@@ -2,7 +2,7 @@
 
 ### 1.下载后解压APIJSON-Demo工程<h3/>
 
-[打开APIJSON的GitHub主页](https://github.com/APIJSON/APIJSON-Demo) &gt; Clone or download &gt; [Download ZIP](https://github.com/APIJSON/APIJSON-Demo/archive/master.zip) &gt; 解压到一个路径并记住这个路径。
+[打开APIJSON-Demo的GitHub主页](https://github.com/APIJSON/APIJSON-Demo) &gt; Clone or download &gt; [Download ZIP](https://github.com/APIJSON/APIJSON-Demo/archive/master.zip) &gt; 解压到一个路径并记住这个路径。
 
 <br />
 
