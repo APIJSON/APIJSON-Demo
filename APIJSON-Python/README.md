@@ -1,6 +1,6 @@
 # APIJSON测试 - Python
 
-### 1.下载后解压APIJSON工程
+### 1.下载后解压APIJSON-Demo工程
 
 [打开APIJSON-Demo的GitHub主页](https://github.com/APIJSON/APIJSON-Demo) &gt; Clone or download &gt; [Download ZIP](https://github.com/APIJSON/APIJSON-Demo/archive/master.zip) &gt; 解压到一个路径并记住这个路径。
 
