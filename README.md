@@ -1,5 +1,6 @@
 # APIJSON-Demo
-APIJSON 各种语言、各种框架的使用示例项目。Demo projects for APIJSON.
+APIJSON 各种语言、各种框架的使用示例项目。
+Demo projects for APIJSON with different programming languages and different frameworks.
 
 
 ### 快速上手
