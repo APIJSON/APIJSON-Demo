@@ -5,7 +5,7 @@
 
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>4.1.0</version>
+	<version>4.2.3</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONBoot</name>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.61</version>
+			<version>1.2.73</version>
 		</dependency>
 
 		<!-- APIJSONBoot 需要用的 Spring 框架，1.4.1 以上 -->
@@ -51,7 +51,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.11</version>
+			<version>8.0.16</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -70,14 +70,14 @@
 			<version>11.5.0.0</version>
 		</dependency>
 
-		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
-		
+		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，需要自行下载 jar 包 -->
+
 		<!-- 可使用 libs 目录的 apijson-framework.jar 和 apijson-orm.jar 本地 jar 包依赖来替代，两种方式二选一 -->
-<!-- 		<dependency>
+		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>LATEST</version>
-		</dependency> -->
+			<version>4.2.3</version>
+		</dependency>
 
 	</dependencies>
 

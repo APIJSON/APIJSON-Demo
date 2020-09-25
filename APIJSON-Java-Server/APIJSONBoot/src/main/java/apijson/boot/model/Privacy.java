@@ -18,6 +18,8 @@ import static apijson.RequestRole.ADMIN;
 import static apijson.RequestRole.OWNER;
 import static apijson.RequestRole.UNKNOWN;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;
 
@@ -70,9 +72,14 @@ public class Privacy extends BaseModel {
 		return this;
 	}
 
-	/**get_password会转为password
+	/**fastjson >= 1.2.70 的版本时，JSON.toJSONString 后，
+	 * get__password, get_password 会分别转为 __password, password，
+	 * 不像之前(例如 1.2.61 及以下)分别转为       _password, password，
+	 * 如果 @JSONField(name="_password") 未生效，请勿使用 1.2.70-1.2.73，或调整数据库字段命名为 __password
 	 * @return
 	 */
+	
+	@JSONField(name="_password")
 	public String get__password() {
 		return password;
 	}
@@ -81,9 +88,14 @@ public class Privacy extends BaseModel {
 		return this;
 	}
 
-	/**get_PayPassword会转为PayPassword
+	/**fastjson >= 1.2.70 的版本时，JSON.toJSONString 后，
+	 * get__payPassword, get_payPassword 会分别转为 __payPassword, payPassword，
+	 * 不像之前(例如 1.2.61 及以下)分别转为             _payPassword, payPassword，
+	 * 如果 @JSONField(name="_payPassword") 未生效，请勿使用 1.2.70-1.2.73，或调整数据库字段命名为 __payPassword
 	 * @return
 	 */
+	
+	@JSONField(name="_payPassword")
 	public String get__payPassword() {
 		return payPassword;
 	}

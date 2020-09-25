@@ -27,7 +27,5 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="libs/apijson-framework-4.2.0.jar"/>
-	<classpathentry kind="lib" path="libs/apijson-orm-4.2.0.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
