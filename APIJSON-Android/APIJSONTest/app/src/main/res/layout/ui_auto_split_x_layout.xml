@@ -1,0 +1,33 @@
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rlUIAutoSplitX"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:layout_alignParentRight="true"
+    >
+
+
+    <View
+        android:id="@+id/vUIAutoSplitX"
+        android:layout_width="1dp"
+        android:layout_height="match_parent"
+        android:background="#20FFFFFF"
+        android:layout_centerInParent="true"
+        />
+
+    <View
+        android:layout_toLeftOf="@id/vUIAutoSplitX"
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        android:background="#20000000"
+        />
+
+    <View
+        android:layout_toRightOf="@id/vUIAutoSplitX"
+        android:layout_width="1px"
+        android:layout_height="match_parent"
+        android:background="#20000000"
+        />
+
+</RelativeLayout>

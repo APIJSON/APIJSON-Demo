@@ -31,17 +31,25 @@ public abstract class UIAutoBaseActivity extends Activity {
 //		DemoApplication.getInstance().onTouchEvent(event, this);
 //		return super.onTouchEvent(event);
 //	}
+//
+
 
 	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		DemoApplication.getInstance().onKeyDown(keyCode, event, this);
-		return super.onKeyDown(keyCode, event);
+	public boolean dispatchKeyEvent(KeyEvent event) {
+		DemoApplication.getInstance().addInputEvent(event, this);
+		return super.dispatchKeyEvent(event);
 	}
 
-	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event) {
-		DemoApplication.getInstance().onKeyUp(keyCode, event, this);
-		return super.onKeyUp(keyCode, event);
-	}
+//	@Override
+//	public boolean onKeyDown(int keyCode, KeyEvent event) {
+//		DemoApplication.getInstance().onKeyDown(keyCode, event, this);
+//		return super.onKeyDown(keyCode, event);
+//	}
+//
+//	@Override
+//	public boolean onKeyUp(int keyCode, KeyEvent event) {
+//		DemoApplication.getInstance().onKeyUp(keyCode, event, this);
+//		return super.onKeyUp(keyCode, event);
+//	}
 
 }

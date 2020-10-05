@@ -265,5 +265,9 @@ public class SelectActivity extends UIAutoBaseActivity implements OnClickListene
 		}
 	}
 
-
+	@Override
+	protected void onDestroy() {
+		DemoApplication.getInstance().onUIAutoActivityDestroy(this);
+		super.onDestroy();
+	}
 }

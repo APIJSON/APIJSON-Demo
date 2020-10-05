@@ -203,8 +203,14 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
             @Override
             public void run() {
                 pbUIAutoList.setVisibility(View.GONE);
-                adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, list);
-                lvUIAutoList.setAdapter(adapter);
+                if (adapter == null) {
+                    adapter = new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, list);
+                    lvUIAutoList.setAdapter(adapter);
+                } else {
+                    adapter.clear();
+                    adapter.addAll(list);
+                    adapter.notifyDataSetChanged();
+                }
             }
         });
     }
@@ -232,13 +238,13 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
                             if (obj.getIntValue("type") == 1) {
                                 list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + InputUtil.getActionName(obj.getIntValue("action"))
                                         + "\nrepeatCount: " + obj.getString("repeatCount") + ", scanCode: " + InputUtil.getScanCodeName(obj.getIntValue("scanCode")) + "         " + InputUtil.getKeyCodeName(obj.getIntValue("keyCode"))
-                                        + "\nsplitX: " + obj.getString("splitX") + ", splitY: " + obj.getString("dividerY") + "           " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
+                                        + "\nsplitX: " + obj.getString("splitX") + ", splitY: " + obj.getString("splitY") + "           " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
                                 );
                             }
                             else {
                                 list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + InputUtil.getActionName(obj.getIntValue("action"))
                                         + "\npointerCount: " + obj.getString("pointerCount") + ",        x: " + obj.getString("x") + ", y: " + obj.getString("y")
-                                        + "\nsplitX: " + obj.getString("splitX") + ", splitY: " + obj.getString("dividerY") + "           " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
+                                        + "\nsplitX: " + obj.getString("splitX") + ", splitY: " + obj.getString("splitY") + "           " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
                                 );
                             }
                         } else {

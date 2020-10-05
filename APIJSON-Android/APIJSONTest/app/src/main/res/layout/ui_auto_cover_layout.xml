@@ -8,7 +8,7 @@
     >
 
     <!--<RelativeLayout-->
-        <!--android:id="@+id/rlUIAutoDivider"-->
+        <!--android:id="@+id/rlUIAutoSplitY"-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="24dp"-->
         <!--android:minHeight="12dp"-->
@@ -18,7 +18,7 @@
         <!--&gt;-->
 
         <!--<View-->
-            <!--android:id="@+id/vUIAutoDivider"-->
+            <!--android:id="@+id/vUIAutoSplit"-->
             <!--android:layout_width="match_parent"-->
             <!--android:layout_height="1dp"-->
             <!--android:background="#10000000"-->
