@@ -28,6 +28,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -90,6 +91,8 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
 
     private Activity context;
 
+    private long deviceId = 0;
+    private long systemId = 0;
     private long flowId = 0;
     private boolean isTouch = false;
     private boolean isLocal = false;
@@ -166,7 +169,7 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
         etUIAutoListName.setVisibility(isTouch ? View.VISIBLE : View.GONE);
         etUIAutoListName.setEnabled(isLocal || hasTempTouchList);
 //        llUIAutoListBar.setVisibility(isLocal ? View.GONE : View.VISIBLE);
-        btnUIAutoListGet.setText(isLocal ? R.string.post : R.string.get);
+        btnUIAutoListGet.setText(isLocal ? "post" : "get");
 
         lvUIAutoList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -271,71 +274,195 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
             cache.edit().remove(cacheKey).putString(cacheKey, JSON.toJSONString(touchList)).apply();
         }
 
-        if (isLocal) {
-            statueList = new HashMap<>();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
 
-            if (touchList != null) {
-                for (int i = 0; i < touchList.size(); i++) {
-                    JSONObject input = touchList.getJSONObject(i);
-                    String state = statueList.get(input);
-                    if ("Remote".equals(state) || "Uploading".equals(state)) {
+                if (isLocal) {
+                    if (deviceId <= 0 || systemId <= 0 || flowId <= 0) {
+                        JSONRequest request = new JSONRequest();
+
+                        if (deviceId <= 0) {
+                            {   // Flow <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                JSONRequest device = new JSONRequest();
+                                device.put("width", 1080);
+                                device.put("height", 1920);
+                                device.put("brand", "Xiaomi");
+                                device.put("model", "MI 8");
+                                request.put("Device", device);
+                            }   // Flow >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                            request.setTag("Device");
+                        }
+                        else if (systemId <= 0) {
+                            {   // Flow <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                JSONRequest system = new JSONRequest();
+                                system.put("type", 0);
+                                system.put("brand", "Xiaomi MIUI");
+                                system.put("versionCode", 14);
+                                system.put("versionName", "14.0");
+                                request.put("System", system);
+                            }   // Flow >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                            request.setTag("System");
+                        }
+                        else {
+                            {   // Flow <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                JSONRequest flow = new JSONRequest();
+                                flow.put("deviceId", 0);
+                                flow.put("systemId", 0);
+                                flow.put("name", StringUtil.getTrimedString(etUIAutoListName));
+                                request.put("Flow", flow);
+                            }   // Flow >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                            request.setTag("Flow");
+                        }
+
+
+                        HttpManager.getInstance().post(fullUrl, request.toString(), new HttpManager.OnHttpResponseListener() {
+                            @Override
+                            public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        pbUIAutoList.setVisibility(View.GONE);
+                                    }
+                                });
+
+                                JSONResponse response = new JSONResponse(resultJson);
+                                if (response.isSuccess()) {
+
+                                    if (deviceId <= 0) {
+                                        deviceId = response.getJSONResponse("Device").getId();
+                                        if (deviceId > 0) {
+                                            send(v);
+                                        }
+                                    }
+                                    else if (systemId <= 0) {
+                                        systemId = response.getJSONResponse("System").getId();
+                                        if (systemId > 0) {
+                                            send(v);
+                                        }
+                                    }
+                                    else {
+                                        flowId = response.getJSONResponse("Flow").getId();
+                                        if (flowId > 0) {
+                                            send(v);
+                                        }
+                                    }
+                                }
+                                else {
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(context, "Upload Device/System/Flow failed! " + response.getMsg(), Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+
                         return;
                     }
 
-                    statueList.put(input, "Uploading");
 
-                    JSONRequest request = new JSONRequest();
-                    {   // Input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        request.put("Input", input);
-                    }   // Input >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                    request.setTag("Input");
 
-                    pbUIAutoList.setVisibility(View.VISIBLE);
-                    HttpManager.getInstance().post(fullUrl, request.toString(), new HttpManager.OnHttpResponseListener() {
-                        @Override
-                        public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-                            JSONResponse response = new JSONResponse(resultJson);
-                            if (response.isSuccess()) {
-                                statueList.put(input, "Remote");
+                    statueList = new HashMap<>();
+
+                    if (touchList != null) {
+                        for (int i = 0; i < touchList.size(); i++) {
+                            JSONObject input = touchList.getJSONObject(i);
+                            if (input == null || input.getLongValue("id") > 0) {
+                                continue;
                             }
-                            else {
-                                statueList.put(input, "Local");
+
+                            String state = statueList.get(input);
+                            if ("Remote".equals(state) || "Uploading".equals(state)) {
+                                continue;
                             }
-                            showList(array);
+
+                            statueList.put(input, "Uploading");
+
+                            JSONObject obj = JSON.parseObject(JSON.toJSONString(input));
+                            obj.remove("id");
+                            obj.put("flowId", flowId);
+
+                            if (obj.get("deviceId") == null) {
+                                obj.put("deviceId", 1);
+                            }
+                            if (obj.get("x") == null) {
+                                obj.put("x", 0);
+                            }
+                            if (obj.get("y") == null) {
+                                obj.put("y", 0);
+                            }
+
+                            JSONRequest request = new JSONRequest();
+                            {   // Input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                request.put("Input", obj);
+                            }   // Input >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                            request.setTag("Input");
+
+
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    pbUIAutoList.setVisibility(View.VISIBLE);
+                                }
+                            });
+                            HttpManager.getInstance().post(fullUrl, request.toString(), new HttpManager.OnHttpResponseListener() {
+                                @Override
+                                public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+                                    JSONResponse response = new JSONResponse(resultJson);
+                                    if (response.isSuccess()) {
+                                        input.put("id", response.getJSONResponse("Input").getId());
+                                        statueList.put(input, "Remote");
+                                    }
+                                    else {
+                                        statueList.put(input, "Local");
+//                                        runOnUiThread(new Runnable() {
+//                                            @Override
+//                                            public void run() {
+//                                                Toast.makeText(context, "Upload Input failed! " + response.getMsg(), Toast.LENGTH_LONG).show();
+//                                            }
+//                                        });
+                                    }
+                                    showList(array);
+                                }
+                            });
                         }
-                    });
+
+                    }
+                }
+                else {
+                    JSONRequest request = new JSONRequest();
+
+                    if (isTouch) {
+                        {   // Input[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                            JSONRequest touchItem = new JSONRequest();
+                            {   // Input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                JSONRequest input = new JSONRequest();
+                                if (flowId > 0) {
+                                    input.put("flowId", flowId);
+                                }
+                                touchItem.put("Input", input);
+                            }   // Input >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                            request.putAll(touchItem.toArray(0, 0, "Input"));
+                        }   // Input[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                    }
+                    else {
+                        {   // Flow[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                            JSONRequest flowItem = new JSONRequest();
+                            {   // Flow <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                                JSONRequest flow = new JSONRequest();
+                                flowItem.put("Flow", flow);
+                            }   // Flow >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                            request.putAll(flowItem.toArray(0, 0, "Flow"));
+                        }   // Flow[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                    }
+
+                    HttpManager.getInstance().post(fullUrl, request.toString(), UIAutoListActivity.this);
                 }
 
             }
-        }
-        else {
-            JSONRequest request = new JSONRequest();
-
-            if (isTouch) {
-                {   // Input[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    JSONRequest touchItem = new JSONRequest();
-                    {   // Input <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        JSONRequest input = new JSONRequest();
-                        input.put("flowId", flowId);
-                        touchItem.put("Input", input);
-                    }   // Input >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                    request.putAll(touchItem.toArray(0, 0, "Input"));
-                }   // Input[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            }
-            else {
-                {   // Flow[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    JSONRequest flowItem = new JSONRequest();
-                    {   // Flow <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        JSONRequest flow = new JSONRequest();
-                        flowItem.put("Flow", flow);
-                    }   // Flow >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-                    request.putAll(flowItem.toArray(0, 0, "Flow"));
-                }   // Flow[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-            }
-
-            HttpManager.getInstance().post(fullUrl, request.toString(), this);
-        }
-
+        }).start();
     }
 
     public void recover(View v) {
