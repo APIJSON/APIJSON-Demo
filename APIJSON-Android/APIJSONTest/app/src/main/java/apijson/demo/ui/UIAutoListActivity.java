@@ -478,7 +478,7 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
             Log.e(TAG, "onHttpResponse e = " + e.getMessage());
         }
         JSONResponse response = new JSONResponse(resultJson);
-        array = response.getJSONArray(isTouch ? "Input[]" : "Flow[]");
+        array = response.getArray(isTouch ? "Input[]" : "Flow[]");
         if (array == null) {
             array = new JSONArray();
         }
