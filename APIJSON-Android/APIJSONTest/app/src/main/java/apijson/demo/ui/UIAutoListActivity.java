@@ -231,14 +231,14 @@ public class UIAutoListActivity extends Activity implements HttpManager.OnHttpRe
                         if (isTouch) {
                             if (obj.getIntValue("type") == 1) {
                                 list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + InputUtil.getActionName(obj.getIntValue("action"))
-                                        + "\nkeyCode: " +  InputUtil.getKeyCodeName(obj.getIntValue("keyCode")) + ",  scanCode: " + InputUtil.getScanCodeName(obj.getIntValue("scanCode")) + ",  dividerY: " + obj.getString("dividerY")
-                                        + "\nrepeatCount: " + obj.getString("repeatCount") + "    " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
+                                        + "\nrepeatCount: " + obj.getString("repeatCount") + ", scanCode: " + InputUtil.getScanCodeName(obj.getIntValue("scanCode")) + "         " + InputUtil.getKeyCodeName(obj.getIntValue("keyCode"))
+                                        + "\nsplitX: " + obj.getString("splitX") + ", splitY: " + obj.getString("dividerY") + "           " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
                                 );
                             }
                             else {
                                 list.add("[" + state + "]  " + new Date(obj.getLongValue("time")).toLocaleString() + "    " + InputUtil.getActionName(obj.getIntValue("action"))
-                                        + "\nx: " + obj.getString("x") + ",  y: " + obj.getString("y") + ",  dividerY: " + obj.getString("dividerY")
-                                        + "\npointerCount: " + obj.getString("pointerCount") + "    " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
+                                        + "\npointerCount: " + obj.getString("pointerCount") + ",        x: " + obj.getString("x") + ", y: " + obj.getString("y")
+                                        + "\nsplitX: " + obj.getString("splitX") + ", splitY: " + obj.getString("dividerY") + "           " + InputUtil.getOrientationName(obj.getIntValue("orientation"))
                                 );
                             }
                         } else {
