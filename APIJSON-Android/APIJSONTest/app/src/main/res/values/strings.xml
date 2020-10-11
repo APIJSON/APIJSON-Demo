@@ -30,5 +30,9 @@
     <string name="record">录制</string>
     <string name="name">名称：</string>
     <string name="recover">回放</string>
+    <string name="please_firstly_record_or_recover">请先录制或回放</string>
+    <string name="finished_because_of_no_step">没有操作步骤，已结束</string>
+    <string name="recover_finished">回放结束</string>
+    <string name="remains_step_needs_uploading">还有没上传完的步骤！</string>
 
 </resources>

@@ -1,0 +1,79 @@
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rlUIAutoSplitX"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:background="#3000"
+    android:keepScreenOn="true"
+    >
+
+    <TextView
+        android:id="@+id/tvControllerDouble"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text=" # "
+        android:textColor="@android:color/white"
+        android:layout_marginRight="12dp"
+        />
+
+    <TextView
+        android:id="@+id/tvControllerReturn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text="《  "
+        android:textColor="@android:color/white"
+        />
+
+    <TextView
+        android:id="@+id/tvControllerCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text="0/0"
+        android:textColor="@android:color/white"
+        />
+
+    <TextView
+        android:id="@+id/tvControllerPlay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text="record"
+        android:textColor="@android:color/white"
+        />
+
+    <TextView
+        android:id="@+id/tvControllerTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text="0:00"
+        android:textColor="@android:color/white"
+        />
+
+    <TextView
+        android:id="@+id/tvControllerForward"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text="  》"
+        android:textColor="@android:color/white"
+        />
+
+
+    <TextView
+        android:id="@+id/tvControllerSetting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="6dp"
+        android:text=" $ "
+        android:textColor="@android:color/white"
+        android:layout_marginLeft="12dp"
+        />
+
+</LinearLayout>

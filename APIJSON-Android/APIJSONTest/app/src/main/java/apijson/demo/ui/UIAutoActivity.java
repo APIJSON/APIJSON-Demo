@@ -17,9 +17,7 @@ package apijson.demo.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -31,7 +29,6 @@ import com.alibaba.fastjson.JSONArray;
 
 import apijson.demo.R;
 import apijson.demo.application.DemoApplication;
-import zuo.biao.apijson.JSON;
 
 
 /**自动 UI 测试，需要用 UIAuto 发请求到这个设备
@@ -118,7 +115,6 @@ public class UIAutoActivity extends Activity {
 
     private JSONArray touchList;
 
-    SharedPreferences cache;
     private long flowId = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +128,7 @@ public class UIAutoActivity extends Activity {
 
 
         flowId = getIntent().getLongExtra(INTENT_FLOW_ID, flowId);
-        touchList = JSON.parseArray(getIntent().getStringExtra(INTENT_TOUCH_LIST));
+        //太卡        touchList = JSON.parseArray(getIntent().getStringExtra(INTENT_TOUCH_LIST));
 
 //
 //        DisplayMetrics outMetrics = new DisplayMetrics();
@@ -157,7 +153,7 @@ public class UIAutoActivity extends Activity {
 
         if (touchList != null && touchList.isEmpty() == false) { //TODO 回放操作
 //            recover(touchList);
-            startActivityForResult(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()), REQUEST_UI_AUTO_LIST);
+            startActivity(UIAutoListActivity.createIntent(DemoApplication.getInstance(), touchList == null ? null : touchList.toJSONString()));
 //            return;
         }
 
@@ -364,11 +360,11 @@ public class UIAutoActivity extends Activity {
     }
 
     public void toRemote(View v) {
-        startActivityForResult(UIAutoListActivity.createIntent(context, false), REQUEST_UI_AUTO_LIST);
+        startActivity(UIAutoListActivity.createIntent(context, false));
     }
 
     public void toLocal(View v) {
-        startActivityForResult(UIAutoListActivity.createIntent(context, true), REQUEST_UI_AUTO_LIST);
+        startActivity(UIAutoListActivity.createIntent(context, true));
     }
 
     public void record(View v) {
@@ -379,7 +375,7 @@ public class UIAutoActivity extends Activity {
 //        finish();
 
         DemoApplication.getInstance().onUIAutoActivityCreate(this);
-        DemoApplication.getInstance().record();
+        DemoApplication.getInstance().prepareRecord(this);
         finish();
     }
 
@@ -806,35 +802,7 @@ public class UIAutoActivity extends Activity {
 //        return touchList;
 //    }
 
-
-
-    public static final int REQUEST_UI_AUTO_LIST = 1;
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (resultCode != RESULT_OK) {
-            return;
-        }
-
-        if (requestCode == REQUEST_UI_AUTO_LIST) {
-            JSONArray array = data == null ? null : JSON.parseArray(data.getStringExtra(UIAutoListActivity.RESULT_LIST));
-            finish();
-
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    touchList = new JSONArray();
-                    DemoApplication.getInstance().recover(array);
-                }
-            }, 1000);
-        }
-
-    }
-
-
-//
+    //
 //    private static class Node<E> {
 //        E item;
 //        Node<E> next;

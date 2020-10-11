@@ -28,4 +28,8 @@
     <string name="record">Record</string>
     <string name="name">Name:</string>
     <string name="recover">Recover</string>
+    <string name="please_firstly_record_or_recover">please firstly record or recover</string>
+    <string name="finished_because_of_no_step">Finished because of no step</string>
+    <string name="recover_finished">Recover finished</string>
+    <string name="remains_step_needs_uploading">Here remains step needs uploading!</string>
 </resources>

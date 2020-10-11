@@ -118,7 +118,7 @@ public class SelectActivity extends UIAutoBaseActivity implements OnClickListene
 		}
 
 		DemoApplication.getInstance().onUIAutoActivityCreate(this);
-		DemoApplication.getInstance().record();
+		DemoApplication.getInstance().prepareRecord(this);
 
 	}
 
