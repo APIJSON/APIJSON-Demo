@@ -19,20 +19,27 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ActionMode;
 import android.view.InputEvent;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.SearchEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowManager;
+import android.view.accessibility.AccessibilityEvent;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,7 +53,6 @@ import com.yhao.floatwindow.ViewStateListener;
 
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -181,8 +187,202 @@ public class DemoApplication extends Application {
         UnitAutoApp.init(this);
         Log.d(TAG, "项目启动 >>>>>>>>>>>>>>>>>>>> \n\n");
 
-        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+        initUIAuto();
+    }
 
+    public SharedPreferences getSharedPreferences() {
+        return getSharedPreferences(TAG, Context.MODE_PRIVATE);
+    }
+
+    public void onUIAutoActivityCreate(Activity activity) {
+        Window window = activity.getWindow();
+        //反而让 vFloatCover 与底部差一个导航栏高度 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+        DisplayMetrics dm = getResources().getDisplayMetrics();
+
+        // DisplayMetrics outMetrics = new DisplayMetrics();
+        // Display display = activity.getWindowManager().getDefaultDisplay();
+
+        // windowWidth = display.getWidth();
+        // windowHeight = display.getHeight();
+        windowX = getWindowX(activity);
+        windowY = getWindowY(activity);
+
+        // display.getRealMetrics(outMetrics);
+        screenWidth = dm.widthPixels;
+        screenHeight = dm.heightPixels;
+
+        windowWidth = screenWidth;
+        windowHeight = screenHeight;
+
+        View decorView = window.getDecorView();
+        decorView.post(new Runnable() {
+            @Override
+            public void run() {
+                windowWidth = decorView.getWidth();
+                windowHeight = decorView.getHeight();
+            }
+        });
+        decorView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                windowWidth = decorView.getWidth();
+                windowHeight = decorView.getHeight();
+            }
+        });
+
+        Window.Callback windowCallback = window.getCallback();
+        window.setCallback(new Window.Callback() {
+            @Override
+            public boolean dispatchKeyEvent(KeyEvent event) {
+//				dispatchEventToCurrentActivity(event);
+                addInputEvent(event, activity);
+                return windowCallback.dispatchKeyEvent(event);
+            }
+
+            @Override
+            public boolean dispatchKeyShortcutEvent(KeyEvent event) {
+//				dispatchEventToCurrentActivity(event);
+                addInputEvent(event, activity);
+                return windowCallback.dispatchKeyShortcutEvent(event);
+            }
+
+            @Override
+            public boolean dispatchTouchEvent(MotionEvent event) {
+//				dispatchEventToCurrentActivity(event);
+                addInputEvent(event, activity);
+                return windowCallback.dispatchTouchEvent(event);
+            }
+
+            @Override
+            public boolean dispatchTrackballEvent(MotionEvent event) {
+//				dispatchEventToCurrentActivity(event);
+                addInputEvent(event, activity);
+                return windowCallback.dispatchTrackballEvent(event);
+            }
+
+            @Override
+            public boolean dispatchGenericMotionEvent(MotionEvent event) {
+//				dispatchEventToCurrentActivity(event);
+                addInputEvent(event, activity);
+                return windowCallback.dispatchGenericMotionEvent(event);
+            }
+
+            @Override
+            public boolean dispatchPopulateAccessibilityEvent(AccessibilityEvent event) {
+                return windowCallback.dispatchPopulateAccessibilityEvent(event);
+            }
+
+            @Nullable
+            @Override
+            public View onCreatePanelView(int featureId) {
+                return windowCallback.onCreatePanelView(featureId);
+            }
+
+            @Override
+            public boolean onCreatePanelMenu(int featureId, Menu menu) {
+                return windowCallback.onCreatePanelMenu(featureId, menu);
+            }
+
+            @Override
+            public boolean onPreparePanel(int featureId, View view, Menu menu) {
+                return windowCallback.onPreparePanel(featureId, view, menu);
+            }
+
+            @Override
+            public boolean onMenuOpened(int featureId, Menu menu) {
+                return windowCallback.onMenuOpened(featureId, menu);
+            }
+
+            @Override
+            public boolean onMenuItemSelected(int featureId, MenuItem item) {
+                return windowCallback.onMenuItemSelected(featureId, item);
+            }
+
+            @Override
+            public void onWindowAttributesChanged(WindowManager.LayoutParams attrs) {
+                windowCallback.onWindowAttributesChanged(attrs);
+            }
+
+            @Override
+            public void onContentChanged() {
+                windowCallback.onContentChanged();
+            }
+
+            @Override
+            public void onWindowFocusChanged(boolean hasFocus) {
+                windowCallback.onWindowFocusChanged(hasFocus);
+            }
+
+            @Override
+            public void onAttachedToWindow() {
+                windowCallback.onAttachedToWindow();
+            }
+
+            @Override
+            public void onDetachedFromWindow() {
+                windowCallback.onDetachedFromWindow();
+            }
+
+            @Override
+            public void onPanelClosed(int featureId, Menu menu) {
+                windowCallback.onPanelClosed(featureId, menu);
+            }
+
+            @Override
+            public boolean onSearchRequested() {
+                return windowCallback.onSearchRequested();
+            }
+
+            @Override
+            public boolean onSearchRequested(SearchEvent searchEvent) {
+                return windowCallback.onSearchRequested(searchEvent);
+            }
+
+            @Nullable
+            @Override
+            public ActionMode onWindowStartingActionMode(ActionMode.Callback callback) {
+                return windowCallback.onWindowStartingActionMode(callback);
+            }
+
+            @Nullable
+            @Override
+            public ActionMode onWindowStartingActionMode(ActionMode.Callback callback, int type) {
+                return windowCallback.onWindowStartingActionMode(callback, type);
+            }
+
+            @Override
+            public void onActionModeStarted(ActionMode mode) {
+                windowCallback.onActionModeStarted(mode);
+            }
+
+            @Override
+            public void onActionModeFinished(ActionMode mode) {
+                windowCallback.onActionModeFinished(mode);
+            }
+        });
+
+        //都是 0
+        // View decorView = window.getDecorView();
+        // windowWidth = decorView.getMeasuredWidth();
+        // windowHeight = decorView.getMeasuredHeight();
+
+        cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
+
+        splitX = cache.getInt(SPLIT_X, 0);
+        splitY = cache.getInt(SPLIT_Y, 0);
+        splitSize = cache.getInt(SPLIT_HEIGHT, dip2px(24));
+
+        if (splitX <= splitSize || splitX >= windowWidth - splitSize) {
+            splitX = windowWidth - splitSize - dip2px(30);
+        }
+        if (splitY <= splitSize || splitY >= windowHeight - splitSize) {
+            splitY = windowHeight - splitSize - dip2px(30);
+        }
+    }
+
+    private void initUIAuto() {
+        registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 
             @Override
             public void onActivityStarted(Activity activity) {
@@ -203,6 +403,7 @@ public class DemoApplication extends Application {
             public void onActivityResumed(Activity activity) {
                 Log.v(TAG, "onActivityResumed  activity = " + activity.getClass().getName());
                 setCurrentActivity(activity);
+                onUIAutoActivityCreate(activity);
             }
 
             @Override
@@ -226,52 +427,10 @@ public class DemoApplication extends Application {
 
         });
 
-    }
 
-    public SharedPreferences getSharedPreferences() {
-        return getSharedPreferences(TAG, Context.MODE_PRIVATE);
-    }
-
-    public void onUIAutoActivityCreate(Activity activity) {
-        setCurrentActivity(activity);
-        Window window = activity.getWindow();
-        //反而让 vFloatCover 与底部差一个导航栏高度 window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
-        DisplayMetrics dm = getResources().getDisplayMetrics();
-
-        // DisplayMetrics outMetrics = new DisplayMetrics();
-        // Display display = activity.getWindowManager().getDefaultDisplay();
-
-        // windowWidth = display.getWidth();
-        // windowHeight = display.getHeight();
-        windowX = getWindowX(activity);
-        windowY = getWindowY(activity);
-
-        // display.getRealMetrics(outMetrics);
-        screenWidth = dm.widthPixels;
-        screenHeight = dm.heightPixels;
-
-        windowWidth = screenWidth;
-        windowHeight = screenHeight;
-
-        //都是 0
-        // View decorView = window.getDecorView();
-        // windowWidth = decorView.getMeasuredWidth();
-        // windowHeight = decorView.getMeasuredHeight();
-
-        cache = getSharedPreferences(TAG, Context.MODE_PRIVATE);
-
-        splitX = cache.getInt(SPLIT_X, 0);
-        splitY = cache.getInt(SPLIT_Y, 0);
-        splitSize = cache.getInt(SPLIT_HEIGHT, dip2px(24));
-
-        if (splitX <= splitSize || splitX >= windowWidth - splitSize) {
-            splitX = windowWidth - splitSize - dip2px(30);
-        }
-        if (splitY <= splitSize || splitY >= windowHeight - splitSize) {
-            splitY = windowHeight - splitSize - dip2px(30);
-        }
-
+        // vFloatCover = new FrameLayout(getInstance());
+        // ViewGroup.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
+        // vFloatCover.setLayoutParams(lp);
 
         vFloatCover = (ViewGroup) getLayoutInflater().inflate(R.layout.ui_auto_cover_layout, null);
         vFloatController = (ViewGroup) getLayoutInflater().inflate(R.layout.ui_auto_controller_layout, null);
@@ -306,19 +465,19 @@ public class DemoApplication extends Application {
         //
         // vSplitY.setBackgroundColor(Color.parseColor(cache.getString(SPLIT_COLOR, "#10000000")));
 
-        vFloatCover.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                Log.d(TAG, "onTouchEvent  " + Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY());
-                dispatchEventToCurrentActivity(event, true);
-//死循环                llTouch.dispatchTouchEvent(event);
-//                vDispatchTouch.dispatchTouchEvent(event);
-//                vDispatchTouch.dispatchTouchEvent(event);
-                //onTouchEvent 不能处理事件 vDispatchTouch.onTouchEvent(event);
-//                vTouch.setOnTouchListener(this);
-                return true;  //连续记录只能 return true
-            }
-        });
+//         vFloatCover.setOnTouchListener(new View.OnTouchListener() {
+//             @Override
+//             public boolean onTouch(View v, MotionEvent event) {
+//                 Log.d(TAG, "onTouchEvent  " + Calendar.getInstance().getTime().toLocaleString() +  " action:" + (event.getAction()) + "; x:" + event.getX() + "; y:" + event.getY());
+//                 dispatchEventToCurrentActivity(event, true);
+// //死循环                llTouch.dispatchTouchEvent(event);
+// //                vDispatchTouch.dispatchTouchEvent(event);
+// //                vDispatchTouch.dispatchTouchEvent(event);
+//                 //onTouchEvent 不能处理事件 vDispatchTouch.onTouchEvent(event);
+// //                vTouch.setOnTouchListener(this);
+//                 return true;  //连续记录只能 return true
+//             }
+//         });
 
         vFloatBall.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -651,25 +810,25 @@ public class DemoApplication extends Application {
     public void showCover(boolean show, Activity activity) {
         isShowing = show;
 
-        floatCover = FloatWindow.get("floatCover");
-        if (floatCover == null) {
-            FloatWindow
-                    .with(getApplicationContext())
-                    .setTag("floatCover")
-                    .setView(vFloatCover)
-                    .setWidth(windowWidth - windowX)                               //设置控件宽高
-                    .setHeight(windowHeight - windowY)
-                    // .setX(windowX)                                   //设置控件初始位置
-                    // .setY(windowY)
-                    .setMoveType(MoveType.inactive)
-                    .setDesktopShow(true) //必须为 true，否则切换 Activity 就会自动隐藏                        //桌面显示
-//                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
-//                .setPermissionListener(mPermissionListener)  //监听权限申请结果
-                    .build();
-
-            floatCover = FloatWindow.get("floatCover");
-        }
-        floatCover.show();
+//         floatCover = FloatWindow.get("floatCover");
+//         if (floatCover == null) {
+//             FloatWindow
+//                     .with(getApplicationContext())
+//                     .setTag("floatCover")
+//                     .setView(vFloatCover)
+//                     .setWidth(windowWidth - windowX)                               //设置控件宽高
+//                     .setHeight(windowHeight - windowY)
+//                     // .setX(windowX)                                   //设置控件初始位置
+//                     // .setY(windowY)
+//                     .setMoveType(MoveType.inactive)
+//                     .setDesktopShow(true) //必须为 true，否则切换 Activity 就会自动隐藏                        //桌面显示
+// //                .setViewStateListener(mViewStateListener)    //监听悬浮控件状态改变
+// //                .setPermissionListener(mPermissionListener)  //监听权限申请结果
+//                     .build();
+//
+//             floatCover = FloatWindow.get("floatCover");
+//         }
+//         floatCover.show();
 
 
         floatController = FloatWindow.get("floatController");
@@ -803,24 +962,25 @@ public class DemoApplication extends Application {
 
 
     public int getWindowX(Activity activity) {
-        // return 0;
-        View decorView = activity.getWindow().getDecorView();
-
-        Rect rectangle = new Rect();
-        decorView.getWindowVisibleDisplayFrame(rectangle);
-        return rectangle.left;
+        return 0;
+        // View decorView = activity.getWindow().getDecorView();
+        //
+        // Rect rectangle = new Rect();
+        // decorView.getWindowVisibleDisplayFrame(rectangle);
+        // return rectangle.left;
     }
 
     public int getWindowY(Activity activity) {
-        // return 0;
-        View decorView = activity.getWindow().getDecorView();
-
-        Rect rectangle = new Rect();
-        decorView.getWindowVisibleDisplayFrame(rectangle);
-        return rectangle.top;
+        return 0;
+        // View decorView = activity.getWindow().getDecorView();
+        //
+        // Rect rectangle = new Rect();
+        // decorView.getWindowVisibleDisplayFrame(rectangle);
+        // return rectangle.top;
     }
 
     public boolean dispatchEventToCurrentActivity(InputEvent ie, boolean record) {
+        activity = getCurrentActivity();
         if (activity != null) {
             if (ie instanceof MotionEvent) {
                 MotionEvent event = (MotionEvent) ie;
@@ -914,6 +1074,8 @@ public class DemoApplication extends Application {
         for (int i = 0; i < touchList.size(); i++) {
             JSONObject obj = touchList.getJSONObject(i);
 
+            int windowWidth, windowHeight;
+
             InputEvent event;
             if (obj.getIntValue("type") == 1) {
                 /**
@@ -966,6 +1128,15 @@ public class DemoApplication extends Application {
                 //                    obj.getFloatValue("x"),  obj.getFloatValue("y"),  obj.getFloatValue("pressure"),  obj.getFloatValue("size"),  obj.getIntValue("metaState"),
                 //                    obj.getFloatValue("xPrecision"),  obj.getFloatValue("yPrecision"),  obj.getIntValue("deviceId"),  obj.getIntValue("edgeFlags"),  obj.getIntValue("source"),
                 //                    obj.getIntValue("displayId"));
+
+                if (obj.getIntValue("orientation") == 1) {
+                    windowWidth = Math.min(this.windowWidth, this.windowHeight);
+                    windowHeight = Math.max(this.windowWidth, this.windowHeight);
+                }
+                else {
+                    windowWidth = Math.max(this.windowWidth, this.windowHeight);
+                    windowHeight = Math.min(this.windowWidth, this.windowHeight);
+                }
 
                 float x = obj.getFloatValue("x");
                 float y = obj.getFloatValue("y");
