@@ -76,7 +76,6 @@ import apijson.boot.model.User;
 import apijson.boot.model.Verify;
 import apijson.framework.APIJSONController;
 import apijson.framework.BaseModel;
-import apijson.framework.MethodUtil;
 import apijson.framework.StructureUtil;
 import apijson.orm.JSONRequest;
 import apijson.orm.exception.ConditionErrorException;
@@ -1544,30 +1543,16 @@ public class DemoController extends APIJSONController {
 
 
 
-	@PostMapping("method/invoke")
-	public JSONObject invokeMethod(@RequestBody String request) {
-		try {
-			JSONObject req = JSON.parseObject(request);
-			if (req != null) {
-				String pkgName = req.getString("package");
-				String clsName = req.getString("class");
-				return MethodUtil.invokeMethod(
-						req,
-						DemoApplication.getApplicationContext().getBean(
-								Class.forName(pkgName.replaceAll("/", ".") + "." + clsName)
-								)
-						);
-			}
-		} catch (Exception e) {
-			Log.e(TAG, "listMethod  try { JSONObject req = JSON.parseObject(request); ... } catch (Exception e) { \n" + e.getMessage());
-		}
-
-		return super.invokeMethod(request);
-	}
-
 	@PostMapping("method/list")
 	public JSONObject listMethod(@RequestBody String request) {
 		return super.listMethod(request);
 	}
+	
+	@PostMapping("method/invoke")
+	public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
+		super.invokeMethod(request, servletRequest);
+	}
+
+
 
 }

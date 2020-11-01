@@ -14,8 +14,12 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import java.lang.reflect.Modifier;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import javax.naming.Context;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
@@ -30,6 +34,10 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.PropertyFilter;
+
 import apijson.Log;
 import apijson.StringUtil;
 import apijson.framework.APIJSONApplication;
@@ -40,6 +48,12 @@ import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
 import apijson.orm.Structure;
 import apijson.orm.Verifier;
+import unitauto.MethodUtil;
+import unitauto.MethodUtil.Argument;
+import unitauto.MethodUtil.InstanceGetter;
+import unitauto.MethodUtil.JSONCallback;
+import unitauto.NotNull;
+import unitauto.jar.UnitAutoApp;
 
 
 /**SpringBootApplication
@@ -49,13 +63,18 @@ import apijson.orm.Verifier;
 @Configuration
 @SpringBootApplication
 public class DemoApplication implements ApplicationContextAware {
+	private static final String TAG = "DemoApplication";
 
 	static {
+		
+		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		
 		Map<String, Pattern> COMPILE_MAP = Structure.COMPILE_MAP;
 		COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
 		COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
 		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 		
+		// 使用本项目的自定义处理类
 		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
 			
 			@Override
@@ -82,6 +101,96 @@ public class DemoApplication implements ApplicationContextAware {
 			}
 		
 		};
+		
+		// APIJSON 配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		
+		
+		
+		// UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
+		
+		UnitAutoApp.init();
+		
+		// 适配 Spring 注入的类及 Context 等环境相关的类
+		final InstanceGetter ig = MethodUtil.INSTANCE_GETTER;
+		MethodUtil.INSTANCE_GETTER = new InstanceGetter() {
+
+			@Override
+			public Object getInstance(@NotNull Class<?> clazz, List<Argument> classArgs, Boolean reuse) throws Exception {
+				if (APPLICATION_CONTEXT != null && ApplicationContext.class.isAssignableFrom(clazz) && clazz.isAssignableFrom(APPLICATION_CONTEXT.getClass())) {
+					return APPLICATION_CONTEXT;
+				}
+
+				if (reuse != null && reuse && (classArgs == null || classArgs.isEmpty())) {
+					return APPLICATION_CONTEXT.getBean(clazz);
+				}
+
+				return ig.getInstance(clazz, classArgs, reuse);
+			}
+		};
+		
+		// 排除转换 JSON 异常的类，一般是 Context 等环境相关的类
+		final JSONCallback jc = MethodUtil.JSON_CALLBACK;
+		MethodUtil.JSON_CALLBACK = new JSONCallback() {
+
+			@Override
+			public JSONObject newSuccessResult() {
+				return jc.newSuccessResult();
+			}
+
+			@Override
+			public JSONObject newErrorResult(Throwable e) {
+				return jc.newErrorResult(e);
+			}
+			
+			@Override
+			public JSONObject parseJSON(String type, Object value) {
+				if (value == null || unitauto.JSON.isBooleanOrNumberOrString(value) || value instanceof JSON || value instanceof Enum) {
+					return jc.parseJSON(type, value);
+				}
+
+				if (value instanceof ApplicationContext
+						|| value instanceof Context
+						|| value instanceof javax.validation.MessageInterpolator.Context
+						|| value instanceof org.omg.CORBA.Context
+						|| value instanceof org.apache.catalina.Context
+						|| value instanceof ch.qos.logback.core.Context
+						) {
+					value = value.toString();
+				}
+				else {
+					try {
+						value = JSON.parse(JSON.toJSONString(value, new PropertyFilter() {
+							@Override
+							public boolean apply(Object object, String name, Object value) {
+								if (value == null) {
+									return true;
+								}
+
+								if (value instanceof ApplicationContext
+										|| value instanceof Context
+										|| value instanceof javax.validation.MessageInterpolator.Context
+										|| value instanceof org.omg.CORBA.Context
+										|| value instanceof org.apache.catalina.Context
+										|| value instanceof ch.qos.logback.core.Context
+										) {
+									return false;
+								}
+
+								return Modifier.isPublic(value.getClass().getModifiers());
+							}
+						}));
+					} catch (Exception e) {
+						Log.e(TAG, "toJSONString  catch \n" + e.getMessage());
+					}
+				}
+
+				return jc.parseJSON(type, value);
+			}
+			
+		};
+		
+		// UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		
 	}
 
 	
