@@ -229,7 +229,8 @@ public class DemoApplication implements ApplicationContextAware {
 	}
 
 
-	//支持JavaScript跨域请求<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	// 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
 	/** 
 	 * 跨域过滤器 
 	 * @return 
@@ -251,6 +252,7 @@ public class DemoApplication implements ApplicationContextAware {
 		corsConfiguration.setAllowCredentials(true); //允许发送跨域凭据，前端Axios存取JSESSIONID必须要
 		return corsConfiguration;  
 	}  
-	//支持JavaScript跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	
+	// 支持 APIAuto 中 JavaScript 代码跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

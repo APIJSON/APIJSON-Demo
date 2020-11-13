@@ -974,6 +974,9 @@ public class DemoController extends APIJSONController {
 		return new DemoParser(PUT).setSession(session).parseResponse(requestObject);
 	}
 
+	
+	
+	// 为 APIAuto 提供的代理接口(解决跨域问题) 和 导入第三方文档的测试接口 https://github.com/TommyLemon/APIAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	public static final String ADD_COOKIE = "Add-Cookie";
 	public static final List<String> EXCEPT_HEADER_LIST;
@@ -1539,9 +1542,11 @@ public class DemoController extends APIJSONController {
         "}";
 	}
 	
-	
+	// 为 APIAuto 提供的代理接口(解决跨域问题) 和 导入第三方文档的测试接口 https://github.com/TommyLemon/APIAuto   https://github.com/TommyLemon/APIAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+
+	// 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	@PostMapping("method/list")
 	public JSONObject listMethod(@RequestBody String request) {
@@ -1553,6 +1558,7 @@ public class DemoController extends APIJSONController {
 		super.invokeMethod(request, servletRequest);
 	}
 
+	// 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 }
