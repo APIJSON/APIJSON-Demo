@@ -72,11 +72,29 @@
 
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，需要自行下载 jar 包 -->
 
+		<!-- 可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 本地 jar 包依赖来替代，两种方式二选一 -->
+		<dependency>
+			<groupId>com.github.TommyLemon</groupId>
+			<artifactId>unitauto-java</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.TommyLemon</groupId>
+			<artifactId>unitauto-jar</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+
+
 		<!-- 可使用 libs 目录的 apijson-framework.jar 和 apijson-orm.jar 本地 jar 包依赖来替代，两种方式二选一 -->
-	<!-- 	<dependency>
+ 		<dependency>
+			<groupId>com.github.APIJSON</groupId>
+			<artifactId>apijson-orm</artifactId>
+			<version>4.2.3</version>
+		</dependency>
+<!-- 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>4.3.1</version>
+			<version>4.3.2</version>
 		</dependency> -->
 
 	</dependencies>
@@ -116,8 +134,11 @@
 			</snapshots>
 		</repository>
 		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
+		    <id>jitpack.io</id>
+		    <url>https://jitpack.io</url>
+		    <snapshots>
+				<enabled>true</enabled>
+			</snapshots>
 		</repository>
 	</repositories>
 	<pluginRepositories>
@@ -128,6 +149,10 @@
 		<pluginRepository>
 			<id>spring-milestones</id>
 			<url>http://repo.spring.io/milestone</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
 		</pluginRepository>
 	</pluginRepositories>
 
