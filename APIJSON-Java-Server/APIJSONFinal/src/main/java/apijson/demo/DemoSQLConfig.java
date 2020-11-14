@@ -12,30 +12,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package apijson.demo.server;
+package apijson.demo;
 
-import static apijson.JSONObject.KEY_ID;
-import static apijson.JSONObject.KEY_USER_ID;
-
-import java.util.List;
-
-import com.alibaba.fastjson.JSONObject;
+import static apijson.framework.APIJSONConstant.ID;
+import static apijson.framework.APIJSONConstant.PRIVACY_;
+import static apijson.framework.APIJSONConstant.USER_;
+import static apijson.framework.APIJSONConstant.USER_ID;
 
 import apijson.RequestMethod;
-import apijson.server.AbstractSQLConfig;
-import apijson.server.Join;
-import apijson.server.SQLConfig;
+import apijson.framework.APIJSONSQLConfig;
+import apijson.orm.AbstractSQLConfig;
 
 
 /**SQL配置
  * TiDB 用法和 MySQL 一致
  * @author Lemon
  */
-public class DemoSQLConfig extends AbstractSQLConfig {
+public class DemoSQLConfig extends APIJSONSQLConfig {
 
-
-	public static final Callback SIMPLE_CALLBACK;
-
+	public DemoSQLConfig() {
+		super();
+	}
+	public DemoSQLConfig(RequestMethod method, String table) {
+		super(method, table);
+	}
 
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的
@@ -64,11 +64,26 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 
 			@Override
 			public String getUserIdKey(String database, String schema, String table) {
-				return Controller.USER_.equals(table) || Controller.PRIVACY_.equals(table) ? KEY_ID : KEY_USER_ID; // id / userId
+				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
+			//取消注释来实现数据库自增 id
+			//			@Override
+			//			public Object newId(RequestMethod method, String database, String schema, String table) {
+			//				return null; // return null 则不生成 id，一般用于数据库自增 id
+			//			}
+			
+//			@Override
+//			public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+////				super.onMissingKey4Combine(name, request, combine, item, key);
+//			}
 		};
+
+		// 自定义where条件拼接
+		//RAW_MAP.put("commentWhereItem1","`Comment`.`userId` = 38710 and `Comment`.`momentId` = 470");
+		//RAW_MAP.put("commentWhereItem2","`Comment`.`toId` = 0");
 	}
+
 
 	@Override
 	public String getDBVersion() {
@@ -83,6 +98,9 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		}
 		if (isOracle()) {
 			return "18c"; //TODO 改成你自己的
+		}
+		if (isDb2()) {
+			return "11.5"; //TODO 改成你自己的
 		}
 		return null;
 	}
@@ -100,6 +118,9 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		if (isOracle()) {
 			return "jdbc:oracle:thin:@localhost:1521:orcl"; //TODO 改成你自己的
 		}
+		if (isDb2()) {
+			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
+		}
 		return null;
 	}
 	@Override
@@ -115,6 +136,9 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		}
 		if (isOracle()) {
 			return "scott";  //TODO 改成你自己的
+		}
+		if (isDb2()) {
+			return "db2admin"; //TODO 改成你自己的
 		}
 		return null;
 	}
@@ -132,9 +156,12 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 		if (isOracle()) {
 			return "tiger";  //TODO 改成你自己的
 		}
+		if (isDb2()) {
+			return "123"; //TODO 改成你自己的
+		}
 		return null;
 	}
-
+	
 	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
 	//	@Override
 	//	public String getDatabase() {
@@ -159,46 +186,9 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	//	public boolean isOracle() {
 	//		return false;
 	//	}
-
-
-
-	@Override
-	public String getIdKey() {
-		return SIMPLE_CALLBACK.getIdKey(getDatabase(), getSchema(), getTable());
-	}
-
-	@Override
-	public String getUserIdKey() {
-		return SIMPLE_CALLBACK.getUserIdKey(getDatabase(), getSchema(), getTable());
-	}
-
-
-	public DemoSQLConfig() {
-		this(RequestMethod.GET);
-	}
-	public DemoSQLConfig(RequestMethod method) {
-		super(method);
-	}
-	public DemoSQLConfig(RequestMethod method, String table) {
-		super(method, table);
-	}
-	public DemoSQLConfig(RequestMethod method, int count, int page) {
-		super(method, count, page);
-	}
-
-
-
-	/**获取SQL配置
-	 * @param table
-	 * @param alias 
-	 * @param request
-	 * @param isProcedure 
-	 * @return
-	 * @throws Exception 
-	 */
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		return newSQLConfig(method, table, alias, request, joinList, isProcedure, SIMPLE_CALLBACK);
-	}
-
+	//	@Override
+	//	public boolean isDb2() {
+	//		return false;
+	//	}
 
 }

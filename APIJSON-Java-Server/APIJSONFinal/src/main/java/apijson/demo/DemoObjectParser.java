@@ -12,15 +12,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package apijson.boot;
+package apijson.demo;
 
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
-import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.orm.AbstractObjectParser;
 import apijson.orm.AbstractParser;

@@ -201,7 +201,7 @@ public class DemoApplication implements ApplicationContextAware {
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(DemoApplication.class, args);
 
-		Log.DEBUG = true; //上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
+		Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
 		APIJSONApplication.init();
 	}
 	
@@ -215,12 +215,12 @@ public class DemoApplication implements ApplicationContextAware {
 		APPLICATION_CONTEXT = applicationContext;		
 	}	
 
-	//SpringBoot 2.x 自定义端口方式
+	//  SpringBoot 2.x 自定义端口方式
 	//	@Bean
 	//	public TomcatServletWebServerFactory servletContainer(){
 	//		return new TomcatServletWebServerFactory(8081) ;
 	//	}
-	//SpringBoot 1.x 自定义端口方式，配置文件加 server.port=80 无效(MacOS 10.10.?)
+	//  SpringBoot 1.x 自定义端口方式，配置文件加 server.port=80 无效(MacOS 10.10.?)
 	@Bean
 	public EmbeddedServletContainerCustomizer containerCustomizer() {
 		return new EmbeddedServletContainerCustomizer() {

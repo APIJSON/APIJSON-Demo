@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package apijson.demo.server.model;
+package apijson.demo.model;
 
 import static apijson.RequestRole.ADMIN;
 import static apijson.RequestRole.CIRCLE;
@@ -22,6 +22,7 @@ import static apijson.RequestRole.OWNER;
 import static apijson.RequestRole.UNKNOWN;
 
 import apijson.MethodAccess;
+import apijson.framework.BaseModel;
 
 /**验证码
  * @author Lemon
