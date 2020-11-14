@@ -66,7 +66,6 @@ public class DemoApplication implements ApplicationContextAware {
 	private static final String TAG = "DemoApplication";
 
 	static {
-		
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		
 		Map<String, Pattern> COMPILE_MAP = Structure.COMPILE_MAP;
@@ -198,7 +197,7 @@ public class DemoApplication implements ApplicationContextAware {
 		SpringApplication.run(DemoApplication.class, args);
 
 		Log.DEBUG = true; //上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-		APIJSONApplication.init(true);
+		APIJSONApplication.init();
 	}
 	
 	

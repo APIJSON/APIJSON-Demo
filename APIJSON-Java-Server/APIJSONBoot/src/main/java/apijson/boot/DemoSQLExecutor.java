@@ -23,4 +23,18 @@ import apijson.framework.APIJSONSQLExecutor;
 public class DemoSQLExecutor extends APIJSONSQLExecutor {
 	public static final String TAG = "DemoSQLExecutor";
 
+	//  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
+	//	@Override
+	//	public List<JSONObject> getCache(String sql, int type) {
+	//		return super.getCache(sql, type);
+	//	}
+	//	@Override
+	//	public synchronized void putCache(String sql, List<JSONObject> list, int type) {
+	//		super.putCache(sql, list, type);
+	//	}
+	//	@Override
+	//	public synchronized void removeCache(String sql, int type) {
+	//		super.removeCache(sql, type);
+	//	}
+
 }

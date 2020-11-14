@@ -19,6 +19,7 @@ import static apijson.RequestRole.UNKNOWN;
 
 import java.util.List;
 
+import apijson.JSON;
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;
 import apijson.orm.Visitor;
@@ -83,6 +84,10 @@ public class User extends BaseModel implements Visitor<Long> {
 		this.pictureList = pictureList;
 		return this;
 	}
+	public User setPictureList(String pictureList) {  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
+		this.pictureList = JSON.parseArray(pictureList, String.class);
+		return this;
+	}
 
 	public String getTag() {
 		return tag;
@@ -97,6 +102,10 @@ public class User extends BaseModel implements Visitor<Long> {
 	}
 	public User setContactIdList(List<Long> contactIdList) {
 		this.contactIdList = contactIdList;
+		return this;
+	}
+	public User setContactIdList(String contactIdList) {  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
+		this.contactIdList = JSON.parseArray(contactIdList, Long.class);
 		return this;
 	}
 
