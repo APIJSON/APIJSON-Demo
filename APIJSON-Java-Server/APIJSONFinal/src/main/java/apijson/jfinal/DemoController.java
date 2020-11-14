@@ -87,7 +87,7 @@ public class DemoController extends Controller {
 		return parser;
 	}
 
-	public void parseAndReponse(RequestMethod method) {
+	public void parseAndResponse(RequestMethod method) {
 		renderJson(newParser(getSession(), method).parse(HttpKit.readData(getRequest())));
 	}
 	
@@ -99,7 +99,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void get() {
-		parseAndReponse(GET);
+		parseAndResponse(GET);
 	}
 
 	/**计数
@@ -108,7 +108,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void head() {
-		parseAndReponse(HEAD);
+		parseAndResponse(HEAD);
 	}
 
 	/**限制性GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
@@ -117,7 +117,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void gets() {
-		parseAndReponse(GETS);
+		parseAndResponse(GETS);
 	}
 
 	/**限制性HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
@@ -126,7 +126,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void heads() {
-		parseAndReponse(HEADS);
+		parseAndResponse(HEADS);
 	}
 
 	/**新增
@@ -135,7 +135,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void post() {
-		parseAndReponse(POST);
+		parseAndResponse(POST);
 	}
 
 	/**修改
@@ -144,7 +144,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void put() {
-		parseAndReponse(PUT);
+		parseAndResponse(PUT);
 	}
 
 	/**删除
@@ -153,7 +153,7 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void delete() {
-		parseAndReponse(DELETE);
+		parseAndResponse(DELETE);
 	}
 
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
