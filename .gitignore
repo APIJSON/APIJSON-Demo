@@ -1,1 +1,6 @@
 APIJSON-Java-Server/APIJSONBoot/.idea
+.classpath
+.project
+APIJSON-Java-Server/APIJSONBoot/.settings
+APIJSON-Java-Server/APIJSONBootTest/.settings
+APIJSON-Java-Server/APIJSONFinal/.settings
