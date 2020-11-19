@@ -1,7 +1,7 @@
 # APIJSON后端部署 - Java
-[APIJSONBootTest](https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer/APIJSONBootTest) 为 APIJSON + SpringBoot 的最简单的初级使用 Demo；<br />
-[APIJSONBoot](https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer/APIJSONBoot) 为 APIJSON + SpringBoot 的接近生产环境成品的 Demo；<br />
-[APIJSONFinal](https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo。<br />
+[APIJSONBootTest](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBootTest) 为 APIJSON + SpringBoot 的最简单的初级使用 Demo；<br />
+[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot 的接近生产环境成品的 Demo；<br />
+[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo。<br />
 
 
 以下简要地说明了部署步骤，也可以看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)
