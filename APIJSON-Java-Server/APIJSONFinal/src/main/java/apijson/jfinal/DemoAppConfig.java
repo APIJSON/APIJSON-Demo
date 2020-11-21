@@ -53,7 +53,7 @@ import apijson.orm.Verifier;
  * 右键这个类 > Run As > Java Application
  * @author Lemon
  */
-public class AppRunnableConfig extends JFinalConfig {
+public class DemoAppConfig extends JFinalConfig {
 	
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -96,7 +96,7 @@ public class AppRunnableConfig extends JFinalConfig {
 
 
 	public static void main(String[] args) throws Exception {
-		UndertowServer.start(AppRunnableConfig.class);
+		UndertowServer.start(DemoAppConfig.class);
 
 		Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
 		APIJSONApplication.init();

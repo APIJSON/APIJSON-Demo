@@ -1,4 +1,7 @@
+# APIJSONFinal
 
-#### 运行
+APIJSON + JFinal 接近成品的 Demo
 
-右键 AppRunnableConfig > Run As > Java Application
+### 运行
+
+右键 DemoAppConfig > Run As > Java Application

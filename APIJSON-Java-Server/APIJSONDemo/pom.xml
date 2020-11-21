@@ -3,12 +3,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>apijson.boot.test</groupId>
-	<artifactId>apijson-boot-test</artifactId>
+	<groupId>apijson.demo</groupId>
+	<artifactId>apijson-demo</artifactId>
 	<version>4.0.0</version>
 	<packaging>jar</packaging>
 
-	<name>APIJSONBootTest</name>
+	<name>APIJSONDemo</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
 
 	<parent>
@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.73</version>
+			<version>1.2.74</version>
 		</dependency>
 
 		<!-- APIJSONBoot 需要用的 Spring 框架，1.4.1 以上 -->

@@ -41,8 +41,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的
 		DEFAULT_SCHEMA = "sys";  //TODO 默认模式名，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
 
-		//  由 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置
-		//		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+		//表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
+		//这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init
+		//(间接调用 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置)，所以不需要。
+		//但如果 Access 这张表的对外表名与数据库实际表名不一致，仍然需要这里注册。例如
+		//		TABLE_KEY_MAP.put(Access.class.getSimpleName(), "access");
+
+		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 		//		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
@@ -162,6 +167,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return null;
 	}
 	
+	//取消注释后，默认的 APIJSON 配置表会由业务表所在数据库模式 schema 改为自定义的
+	//	@Override
+	//	public String getConfigSchema() {
+	//		return "apijson";
+	//	}
+
 	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
 	//	@Override
 	//	public String getDatabase() {

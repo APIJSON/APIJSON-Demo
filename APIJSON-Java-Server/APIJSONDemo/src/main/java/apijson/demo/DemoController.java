@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.*/
 
-package apijson.boot.test;
+package apijson.demo;
 
 import java.net.URLDecoder;
 
@@ -30,6 +30,9 @@ import apijson.framework.APIJSONController;
 import apijson.orm.Parser;
 
 
+/**提供入口，转交给 APIJSON 的 Parser 来处理
+ * @author Lemon
+ */
 @RestController
 @RequestMapping("")
 public class DemoController extends APIJSONController {

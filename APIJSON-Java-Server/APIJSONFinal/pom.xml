@@ -21,15 +21,15 @@
 		</dependency>
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-		<dependency>
+	 	<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>4.2.4</version>
+			<version>4.2.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>4.4.0</version>
+			<version>4.4.3</version>
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
@@ -148,7 +148,7 @@
 							<transformers>
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>apijson.jfinal.AppRunnableConfig</mainClass>
+									<mainClass>apijson.jfinal.DemoAppConfig</mainClass>
 								</transformer>
 
 								<!-- 下面的配置支持排除指定文件打包到 jar 之中，可以用于排除需要修改的配置文件以便于在外部的 config 目录下的 同名配置文件生效，建议使用 
