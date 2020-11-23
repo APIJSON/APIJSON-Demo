@@ -4,7 +4,7 @@
 [APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo。<br />
 
 
-以下简要地说明了部署步骤，也可以看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)
+以下简要地说明了上手步骤，也可以看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)
 
 #### 用现成的开箱即用 jar包 极速部署 见
 https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
