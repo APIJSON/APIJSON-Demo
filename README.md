@@ -5,11 +5,11 @@ Demo projects for Tencent [APIJSON](https://github.com/APIJSON/APIJSON) with dif
 
 ### 快速上手
 
-#### 1.后端部署
+#### 1.后端上手
 可以跳过这个步骤，直接用APIJSON服务器IP地址 apijson.cn:8080 来测试接口。<br />
-见&nbsp; [APIJSON后端部署 - Java](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)<br />
+见&nbsp; [APIJSON后端上手 - Java](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)<br />
 
-#### 2.前端部署
+#### 2.前端上手
 可以跳过这个步骤，直接使用 [APIAuto-自动化接口管理工具](https://github.com/TommyLemon/APIAuto) 或 下载客户端App。<br />
 见&nbsp; [Android](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android) &nbsp;或&nbsp; [iOS](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript)<br />
 
