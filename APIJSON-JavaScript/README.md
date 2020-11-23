@@ -1,4 +1,4 @@
-# APIJSON前端部署 - JavaScript
+# APIJSON上手部署 - JavaScript
 
 ### 1.下载后解压APIJSON-Demo工程
 
