@@ -31,7 +31,7 @@ CREATE TABLE `Response` (
   `date` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建日期',
   PRIMARY KEY (`id`),
   UNIQUE KEY `id_UNIQUE` (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='每次启动服务器时加载整个表到内存。';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='返回结果处理配置(目前未用上)\n每次启动服务器时加载整个表到内存。';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -53,4 +53,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-10-28  1:58:21
+-- Dump completed on 2020-11-29  4:33:40
