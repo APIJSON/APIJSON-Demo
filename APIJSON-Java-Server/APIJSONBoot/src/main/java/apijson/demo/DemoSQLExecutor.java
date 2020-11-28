@@ -14,10 +14,17 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import java.sql.Connection;
+
+import javax.sql.DataSource;
+
+import apijson.Log;
+import apijson.boot.DemoApplication;
 import apijson.framework.APIJSONSQLExecutor;
+import apijson.orm.SQLConfig;
 
 
-/**executor for query(read) or update(write) MySQL database
+/**SQL 执行
  * @author Lemon
  */
 public class DemoSQLExecutor extends APIJSONSQLExecutor {
@@ -36,5 +43,26 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 	//	public synchronized void removeCache(String sql, int type) {
 	//		super.removeCache(sql, type);
 	//	}
+
+	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
+	@Override
+	public Connection getConnection(SQLConfig config) throws Exception {
+		Connection c = connectionMap.get(config.getDatabase());
+		if (c == null || c.isClosed()) {
+			try {
+				DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class);
+				// 另一种方式是 DruidConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DruidConfig.DATA_SOURCE.getConnection();
+				connectionMap.put(config.getDatabase(), ds == null ? null : ds.getConnection());
+			} catch (Exception e) {
+				Log.e(TAG, "DemoSQLExecutor.getConnection   try { "
+						+ "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
+						+ "} catch (Exception e) = " + e.getMessage());
+			}
+		}
+
+		// 必须最后执行 super 方法，因为里面还有事务相关处理。
+		// 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
+		return super.getConnection(config);
+	}
 
 }

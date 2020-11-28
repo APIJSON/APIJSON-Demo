@@ -24,7 +24,7 @@ import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 
 
-/**SQL配置
+/**SQL 配置
  * TiDB 用法和 MySQL 一致
  * @author Lemon
  */
@@ -38,7 +38,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	}
 
 	static {
-		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的
+		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
 		DEFAULT_SCHEMA = "sys";  //TODO 默认模式名，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
 
 		//表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
@@ -90,6 +90,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	}
 
 
+	// 如果 DemoSQLExecutor.getConnection 能拿到连接池的有效 Connection，则这里不需要配置 dbVersion, dbUri, dbAccount, dbPassword
+
 	@Override
 	public String getDBVersion() {
 		if (isMySQL()) {
@@ -112,7 +114,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	@Override
 	public String getDBUri() {
 		if (isMySQL()) {
-			return "jdbc:mysql://localhost:3306"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
+			// 以下是 MySQL 5.7 及以下
+			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) {
 			return "jdbc:postgresql://localhost:5432/postgres"; //TODO 改成你自己的

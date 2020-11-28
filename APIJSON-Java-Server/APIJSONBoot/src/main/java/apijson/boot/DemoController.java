@@ -79,7 +79,6 @@ import apijson.demo.model.User;
 import apijson.demo.model.Verify;
 import apijson.framework.APIJSONController;
 import apijson.framework.BaseModel;
-import apijson.framework.StructureUtil;
 import apijson.orm.JSONRequest;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
@@ -299,6 +298,15 @@ public class DemoController extends APIJSONController {
 
 		boolean reloadAll = StringUtil.isEmpty(type, true) || "ALL".equals(type);
 
+		if (reloadAll || "ACCESS".equals(type)) {
+			try {
+				result.put(ACCESS_, DemoVerifier.initAccess());
+			} catch (ServerException e) {
+				e.printStackTrace();
+				result.put(ACCESS_, DemoParser.newErrorResult(e));
+			}
+		}
+
 		if (reloadAll || "FUNCTION".equals(type)) {
 			try {
 				result.put(FUNCTION_, DemoFunctionParser.init());
@@ -310,19 +318,10 @@ public class DemoController extends APIJSONController {
 
 		if (reloadAll || "REQUEST".equals(type)) {
 			try {
-				result.put(REQUEST_, StructureUtil.init());
+				result.put(REQUEST_, DemoVerifier.initRequest());
 			} catch (ServerException e) {
 				e.printStackTrace();
 				result.put(REQUEST_, DemoParser.newErrorResult(e));
-			}
-		}
-
-		if (reloadAll || "ACCESS".equals(type)) {
-			try {
-				result.put(ACCESS_, DemoVerifier.init());
-			} catch (ServerException e) {
-				e.printStackTrace();
-				result.put(ACCESS_, DemoParser.newErrorResult(e));
 			}
 		}
 

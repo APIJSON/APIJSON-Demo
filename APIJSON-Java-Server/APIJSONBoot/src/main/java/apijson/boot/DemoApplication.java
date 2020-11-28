@@ -47,11 +47,11 @@ import apijson.demo.DemoSQLExecutor;
 import apijson.demo.DemoVerifier;
 import apijson.framework.APIJSONApplication;
 import apijson.framework.APIJSONCreator;
+import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
 import apijson.orm.Parser;
 import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
-import apijson.orm.Structure;
 import apijson.orm.Verifier;
 import unitauto.MethodUtil;
 import unitauto.MethodUtil.Argument;
@@ -73,7 +73,7 @@ public class DemoApplication implements ApplicationContextAware {
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		
-		Map<String, Pattern> COMPILE_MAP = Structure.COMPILE_MAP;
+		Map<String, Pattern> COMPILE_MAP = AbstractVerifier.COMPILE_MAP;
 		COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
 		COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
 		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
