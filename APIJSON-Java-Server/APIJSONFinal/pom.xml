@@ -4,7 +4,7 @@
 	<groupId>apijson.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>4.4.0</version>
+	<version>4.4.6</version>
 	<name>Demo project for APIJSON Server based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
