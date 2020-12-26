@@ -3,9 +3,8 @@
 [APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot 的接近生产环境成品的 Demo；<br />
 [APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo。<br />
 
-### 注意
 Oracle,SQLServer 的 JDBC 驱动用了 GPL 类协议，所以示例项目的 pom.xml 都没有加它们的 Maven 依赖，需要自己加。<br />
-
+<br />
 以下简要地说明了上手步骤，也可以看这个详细的 [图文入门教程](https://vincentcheng.github.io/apijson-doc/zh)
 
 #### 用现成的开箱即用 jar包 极速部署 见
