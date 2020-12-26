@@ -38,6 +38,28 @@ public class DemoApplication {
 				return new DemoSQLConfig();
 			}
 		};
+		
+		// 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
+		//		try { //加载驱动程序
+		//			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+		//			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+		//			Log.d(TAG, "成功加载 SQLServer 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+		//		}
+		//		catch (ClassNotFoundException e) {
+		//			e.printStackTrace();
+		//			Log.e(TAG, "加载 SQLServer 驱动失败，请检查 pom.xml 中 net.sourceforge.jtds 版本是否存在以及可用 ！！！");
+		//		}
+		//		
+		//		try { //加载驱动程序
+		//			Log.d(TAG, "尝试加载 Oracle 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+		//			Class.forName("oracle.jdbc.driver.OracleDriver");
+		//			Log.d(TAG, "成功加载 Oracle 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+		//		}
+		//		catch (ClassNotFoundException e) {
+		//			e.printStackTrace();
+		//			Log.e(TAG, "加载 Oracle 驱动失败，请检查 pom.xml 中 com.oracle.jdbc 版本是否存在以及可用 ！！！");
+		//		}
+
 	}
 	
 	public static void main(String[] args) throws Exception {
