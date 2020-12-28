@@ -257,6 +257,7 @@ public class DemoController extends APIJSONController {
 	public static final String VERIFY = "verify";
 
 	public static final String TYPE = "type";
+	public static final String VALUE = "value";
 
 
 
@@ -268,7 +269,10 @@ public class DemoController extends APIJSONController {
 		{
 			"type": "ALL",  //重载对象，ALL, FUNCTION, REQUEST, ACCESS，非必须
 			"phone": "13000082001",
-			"verify": "1234567" //验证码，对应类型为 Verify.TYPE_RELOAD
+			"verify": "1234567", //验证码，对应类型为 Verify.TYPE_RELOAD
+			"value": {  // 自定义增量更新条件
+			   "id": 1  // 过滤条件，符合 APIJSON 查询功能符即可
+			}
 		}
 	 * </pre>
 	 */
@@ -277,11 +281,13 @@ public class DemoController extends APIJSONController {
 	public JSONObject reload(@RequestBody String request) {
 		JSONObject requestObject = null;
 		String type;
+		JSONObject value;
 		String phone;
 		String verify;
 		try {
 			requestObject = DemoParser.parseRequest(request);
 			type = requestObject.getString(TYPE);
+			value = requestObject.getJSONObject(VALUE);
 			phone = requestObject.getString(PHONE);
 			verify = requestObject.getString(VERIFY);
 		} catch (Exception e) {
@@ -300,7 +306,7 @@ public class DemoController extends APIJSONController {
 
 		if (reloadAll || "ACCESS".equals(type)) {
 			try {
-				result.put(ACCESS_, DemoVerifier.initAccess());
+				result.put(ACCESS_, DemoVerifier.initAccess(false, null, value));
 			} catch (ServerException e) {
 				e.printStackTrace();
 				result.put(ACCESS_, DemoParser.newErrorResult(e));
@@ -309,7 +315,7 @@ public class DemoController extends APIJSONController {
 
 		if (reloadAll || "FUNCTION".equals(type)) {
 			try {
-				result.put(FUNCTION_, DemoFunctionParser.init());
+				result.put(FUNCTION_, DemoFunctionParser.init(false, null, value));
 			} catch (ServerException e) {
 				e.printStackTrace();
 				result.put(FUNCTION_, DemoParser.newErrorResult(e));
@@ -318,7 +324,7 @@ public class DemoController extends APIJSONController {
 
 		if (reloadAll || "REQUEST".equals(type)) {
 			try {
-				result.put(REQUEST_, DemoVerifier.initRequest());
+				result.put(REQUEST_, DemoVerifier.initRequest(false, null, value));
 			} catch (ServerException e) {
 				e.printStackTrace();
 				result.put(REQUEST_, DemoParser.newErrorResult(e));

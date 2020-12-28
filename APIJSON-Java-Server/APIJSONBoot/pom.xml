@@ -5,7 +5,7 @@
 
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>4.4.9</version>
+	<version>4.5.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONBoot</name>
@@ -41,12 +41,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>4.4.7</version>
+			<version>4.4.8</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>4.4.9</version>
+			<version>4.5.0</version>
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
