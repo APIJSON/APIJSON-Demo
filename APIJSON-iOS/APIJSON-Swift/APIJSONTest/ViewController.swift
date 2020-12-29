@@ -52,10 +52,10 @@ class ViewController: UIViewController {
         requestLabel.numberOfLines = 6
         self.view.addSubview(requestLabel)
         
-        let responseLable = UILabel(frame:CGRect(x:20, y:130, width:400, height:600))
-        responseLable.text = "request..."
-        responseLable.numberOfLines = 100
-        self.view.addSubview(responseLable)
+        let responseLabel = UILabel(frame:CGRect(x:20, y:130, width:400, height:600))
+        responseLabel.text = "request..."
+        responseLabel.numberOfLines = 100
+        self.view.addSubview(responseLabel)
         
         //生成UI >>>>>>>>>>>>>>>>>>>>>
         
@@ -65,23 +65,23 @@ class ViewController: UIViewController {
         
         //请求URL
         
-        let request:NSMutableURLRequest = NSMutableURLRequest(URL: NSURL(string: url)!)
+        let request = NSMutableURLRequest(url: URL(string: url)!)
         
-        request.HTTPMethod = "POST"
+        request.httpMethod = "POST"
         //设置发送的数据格式为JSON
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         do {
-            request.HTTPBody = try NSJSONSerialization.dataWithJSONObject(json, options: NSJSONWritingOptions.PrettyPrinted)
+            request.httpBody = try JSONSerialization.data(withJSONObject: json, options: JSONSerialization.WritingOptions.prettyPrinted)
         } catch {
             print("Something went wrong!")
         }
         
         //默认session配置
-        let config = NSURLSessionConfiguration.defaultSessionConfiguration()
-        let session = NSURLSession(configuration: config)
+        let config = URLSessionConfiguration.default
+        let session = URLSession(configuration: config)
         
         //发起请求
-        let dataTask = session.dataTaskWithRequest(request) { (data, response, error) in
+        let dataTask = session.dataTask(with: request as URLRequest) { (data, response, error) in
            
             print("\n\nreceived result!\n\n")
 
@@ -90,20 +90,20 @@ class ViewController: UIViewController {
             print(error)
             
             //数据类型转换
-            let jsonData:NSDictionary = try! NSJSONSerialization.JSONObjectWithData(data!, options: .MutableContainers) as! NSDictionary
+            let jsonData:NSDictionary = try! JSONSerialization.jsonObject(with: data!, options: .mutableContainers) as! NSDictionary
             
             print(jsonData)
             
-            let res:String = self.toJSONString(jsonData);
+            let res:String = self.toJSONString(jsonData as! [String : Any]);
             print("Response = \n" + res)
             
             
             //显示返回结果
-            dispatch_async(dispatch_get_main_queue(), {
+            DispatchQueue.main.async {
                 
-                responseLable.text = "Response:\n" + res
+                responseLabel.text = "Response:\n" + res
                 print("set text end\n\n")
-            });
+            }
             
         }
         
@@ -111,9 +111,11 @@ class ViewController: UIViewController {
         dataTask.resume()
     }
     
-    func toJSONString(jsonData: NSDictionary!) -> String {
-        let data : NSData! = try? NSJSONSerialization.dataWithJSONObject(jsonData, options: [NSJSONWritingOptions.PrettyPrinted]) as NSData!
-        let str = String(data: data, encoding: NSUTF8StringEncoding)
+    func toJSONString(_ jsonData: [String: Any]!) -> String {
+        guard let data = try? JSONSerialization.data(withJSONObject: jsonData!, options: [JSONSerialization.WritingOptions.prettyPrinted]) else {
+            return ""
+        }
+        let str = String(data: data, encoding: String.Encoding.utf8)
         return str!
     }
     
