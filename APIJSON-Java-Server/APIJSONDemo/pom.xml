@@ -5,13 +5,11 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>4.0.0</version>
+	<version>4.5.1</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONDemo</name>
-	<description>Demo project for Testing APIJSON Server based on
-		SpringBoot
-	</description>
+	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -21,30 +19,30 @@
 	</properties>
 
 	<dependencies>
+		<!-- APIJSONBoot 需要用的数据库 JDBC 驱动 -->
 		<dependency>
-			<groupId>com.qcloud</groupId>
-			<artifactId>qcloud-java-sdk</artifactId>
-			<version>2.0.1</version>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.22</version>
 		</dependency>
 		<dependency>
-			<groupId>com.tencentcloudapi</groupId>
-			<artifactId>scf-java-events</artifactId>
-			<version>0.0.2</version>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.18</version>
 		</dependency>
-		<!-- APIJSONORM 需要用的 JSON 封装/解析库，1.2.24 以上 -->
-
-		<!-- APIJSONBoot 需要用的 Spring 框架，1.4.1 以上 -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<version>2.4.2</version>
-		</dependency>
-		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，已在 libs 目录放了对应的 jar 包来替代 -->
+		<!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
 
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
 			<version>LATEST</version>
+		</dependency>
+
+		<!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.1 以上 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>2.4.2</version>
 		</dependency>
 
 	</dependencies>
