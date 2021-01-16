@@ -193,6 +193,7 @@
 				TargetAttributes = {
 					655C4C5A1FCDCACA00EE5EF8 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 7KXVPC4Y3C;
 					};
 					655C4C6E1FCDCACA00EE5EF8 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -209,6 +210,7 @@
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
 			knownRegions = (
+				English,
 				en,
 				Base,
 			);
@@ -399,10 +401,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7KXVPC4Y3C;
 				INFOPLIST_FILE = APIJSONTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.apijson.APIJSONTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
@@ -410,10 +414,12 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = 7KXVPC4Y3C;
 				INFOPLIST_FILE = APIJSONTest/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = org.apijson.APIJSONTest;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
@@ -482,6 +488,7 @@
 				655C4C851FCDCACA00EE5EF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		655C4C861FCDCACA00EE5EF8 /* Build configuration list for PBXNativeTarget "APIJSONTestTests" */ = {
 			isa = XCConfigurationList;
@@ -490,6 +497,7 @@
 				655C4C881FCDCACA00EE5EF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		655C4C891FCDCACA00EE5EF8 /* Build configuration list for PBXNativeTarget "APIJSONTestUITests" */ = {
 			isa = XCConfigurationList;
@@ -498,6 +506,7 @@
 				655C4C8B1FCDCACA00EE5EF8 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

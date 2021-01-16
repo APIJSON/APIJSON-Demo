@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   uuid = "F176DF8F-D2E4-4AAD-82C4-B145D3DDB06F"
+   type = "1"
+   version = "2.0">
+   <Breakpoints>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "0FD1DAD7-3631-4008-A63C-D9F9E5B3C01C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "APIJSONTest/ViewController.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "84"
+            endingLineNumber = "84"
+            landmarkName = "test()"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "0FD1DAD7-3631-4008-A63C-D9F9E5B3C01C - 336694360a88cce6"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "APIJSONTest.ViewController.test() -&gt; ()"
+                  moduleName = "APIJSONTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rogerluo/Downloads/APIJSON-Demo-master/APIJSON-iOS/APIJSON-Swift/APIJSONTest/ViewController.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "84"
+                  endingLineNumber = "84"
+                  offsetFromSymbolStart = "4060">
+               </Location>
+               <Location
+                  uuid = "0FD1DAD7-3631-4008-A63C-D9F9E5B3C01C - 183bbd76298b9b95"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "closure #1 (Swift.Optional&lt;Foundation.Data&gt;, Swift.Optional&lt;__C.NSURLResponse&gt;, Swift.Optional&lt;Swift.Error&gt;) -&gt; () in APIJSONTest.ViewController.test() -&gt; ()"
+                  moduleName = "APIJSONTest"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/rogerluo/Downloads/APIJSON-Demo-master/APIJSON-iOS/APIJSON-Swift/APIJSONTest/ViewController.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "86"
+                  endingLineNumber = "86"
+                  offsetFromSymbolStart = "388">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+   </Breakpoints>
+</Bucket>
