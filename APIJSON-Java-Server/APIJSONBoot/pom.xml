@@ -5,18 +5,11 @@
 
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>4.5.0</version>
+	<version>4.5.1</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONBoot</name>
 	<description>Demo project for APIJSON Server based on SpringBoot</description>
-
-	<parent>
-		<groupId>org.springframework.boot</groupId>
-		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>1.4.1.RELEASE</version> <!--改成 2.1.9 直接报错，找不到 mysql-connector-java 等 3 个驱动包 <version>2.1.9.RELEASE</version> -->
-		<relativePath /> <!-- lookup parent from repository -->
-	</parent>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -25,17 +18,33 @@
 	</properties>
 
 	<dependencies>
+		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
 			<version>1.2.74</version>
 		</dependency>
 
+		<!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>4.0.1</version>
 		</dependency>
+		
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 <<<<<<<<< -->
+		<dependency>
+			<groupId>com.github.TommyLemon</groupId>
+			<artifactId>unitauto-java</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.TommyLemon</groupId>
+			<artifactId>unitauto-jar</artifactId>
+			<version>2.5.3</version>
+		</dependency>
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 >>>>>>>>> -->
+		
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 <<<<<<<<<< -->
 		<dependency>
@@ -68,36 +77,13 @@
 		</dependency>
 		<!-- 没找到合适且稳定的 Oracle 的 JDBC Maven 依赖，需要自行下载 jar 包 -->
 		<!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
-
-
-		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 <<<<<<<<< -->
-		<dependency>
-			<groupId>com.github.TommyLemon</groupId>
-			<artifactId>unitauto-java</artifactId>
-			<version>2.5.3</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.TommyLemon</groupId>
-			<artifactId>unitauto-jar</artifactId>
-			<version>2.5.3</version>
-		</dependency>
-		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 >>>>>>>>> -->
-
-
+		
 
 		<!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.1 以上 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>2.4.2</version>
 		</dependency>
 
 	</dependencies>
