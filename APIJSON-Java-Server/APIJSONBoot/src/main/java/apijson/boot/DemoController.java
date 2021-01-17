@@ -596,7 +596,12 @@ public class DemoController extends APIJSONController {
 
 		response = new JSONResponse(
 				new DemoParser(GETS, false).parseResponse(
-						new JSONRequest(new User(userId)).setFormat(true)
+						new JSONRequest(  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
+								USER_,  // User 里在 setContactIdList(List<Long>) 后加 setContactIdList(String) 没用
+								new apijson.JSONObject(  // fastjson 查到一个就不继续了，所以只能加到前面或者只有这一个，但这样反过来不兼容 5.7+
+										new User(userId)  // 所以就用 @json 来强制转为 JSONArray，保证有效
+										).setJson("contactIdList,pictureList")
+								).setFormat(true)
 						)
 				);
 		User user = response.getObject(User.class);
