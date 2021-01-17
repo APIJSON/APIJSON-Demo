@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import apijson.framework.APIJSONSQLConfig;
 
 
@@ -42,14 +44,20 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	public String getDBVersion() {
 		return "5.7.22";  // "8.0.11";  // TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号  // MYSQL 8 和 7 使用的 JDBC 配置不一样
 	}
+	
+	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
 	public String getDBUri() {
 		return "jdbc:mysql://localhost:3306"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 	}
+	
+	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
 	public String getDBAccount() {
 		return "root";  // TODO 改成你自己的
 	}
+	
+	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
 	public String getDBPassword() {
 		return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""

@@ -19,6 +19,8 @@ import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 
+import com.alibaba.fastjson.annotation.JSONField;
+
 import apijson.RequestMethod;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
@@ -109,6 +111,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		return null;
 	}
+	
+	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBUri() {
 		if (isMySQL()) {
@@ -128,6 +132,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		return null;
 	}
+	
+	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBAccount() {
 		if (isMySQL()) {
@@ -147,6 +153,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		return null;
 	}
+	
+	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBPassword() {
 		if (isMySQL()) {
