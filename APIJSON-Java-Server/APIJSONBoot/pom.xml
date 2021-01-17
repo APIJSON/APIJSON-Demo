@@ -32,8 +32,7 @@
 			<version>4.0.1</version>
 		</dependency>
 
-		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 
-			<<<<<<<<< -->
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 <<<<<<<<< -->
 		<dependency>
 			<groupId>com.github.TommyLemon</groupId>
 			<artifactId>unitauto-java</artifactId>
@@ -49,8 +48,7 @@
 			<artifactId>classgraph</artifactId>
 			<version>4.8.87</version>
 		</dependency>
-		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 
-			>>>>>>>>> -->
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 >>>>>>>>> -->
 
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 <<<<<<<<<< -->
@@ -66,7 +64,7 @@
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
-				<!-- APIJSONBoot 需要用的数据库 JDBC 驱动 -->
+		<!-- 需要用的数据库 JDBC 驱动 -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>

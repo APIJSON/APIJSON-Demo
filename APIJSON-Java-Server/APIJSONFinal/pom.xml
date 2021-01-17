@@ -8,12 +8,14 @@
 	<name>Demo project for APIJSON Server based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
+		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
 			<version>1.2.74</version>
 		</dependency>
 
+		<!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
@@ -33,7 +35,7 @@
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
-		<!-- APIJSONBoot 需要用的数据库 JDBC 驱动 -->
+		<!-- 需要用的数据库 JDBC 驱动 -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -46,18 +48,19 @@
 		</dependency>
 		<!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
 
-		<!-- APIJSONBoot 需要用的 JFinal 框架，3.5 以上 -->
+		<!-- 需要用的 JFinal 框架，3.5 以上 -->
 		<dependency>
 			<groupId>com.jfinal</groupId>
 			<artifactId>jfinal-undertow</artifactId>
-			<version>1.9</version>
+			<version>2.4</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jfinal</groupId>
 			<artifactId>jfinal</artifactId>
-			<version>4.6</version>
+			<version>4.9.06</version>
 		</dependency>
-		<!-- cors跨域 -->
+		
+		<!-- CORS 跨域 -->
 		<dependency>
 			<groupId>com.thetransactioncompany</groupId>
 			<artifactId>cors-filter</artifactId>

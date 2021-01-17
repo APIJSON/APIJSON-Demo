@@ -18,7 +18,14 @@
 	</properties>
 
 	<dependencies>
-		<!-- APIJSONBoot 需要用的数据库 JDBC 驱动 -->
+		<!-- 需要的 APIJSON 相关依赖 -->
+		<dependency>
+			<groupId>com.github.APIJSON</groupId>
+			<artifactId>apijson-framework</artifactId>
+			<version>LATEST</version>
+		</dependency>
+		
+		<!-- 需要用的数据库 JDBC 驱动 -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
@@ -31,14 +38,7 @@
 		</dependency>
 		<!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
 
-		<!-- APIJSONBoot 需要的 APIJSON 相关依赖 -->
-		<dependency>
-			<groupId>com.github.APIJSON</groupId>
-			<artifactId>apijson-framework</artifactId>
-			<version>LATEST</version>
-		</dependency>
-
-		<!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.0 以上 -->
+		<!-- 需要用的 SpringBoot 框架，1.4.0 以上 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
