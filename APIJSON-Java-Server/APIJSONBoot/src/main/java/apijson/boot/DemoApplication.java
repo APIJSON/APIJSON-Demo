@@ -110,7 +110,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 
 
 		// UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+		// FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
 		UnitAutoApp.init();
 
 		// 适配 Spring 注入的类及 Context 等环境相关的类
@@ -177,6 +177,21 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 									return false;
 								}
 
+								// 防止通过 UnitAuto 远程执行 getDBPassword 等方法来查到敏感信息，但如果直接调用 public String getDBUri 这里没法拦截，仍然会返回敏感信息
+								//	if (object instanceof SQLConfig) {
+								//		// 这个类部分方法不序列化返回					
+								//		if ("dBUri".equalsIgnoreCase(name) || "dBPassword".equalsIgnoreCase(name) || "dBAccount".equalsIgnoreCase(name)) {
+								//			return false;
+								//		}
+								//		return false;  // 这个类所有方法都不序列化返回
+								//	}
+								
+								// 所有类中的方法只要包含关键词就不序列化返回
+								String n = StringUtil.toLowerCase(name);
+								if (n.contains("database") || n.contains("schema") || n.contains("dburi") || n.contains("password") || n.contains("account")) {
+									return false;
+								}
+
 								return Modifier.isPublic(value.getClass().getModifiers());
 							}
 						}));
@@ -229,7 +244,8 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(DemoApplication.class, args);
 
-		Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
+		// FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
+		unitauto.Log.DEBUG = Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
 		APIJSONApplication.init();
 	}
 
