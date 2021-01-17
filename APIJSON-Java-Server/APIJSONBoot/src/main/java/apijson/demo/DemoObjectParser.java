@@ -17,10 +17,10 @@ package apijson.demo;
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
-import javax.validation.constraints.NotNull;
 
 import com.alibaba.fastjson.JSONObject;
 
+import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.orm.AbstractObjectParser;
 import apijson.orm.AbstractParser;

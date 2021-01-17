@@ -24,21 +24,21 @@ import javax.naming.Context;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 
 import apijson.Log;
+import apijson.NotNull;
 import apijson.StringUtil;
 import apijson.demo.DemoFunctionParser;
 import apijson.demo.DemoParser;
@@ -57,7 +57,6 @@ import unitauto.MethodUtil;
 import unitauto.MethodUtil.Argument;
 import unitauto.MethodUtil.InstanceGetter;
 import unitauto.MethodUtil.JSONCallback;
-import unitauto.NotNull;
 import unitauto.jar.UnitAutoApp;
 
 
@@ -67,20 +66,20 @@ import unitauto.jar.UnitAutoApp;
  */
 @Configuration
 @SpringBootApplication
-public class DemoApplication implements ApplicationContextAware {
+public class DemoApplication implements ApplicationContextAware, WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 	private static final String TAG = "DemoApplication";
 
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		
+
 		Map<String, Pattern> COMPILE_MAP = AbstractVerifier.COMPILE_MAP;
 		COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
 		COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
 		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
-		
+
 		// 使用本项目的自定义处理类
 		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
-			
+
 			@Override
 			public Parser<Long> createParser() {
 				return new DemoParser();
@@ -89,12 +88,12 @@ public class DemoApplication implements ApplicationContextAware {
 			public FunctionParser createFunctionParser() {
 				return new DemoFunctionParser();
 			}
-			
+
 			@Override
 			public Verifier<Long> createVerifier() {
 				return new DemoVerifier();
 			}
-			
+
 			@Override
 			public SQLConfig createSQLConfig() {
 				return new DemoSQLConfig();
@@ -103,17 +102,17 @@ public class DemoApplication implements ApplicationContextAware {
 			public SQLExecutor createSQLExecutor() {
 				return new DemoSQLExecutor();
 			}
-		
+
 		};
-		
+
 		// APIJSON 配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		
-		
-		
+
+
+
 		// UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
-		
+
 		UnitAutoApp.init();
-		
+
 		// 适配 Spring 注入的类及 Context 等环境相关的类
 		final InstanceGetter ig = MethodUtil.INSTANCE_GETTER;
 		MethodUtil.INSTANCE_GETTER = new InstanceGetter() {
@@ -131,7 +130,7 @@ public class DemoApplication implements ApplicationContextAware {
 				return ig.getInstance(clazz, classArgs, reuse);
 			}
 		};
-		
+
 		// 排除转换 JSON 异常的类，一般是 Context 等环境相关的类
 		final JSONCallback jc = MethodUtil.JSON_CALLBACK;
 		MethodUtil.JSON_CALLBACK = new JSONCallback() {
@@ -145,7 +144,7 @@ public class DemoApplication implements ApplicationContextAware {
 			public JSONObject newErrorResult(Throwable e) {
 				return jc.newErrorResult(e);
 			}
-			
+
 			@Override
 			public JSONObject parseJSON(String type, Object value) {
 				if (value == null || unitauto.JSON.isBooleanOrNumberOrString(value) || value instanceof JSON || value instanceof Enum) {
@@ -154,7 +153,6 @@ public class DemoApplication implements ApplicationContextAware {
 
 				if (value instanceof ApplicationContext
 						|| value instanceof Context
-						|| value instanceof javax.validation.MessageInterpolator.Context
 						|| value instanceof org.omg.CORBA.Context
 						|| value instanceof org.apache.catalina.Context
 						|| value instanceof ch.qos.logback.core.Context
@@ -172,7 +170,6 @@ public class DemoApplication implements ApplicationContextAware {
 
 								if (value instanceof ApplicationContext
 										|| value instanceof Context
-										|| value instanceof javax.validation.MessageInterpolator.Context
 										|| value instanceof org.omg.CORBA.Context
 										|| value instanceof org.apache.catalina.Context
 										|| value instanceof ch.qos.logback.core.Context
@@ -190,12 +187,12 @@ public class DemoApplication implements ApplicationContextAware {
 
 				return jc.parseJSON(type, value);
 			}
-			
+
 		};
-		
+
 		// UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		
-		
+
+
 		// 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
 		//		try { //加载驱动程序
 		//			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
@@ -228,15 +225,21 @@ public class DemoApplication implements ApplicationContextAware {
 		//		}
 	}
 
-	
+
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(DemoApplication.class, args);
 
 		Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
 		APIJSONApplication.init();
 	}
-	
-	
+
+	// SpringBoot 2.x 自定义端口方式
+	@Override
+	public void customize(ConfigurableServletWebServerFactory server) {
+		server.setPort(8080);
+	}
+
+	// 全局 ApplicationContext 实例，方便 getBean 拿到 Spring/SpringBoot 注入的类实例
 	private static ApplicationContext APPLICATION_CONTEXT;
 	public static ApplicationContext getApplicationContext() {
 		return APPLICATION_CONTEXT;
@@ -244,50 +247,25 @@ public class DemoApplication implements ApplicationContextAware {
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		APPLICATION_CONTEXT = applicationContext;		
-	}	
-
-	//  SpringBoot 2.x 自定义端口方式
-	//	@Bean
-	//	public TomcatServletWebServerFactory servletContainer(){
-	//		return new TomcatServletWebServerFactory(8081) ;
-	//	}
-	//  SpringBoot 1.x 自定义端口方式，配置文件加 server.port=80 无效(MacOS 10.10.?)
-	@Bean
-	public EmbeddedServletContainerCustomizer containerCustomizer() {
-		return new EmbeddedServletContainerCustomizer() {
-
-			@Override
-			public void customize(ConfigurableEmbeddedServletContainer container) {
-				container.setPort(8080); //自定义端口号，如果和 TiDB 等其它程序端口有冲突，可改为 8081, 9090, 9091 等未被占用的端口 	
-			}
-		};
 	}
 
 
 	// 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
-	/** 
-	 * 跨域过滤器 
-	 * @return 
-	 */  
-	@Bean  
-	public CorsFilter corsFilter() {  
-		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();  
-		source.registerCorsConfiguration("/**", buildConfig());
-		return new CorsFilter(source);  
-	}  
-	/**CORS跨域配置
-	 * @return
-	 */
-	private CorsConfiguration buildConfig() {  
-		CorsConfiguration corsConfiguration = new CorsConfiguration();  
-		corsConfiguration.addAllowedOrigin("*"); //允许的域名或IP地址
-		corsConfiguration.addAllowedHeader("*"); //允许的请求头
-		corsConfiguration.addAllowedMethod("*"); //允许的HTTP请求方法
-		corsConfiguration.setAllowCredentials(true); //允许发送跨域凭据，前端Axios存取JSESSIONID必须要
-		return corsConfiguration;  
-	}  
-	
+
+	@Bean
+	public WebMvcConfigurer corsConfigurer() {
+		return new WebMvcConfigurer() {
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**")
+				.allowedOriginPatterns("*")  
+				.allowedMethods("*")
+				.allowCredentials(true)
+				.maxAge(3600);  
+			}
+		};
+	}
+
 	// 支持 APIAuto 中 JavaScript 代码跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
