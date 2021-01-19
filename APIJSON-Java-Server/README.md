@@ -25,11 +25,11 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 我的配置是Windows 7 + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.7 和 OSX EI Capitan + MySQL Community Server 5.7.16 + MySQLWorkbench 6.3.8 + Postgre 2.1.5，其中系统和软件都是64位的。
 
 #### 使用 Navicat
-启动Navicat &gt; 双击 localhost &gt; 双击 postgres &gt; 右键 postgres &gt; <br /> 如果没有 sys 模式则先右键新建一个 &gt; 运行 SQL 文件 &gt; 根据你使用的数据库类型来选择刚才解压路径下的 APIJSON-Master/MySQL 和 APIJSON-Master/PostgreSQL <br />
+启动Navicat &gt; 双击 localhost &gt; 双击 postgres &gt; 右键 postgres &gt; <br /> 如果没有 sys 模式则先右键新建一个 &gt; 运行 SQL 文件 &gt; 根据你使用的数据库类型来选择刚才解压路径下的 APIJSON-Demo-Master 里的 MySQL/PostgreSQL/Oracle 等 <br />
 &gt; 开始 &gt; 右键 postgres 里的 sys &gt; 刷新， sys/表 会出现添加的表。
 
 #### 使用 MySQLWorkbench（仅限MySQL）
-启动MySQLWorkbench &gt; 进入一个Connection &gt; 如果没有 sys Schema则先右键新建一个 &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Master/MySQL &gt; Start Import &gt; 刷新SCHEMAS， 左下方 sys/tables 会出现添加的表。
+启动MySQLWorkbench &gt; 进入一个Connection &gt; 如果没有 sys Schema则先右键新建一个 &gt; 点击Server菜单 &gt; Data Import &gt; 选择刚才解压路径下的APIJSON-Demo-Master/MySQL &gt; Start Import &gt; 刷新SCHEMAS， 左下方 sys/tables 会出现添加的表。
 
 配置你自己的表请参考：
 [3步创建APIJSON后端新表及配置](https://my.oschina.net/tommylemon/blog/889074)
@@ -66,7 +66,7 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 #### IntellIJ IDEA Ultimate
 
 <h5>1)打开项目</h5>
-Open > 选择刚才解压路径下的 APIJSON-Demo-Master/APIJSON-Java-Server 里面的 APIJSONBoot(实际项目) 或 APIJSONBootTest(简单Demo) > OK
+Open > 选择刚才解压路径下的 APIJSON-Demo-Master/APIJSON-Java-Server 里面的 APIJSONDemo(简单Demo) 或 APIJSONBoot(实际项目) > OK
 
 <h5>2)配置依赖库 </h5>
 其中 apijson-orm, apijson-framework 默认使用 Maven 远程依赖仓库，等待自动下载完成， <br />
