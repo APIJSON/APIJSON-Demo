@@ -8,3 +8,5 @@ APIJSON-Java-Server/APIJSONFinal/.idea
 apijson-final.iml
 APIJSON-Java-Server/APIJSONDemo/.settings
 APIJSON-Java-Server/APIJSONDemo/.idea
+
+*.iml
