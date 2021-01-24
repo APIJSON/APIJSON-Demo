@@ -186,7 +186,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return null;
 	}
 
-	//取消注释后，默认的 APIJSON 配置表会由业务表所在数据库模式 schema 改为自定义的
+	//取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的
+	//	@Override
+	//	public String getConfigDatabase() {
+	//		return DATABASE_POSTGRESQL;
+	//	}
 	//	@Override
 	//	public String getConfigSchema() {
 	//		return "apijson";
