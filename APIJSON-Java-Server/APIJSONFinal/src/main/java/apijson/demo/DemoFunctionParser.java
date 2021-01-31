@@ -14,14 +14,14 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import javax.servlet.http.HttpSession;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
 
 import apijson.JSONResponse;
 import apijson.NotNull;
@@ -47,6 +47,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 	/**
 	 * @param current
+	 * @param idList
 	 * @return
 	 * @throws Exception
 	 */
@@ -72,7 +73,8 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**
-	 * @param request
+	 * @param current
+	 * @param urlList
 	 * @return
 	 * @throws Exception
 	 */
@@ -98,7 +100,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**
-	 * @param rq
+	 * @param current
 	 * @param momentId
 	 * @return
 	 * @throws Exception
@@ -126,7 +128,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**删除评论的子评论
-	 * @param rq
+	 * @param current
 	 * @param toId
 	 * @return
 	 */
@@ -194,7 +196,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
-	 * @param request
+	 * @param current
 	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 * @throws Exception
 	 */
@@ -204,7 +206,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**TODO 仅用来测试 "key-()":"verifyAccess()"
-	 * @param request
+	 * @param current
 	 * @return
 	 * @throws Exception
 	 */

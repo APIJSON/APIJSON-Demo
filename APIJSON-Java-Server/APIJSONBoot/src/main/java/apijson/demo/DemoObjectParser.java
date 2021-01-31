@@ -22,8 +22,7 @@ import javax.servlet.http.HttpSession;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.orm.AbstractObjectParser;
-import apijson.orm.AbstractParser;
+import apijson.framework.APIJSONObjectParser;
 import apijson.orm.Join;
 import apijson.orm.SQLConfig;
 
@@ -31,30 +30,17 @@ import apijson.orm.SQLConfig;
 /**简化Parser，getObject和getArray(getArrayConfig)都能用
  * @author Lemon
  */
-public class DemoObjectParser extends AbstractObjectParser {
+public class DemoObjectParser extends APIJSONObjectParser {
 
-	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
-			, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
-		super(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
-	}
+    public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
+            , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
+        super(session, request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
+    }
 
-	@Override
-	public DemoObjectParser setMethod(RequestMethod method) {
-		super.setMethod(method);
-		return this;
-	}
-
-	@Override
-	public DemoObjectParser setParser(AbstractParser<?> parser) {
-		super.setParser(parser);
-		return this;
-	}
-
-
-	@Override
-	public SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		return DemoSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure);
-	}
+    @Override
+    public SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+        return DemoSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure);
+    }
 
 
 }

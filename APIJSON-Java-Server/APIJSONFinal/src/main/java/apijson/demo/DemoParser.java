@@ -33,7 +33,7 @@ public class DemoParser extends APIJSONParser {
 		super(method, needVerify);
 	}
 
-	//	//可重写来设置最大查询数量
+	//	可重写来设置最大查询数量
 	//	@Override
 	//	public int getMaxQueryCount() {
 	//		return 50;

@@ -37,7 +37,6 @@ import apijson.StringUtil;
 import apijson.demo.DemoFunctionParser;
 import apijson.demo.DemoParser;
 import apijson.demo.DemoSQLConfig;
-import apijson.demo.DemoSQLExecutor;
 import apijson.demo.DemoVerifier;
 import apijson.framework.APIJSONApplication;
 import apijson.framework.APIJSONCreator;
@@ -45,7 +44,6 @@ import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
 import apijson.orm.Parser;
 import apijson.orm.SQLConfig;
-import apijson.orm.SQLExecutor;
 import apijson.orm.Verifier;
 
 
@@ -83,10 +81,6 @@ public class DemoAppConfig extends JFinalConfig {
 			@Override
 			public SQLConfig createSQLConfig() {
 				return new DemoSQLConfig();
-			}
-			@Override
-			public SQLExecutor createSQLExecutor() {
-				return new DemoSQLExecutor();
 			}
 
 		};
