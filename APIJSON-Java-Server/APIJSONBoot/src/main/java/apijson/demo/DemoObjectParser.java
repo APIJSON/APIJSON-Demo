@@ -14,11 +14,11 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import com.alibaba.fastjson.JSONObject;
+
 import java.util.List;
 
 import javax.servlet.http.HttpSession;
-
-import com.alibaba.fastjson.JSONObject;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
@@ -33,14 +33,9 @@ import apijson.orm.SQLConfig;
  */
 public class DemoObjectParser extends AbstractObjectParser {
 
-	/**for single object
-	 * @param parentPath
-	 * @param request
-	 * @param name
-	 * @throws Exception 
-	 */
-	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, String name, SQLConfig arrayConfig, boolean isSubquery) throws Exception {
-		super(request, parentPath, name, arrayConfig, isSubquery);
+	public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
+			, boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
+		super(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
 	}
 
 	@Override
