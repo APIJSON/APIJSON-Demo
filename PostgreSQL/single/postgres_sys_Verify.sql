@@ -1,31 +1,3 @@
-create table "Verify"
-(
-    id     bigint                                 not null
-        constraint "Verify_pkey"
-            primary key,
-    type   integer                                not null,
-    phone  varchar(11)                            not null,
-    verify varchar(32)                            not null,
-    date   timestamp(6) default CURRENT_TIMESTAMP not null
-);
-
-comment on column "Verify".id is '唯一标识';
-
-comment on column "Verify".type is '类型：
-0-登录
-1-注册
-2-修改登录密码
-3-修改支付密码';
-
-comment on column "Verify".phone is '手机号';
-
-comment on column "Verify".verify is '验证码';
-
-comment on column "Verify".date is '创建时间';
-
-alter table "Verify"
-    owner to postgres;
-
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1527950171719, 1, '13000084444', '10375', '2018-06-02 14:36:11.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528250810515, 1, '15122820115', '2586', '2018-06-06 02:06:50.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528254139866, 1, '15225556855', '8912', '2018-06-06 03:02:19.000000');

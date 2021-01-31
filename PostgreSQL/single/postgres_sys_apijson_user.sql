@@ -1,44 +1,5 @@
-create table apijson_user
-(
-    id              bigint   not null
-        constraint apijson_user_pkey
-            primary key,
-    sex             smallint not null,
-    name            varchar(20),
-    tag             varchar(45),
-    head            varchar(300),
-    "contactIdList" jsonb,
-    "pictureList"   jsonb,
-    date            timestamp(6)
-);
-
-comment on table apijson_user is '用户公开信息表。
-对安全要求高，不想泄漏真实名称。对外名称为 User';
-
-comment on column apijson_user.id is '唯一标识';
-
-comment on column apijson_user.sex is '性别：
-0-男
-1-女';
-
-comment on column apijson_user.name is '名称';
-
-comment on column apijson_user.tag is '标签';
-
-comment on column apijson_user.head is '头像url';
-
-comment on column apijson_user."contactIdList" is '联系人id列表';
-
-comment on column apijson_user."pictureList" is '照片列表';
-
-comment on column apijson_user.date is '创建日期';
-
-alter table apijson_user
-    owner to postgres;
-
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (38710, 0, 'TommyLemon', 'Android&Java', 'http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000', '[82003, 82005, 90814, 82004, 82009, 82002, 82044, 93793, 70793]', '["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000", "http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511407581570, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003, 82005, 82006, 82021, 82023, 82036, 82033]', '[]', '2017-11-23 03:26:21.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82001, 1, '测试账号', 'Dev', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82012, 82003, 93794, 82006, 38710, 82004]', '["http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1532439021068, 0, 'huxiaofan', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82002, 82003, 82006, 82021]', null, '2018-07-24 13:30:21.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82045, 0, 'Green', null, 'http://common.cnblogs.com/images/wechat.png', '[82001, 82002, 82003, 1485246481130]', '[]', '2017-03-04 10:22:39.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82005, 1, 'Jan', 'AG', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 38710, 1532439021068]', '[]', '2017-02-01 11:21:50.000000');
@@ -177,3 +138,4 @@ INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictur
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538504264944, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-02 18:17:44.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521374327542, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-18 11:58:47.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1518218350585, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-02-09 23:19:10.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82001, 1, '测试账号', 'Dev', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82012, 82003, 93794, 82006, 38710, 82004]', '["http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');

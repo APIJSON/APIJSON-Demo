@@ -1,28 +1,3 @@
-create table "Login"
-(
-    id       bigint       not null
-        constraint "Login_pkey"
-            primary key,
-    "userId" bigint       not null,
-    type     smallint     not null,
-    date     timestamp(6) not null
-);
-
-comment on table "Login" is '@deprecated，登录信息存session';
-
-comment on column "Login".id is '唯一标识';
-
-comment on column "Login"."userId" is '用户id';
-
-comment on column "Login".type is '类型
-0-密码登录
-1-验证码登录';
-
-comment on column "Login".date is '创建日期';
-
-alter table "Login"
-    owner to postgres;
-
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488365732208, 0, 0, '2017-03-01 10:55:32.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488379391681, 1488378558927, 0, '2017-03-01 14:43:11.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488379908786, 1488378449469, 0, '2017-03-01 14:51:48.000000');

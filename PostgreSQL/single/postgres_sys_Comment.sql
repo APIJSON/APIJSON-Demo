@@ -1,32 +1,3 @@
-create table "Comment"
-(
-    id         bigint           not null
-        constraint "Comment_pkey"
-            primary key,
-    "toId"     bigint default 0 not null,
-    "userId"   bigint           not null,
-    "momentId" bigint           not null,
-    date       timestamp(6),
-    content    varchar(1000)    not null
-);
-
-comment on table "Comment" is '评论';
-
-comment on column "Comment".id is '唯一标识';
-
-comment on column "Comment"."toId" is '被回复的id';
-
-comment on column "Comment"."userId" is '评论人id';
-
-comment on column "Comment"."momentId" is '动态id';
-
-comment on column "Comment".date is '创建日期';
-
-comment on column "Comment".content is '内容';
-
-alter table "Comment"
-    owner to postgres;
-
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (4, 0, 38710, 470, '2017-02-01 11:20:50.000000', 'This is a Content...-4');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (13, 0, 82005, 58, '2017-02-01 11:20:50.000000', 'This is a Content...-13');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (22, 221, 82001, 470, '2017-02-01 11:20:50.000000', '测试修改评论');
@@ -529,3 +500,30 @@ INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALU
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1562814021942, 1562814013816, 82001, 1562556720665, '2019-07-11 03:00:21.000000', 'xxxx');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1563506794618, 0, 82001, 15, '2019-07-19 03:26:34.000000', '测试新增评论');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1563641514400, 0, 82001, 1563605336326, '2019-07-20 16:51:54.000000', '年轻人不要想不开');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1570199485130, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1570357593954, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1570357613617, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1570524542455, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1570611593196, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1570611884292, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127141506, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127146874, 0, 82002, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127152654, 0, 82003, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127171390, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127176972, 0, 82002, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127182660, 0, 82003, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127220673, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127225286, 0, 82002, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127230152, 0, 82003, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127564313, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127568513, 0, 82002, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127573536, 0, 82003, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127695250, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127699686, 0, 82002, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127704277, 0, 82003, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127720172, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127724383, 0, 82002, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601127728638, 0, 82003, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601132118675, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1612038997561, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1612039188938, 0, 82001, 15, null, '测试新增评论');
