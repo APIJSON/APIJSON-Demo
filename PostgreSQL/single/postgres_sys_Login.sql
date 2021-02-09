@@ -1,3 +1,16 @@
+CREATE TABLE sys."Login"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "userId" bigint NOT NULL,
+    type smallint NOT NULL,
+    date timestamp(6) NOT NULL
+);
+COMMENT ON COLUMN sys."Login".id IS '唯一标识';
+COMMENT ON COLUMN sys."Login"."userId" IS '用户id';
+COMMENT ON COLUMN sys."Login".type IS '类型
+0-密码登录
+1-验证码登录';
+COMMENT ON COLUMN sys."Login".date IS '创建日期';
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488365732208, 0, 0, '2017-03-01 10:55:32.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488379391681, 1488378558927, 0, '2017-03-01 14:43:11.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488379908786, 1488378449469, 0, '2017-03-01 14:51:48.000000');

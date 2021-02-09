@@ -1,3 +1,19 @@
+CREATE TABLE sys.apijson_privacy
+(
+    id bigint PRIMARY KEY NOT NULL,
+    certified smallint NOT NULL,
+    phone varchar(64) NOT NULL,
+    balance numeric(10,2) NOT NULL,
+    _password varchar(20) NOT NULL,
+    "_payPassword" varchar(32) NOT NULL
+);
+COMMENT ON COLUMN sys.apijson_privacy.id IS '唯一标识';
+COMMENT ON COLUMN sys.apijson_privacy.certified IS '已认证';
+COMMENT ON COLUMN sys.apijson_privacy.phone IS '手机号，仅支持 11 位数的。不支持 +86 这种国家地区开头的。如果要支持就改为 VARCHAR(14)';
+COMMENT ON COLUMN sys.apijson_privacy.balance IS '余额';
+COMMENT ON COLUMN sys.apijson_privacy._password IS '登录密码';
+COMMENT ON COLUMN sys.apijson_privacy."_payPassword" IS '支付密码';
+CREATE INDEX "phone_UNIQUE" ON sys.apijson_privacy (phone);
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (38710, 1, '13000038710', 33376.00, 'apijson', '123456');
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (70793, 0, '13000070793', 56000.00, 'apijson', '123456');
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82002, 1, '13000082002', 6817.23, '123456', '123456');

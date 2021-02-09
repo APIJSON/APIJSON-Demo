@@ -1,3 +1,18 @@
+CREATE TABLE sys."Comment"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "toId" bigint DEFAULT 0 NOT NULL,
+    "userId" bigint NOT NULL,
+    "momentId" bigint NOT NULL,
+    date timestamp(6),
+    content varchar(1000) NOT NULL
+);
+COMMENT ON COLUMN sys."Comment".id IS '唯一标识';
+COMMENT ON COLUMN sys."Comment"."toId" IS '被回复的id';
+COMMENT ON COLUMN sys."Comment"."userId" IS '评论人id';
+COMMENT ON COLUMN sys."Comment"."momentId" IS '动态id';
+COMMENT ON COLUMN sys."Comment".date IS '创建日期';
+COMMENT ON COLUMN sys."Comment".content IS '内容';
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (4, 0, 38710, 470, '2017-02-01 11:20:50.000000', 'This is a Content...-4');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (13, 0, 82005, 58, '2017-02-01 11:20:50.000000', 'This is a Content...-13');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (22, 221, 82001, 470, '2017-02-01 11:20:50.000000', '测试修改评论');

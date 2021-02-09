@@ -1,3 +1,31 @@
+CREATE TABLE sys."Document"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "userId" bigint NOT NULL,
+    version smallint NOT NULL,
+    name varchar(100) NOT NULL,
+    url varchar(250) NOT NULL,
+    request text NOT NULL,
+    response text,
+    header text,
+    date timestamp
+);
+COMMENT ON COLUMN sys."Document".id IS '唯一标识';
+COMMENT ON COLUMN sys."Document"."userId" IS '用户id
+		应该用adminId，只有当登录账户是管理员时才能操作文档。
+		需要先建Admin表，新增登录等相关接口。';
+COMMENT ON COLUMN sys."Document".version IS '接口版本号
+		<=0 - 不限制版本，任意版本都可用这个接口
+		>0 - 在这个版本添加的接口';
+COMMENT ON COLUMN sys."Document".name IS '接口名称';
+COMMENT ON COLUMN sys."Document".url IS '请求地址';
+COMMENT ON COLUMN sys."Document".request IS '请求
+		用json格式会导致强制排序，而请求中引用赋值只能引用上面的字段，必须有序。';
+COMMENT ON COLUMN sys."Document".response IS '标准返回结果JSON
+		用json格式会导致强制排序，而请求中引用赋值只能引用上面的字段，必须有序。';
+COMMENT ON COLUMN sys."Document".header IS '请求头 Request Header：
+		key: value //注释';
+COMMENT ON COLUMN sys."Document".date IS '创建时间';
 INSERT INTO sys."Document" (id, "userId", version, name, url, request, response, header, date) VALUES (1, 0, 1, '登录', '/login', '{"type": 0, "phone": "13000082001", "version": 1, "password": "123456"}', null, null, '2017-11-26 07:35:19.000000');
 INSERT INTO sys."Document" (id, "userId", version, name, url, request, response, header, date) VALUES (2, 0, 1, '注册(先获取验证码type:1)', '/register', '{
     "Privacy": {

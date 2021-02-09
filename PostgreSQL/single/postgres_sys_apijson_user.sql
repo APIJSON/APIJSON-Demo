@@ -1,3 +1,24 @@
+CREATE TABLE sys.apijson_user
+(
+    id bigint PRIMARY KEY NOT NULL,
+    sex smallint NOT NULL,
+    name varchar(20),
+    tag varchar(45),
+    head varchar(300),
+    "contactIdList" jsonb,
+    "pictureList" jsonb,
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys.apijson_user.id IS '唯一标识';
+COMMENT ON COLUMN sys.apijson_user.sex IS '性别：
+0-男
+1-女';
+COMMENT ON COLUMN sys.apijson_user.name IS '名称';
+COMMENT ON COLUMN sys.apijson_user.tag IS '标签';
+COMMENT ON COLUMN sys.apijson_user.head IS '头像url';
+COMMENT ON COLUMN sys.apijson_user."contactIdList" IS '联系人id列表';
+COMMENT ON COLUMN sys.apijson_user."pictureList" IS '照片列表';
+COMMENT ON COLUMN sys.apijson_user.date IS '创建日期';
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (38710, 0, 'TommyLemon', 'Android&Java', 'http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000', '[82003, 82005, 90814, 82004, 82009, 82002, 82044, 93793, 70793]', '["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000", "http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511407581570, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003, 82005, 82006, 82021, 82023, 82036, 82033]', '[]', '2017-11-23 03:26:21.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1532439021068, 0, 'huxiaofan', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82002, 82003, 82006, 82021]', null, '2018-07-24 13:30:21.000000');

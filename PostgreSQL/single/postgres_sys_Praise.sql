@@ -1,3 +1,14 @@
+CREATE TABLE sys."Praise"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "momentId" bigint NOT NULL,
+    "userId" bigint NOT NULL,
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys."Praise".id IS '动态id';
+COMMENT ON COLUMN sys."Praise"."momentId" IS '唯一标识';
+COMMENT ON COLUMN sys."Praise"."userId" IS '用户id';
+COMMENT ON COLUMN sys."Praise".date IS '点赞时间';
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (1, 12, 82001, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (2, 15, 82002, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (3, 32, 82003, '2017-11-19 13:02:30.000000');

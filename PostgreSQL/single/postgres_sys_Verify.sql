@@ -1,3 +1,20 @@
+CREATE TABLE sys."Verify"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    type integer NOT NULL,
+    phone varchar(11) NOT NULL,
+    verify varchar(32) NOT NULL,
+    date timestamp(6) DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+COMMENT ON COLUMN sys."Verify".id IS '唯一标识';
+COMMENT ON COLUMN sys."Verify".type IS '类型：
+0-登录
+1-注册
+2-修改登录密码
+3-修改支付密码';
+COMMENT ON COLUMN sys."Verify".phone IS '手机号';
+COMMENT ON COLUMN sys."Verify".verify IS '验证码';
+COMMENT ON COLUMN sys."Verify".date IS '创建时间';
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1527950171719, 1, '13000084444', '10375', '2018-06-02 14:36:11.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528250810515, 1, '15122820115', '2586', '2018-06-06 02:06:50.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528254139866, 1, '15225556855', '8912', '2018-06-06 03:02:19.000000');

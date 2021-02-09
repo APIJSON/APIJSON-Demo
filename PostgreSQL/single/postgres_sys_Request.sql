@@ -1,3 +1,26 @@
+CREATE TABLE sys."Request"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    version smallint NOT NULL,
+    method varchar(10),
+    tag varchar(20) NOT NULL,
+    structure jsonb NOT NULL,
+    detail varchar(10000),
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys."Request".id IS '唯一标识';
+COMMENT ON COLUMN sys."Request".version IS 'GET,HEAD可用任意结构访问任意开放内容，不需要这个字段。
+其它的操作因为写入了结构和内容，所以都需要，按照不同的version选择对应的structure。
+
+自动化版本管理：
+Request JSON最外层可以传 "version":Integer 。
+1.未传或 <= 0，用最新版。 "@order":"version-"
+2.已传且 > 0，用version以上的可用版本的最低版本。 "@order":"version+", "version{}":">={version}"';
+COMMENT ON COLUMN sys."Request".method IS '只限于GET,HEAD外的操作方法。';
+COMMENT ON COLUMN sys."Request".tag IS '标签';
+COMMENT ON COLUMN sys."Request".structure IS '结构';
+COMMENT ON COLUMN sys."Request".detail IS '详细说明';
+COMMENT ON COLUMN sys."Request".date IS '创建时间';
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (1, 1, 'POST', 'register', '{"User": {"UPDATE": {"id@": "Privacy/id"}, "DISALLOW": "id", "NECESSARY": "name"}, "Privacy": {"UNIQUE": "phone", "VERIFY": {"phone~": "phone"}, "DISALLOW": "id", "NECESSARY": "_password,phone"}}', 'UNIQUE校验phone是否已存在。VERIFY校验phone是否符合手机号的格式', '2017-02-01 11:19:51.000000');
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (2, 1, 'POST', 'Moment', '{"INSERT": {"@role": "OWNER", "pictureList": [], "praiseUserIdList": []}, "UPDATE": {"verifyIdList-()": "verifyIdList(praiseUserIdList)", "verifyURLList-()": "verifyURLList(pictureList)"}, "DISALLOW": "id"}', 'INSERT当没传pictureList和praiseUserIdList时用空数组[]补全，保证不会为null', '2017-02-01 11:19:51.000000');
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (3, 1, 'POST', 'Comment', '{"UPDATE": {"@role": "OWNER"}, "DISALLOW": "id", "NECESSARY": "momentId,content"}', '必须传userId,momentId,content，不允许传id', '2017-02-01 11:19:51.000000');

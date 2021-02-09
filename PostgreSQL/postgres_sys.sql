@@ -1,3 +1,43 @@
+CREATE TABLE sys."_Visit"
+(
+    model varchar(15) NOT NULL,
+    id bigint NOT NULL,
+    operate smallint NOT NULL,
+    date timestamp(6) NOT NULL
+);
+COMMENT ON COLUMN sys."_Visit".operate IS '1-增
+2-删
+3-改
+4-查';
+CREATE TABLE sys."Access"
+(
+    id integer PRIMARY KEY NOT NULL,
+    debug integer DEFAULT 0 NOT NULL,
+    name varchar(50) DEFAULT '实际表名，例如 apijson_user'::character varying NOT NULL,
+    alias text,
+    get text DEFAULT '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text NOT NULL,
+    head text DEFAULT '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text NOT NULL,
+    gets text DEFAULT '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text NOT NULL,
+    heads text DEFAULT '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text NOT NULL,
+    post text DEFAULT '["OWNER", "ADMIN"]'::text NOT NULL,
+    put text DEFAULT '["OWNER", "ADMIN"]'::text NOT NULL,
+    delete text DEFAULT '["OWNER", "ADMIN"]'::text NOT NULL,
+    date text DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+COMMENT ON COLUMN sys."Access".id IS '唯一标识';
+COMMENT ON COLUMN sys."Access".debug IS '是否为调试表，只允许在开发环境使用，测试和线上环境禁用';
+COMMENT ON COLUMN sys."Access".alias IS '外部调用的表别名，例如 User';
+COMMENT ON COLUMN sys."Access".get IS '允许 get 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]
+用 JSON 类型不能设置默认值，反正权限对应的需求是明确的，也不需要自动转 JSONArray。
+TODO: 直接 LOGIN,CONTACT,CIRCLE,OWNER 更简单，反正是开发内部用，不需要复杂查询。';
+COMMENT ON COLUMN sys."Access".head IS '允许 head 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+COMMENT ON COLUMN sys."Access".gets IS '允许 gets 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+COMMENT ON COLUMN sys."Access".heads IS '允许 heads 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+COMMENT ON COLUMN sys."Access".post IS '允许 post 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+COMMENT ON COLUMN sys."Access".put IS '允许 put 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+COMMENT ON COLUMN sys."Access".delete IS '允许 delete 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+COMMENT ON COLUMN sys."Access".date IS '创建时间';
+CREATE UNIQUE INDEX access_alias_uindex ON sys."Access" (alias);
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (1, 1, 'Access', '', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2019-07-21 12:21:36');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (2, 1, 'Table', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (3, 1, 'Column', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
@@ -15,6 +55,340 @@ INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, 
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (15, 0, 'apijson_privacy', 'Privacy', '[]', '[]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["UNKNOWN","LOGIN","OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["ADMIN"]', '2018-11-28 16:29:48');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (16, 0, 'Moment', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '2018-11-28 16:29:19');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (17, 0, 'Comment', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '2018-11-28 16:29:19');
+CREATE TABLE sys.apijson_privacy
+(
+    id bigint PRIMARY KEY NOT NULL,
+    certified smallint NOT NULL,
+    phone varchar(64) NOT NULL,
+    balance numeric(10,2) NOT NULL,
+    _password varchar(20) NOT NULL,
+    "_payPassword" varchar(32) NOT NULL
+);
+COMMENT ON COLUMN sys.apijson_privacy.id IS '唯一标识';
+COMMENT ON COLUMN sys.apijson_privacy.certified IS '已认证';
+COMMENT ON COLUMN sys.apijson_privacy.phone IS '手机号，仅支持 11 位数的。不支持 +86 这种国家地区开头的。如果要支持就改为 VARCHAR(14)';
+COMMENT ON COLUMN sys.apijson_privacy.balance IS '余额';
+COMMENT ON COLUMN sys.apijson_privacy._password IS '登录密码';
+COMMENT ON COLUMN sys.apijson_privacy."_payPassword" IS '支付密码';
+CREATE INDEX "phone_UNIQUE" ON sys.apijson_privacy (phone);
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (38710, 1, '13000038710', 33376.00, 'apijson', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (70793, 0, '13000070793', 56000.00, 'apijson', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82002, 1, '13000082002', 6817.23, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82003, 1, '13000082003', 2000.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82004, 0, '13000082004', 2000.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82005, 0, '13000082005', 1923.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82006, 0, '13000082006', 2000.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82009, 0, '13000082009', 2000.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82012, 0, '13000082012', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82020, 0, '12345678900', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82021, 0, '12345678901', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82022, 0, '12345678902', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82023, 0, '12345678903', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82024, 0, '12345678904', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82025, 0, '12345678905', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82026, 0, '12345678906', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82027, 0, '12345678907', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82028, 0, '12345678908', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82029, 0, '12345678909', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82030, 0, '12345678910', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82031, 0, '12345678911', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82032, 0, '12345678912', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82033, 0, '12345678913', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82034, 0, '12345678914', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82035, 0, '12345678915', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82036, 0, '12345678916', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82037, 0, '12345678917', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82038, 0, '12345678918', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82039, 0, '12345678919', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82040, 0, '13000082019', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82041, 0, '13000082015', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82042, 0, '13000082016', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82043, 0, '13000082017', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82044, 0, '13000082018', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82045, 0, '13000082020', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82046, 0, '13000082010', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82047, 0, '13000082021', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82048, 0, '13000038711', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82049, 0, '13000038712', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82050, 0, '13000038713', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82051, 0, '13000038714', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82052, 0, '13000038715', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82053, 0, '13000038720', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82054, 0, '13000038721', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82055, 0, '13000082030', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82056, 0, '13000082040', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82057, 0, '13000038730', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82058, 0, '13000038750', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82059, 0, '13000082033', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82060, 0, '13000082050', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (90814, 1, '13000090814', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (93793, 1, '13000093793', 3000.00, 'apijson', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (93794, 0, '99999999999', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490109742863, 0, '13000082100', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490109845208, 0, '13000082101', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490420651686, 0, '13000038716', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490427139175, 0, '13000038717', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490427577823, 0, '13000082102', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490584952968, 0, '13000038790', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490973670928, 0, '13000082051', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1492936169722, 0, '13000093794', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493480142628, 0, '13000038888', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493747512860, 0, '13000038777', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493747777770, 0, '13000038778', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493748594003, 0, '13000038779', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493748615711, 0, '13000038780', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493749090643, 0, '13000038781', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493836043151, 0, '13000038999', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493883110132, 0, '13000039999', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493890214167, 0, '13000031000', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493890303473, 0, '13000031001', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493890303474, 0, '13000088888', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1497792972314, 0, '13000082111', 0.00, '654321', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1499057230629, 0, '13000082011', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1500825221910, 0, '13000099999', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1502639062900, 0, '13000082222', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1502639424119, 0, '13000082333', 0.00, '12345678', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1507220582167, 0, '13000011111', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072071492, 0, '13000071492', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072105320, 0, '13000082008', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072160401, 0, '13000082007', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072202871, 0, '13000082031', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1510495628760, 0, '13000082000', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1511407581570, 0, '17610725819', 0.00, '123123', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1511761906715, 0, '13708222312', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1511965911349, 0, '13000083333', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1512387063078, 0, '15858585858', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1512531601485, 0, '18210847727', 0.00, '5816136', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514623064133, 0, '13000038725', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514625918255, 0, '13000038726', 255.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514626163032, 0, '13000038727', 4951.37, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514858422969, 0, '13000082041', 164.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1515565976140, 0, '15009257563', 0.00, 'qazwsx', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1518218350585, 0, '18663689263', 0.00, 'cherish751220', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1519778917280, 0, '15000536915', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1520242280259, 0, '18917212395', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1521274648008, 0, '18989491914', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1521371722416, 0, '13000088889', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1521374327542, 0, '13000056789', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1523626157302, 0, '15603313259', 0.00, '15603313259', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1523935772553, 0, '15603313258', 0.00, '15603313258', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1524042900591, 0, '15222297100', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1524298730523, 0, '17854217949', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1524878698882, 0, '13917451840', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1525677515673, 0, '13390935538', 10000.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1527495857924, 0, '13142033345', 15.00, 'qweasd', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1527498229991, 0, '13142033342', 0.00, 'qweasd', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1527821445610, 0, '13142033346', 0.00, 'qweasd', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528250827953, 0, '15122820115', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528254173621, 0, '15225556855', 200.00, 'lmt970208', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528255497767, 0, '15822798927', 0.00, '111111', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528264711016, 0, '15620878773', 0.00, '111111', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528339692804, 0, '15122541683', 0.00, '568599', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528344980598, 0, '15188899797', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528356470041, 0, '15620878772', 0.00, '111111', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1531969715979, 0, '13800138000', 10000.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1532188114543, 0, '13977757845', 20360.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1532439021068, 0, '18779607703', 0.00, '15879684798qq', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1533835176109, 0, '13977757846', 1700.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1534926301956, 0, '17602120205', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1538504264944, 0, '13000087654', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1538504500574, 0, '13000087655', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1538987952996, 0, '18662327672', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1541583762603, 0, '18689846285', 0.00, 'jyt123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1544276209348, 0, '13000087656', 1050.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1544503822963, 0, '13000082968', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1545707526805, 0, '13533039558', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1545895694424, 0, '13533039550', 357.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1547177436600, 0, '18980210241', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1548068043688, 0, '17181595855', 0.00, '0812563993gg', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1553095415917, 0, '13185236871', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1553527700480, 0, '13189758117', 0.00, '3802489', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1559129626356, 0, '13000000000', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1560409157504, 0, '18030546471', 0.00, '123456789', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1561539257158, 0, '15870873323', 0.00, '123qwe', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1563605318975, 0, '13590330481', 0.00, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566064943195, 0, '13111182001', 0.00, '6733', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065271307, 0, '13111182002', 0.00, '6733', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065319823, 0, '13111182003', 0.00, '6733', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065621308, 0, '13111182008', 0.00, '6733', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82001, 1, '13000082001', 98729.15, '123456', '123456');
+CREATE TABLE sys.apijson_user
+(
+    id bigint PRIMARY KEY NOT NULL,
+    sex smallint NOT NULL,
+    name varchar(20),
+    tag varchar(45),
+    head varchar(300),
+    "contactIdList" jsonb,
+    "pictureList" jsonb,
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys.apijson_user.id IS '唯一标识';
+COMMENT ON COLUMN sys.apijson_user.sex IS '性别：
+0-男
+1-女';
+COMMENT ON COLUMN sys.apijson_user.name IS '名称';
+COMMENT ON COLUMN sys.apijson_user.tag IS '标签';
+COMMENT ON COLUMN sys.apijson_user.head IS '头像url';
+COMMENT ON COLUMN sys.apijson_user."contactIdList" IS '联系人id列表';
+COMMENT ON COLUMN sys.apijson_user."pictureList" IS '照片列表';
+COMMENT ON COLUMN sys.apijson_user.date IS '创建日期';
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (38710, 0, 'TommyLemon', 'Android&Java', 'http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000', '[82003, 82005, 90814, 82004, 82009, 82002, 82044, 93793, 70793]', '["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000", "http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511407581570, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003, 82005, 82006, 82021, 82023, 82036, 82033]', '[]', '2017-11-23 03:26:21.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1532439021068, 0, 'huxiaofan', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82002, 82003, 82006, 82021]', null, '2018-07-24 13:30:21.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82045, 0, 'Green', null, 'http://common.cnblogs.com/images/wechat.png', '[82001, 82002, 82003, 1485246481130]', '[]', '2017-03-04 10:22:39.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82005, 1, 'Jan', 'AG', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 38710, 1532439021068]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82046, 0, 'Team', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82002, 1485246481130]', '[]', '2017-03-04 15:11:17.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1534926301956, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82003, 82002, 82025]', null, '2018-08-22 08:25:01.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1525677515673, 0, 'APIJSONUser', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[82003, 82002, 38710]', null, '2018-05-07 07:18:35.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82002, 1, 'Happy~', 'iOS', 'http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000', '[82005, 82001, 38710]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82012, 0, 'Steve', 'FEWE', 'http://static.oschina.net/uploads/user/1/3064_50.jpg?t=1449566001000', '[82004, 82002, 93793]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1531969715979, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003, 82005]', null, '2018-07-19 03:08:35.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82043, 0, 'Holiday', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[70793, 82006]', '[]', '2017-03-04 10:05:04.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528264711016, 0, '梦', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[82021, 1528250827953]', null, '2018-06-06 05:58:31.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1544276209348, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 38710]', null, '2018-12-08 13:36:49.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82003, 1, 'Wechat', null, 'http://common.cnblogs.com/images/wechat.png', '[82001, 93793]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82041, 0, 'Holo', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82001]', '[]', '2017-03-04 09:59:34.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82058, 0, 'StupidBird', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 82002]', '[]', '2017-03-12 11:23:04.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82055, 1, 'Solid', null, 'http://static.oschina.net/uploads/user/19/39085_50.jpg', '[38710, 82002]', '[]', '2017-03-11 15:04:00.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (70793, 0, 'Strong', 'djdj', 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[38710, 82002]', '["http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg", "http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg", "https://camo.githubusercontent.com/788c0a7e11a", "https://camo.githubusercontent.com/f513f67"]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1544503822963, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[93793, 82003]', null, '2018-12-11 04:50:22.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514625918255, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 93793]', null, '2017-12-30 09:25:18.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1527495857924, 0, 'account', null, 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2510057322,2452415311&fm=27&gp=0.jpg', '[1527821445610, 82012]', null, '2018-05-28 08:24:17.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528339692804, 1, '568599', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1528250827953, 1528264711016]', null, '2018-06-07 02:48:12.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1524042900591, 1, '哈哈哈', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003]', null, '2018-04-18 09:15:00.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514858422969, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[93793, 82056]', null, '2018-01-02 02:00:22.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490973670928, 1, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[70793, 93793]', '[]', '2017-03-31 15:21:10.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490427139175, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 70793]', '[]', '2017-03-25 07:32:19.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1515565976140, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82003, 82021]', null, '2018-01-10 06:32:56.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1523626157302, 1, 'Charlie_brown', '', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1523935772553, 93793]', null, '2018-04-13 13:29:17.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528254173621, 1, 'A', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 38710]', null, '2018-06-06 03:02:53.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1523935772553, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1523626157302]', null, '2018-04-17 03:29:32.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1512531601485, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001]', '[]', '2017-12-06 03:40:01.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1553095415917, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001]', null, '2019-03-20 15:23:35.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528255497767, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002]', null, '2018-06-06 03:24:57.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1520242280259, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002]', null, '2018-03-05 09:31:20.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528250827953, 1, 'limengt', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1528264711016]', null, '2018-06-06 02:07:07.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1527821445610, 0, 'accountt', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[1527495857924]', null, '2018-06-01 02:50:45.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82044, 1, 'Love', null, 'http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000', '[82006]', '[]', '2017-03-04 10:20:27.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1527498229991, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1499057230629]', null, '2018-05-28 09:03:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528356470041, 0, 'aaaa', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1528339692804]', null, '2018-06-07 07:27:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82040, 1, 'Dream', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[70793]', '[]', '2017-03-02 16:44:26.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490420651686, 1, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[70793]', '[]', '2017-03-25 05:44:11.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1559129626356, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1507220582167]', null, '2019-05-29 11:33:46.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1533835176109, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1532188114543]', null, '2018-08-09 17:19:36.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490109742863, 1, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-21 15:22:22.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1500825221910, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-07-23 15:53:41.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493890214167, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-04 09:30:14.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1507220582167, 0, 'APIJSONUser', '通过APIJSONAuto的图像化界面注册，按Enter而不是Register', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-05 16:23:02.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1497792972314, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-06-18 13:36:12.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511761906715, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-11-27 05:51:46.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1524298730523, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', null, '2018-04-21 08:18:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493747512860, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 17:51:52.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493748615711, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 18:10:15.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493480142628, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-04-29 15:35:42.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1499057230629, 0, '一二三', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-07-03 04:47:10.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1512387063078, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-12-04 11:31:03.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511965911349, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-11-29 14:31:51.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072071492, 0, '赵钱孙李', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:54:31.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493749090643, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 18:18:10.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493748594003, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 18:09:54.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82004, 0, 'Tommy', 'fasef', 'http://static.oschina.net/uploads/user/1200/2400261_50.png?t=1439638750000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82006, 1, 'Meria', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82009, 0, 'God', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (93793, 0, 'Mike', 'GES', 'http://static.oschina.net/uploads/user/48/96331_50.jpg', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (93794, 0, 'Lemon', null, 'http://static.oschina.net/uploads/user/48/97721_50.jpg?t=1451544779000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82020, 0, 'ORANGE', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82021, 1, 'Tommy', null, 'http://static.oschina.net/uploads/user/19/39085_50.jpg', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82022, 0, 'Internet', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82023, 0, 'No1', null, 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072105320, 1, '周吴郑王', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:55:05.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82024, 0, 'Lemon', null, 'http://static.oschina.net/uploads/user/427/855532_50.jpg?t=1435030876000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82025, 1, 'Tommy', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82026, 0, 'iOS', null, 'http://static.oschina.net/uploads/user/1200/2400261_50.png?t=1439638750000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82027, 0, 'Yong', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82028, 1, 'gaeg', null, 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82029, 0, 'GASG', null, 'http://common.cnblogs.com/images/wechat.png', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82030, 1, 'Fun', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82031, 0, 'Lemon', null, 'http://static.oschina.net/uploads/user/48/96331_50.jpg', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82032, 0, 'Stack', 'fasdg', 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82033, 1, 'GAS', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82034, 1, 'Jump', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82035, 1, 'Tab', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82036, 0, 'SAG', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1502639062900, 0, 'TESLA', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-08-13 15:44:22.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82037, 0, 'Test', null, 'http://static.oschina.net/uploads/user/1200/2400261_50.png?t=1439638750000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82038, 0, 'Battle', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1502639424119, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-08-13 15:50:24.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82039, 1, 'Everyday', null, 'http://common.cnblogs.com/images/icon_weibo_24.png', '[]', '[]', '2017-02-19 13:57:56.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072202871, 0, '七八九十', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:56:42.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82042, 1, 'Why', null, 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[]', '[]', '2017-03-04 10:04:33.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82047, 0, 'Tesla', null, 'http://common.cnblogs.com/images/wechat.png', '[]', '[]', '2017-03-04 16:02:05.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82048, 0, 'Moto', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-03-04 16:04:02.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82049, 0, 'ITMan', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[]', '[]', '2017-03-05 09:51:51.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82050, 0, 'Parl', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[]', '[]', '2017-03-05 09:52:52.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82051, 0, 'Girl', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-03-05 09:53:37.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82052, 0, 'Unbrella', null, 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-03-05 09:57:54.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82053, 0, 'Alice', null, 'http://common.cnblogs.com/images/wechat.png', '[]', '[]', '2017-03-05 15:25:42.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82054, 0, 'Harvey', null, 'http://static.oschina.net/uploads/user/19/39085_50.jpg', '[]', '[]', '2017-03-06 12:29:03.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82056, 1, 'IronMan', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-03-11 15:32:25.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490584952968, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-27 03:22:32.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82057, 0, 'NullPointerExeption', null, 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-03-12 06:01:23.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82059, 1, 'He&She', null, 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[]', '[]', '2017-03-19 14:49:15.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82060, 1, 'Anyway~', null, 'http://static.oschina.net/uploads/user/1/3064_50.jpg?t=1449566001000', '[]', '[]', '2017-03-21 14:10:18.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493836043151, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-03 18:27:23.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072160401, 0, '四五六', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:56:00.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (90814, 0, '007', null, 'http://static.oschina.net/uploads/user/51/102723_50.jpg?t=1449212504000', '[]', '[]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1510495628760, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-11-12 14:07:08.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490109845208, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-21 15:24:05.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490427577823, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-25 07:39:37.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493747777770, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 17:56:17.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493890303473, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-04 09:31:43.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493890303474, 0, 'Test Post', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-06-12 15:50:44.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493883110132, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-04 07:31:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1492936169722, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-04-23 08:29:29.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1553527700480, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-03-25 15:28:20.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566065271307, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:08:04.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566065621308, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:13:55.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1563605318975, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-07-20 06:48:38.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514623064133, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2017-12-30 08:37:44.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1561539257158, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-06-26 08:54:17.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514626163032, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2017-12-30 09:29:23.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1545895694424, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-12-27 07:28:14.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566064943195, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:02:36.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538504500574, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-02 18:21:40.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538987952996, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-08 08:39:13.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1532188114543, 0, '宁旭', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-07-21 15:48:34.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528344980598, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-06-07 04:16:20.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1560409157504, 0, '上邪', null, '最好的时光', null, null, '2019-06-13 06:59:17.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1524878698882, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-04-28 01:24:58.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566065319823, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:08:53.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1545707526805, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-12-25 03:12:06.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1519778917280, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-02-28 00:48:37.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1548068043688, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-01-21 10:54:03.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1541583762603, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-11-07 09:42:42.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521371722416, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-18 11:15:22.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1547177436600, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-01-11 03:30:36.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521274648008, 0, 'Kiro', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-17 08:17:28.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538504264944, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-02 18:17:44.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521374327542, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-18 11:58:47.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1518218350585, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-02-09 23:19:10.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82001, 1, '测试账号', 'Dev', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82012, 82003, 93794, 82006, 38710, 82004]', '["http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
+CREATE TABLE sys."Comment"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "toId" bigint DEFAULT 0 NOT NULL,
+    "userId" bigint NOT NULL,
+    "momentId" bigint NOT NULL,
+    date timestamp(6),
+    content varchar(1000) NOT NULL
+);
+COMMENT ON COLUMN sys."Comment".id IS '唯一标识';
+COMMENT ON COLUMN sys."Comment"."toId" IS '被回复的id';
+COMMENT ON COLUMN sys."Comment"."userId" IS '评论人id';
+COMMENT ON COLUMN sys."Comment"."momentId" IS '动态id';
+COMMENT ON COLUMN sys."Comment".date IS '创建日期';
+COMMENT ON COLUMN sys."Comment".content IS '内容';
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (4, 0, 38710, 470, '2017-02-01 11:20:50.000000', 'This is a Content...-4');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (13, 0, 82005, 58, '2017-02-01 11:20:50.000000', 'This is a Content...-13');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (22, 221, 82001, 470, '2017-02-01 11:20:50.000000', '测试修改评论');
@@ -544,6 +918,34 @@ INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALU
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601132118675, 0, 82001, 15, null, '测试新增评论');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1612038997561, 0, 82001, 15, null, '测试新增评论');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1612039188938, 0, 82001, 15, null, '测试新增评论');
+CREATE TABLE sys."Document"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "userId" bigint NOT NULL,
+    version smallint NOT NULL,
+    name varchar(100) NOT NULL,
+    url varchar(250) NOT NULL,
+    request text NOT NULL,
+    response text,
+    header text,
+    date timestamp
+);
+COMMENT ON COLUMN sys."Document".id IS '唯一标识';
+COMMENT ON COLUMN sys."Document"."userId" IS '用户id
+		应该用adminId，只有当登录账户是管理员时才能操作文档。
+		需要先建Admin表，新增登录等相关接口。';
+COMMENT ON COLUMN sys."Document".version IS '接口版本号
+		<=0 - 不限制版本，任意版本都可用这个接口
+		>0 - 在这个版本添加的接口';
+COMMENT ON COLUMN sys."Document".name IS '接口名称';
+COMMENT ON COLUMN sys."Document".url IS '请求地址';
+COMMENT ON COLUMN sys."Document".request IS '请求
+		用json格式会导致强制排序，而请求中引用赋值只能引用上面的字段，必须有序。';
+COMMENT ON COLUMN sys."Document".response IS '标准返回结果JSON
+		用json格式会导致强制排序，而请求中引用赋值只能引用上面的字段，必须有序。';
+COMMENT ON COLUMN sys."Document".header IS '请求头 Request Header：
+		key: value //注释';
+COMMENT ON COLUMN sys."Document".date IS '创建时间';
 INSERT INTO sys."Document" (id, "userId", version, name, url, request, response, header, date) VALUES (1, 0, 1, '登录', '/login', '{"type": 0, "phone": "13000082001", "version": 1, "password": "123456"}', null, null, '2017-11-26 07:35:19.000000');
 INSERT INTO sys."Document" (id, "userId", version, name, url, request, response, header, date) VALUES (2, 0, 1, '注册(先获取验证码type:1)', '/register', '{
     "Privacy": {
@@ -909,6 +1311,29 @@ INSERT INTO sys."Document" (id, "userId", version, name, url, request, response,
         }
     }
 }', null, '', '2019-09-25 03:31:45.000000');
+CREATE TABLE sys."Function"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    name varchar(30) NOT NULL,
+    arguments varchar(100),
+    demo text NOT NULL,
+    detail varchar(1000),
+    date timestamp(6) NOT NULL,
+    back varchar(45),
+    requestlist varchar(45),
+    "userId" bigint DEFAULT 0,
+    type varchar(45) DEFAULT 'Object'::character varying
+);
+COMMENT ON COLUMN sys."Function".name IS '方法名';
+COMMENT ON COLUMN sys."Function".arguments IS '参数列表，每个参数的类型都是 String。
+用 , 分割的字符串 比 [JSONArray] 更好，例如 array,item ，更直观，还方便拼接函数。';
+COMMENT ON COLUMN sys."Function".demo IS '可用的示例。';
+COMMENT ON COLUMN sys."Function".detail IS '详细描述';
+COMMENT ON COLUMN sys."Function".date IS '创建时间';
+COMMENT ON COLUMN sys."Function".back IS '返回类型';
+COMMENT ON COLUMN sys."Function".requestlist IS 'Request 的 id 列表';
+COMMENT ON COLUMN sys."Function"."userId" IS '用户id';
+COMMENT ON COLUMN sys."Function".type IS '返回类型';
 INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, requestlist, "userId", type) VALUES (3, 'countArray', 'array', '{"array": [1, 2, 3]}', '获取数组长度。没写调用键值对，会自动补全 "result()": "countArray(array)"', '2018-10-13 08:23:23.000000', null, null, 0, 'Object');
 INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, requestlist, "userId", type) VALUES (4, 'countObject', 'object', '{"object": {"key0": 1, "key1": 2}}', '获取对象长度。', '2018-10-13 08:23:23.000000', null, null, 0, 'Object');
 INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, requestlist, "userId", type) VALUES (5, 'isContain', 'array,value', '{"array": [1, 2, 3], "value": 2}', '判断是否数组包含值。', '2018-10-13 08:23:23.000000', null, null, 0, 'Object');
@@ -923,6 +1348,19 @@ INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, reque
 INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, requestlist, "userId", type) VALUES (15, 'getFunctionDemo', null, '{}', '获取远程函数的 Demo', '2019-08-20 15:26:36.000000', null, null, 0, 'Object');
 INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, requestlist, "userId", type) VALUES (16, 'getFunctionDetail', null, '{}', '获取远程函数的详情', '2019-08-20 15:26:36.000000', null, null, 0, 'Object');
 INSERT INTO sys."Function" (id, name, arguments, demo, detail, date, back, requestlist, "userId", type) VALUES (10, 'deleteCommentOfMoment', 'momentId', '{"momentId": 1}', '根据动态 id 删除它的所有评论', '2019-08-17 18:46:56.000000', null, null, 0, 'Object');
+CREATE TABLE sys."Login"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "userId" bigint NOT NULL,
+    type smallint NOT NULL,
+    date timestamp(6) NOT NULL
+);
+COMMENT ON COLUMN sys."Login".id IS '唯一标识';
+COMMENT ON COLUMN sys."Login"."userId" IS '用户id';
+COMMENT ON COLUMN sys."Login".type IS '类型
+0-密码登录
+1-验证码登录';
+COMMENT ON COLUMN sys."Login".date IS '创建日期';
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488365732208, 0, 0, '2017-03-01 10:55:32.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488379391681, 1488378558927, 0, '2017-03-01 14:43:11.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1488379908786, 1488378449469, 0, '2017-03-01 14:51:48.000000');
@@ -1244,6 +1682,21 @@ INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1493891782837, 82001,
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1493891784591, 82002, 0, '2017-05-04 09:56:24.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1493891793881, 82002, 0, '2017-05-04 09:56:33.000000');
 INSERT INTO sys."Login" (id, "userId", type, date) VALUES (1493891806372, 38710, 1, '2017-05-04 09:56:46.000000');
+CREATE TABLE sys."Moment"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "userId" bigint NOT NULL,
+    date timestamp(6),
+    content varchar(300),
+    "praiseUserIdList" jsonb NOT NULL,
+    "pictureList" jsonb NOT NULL
+);
+COMMENT ON COLUMN sys."Moment".id IS '唯一标识';
+COMMENT ON COLUMN sys."Moment"."userId" IS '用户id';
+COMMENT ON COLUMN sys."Moment".date IS '创建日期';
+COMMENT ON COLUMN sys."Moment".content IS '内容';
+COMMENT ON COLUMN sys."Moment"."praiseUserIdList" IS '点赞的用户id列表';
+COMMENT ON COLUMN sys."Moment"."pictureList" IS '图片列表';
 INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (12, 70793, '2017-02-08 08:06:11.000000', 'APIJSON,let interfaces and documents go to hell !', '[70793, 93793, 82044, 82040, 82055, 90814, 38710, 82002, 82006, 1508072105320, 82001]', '["http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg", "http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg", "https://camo.githubusercontent.com/788c0a7e11a4f5aadef3c886f028c79b4808613a/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343932353935372d313732303737333630382e6a7067", "http://static.oschina.net/uploads/img/201604/22172507_Pz9Y.png", "https://camo.githubusercontent.com/c98b1c86af136745cc4626c6ece830f76de9ee83/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343930383036362d313837323233393236352e6a7067", "https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067", "https://camo.githubusercontent.com/c98b1c86af136745cc4626c6ece830f76de9ee83/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343930383036362d313837323233393236352e6a7067", "https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067"]');
 INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (32, 82002, '2017-02-08 08:06:11.000000', null, '[38710, 82002, 82001]', '["https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067", "https://camo.githubusercontent.com/5f5c4e0c4dc539c34e8eae8ac0cbc6dccdfee5d3/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343533333831362d323032373434343231382e6a7067", "http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg"]');
 INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (58, 90814, '2017-02-01 11:14:31.000000', 'This is a Content...-435', '[38710, 82003, 82005, 93793, 82006, 82044, 82001]', '["http://static.oschina.net/uploads/img/201604/22172507_aMmH.jpg"]');
@@ -1447,6 +1900,17 @@ INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pict
 INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1612039185041, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
 INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (235, 38710, '2017-02-08 08:06:11.000000', 'APIJSON,let interfaces and documents go to hell !', '[82001]', '["http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg", "http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000"]');
 INSERT INTO sys."Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1612039188935, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
+CREATE TABLE sys."Praise"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "momentId" bigint NOT NULL,
+    "userId" bigint NOT NULL,
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys."Praise".id IS '动态id';
+COMMENT ON COLUMN sys."Praise"."momentId" IS '唯一标识';
+COMMENT ON COLUMN sys."Praise"."userId" IS '用户id';
+COMMENT ON COLUMN sys."Praise".date IS '点赞时间';
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (1, 12, 82001, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (2, 15, 82002, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (3, 32, 82003, '2017-11-19 13:02:30.000000');
@@ -1465,6 +1929,29 @@ INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (15, 704, 82015
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (16, 1491200468898, 82016, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (17, 1491277116776, 82017, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (18, 1493835799335, 82018, '2017-11-19 13:02:30.000000');
+CREATE TABLE sys."Request"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    version smallint NOT NULL,
+    method varchar(10),
+    tag varchar(20) NOT NULL,
+    structure jsonb NOT NULL,
+    detail varchar(10000),
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys."Request".id IS '唯一标识';
+COMMENT ON COLUMN sys."Request".version IS 'GET,HEAD可用任意结构访问任意开放内容，不需要这个字段。
+其它的操作因为写入了结构和内容，所以都需要，按照不同的version选择对应的structure。
+
+自动化版本管理：
+Request JSON最外层可以传 "version":Integer 。
+1.未传或 <= 0，用最新版。 "@order":"version-"
+2.已传且 > 0，用version以上的可用版本的最低版本。 "@order":"version+", "version{}":">={version}"';
+COMMENT ON COLUMN sys."Request".method IS '只限于GET,HEAD外的操作方法。';
+COMMENT ON COLUMN sys."Request".tag IS '标签';
+COMMENT ON COLUMN sys."Request".structure IS '结构';
+COMMENT ON COLUMN sys."Request".detail IS '详细说明';
+COMMENT ON COLUMN sys."Request".date IS '创建时间';
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (1, 1, 'POST', 'register', '{"User": {"UPDATE": {"id@": "Privacy/id"}, "DISALLOW": "id", "NECESSARY": "name"}, "Privacy": {"UNIQUE": "phone", "VERIFY": {"phone~": "phone"}, "DISALLOW": "id", "NECESSARY": "_password,phone"}}', 'UNIQUE校验phone是否已存在。VERIFY校验phone是否符合手机号的格式', '2017-02-01 11:19:51.000000');
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (2, 1, 'POST', 'Moment', '{"INSERT": {"@role": "OWNER", "pictureList": [], "praiseUserIdList": []}, "UPDATE": {"verifyIdList-()": "verifyIdList(praiseUserIdList)", "verifyURLList-()": "verifyURLList(pictureList)"}, "DISALLOW": "id"}', 'INSERT当没传pictureList和praiseUserIdList时用空数组[]补全，保证不会为null', '2017-02-01 11:19:51.000000');
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (3, 1, 'POST', 'Comment', '{"UPDATE": {"@role": "OWNER"}, "DISALLOW": "id", "NECESSARY": "momentId,content"}', '必须传userId,momentId,content，不允许传id', '2017-02-01 11:19:51.000000');
@@ -1492,10 +1979,49 @@ INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VA
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (36, 2, 'PUT', 'Document', '{"DISALLOW": "userId", "NECESSARY": "id"}', null, '2017-11-26 08:35:15.000000');
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (37, 2, 'DELETE', 'Document', '{"INSERT": {"@role": "OWNER"}, "UPDATE": {"TestRecord": {"@role": "OWNER", "documentId@": "Document/id"}}, "DISALLOW": "!", "NECESSARY": "id"}', null, '2017-11-26 00:36:20.000000');
 INSERT INTO sys."Request" (id, version, method, tag, structure, detail, date) VALUES (38, 2, 'POST', 'TestRecord', '{"DISALLOW": "id", "NECESSARY": "userId,documentId,response"}', null, '2018-06-16 23:44:36.000000');
+CREATE TABLE sys."Response"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    method varchar(10),
+    model varchar(20) NOT NULL,
+    structure text NOT NULL,
+    detail varchar(10000),
+    date timestamp(6)
+);
+COMMENT ON COLUMN sys."Response".id IS '唯一标识';
+COMMENT ON COLUMN sys."Response".method IS '方法';
+COMMENT ON COLUMN sys."Response".model IS '表名，table是SQL关键词不能用';
+COMMENT ON COLUMN sys."Response".structure IS '结构';
+COMMENT ON COLUMN sys."Response".detail IS '详细说明';
+COMMENT ON COLUMN sys."Response".date IS '创建日期';
+CREATE INDEX "id_UNIQUE" ON sys."Response" (id);
 INSERT INTO sys."Response" (id, method, model, structure, detail, date) VALUES (1, 'GET', 'User', '{"put": {"extra": "Response works! Test:He(She) is lazy and wrote nothing here"}, "remove": "phone"}', null, '2017-05-22 12:36:47.000000');
 INSERT INTO sys."Response" (id, method, model, structure, detail, date) VALUES (2, 'DELETE', 'Comment', '{"remove": "Comment:child"}', null, '2017-05-03 17:51:26.000000');
 INSERT INTO sys."Response" (id, method, model, structure, detail, date) VALUES (3, 'DELETE', 'Moment', '{"remove": "Comment"}', null, '2017-05-03 17:51:26.000000');
+CREATE TABLE sys."Test"
+(
+    id smallint PRIMARY KEY NOT NULL
+);
 INSERT INTO sys."Test" (id) VALUES (1);
+CREATE TABLE sys."TestRecord"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    "userId" bigint NOT NULL,
+    "documentId" bigint NOT NULL,
+    response text NOT NULL,
+    date timestamp(6) NOT NULL,
+    compare text,
+    standard text,
+    "randomId" bigint DEFAULT 0
+);
+COMMENT ON COLUMN sys."TestRecord".id IS '唯一标识';
+COMMENT ON COLUMN sys."TestRecord"."userId" IS '用户id';
+COMMENT ON COLUMN sys."TestRecord"."documentId" IS '测试用例文档id';
+COMMENT ON COLUMN sys."TestRecord".response IS '接口返回结果JSON';
+COMMENT ON COLUMN sys."TestRecord".date IS '创建日期';
+COMMENT ON COLUMN sys."TestRecord".compare IS '对比结果';
+COMMENT ON COLUMN sys."TestRecord".standard IS 'response 的校验标准，是一个 JSON 格式的 AST ，描述了正确 Response 的结构、里面的字段名称、类型、长度、取值范围 等属性。';
+COMMENT ON COLUMN sys."TestRecord"."randomId" IS '随机配置 id';
 INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compare, standard, "randomId") VALUES (1520087199083, 82001, 1519526273822, '{"[]":[{"User":{"id":82002,"sex":1,"name":"Happy~","tag":"iOS","head":"http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000","contactIdList":[82005,82001,38710,93793],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82003,"sex":1,"name":"Wechat","head":"http://common.cnblogs.com/images/wechat.png","contactIdList":[82001,93793],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82005,"sex":1,"name":"Jan","tag":"AG","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[82001,38710],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82006,"sex":1,"name":"Meria","head":"http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82021,"sex":1,"name":"Tommy","head":"http://static.oschina.net/uploads/user/19/39085_50.jpg","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82025,"sex":1,"name":"Tommy","head":"http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82028,"sex":1,"name":"gaeg","head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82030,"sex":1,"name":"Fun","head":"http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82033,"sex":1,"name":"GAS","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82034,"sex":1,"name":"Jump","head":"http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82035,"sex":1,"name":"Tab","head":"http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000","contactIdList":[],"pictureList":[],"date":"2017-02-01 19:21:50.0"}},{"User":{"id":82039,"sex":1,"name":"Everyday","head":"http://common.cnblogs.com/images/icon_weibo_24.png","contactIdList":[],"pictureList":[],"date":"2017-02-19 21:57:56.0"}},{"User":{"id":82040,"sex":1,"name":"Dream","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[70793],"pictureList":[],"date":"2017-03-03 00:44:26.0"}},{"User":{"id":82042,"sex":1,"name":"Why","head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000","contactIdList":[],"pictureList":[],"date":"2017-03-04 18:04:33.0"}},{"User":{"id":82044,"sex":1,"name":"Love","head":"http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000","contactIdList":[82006],"pictureList":[],"date":"2017-03-04 18:20:27.0"}},{"User":{"id":82055,"sex":1,"name":"Solid","head":"http://static.oschina.net/uploads/user/19/39085_50.jpg","contactIdList":[38710,82002],"pictureList":[],"date":"2017-03-11 23:04:00.0"}},{"User":{"id":82056,"sex":1,"name":"IronMan","head":"http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000","contactIdList":[],"pictureList":[],"date":"2017-03-11 23:32:25.0"}},{"User":{"id":82059,"sex":1,"name":"He&She","head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000","contactIdList":[],"pictureList":[],"date":"2017-03-19 22:49:15.0"}},{"User":{"id":82060,"sex":1,"name":"Anyway~","head":"http://static.oschina.net/uploads/user/1/3064_50.jpg?t=1449566001000","contactIdList":[],"pictureList":[],"date":"2017-03-21 22:10:18.0"}},{"User":{"id":1490109742863,"sex":1,"name":"APIJSONUser","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[],"pictureList":[],"date":"2017-03-21 23:22:22.0"}},{"User":{"id":1490420651686,"sex":1,"name":"APIJSONUser","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[70793],"pictureList":[],"date":"2017-03-25 13:44:11.0"}},{"User":{"id":1490973670928,"sex":1,"name":"APIJSONUser","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[70793,93793],"pictureList":[],"date":"2017-03-31 23:21:10.0"}},{"User":{"id":1508072105320,"sex":1,"name":"周吴郑王","head":"http://my.oschina.net/img/portrait.gif?t=1451961935000","contactIdList":[],"pictureList":[],"date":"2017-10-15 20:55:05.0"}}],"code":200,"msg":"success"}', '2018-03-03 14:26:39.000000', null, null, 0);
 INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compare, standard, "randomId") VALUES (1520087202299, 82001, 1519368532249, '{"Privacy":{"id":82001,"certified":1,"phone":13000082001,"balance":21927.05},"code":200,"msg":"success"}', '2018-03-03 14:26:42.000000', null, null, 0);
 INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compare, standard, "randomId") VALUES (1520087205329, 82001, 1511969630372, '{"Comment":{"code":200,"msg":"success","id":1520087181598,"count":1},"code":200,"msg":"success"}', '2018-03-03 14:26:45.000000', null, null, 0);
@@ -2156,6 +2682,23 @@ INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compar
 INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compare, standard, "randomId") VALUES (1538112311450, 82001, 1521904756674, '{"User[]":[{"id":38710,"sex":0,"name":"TommyLemon","tag":"Android&Java","head":"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000","contactIdList":[82003,82005,90814,82004,82009,82002,82044,93793,70793],"pictureList":["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000","http://common.cnblogs.com/images/icon_weibo_24.png"],"date":"2017-02-01 19:21:50.0"},{"id":70793,"sex":0,"name":"Strong","tag":"djdj","head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000","contactIdList":[38710,82002],"pictureList":["http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg","http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg","https://camo.githubusercontent.com/788c0a7e11a","https://camo.githubusercontent.com/f513f67"],"date":"2017-02-01 19:21:50.0"},{"id":82001,"sex":0,"name":"测试改名","tag":"APIJSON User","head":"https://static.oschina.net/uploads/user/19/39085_50.jpg","contactIdList":[82025,82024,82003,93793],"pictureList":["http://common.cnblogs.com/images/icon_weibo_24.png"],"date":"2017-02-01 19:21:50.0"}],"code":200,"msg":"success"}', '2018-09-28 05:25:11.000000', null, null, 0);
 INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compare, standard, "randomId") VALUES (1538731040138, 82001, 1511963677325, '{"User":{"id":82001,"sex":0,"name":"测试改名","tag":"APIJSON User","head":"https://static.oschina.net/uploads/user/19/39085_50.jpg","contactIdList":[82025,82024,82003,93793,70793],"pictureList":["http://common.cnblogs.com/images/icon_weibo_24.png"],"date":"2017-02-01 19:21:50.0"},"code":200,"msg":"success"}', '2018-10-05 09:17:20.000000', null, null, 0);
 INSERT INTO sys."TestRecord" (id, "userId", "documentId", response, date, compare, standard, "randomId") VALUES (1538731046687, 82001, 1521907570452, '{"Moment":{"id":12,"userId":70793,"date":"2017-02-08 16:06:11.0","content":"1111534034","praiseUserIdList":[70793,93793,82044,82040,82055,90814,38710,82002,82006,1508072105320],"pictureList":["http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg","http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg","https://camo.githubusercontent.com/788c0a7e11a4f5aadef3c886f028c79b4808613a/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343932353935372d313732303737333630382e6a7067","http://static.oschina.net/uploads/img/201604/22172507_Pz9Y.png","https://camo.githubusercontent.com/c98b1c86af136745cc4626c6ece830f76de9ee83/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343930383036362d313837323233393236352e6a7067","https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067","https://camo.githubusercontent.com/c98b1c86af136745cc4626c6ece830f76de9ee83/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343930383036362d313837323233393236352e6a7067","https://camo.githubusercontent.com/f513fa631bd780dc0ec3cf2663777e356dc3664f/687474703a2f2f696d61676573323031352e636e626c6f67732e636f6d2f626c6f672f3636303036372f3230313630342f3636303036372d32303136303431343232343733323232332d3337333933303233322e6a7067"]},"User":{"id":70793,"sex":0,"name":"Strong","tag":"djdj","head":"http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000","contactIdList":[38710,82002],"pictureList":["http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg","http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg","https://camo.githubusercontent.com/788c0a7e11a","https://camo.githubusercontent.com/f513f67"],"date":"2017-02-01 19:21:50.0"},"code":200,"msg":"success"}', '2018-10-05 09:17:27.000000', null, null, 0);
+CREATE TABLE sys."Verify"
+(
+    id bigint PRIMARY KEY NOT NULL,
+    type integer NOT NULL,
+    phone varchar(11) NOT NULL,
+    verify varchar(32) NOT NULL,
+    date timestamp(6) DEFAULT CURRENT_TIMESTAMP NOT NULL
+);
+COMMENT ON COLUMN sys."Verify".id IS '唯一标识';
+COMMENT ON COLUMN sys."Verify".type IS '类型：
+0-登录
+1-注册
+2-修改登录密码
+3-修改支付密码';
+COMMENT ON COLUMN sys."Verify".phone IS '手机号';
+COMMENT ON COLUMN sys."Verify".verify IS '验证码';
+COMMENT ON COLUMN sys."Verify".date IS '创建时间';
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1527950171719, 1, '13000084444', '10375', '2018-06-02 14:36:11.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528250810515, 1, '15122820115', '2586', '2018-06-06 02:06:50.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528254139866, 1, '15225556855', '8912', '2018-06-06 03:02:19.000000');
@@ -2245,285 +2788,3 @@ INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742060130, 
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742124507, 6, '13000082001', '4901', '2019-01-29 06:08:44.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742151361, 10, '13000082001', '8513', '2019-01-29 06:09:11.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1549548031095, 4, '13000082001', '1234', '2019-09-14 22:00:31.115000');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (38710, 1, '13000038710', 33376.00, 'apijson', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (70793, 0, '13000070793', 56000.00, 'apijson', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82002, 1, '13000082002', 6817.23, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82003, 1, '13000082003', 2000.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82004, 0, '13000082004', 2000.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82005, 0, '13000082005', 1923.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82006, 0, '13000082006', 2000.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82009, 0, '13000082009', 2000.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82012, 0, '13000082012', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82020, 0, '12345678900', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82021, 0, '12345678901', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82022, 0, '12345678902', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82023, 0, '12345678903', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82024, 0, '12345678904', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82025, 0, '12345678905', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82026, 0, '12345678906', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82027, 0, '12345678907', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82028, 0, '12345678908', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82029, 0, '12345678909', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82030, 0, '12345678910', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82031, 0, '12345678911', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82032, 0, '12345678912', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82033, 0, '12345678913', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82034, 0, '12345678914', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82035, 0, '12345678915', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82036, 0, '12345678916', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82037, 0, '12345678917', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82038, 0, '12345678918', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82039, 0, '12345678919', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82040, 0, '13000082019', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82041, 0, '13000082015', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82042, 0, '13000082016', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82043, 0, '13000082017', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82044, 0, '13000082018', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82045, 0, '13000082020', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82046, 0, '13000082010', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82047, 0, '13000082021', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82048, 0, '13000038711', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82049, 0, '13000038712', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82050, 0, '13000038713', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82051, 0, '13000038714', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82052, 0, '13000038715', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82053, 0, '13000038720', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82054, 0, '13000038721', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82055, 0, '13000082030', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82056, 0, '13000082040', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82057, 0, '13000038730', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82058, 0, '13000038750', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82059, 0, '13000082033', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82060, 0, '13000082050', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (90814, 1, '13000090814', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (93793, 1, '13000093793', 3000.00, 'apijson', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (93794, 0, '99999999999', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490109742863, 0, '13000082100', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490109845208, 0, '13000082101', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490420651686, 0, '13000038716', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490427139175, 0, '13000038717', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490427577823, 0, '13000082102', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490584952968, 0, '13000038790', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1490973670928, 0, '13000082051', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1492936169722, 0, '13000093794', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493480142628, 0, '13000038888', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493747512860, 0, '13000038777', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493747777770, 0, '13000038778', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493748594003, 0, '13000038779', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493748615711, 0, '13000038780', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493749090643, 0, '13000038781', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493836043151, 0, '13000038999', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493883110132, 0, '13000039999', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493890214167, 0, '13000031000', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493890303473, 0, '13000031001', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1493890303474, 0, '13000088888', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1497792972314, 0, '13000082111', 0.00, '654321', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1499057230629, 0, '13000082011', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1500825221910, 0, '13000099999', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1502639062900, 0, '13000082222', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1502639424119, 0, '13000082333', 0.00, '12345678', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1507220582167, 0, '13000011111', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072071492, 0, '13000071492', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072105320, 0, '13000082008', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072160401, 0, '13000082007', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1508072202871, 0, '13000082031', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1510495628760, 0, '13000082000', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1511407581570, 0, '17610725819', 0.00, '123123', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1511761906715, 0, '13708222312', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1511965911349, 0, '13000083333', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1512387063078, 0, '15858585858', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1512531601485, 0, '18210847727', 0.00, '5816136', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514623064133, 0, '13000038725', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514625918255, 0, '13000038726', 255.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514626163032, 0, '13000038727', 4951.37, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1514858422969, 0, '13000082041', 164.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1515565976140, 0, '15009257563', 0.00, 'qazwsx', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1518218350585, 0, '18663689263', 0.00, 'cherish751220', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1519778917280, 0, '15000536915', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1520242280259, 0, '18917212395', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1521274648008, 0, '18989491914', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1521371722416, 0, '13000088889', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1521374327542, 0, '13000056789', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1523626157302, 0, '15603313259', 0.00, '15603313259', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1523935772553, 0, '15603313258', 0.00, '15603313258', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1524042900591, 0, '15222297100', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1524298730523, 0, '17854217949', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1524878698882, 0, '13917451840', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1525677515673, 0, '13390935538', 10000.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1527495857924, 0, '13142033345', 15.00, 'qweasd', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1527498229991, 0, '13142033342', 0.00, 'qweasd', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1527821445610, 0, '13142033346', 0.00, 'qweasd', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528250827953, 0, '15122820115', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528254173621, 0, '15225556855', 200.00, 'lmt970208', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528255497767, 0, '15822798927', 0.00, '111111', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528264711016, 0, '15620878773', 0.00, '111111', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528339692804, 0, '15122541683', 0.00, '568599', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528344980598, 0, '15188899797', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1528356470041, 0, '15620878772', 0.00, '111111', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1531969715979, 0, '13800138000', 10000.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1532188114543, 0, '13977757845', 20360.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1532439021068, 0, '18779607703', 0.00, '15879684798qq', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1533835176109, 0, '13977757846', 1700.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1534926301956, 0, '17602120205', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1538504264944, 0, '13000087654', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1538504500574, 0, '13000087655', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1538987952996, 0, '18662327672', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1541583762603, 0, '18689846285', 0.00, 'jyt123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1544276209348, 0, '13000087656', 1050.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1544503822963, 0, '13000082968', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1545707526805, 0, '13533039558', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1545895694424, 0, '13533039550', 357.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1547177436600, 0, '18980210241', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1548068043688, 0, '17181595855', 0.00, '0812563993gg', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1553095415917, 0, '13185236871', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1553527700480, 0, '13189758117', 0.00, '3802489', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1559129626356, 0, '13000000000', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1560409157504, 0, '18030546471', 0.00, '123456789', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1561539257158, 0, '15870873323', 0.00, '123qwe', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1563605318975, 0, '13590330481', 0.00, '123456', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566064943195, 0, '13111182001', 0.00, '6733', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065271307, 0, '13111182002', 0.00, '6733', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065319823, 0, '13111182003', 0.00, '6733', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065621308, 0, '13111182008', 0.00, '6733', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82001, 1, '13000082001', 98729.15, '123456', '123456');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (38710, 0, 'TommyLemon', 'Android&Java', 'http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000', '[82003, 82005, 90814, 82004, 82009, 82002, 82044, 93793, 70793]', '["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000", "http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511407581570, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003, 82005, 82006, 82021, 82023, 82036, 82033]', '[]', '2017-11-23 03:26:21.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1532439021068, 0, 'huxiaofan', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82002, 82003, 82006, 82021]', null, '2018-07-24 13:30:21.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82045, 0, 'Green', null, 'http://common.cnblogs.com/images/wechat.png', '[82001, 82002, 82003, 1485246481130]', '[]', '2017-03-04 10:22:39.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82005, 1, 'Jan', 'AG', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 38710, 1532439021068]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82046, 0, 'Team', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82002, 1485246481130]', '[]', '2017-03-04 15:11:17.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1534926301956, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82003, 82002, 82025]', null, '2018-08-22 08:25:01.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1525677515673, 0, 'APIJSONUser', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[82003, 82002, 38710]', null, '2018-05-07 07:18:35.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82002, 1, 'Happy~', 'iOS', 'http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000', '[82005, 82001, 38710]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82012, 0, 'Steve', 'FEWE', 'http://static.oschina.net/uploads/user/1/3064_50.jpg?t=1449566001000', '[82004, 82002, 93793]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1531969715979, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003, 82005]', null, '2018-07-19 03:08:35.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82043, 0, 'Holiday', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[70793, 82006]', '[]', '2017-03-04 10:05:04.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528264711016, 0, '梦', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[82021, 1528250827953]', null, '2018-06-06 05:58:31.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1544276209348, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 38710]', null, '2018-12-08 13:36:49.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82003, 1, 'Wechat', null, 'http://common.cnblogs.com/images/wechat.png', '[82001, 93793]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82041, 0, 'Holo', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 82001]', '[]', '2017-03-04 09:59:34.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82058, 0, 'StupidBird', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 82002]', '[]', '2017-03-12 11:23:04.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82055, 1, 'Solid', null, 'http://static.oschina.net/uploads/user/19/39085_50.jpg', '[38710, 82002]', '[]', '2017-03-11 15:04:00.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (70793, 0, 'Strong', 'djdj', 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[38710, 82002]', '["http://static.oschina.net/uploads/img/201604/22172508_eGDi.jpg", "http://static.oschina.net/uploads/img/201604/22172507_rrZ5.jpg", "https://camo.githubusercontent.com/788c0a7e11a", "https://camo.githubusercontent.com/f513f67"]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1544503822963, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[93793, 82003]', null, '2018-12-11 04:50:22.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514625918255, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 93793]', null, '2017-12-30 09:25:18.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1527495857924, 0, 'account', null, 'https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2510057322,2452415311&fm=27&gp=0.jpg', '[1527821445610, 82012]', null, '2018-05-28 08:24:17.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528339692804, 1, '568599', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1528250827953, 1528264711016]', null, '2018-06-07 02:48:12.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1524042900591, 1, '哈哈哈', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002, 82003]', null, '2018-04-18 09:15:00.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514858422969, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[93793, 82056]', null, '2018-01-02 02:00:22.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490973670928, 1, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[70793, 93793]', '[]', '2017-03-31 15:21:10.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490427139175, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[38710, 70793]', '[]', '2017-03-25 07:32:19.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1515565976140, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82003, 82021]', null, '2018-01-10 06:32:56.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1523626157302, 1, 'Charlie_brown', '', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1523935772553, 93793]', null, '2018-04-13 13:29:17.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528254173621, 1, 'A', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001, 38710]', null, '2018-06-06 03:02:53.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1523935772553, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1523626157302]', null, '2018-04-17 03:29:32.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1512531601485, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001]', '[]', '2017-12-06 03:40:01.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1553095415917, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82001]', null, '2019-03-20 15:23:35.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528255497767, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002]', null, '2018-06-06 03:24:57.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1520242280259, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82002]', null, '2018-03-05 09:31:20.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528250827953, 1, 'limengt', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1528264711016]', null, '2018-06-06 02:07:07.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1527821445610, 0, 'accountt', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[1527495857924]', null, '2018-06-01 02:50:45.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82044, 1, 'Love', null, 'http://static.oschina.net/uploads/user/1174/2348263_50.png?t=1439773471000', '[82006]', '[]', '2017-03-04 10:20:27.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1527498229991, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1499057230629]', null, '2018-05-28 09:03:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528356470041, 0, 'aaaa', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1528339692804]', null, '2018-06-07 07:27:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82040, 1, 'Dream', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[70793]', '[]', '2017-03-02 16:44:26.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490420651686, 1, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[70793]', '[]', '2017-03-25 05:44:11.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1559129626356, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1507220582167]', null, '2019-05-29 11:33:46.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1533835176109, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[1532188114543]', null, '2018-08-09 17:19:36.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490109742863, 1, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-21 15:22:22.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1500825221910, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-07-23 15:53:41.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493890214167, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-04 09:30:14.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1507220582167, 0, 'APIJSONUser', '通过APIJSONAuto的图像化界面注册，按Enter而不是Register', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-05 16:23:02.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1497792972314, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-06-18 13:36:12.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511761906715, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-11-27 05:51:46.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1524298730523, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', null, '2018-04-21 08:18:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493747512860, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 17:51:52.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493748615711, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 18:10:15.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493480142628, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-04-29 15:35:42.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1499057230629, 0, '一二三', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-07-03 04:47:10.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1512387063078, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-12-04 11:31:03.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1511965911349, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-11-29 14:31:51.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072071492, 0, '赵钱孙李', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:54:31.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493749090643, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 18:18:10.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493748594003, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 18:09:54.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82004, 0, 'Tommy', 'fasef', 'http://static.oschina.net/uploads/user/1200/2400261_50.png?t=1439638750000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82006, 1, 'Meria', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82009, 0, 'God', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (93793, 0, 'Mike', 'GES', 'http://static.oschina.net/uploads/user/48/96331_50.jpg', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (93794, 0, 'Lemon', null, 'http://static.oschina.net/uploads/user/48/97721_50.jpg?t=1451544779000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82020, 0, 'ORANGE', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82021, 1, 'Tommy', null, 'http://static.oschina.net/uploads/user/19/39085_50.jpg', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82022, 0, 'Internet', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82023, 0, 'No1', null, 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072105320, 1, '周吴郑王', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:55:05.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82024, 0, 'Lemon', null, 'http://static.oschina.net/uploads/user/427/855532_50.jpg?t=1435030876000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82025, 1, 'Tommy', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82026, 0, 'iOS', null, 'http://static.oschina.net/uploads/user/1200/2400261_50.png?t=1439638750000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82027, 0, 'Yong', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82028, 1, 'gaeg', null, 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82029, 0, 'GASG', null, 'http://common.cnblogs.com/images/wechat.png', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82030, 1, 'Fun', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82031, 0, 'Lemon', null, 'http://static.oschina.net/uploads/user/48/96331_50.jpg', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82032, 0, 'Stack', 'fasdg', 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82033, 1, 'GAS', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82034, 1, 'Jump', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82035, 1, 'Tab', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82036, 0, 'SAG', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1502639062900, 0, 'TESLA', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-08-13 15:44:22.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82037, 0, 'Test', null, 'http://static.oschina.net/uploads/user/1200/2400261_50.png?t=1439638750000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82038, 0, 'Battle', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1502639424119, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-08-13 15:50:24.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82039, 1, 'Everyday', null, 'http://common.cnblogs.com/images/icon_weibo_24.png', '[]', '[]', '2017-02-19 13:57:56.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072202871, 0, '七八九十', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:56:42.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82042, 1, 'Why', null, 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[]', '[]', '2017-03-04 10:04:33.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82047, 0, 'Tesla', null, 'http://common.cnblogs.com/images/wechat.png', '[]', '[]', '2017-03-04 16:02:05.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82048, 0, 'Moto', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-03-04 16:04:02.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82049, 0, 'ITMan', null, 'http://static.oschina.net/uploads/user/629/1258821_50.jpg?t=1378063141000', '[]', '[]', '2017-03-05 09:51:51.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82050, 0, 'Parl', null, 'http://static.oschina.net/uploads/user/998/1997902_50.jpg?t=1407806577000', '[]', '[]', '2017-03-05 09:52:52.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82051, 0, 'Girl', null, 'http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000', '[]', '[]', '2017-03-05 09:53:37.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82052, 0, 'Unbrella', null, 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-03-05 09:57:54.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82053, 0, 'Alice', null, 'http://common.cnblogs.com/images/wechat.png', '[]', '[]', '2017-03-05 15:25:42.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82054, 0, 'Harvey', null, 'http://static.oschina.net/uploads/user/19/39085_50.jpg', '[]', '[]', '2017-03-06 12:29:03.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82056, 1, 'IronMan', null, 'http://static.oschina.net/uploads/user/48/96289_50.jpg?t=1452751699000', '[]', '[]', '2017-03-11 15:32:25.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490584952968, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-27 03:22:32.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82057, 0, 'NullPointerExeption', null, 'http://static.oschina.net/uploads/user/1385/2770216_50.jpg?t=1464405516000', '[]', '[]', '2017-03-12 06:01:23.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82059, 1, 'He&She', null, 'http://static.oschina.net/uploads/user/585/1170143_50.jpg?t=1390226446000', '[]', '[]', '2017-03-19 14:49:15.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82060, 1, 'Anyway~', null, 'http://static.oschina.net/uploads/user/1/3064_50.jpg?t=1449566001000', '[]', '[]', '2017-03-21 14:10:18.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493836043151, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-03 18:27:23.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1508072160401, 0, '四五六', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-10-15 12:56:00.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (90814, 0, '007', null, 'http://static.oschina.net/uploads/user/51/102723_50.jpg?t=1449212504000', '[]', '[]', '2017-02-01 11:21:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1510495628760, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-11-12 14:07:08.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490109845208, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-21 15:24:05.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1490427577823, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-03-25 07:39:37.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493747777770, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-02 17:56:17.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493890303473, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-04 09:31:43.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493890303474, 0, 'Test Post', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-06-12 15:50:44.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1493883110132, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-05-04 07:31:50.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1492936169722, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[]', '[]', '2017-04-23 08:29:29.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1553527700480, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-03-25 15:28:20.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566065271307, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:08:04.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566065621308, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:13:55.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1563605318975, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-07-20 06:48:38.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514623064133, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2017-12-30 08:37:44.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1561539257158, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-06-26 08:54:17.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1514626163032, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2017-12-30 09:29:23.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1545895694424, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-12-27 07:28:14.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566064943195, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:02:36.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538504500574, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-02 18:21:40.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538987952996, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-08 08:39:13.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1532188114543, 0, '宁旭', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-07-21 15:48:34.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1528344980598, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-06-07 04:16:20.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1560409157504, 0, '上邪', null, '最好的时光', null, null, '2019-06-13 06:59:17.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1524878698882, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-04-28 01:24:58.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1566065319823, 0, 'new APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-08-17 18:08:53.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1545707526805, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-12-25 03:12:06.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1519778917280, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-02-28 00:48:37.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1548068043688, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-01-21 10:54:03.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1541583762603, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-11-07 09:42:42.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521371722416, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-18 11:15:22.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1547177436600, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2019-01-11 03:30:36.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521274648008, 0, 'Kiro', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-17 08:17:28.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538504264944, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-02 18:17:44.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521374327542, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-18 11:58:47.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1518218350585, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-02-09 23:19:10.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82001, 1, '测试账号', 'Dev', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82012, 82003, 93794, 82006, 38710, 82004]', '["http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
