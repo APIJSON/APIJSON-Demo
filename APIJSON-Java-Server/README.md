@@ -108,6 +108,7 @@ Open > 选择刚才解压路径下的 APIJSON-Demo-Master/APIJSON-Java-Server �
 
 
 ### 5.测试接口<br />
-直接使用 [APIJSON在线工具](http://apijson.org/auto) 或 下载主页提供的 [客户端App](https://github.com/APIJSON/APIJSON)。
+直接使用 [APIJSON在线工具](http://apijson.org/auto) 或 Postman 等其它 HTTP 接口工具，格式为 HTTP POST JSON，具体示例参考通用文档 <br />
+https://github.com/Tencent/APIJSON/blob/master/Document.md
 
 <br />
