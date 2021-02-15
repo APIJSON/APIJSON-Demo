@@ -86,7 +86,7 @@ import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.OutOfRangeException;
 
 
-/**request controller
+/**数据相关的控制器，包括通用增删改查接口等
  * <br > 建议全通过HTTP POST来请求:
  * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
  * <br > 2.提高性能 - 无需URL encode和decode
