@@ -92,8 +92,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("(`Comment`.`userId`=`to`.`userId`)", "");  // 已经是一个条件表达式了，用 () 包裹是为了避免 JSON 中的 key 拼接在前面导致 SQL 出错
 		RAW_MAP.put("sum(if(userId%2=0,1,0))", "");  // 超过单个函数的 SQL 表达式
 		RAW_MAP.put("sumUserIdIsEven", "sum(if(`userId`%2=0,1,0)) AS sumUserIdIsEven");  // 简化前端传参
-		RAW_MAP.put("SUBSTRING_INDEX(SUBSTRING_INDEX(content,',',1),',',-1)", "");  // APIAuto 不支持 '，可以用 Postman 测
-		RAW_MAP.put("SUBSTRING_INDEX(SUBSTRING_INDEX(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
+		RAW_MAP.put("substring_index(substring_index(content,',',1),',',-1)", "");  // APIAuto 不支持 '，可以用 Postman 测
+		RAW_MAP.put("substring_index(substring_index(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
 		RAW_MAP.put("to_days(now())-to_days(`date`)<=7","");  // 给 @having 使用
 	}

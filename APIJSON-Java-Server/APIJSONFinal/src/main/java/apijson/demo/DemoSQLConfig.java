@@ -86,9 +86,6 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 //			}
 		};
 
-		// 自定义where条件拼接
-		//RAW_MAP.put("commentWhereItem1","`Comment`.`userId` = 38710 and `Comment`.`momentId` = 470");
-		//RAW_MAP.put("commentWhereItem2","`Comment`.`toId` = 0");
 	}
 
 
