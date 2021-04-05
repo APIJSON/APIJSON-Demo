@@ -19,9 +19,16 @@ import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 
@@ -96,6 +103,34 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("substring_index(substring_index(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
 		RAW_MAP.put("to_days(now())-to_days(`date`)<=7","");  // 给 @having 使用
+
+
+		// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
+
+		// 反选字段配置
+		Map<String, List<String>> tableColumnMap = new HashMap<>();
+		tableColumnMap.put("User", Arrays.asList(StringUtil.split("id,sex,name,tag,head,contactIdList,pictureList,date")));
+		// 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputColumn(column, getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
+		tableColumnMap.put("MYSQL-sys-Privacy", Arrays.asList(StringUtil.split("id,certified,phone,balance,_password,_payPassword")));
+		ColumnUtil.VERSIONED_TABLE_COLUMN_MAP.put(null, tableColumnMap);
+
+		// 字段名映射配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		Map<String, Map<String, String>> tableKeyColumnMap = new HashMap<>();
+
+		Map<String, String> userKeyColumnMap = new HashMap<>();
+		userKeyColumnMap.put("gender", "sex");
+		userKeyColumnMap.put("createTime", "date");
+		tableKeyColumnMap.put("User", userKeyColumnMap);
+
+		Map<String, String> privacyKeyColumnMap = new HashMap<>();
+		privacyKeyColumnMap.put("rest", "balance");
+		// 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputKey(super.getKey(key), getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
+		tableKeyColumnMap.put("MYSQL-sys-Privacy", privacyKeyColumnMap);
+
+		ColumnUtil.VERSIONED_KEY_COLUMN_MAP.put(null, tableKeyColumnMap);
+		// 字段名映射配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		ColumnUtil.init();
 	}
 
 
@@ -120,7 +155,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		return null;
 	}
-	
+
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBUri() {
@@ -143,7 +178,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		return null;
 	}
-	
+
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBAccount() {
@@ -164,7 +199,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		return null;
 	}
-	
+
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBPassword() {
@@ -225,4 +260,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		return false;
 	//	}
 
+
+	// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
+	@Override
+	public AbstractSQLConfig setColumn(List<String> column) {
+		return super.setColumn(ColumnUtil.compatInputColumn(column, getTable(), getMethod()));
+	}
+	@Override
+	public String getKey(String key) {
+		return ColumnUtil.compatInputKey(super.getKey(key), getTable(), getMethod());
+	}
 }

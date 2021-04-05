@@ -15,11 +15,17 @@ limitations under the License.*/
 package apijson.demo;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.Log;
 import apijson.boot.DemoApplication;
+import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
@@ -63,6 +69,14 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 		// 必须最后执行 super 方法，因为里面还有事务相关处理。
 		// 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
 		return super.getConnection(config);
+	}
+	
+	
+	// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
+	@Override
+	protected String getKey(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table,
+			int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+		return ColumnUtil.compatOutputKey(super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap), config.getTable(), config.getMethod());
 	}
 
 }
