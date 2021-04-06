@@ -363,12 +363,8 @@ public class DemoController extends APIJSONController {
 				newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
 				);
 
-		JSONObject verify = null;
-		try {
-			verify = response.getJSONObject(StringUtil.firstCase(VERIFY_));
-		} catch (Exception e) {}
 
-		if (verify == null || JSONResponse.isSuccess(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
+		if (JSONResponse.isSuccess(response) == false) {
 			new DemoParser(DELETE, false).parseResponse(new JSONRequest(new Verify(type, phone)));
 			return response;
 		}
