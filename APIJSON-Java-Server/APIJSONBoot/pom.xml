@@ -5,7 +5,7 @@
 
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>4.6.6</version>
+	<version>4.6.7</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONBoot</name>
@@ -57,12 +57,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>4.6.6</version>
+			<version>4.6.7</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>4.6.6</version>
+			<version>4.6.7</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
