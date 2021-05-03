@@ -268,6 +268,6 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	}
 	@Override
 	public String getKey(String key) {
-		return ColumnUtil.compatInputKey(super.getKey(key), getTable(), getMethod());
+		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
 	}
 }
