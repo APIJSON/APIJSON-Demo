@@ -262,12 +262,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 
 	// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
-	@Override
-	public AbstractSQLConfig setColumn(List<String> column) {
-		return super.setColumn(ColumnUtil.compatInputColumn(column, getTable(), getMethod()));
-	}
-	@Override
-	public String getKey(String key) {
-		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
-	}
+	//	@Override
+	//	public AbstractSQLConfig setColumn(List<String> column) {
+	//		return super.setColumn(ColumnUtil.compatInputColumn(column, getTable(), getMethod()));
+	//	}
+	//	@Override
+	//	public String getKey(String key) {
+	//		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
+	//	}
+	
 }
