@@ -39,10 +39,37 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 
 <br />
 
-### 3.用 Eclipse for JavaEE 或 IntellIJ IDEA Ultimate 运行后端工程
+### 3.用 IntellIJ IDEA Ultimate 或 Eclipse for JavaEE 运行后端工程
 
 如果以上编辑器一个都没安装，运行前先下载安装一个。<br />
-我的配置是 Windows 7 + JDK 1.7.0_71 + Eclipse 4.6.1 + IntellIJ 2016.3 和 OSX EI Capitan + JDK 1.8.0_91 + Eclipse 4.6.1 + IntellIJ 2016.2.5
+我的配置是 Windows 7 + JDK 1.7.0_71 + IntellIJ 2016.3 + Eclipse 4.6.1 和 OSX EI Capitan + JDK 1.8.0_91 + IntellIJ 2016.2.5 + Eclipse 4.6.1
+
+
+#### IntellIJ IDEA Ultimate
+
+<h5>1)打开项目</h5>
+Open > 选择刚才解压路径下的 APIJSON-Demo-Master/APIJSON-Java-Server 里面的 APIJSONDemo(简单Demo) 或 APIJSONBoot(实际项目) > OK
+
+<h5>2)配置依赖库 </h5>
+其中 apijson-orm, apijson-framework 默认使用 Maven 远程依赖仓库，等待自动下载完成， <br />
+具体见 https://github.com/APIJSON/apijson-orm 和 https://github.com/APIJSON/apijson-framework <br />
+如果依赖下载不了，注释掉报错的 apijson-orm, apijson-framework 依赖代码， <br />
+然后右键 libs (APIJSONBoot 内，其它项目需要拷贝过去)里面的 apijson-orm.jar > Add as Library > OK <br />
+同样按照以上步骤来依赖 libs 目录内的其它所有 jar 包。 <br />
+
+<h5>3)配置数据库(如果完成下方步骤 4，导入 APIJSON 的表，则可跳过) </h5>
+打开 DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
+
+<h5>4)运行项目</h5>
+APIJSONDemo/APIJSONBoot: 右键 DemoApplication > Run DemoApplication.main <br />
+APIJSONFinal: 右键 DemoAppConfig > Run DemoAppConfig.main
+
+<h4>运行后会出现 APIJSON 的测试日志，最后显示 "APIJSON 已启动" ，说明已启动完成。</h4>
+
+如果是 Address already in use，说明 8080 端口被占用，<br />
+可以关闭占用这个端口的程序(可能就是已运行的 APIJSON 工程) <br />
+或者 改下 APIJSON 工程的端口号，参考 [SpringBoot 改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)。<br />
+其它问题请谷歌或百度。
 
 
 #### Eclipse for JavaEE
@@ -63,33 +90,8 @@ https://github.com/TommyLemon/StaticResources/tree/master/APIJSONServer
 打开 DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
 
 <h5>4)运行项目</h5>
-右键 DemoApplication > Run As > Java Application
-
-
-#### IntellIJ IDEA Ultimate
-
-<h5>1)打开项目</h5>
-Open > 选择刚才解压路径下的 APIJSON-Demo-Master/APIJSON-Java-Server 里面的 APIJSONDemo(简单Demo) 或 APIJSONBoot(实际项目) > OK
-
-<h5>2)配置依赖库 </h5>
-其中 apijson-orm, apijson-framework 默认使用 Maven 远程依赖仓库，等待自动下载完成， <br />
-具体见 https://github.com/APIJSON/apijson-orm 和 https://github.com/APIJSON/apijson-framework <br />
-如果依赖下载不了，注释掉报错的 apijson-orm, apijson-framework 依赖代码， <br />
-然后右键 libs (APIJSONBoot 内，其它项目需要拷贝过去)里面的 apijson-orm.jar > Add as Library > OK <br />
-同样按照以上步骤来依赖 libs 目录内的其它所有 jar 包。 <br />
-
-<h5>3)配置数据库(如果完成下方步骤 4，导入 APIJSON 的表，则可跳过) </h5>
-打开 DemoSQLConfig 类，编辑 getDBUri，getDBAccount，getDBPassword，getSchema 的返回值为你自己数据库的配置。<br />
-
-<h5>4)运行项目</h5>
-右键 DemoApplication > Run DemoApplication.main
-
-<h4>运行后会出现 APIJSON 的测试日志，最后显示 "APIJSON 已启动" ，说明已启动完成。</h4>
-
-如果是 Address already in use，说明 8080 端口被占用，<br />
-可以关闭占用这个端口的程序(可能就是已运行的 APIJSON 工程) <br />
-或者 改下 APIJSON 工程的端口号，参考 [SpringBoot 改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)。<br />
-其它问题请谷歌或百度。
+APIJSONDemo/APIJSONBoot: 右键 DemoApplication > Run As > Java Application <br />
+APIJSONFinal: 右键 DemoAppConfig > Run As > Java Application
 
 <br />
 

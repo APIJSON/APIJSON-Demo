@@ -154,7 +154,6 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 
 				if (value instanceof ApplicationContext
 						|| value instanceof Context
-						|| value instanceof org.omg.CORBA.Context
 						|| value instanceof org.apache.catalina.Context
 						|| value instanceof ch.qos.logback.core.Context
 						) {
@@ -171,7 +170,6 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 
 								if (value instanceof ApplicationContext
 										|| value instanceof Context
-										|| value instanceof org.omg.CORBA.Context
 										|| value instanceof org.apache.catalina.Context
 										|| value instanceof ch.qos.logback.core.Context
 										) {
