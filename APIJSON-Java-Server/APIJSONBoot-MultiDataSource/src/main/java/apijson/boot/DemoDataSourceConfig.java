@@ -41,16 +41,16 @@ public class DemoDataSourceConfig {
 	      return new DruidDataSource();
 	  }
 	  
-//	  @Bean
-//	  @ConfigurationProperties(prefix = "spring.datasource.druid-test")
-//	  public DruidDataSource druidTestDataSource(){
-//		  return new DruidDataSource();
-//	  }
-//	  
-//	  @Bean
-//	  @ConfigurationProperties(prefix = "spring.datasource.druid-online")
-//	  public DruidDataSource druidOnlineDataSource(){
-//		  return new DruidDataSource();
-//	  }
+	  @Bean
+	  @ConfigurationProperties(prefix = "spring.datasource.druid-test")
+	  public DruidDataSource druidTestDataSource(){
+		  return new DruidDataSource();
+	  }
+	  
+	  @Bean
+	  @ConfigurationProperties(prefix = "spring.datasource.druid-online")
+	  public DruidDataSource druidOnlineDataSource(){
+		  return new DruidDataSource();
+	  }
 
 }

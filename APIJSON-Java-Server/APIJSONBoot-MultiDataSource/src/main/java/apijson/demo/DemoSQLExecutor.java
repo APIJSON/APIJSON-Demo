@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo;
 
 import java.sql.Connection;
+import java.util.Map;
 
 import javax.sql.DataSource;
 
@@ -52,7 +53,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 	public Connection getConnection(SQLConfig config) throws Exception {
 		String datasource = config.getDatasource();
 		Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
-		
+
 		Connection c = connectionMap.get(datasource);
 		if (datasource != null && (c == null || c.isClosed())) {
 			try {
@@ -60,28 +61,29 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 				switch (datasource) {
 				case "HIKARICP":
 					ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
-					// 另一种方式是 DemoHikariCPConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DemoHikariCPConfig.DATA_SOURCE.getConnection();
+					// 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
 					break;
 				case "DRUID":
 				case "DRUID-TEST":
 				case "DRUID-ONLINE":
-					ds = DemoApplication.getApplicationContext().getBean(DruidDataSource.class);
-//					switch (datasource) {
-//					case "DRUID-TEST":
-//						
-//					case "DRUID-ONLINE":
-//						// 另一种方式是 DemoDruidConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DemoDruidConfig.DATA_SOURCE.getConnection();
-//						break;
-//					default:
-//						ds = null;
-//						break;
-//					}
+					Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
+					// 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
+					switch (datasource) {
+					case "DRUID-TEST":
+						ds = dsMap.get("druidTestDataSource");
+					case "DRUID-ONLINE":
+						ds = dsMap.get("druidOnlineDataSource");
+						break;
+					default:
+						ds = dsMap.get("druidDataSource");
+						break;
+					}
 					break;
 				default:
 					ds = null;
 					break;
 				}
-				
+
 				connectionMap.put(datasource, ds == null ? null : ds.getConnection());
 			} catch (Exception e) {
 				Log.e(TAG, "getConnection   try { "
