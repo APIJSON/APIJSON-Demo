@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>apijson.boot</groupId>
+	<artifactId>apijson-boot-multi-datasource</artifactId>
+	<version>4.7.0</version>
+	<packaging>jar</packaging>
+
+	<name>APIJSONBoot-MultiDataSource</name>
+	<description>Demo project for APIJSON Server based on SpringBoot</description>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<java.version>1.8</java.version>
+	</properties>
+
+	<dependencies>
+		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>fastjson</artifactId>
+			<version>1.2.74</version>
+		</dependency>
+
+		<!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>4.0.1</version>
+		</dependency>
+
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 
+			<<<<<<<<< -->
+		<dependency>
+			<groupId>com.github.TommyLemon</groupId>
+			<artifactId>unitauto-java</artifactId>
+			<version>2.6.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.TommyLemon</groupId>
+			<artifactId>unitauto-jar</artifactId>
+			<version>2.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.github.classgraph</groupId>
+			<artifactId>classgraph</artifactId>
+			<version>4.8.87</version>
+		</dependency>
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 >>>>>>>>> -->
+
+
+		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
+		<dependency>
+			<groupId>com.github.Tencent</groupId>
+			<artifactId>APIJSON</artifactId>
+			<version>4.7.0</version>
+		</dependency>
+		 <dependency>
+			<groupId>com.github.APIJSON</groupId>
+			<artifactId>apijson-framework</artifactId>
+			<version>4.7.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.APIJSON</groupId>
+			<artifactId>apijson-column</artifactId>
+			<version>1.1.0</version>
+		</dependency>
+		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
+
+		<!-- 需要用的数据库 JDBC 驱动 -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.22</version>
+		</dependency>
+		<dependency>
+			<groupId>org.postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>42.2.18</version>
+		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.jtds</groupId>
+			<artifactId>jtds</artifactId>
+			<version>1.3.1</version>
+		</dependency>
+		<!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
+		<!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
+
+
+		<!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.0 以上 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+			<version>2.4.2</version>
+		</dependency>
+
+		<!-- 需要用的 HikariCP 数据库连接池库，3.1.0 以上 -->
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+
+		<!-- 需要用的 Druid 数据库连接池库，1.0.29 以上 -->
+		<dependency>
+			<groupId>com.alibaba</groupId>
+			<artifactId>druid</artifactId>
+			<version>1.0.29</version>
+		</dependency>
+		
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<!-- Allow access to Spring milestones and snapshots -->
+	<!-- (you don't need this if you are using anything after 0.5.0.RELEASE) -->
+	<repositories>
+		<!-- APIJSON 必须用到的托管平台 -->
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+
+		<repository>
+			<id>spring-snapshots</id>
+			<url>http://repo.spring.io/snapshot</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>spring-milestones</id>
+			<url>http://repo.spring.io/milestone</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<id>spring-snapshots</id>
+			<url>http://repo.spring.io/snapshot</url>
+		</pluginRepository>
+		<pluginRepository>
+			<id>spring-milestones</id>
+			<url>http://repo.spring.io/milestone</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+</project>

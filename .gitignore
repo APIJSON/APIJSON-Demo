@@ -11,3 +11,5 @@ APIJSON-Java-Server/APIJSONDemo/.idea
 
 *.iml
 APIJSON-Java-Server/APIJSONDemo-HikariCP/.settings
+APIJSON-Java-Server/APIJSONBoot-MultiConnectionPool/.settings
+APIJSON-Java-Server/APIJSONBoot-MultiDataSource/.settings
