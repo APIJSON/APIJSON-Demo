@@ -21,16 +21,16 @@ import org.springframework.context.annotation.Configuration;
 import com.alibaba.druid.pool.DruidDataSource;
 
 
-/**Druid 连接池配置，对应 application.yml 的 datasource 配置
+/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置
  * @author Lemon
  */
 @Configuration
-public class DemoDruidConfig {
-	
+public class DemoDataSourceConfig {
+	  
 	  @Bean
 	  @ConfigurationProperties(prefix = "spring.datasource.druid")
-	  public DruidDataSource dataSource(){
+	  public DruidDataSource druidDataSource() {
 	      return new DruidDataSource();
 	  }
- 
+
 }

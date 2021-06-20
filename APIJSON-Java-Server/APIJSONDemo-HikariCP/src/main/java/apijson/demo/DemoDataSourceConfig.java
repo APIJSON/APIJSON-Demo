@@ -22,7 +22,7 @@ import org.springframework.context.annotation.Configuration;
 import javax.sql.DataSource;
 
 
-/**HikariCP 连接池配置，对应 application.yml 的 datasource 配置
+/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置
  * @author Lemon
  */
 @Configuration
@@ -30,7 +30,7 @@ public class DemoDataSourceConfig {
 	
 	  @Bean
 	  @ConfigurationProperties(prefix = "spring.datasource.hikari")
-	  public DataSource dataSource(){
+	  public DataSource dataSource() {
 	      return new HikariDataSource();
 	  }
  

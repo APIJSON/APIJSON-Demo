@@ -30,14 +30,14 @@ public class DemoDataSourceConfig {
 	
 	  @Bean
 	  @ConfigurationProperties(prefix = "spring.datasource.hikari")
-	  public HikariDataSource hikaricpDataSource(){
+	  public HikariDataSource hikaricpDataSource() {
 	      return new HikariDataSource();
 	  }
 	  
 	  
 	  @Bean
 	  @ConfigurationProperties(prefix = "spring.datasource.druid")
-	  public DruidDataSource druidDataSource(){
+	  public DruidDataSource druidDataSource() {
 	      return new DruidDataSource();
 	  }
 	  
