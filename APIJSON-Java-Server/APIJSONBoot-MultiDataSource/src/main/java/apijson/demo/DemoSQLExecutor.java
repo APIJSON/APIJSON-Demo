@@ -63,9 +63,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 					ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
 					// 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
 					break;
-				case "DRUID":
-				case "DRUID-TEST":
-				case "DRUID-ONLINE":
+				default:
 					Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
 					// 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
 					switch (datasource) {
@@ -74,13 +72,12 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 					case "DRUID-ONLINE":
 						ds = dsMap.get("druidOnlineDataSource");
 						break;
-					default:
+					case "DRUID":
 						ds = dsMap.get("druidDataSource");
+					default:
+						ds = null;
 						break;
 					}
-					break;
-				default:
-					ds = null;
 					break;
 				}
 
