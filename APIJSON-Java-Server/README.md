@@ -120,7 +120,6 @@ APIJSONFinal: 右键 DemoAppConfig > Run As > Java Application
 
 
 ### 5.测试接口<br />
-直接使用 [APIJSON在线工具](http://apijson.org/auto) 或 Postman 等其它 HTTP 接口工具，格式为 HTTP POST JSON，具体示例参考通用文档 <br />
+直接使用 [APIAuto-机器学习 HTTP 接口工具](http://apijson.cn/api) 或 Postman 等其它 HTTP 接口工具，格式为 HTTP POST JSON，具体示例参考通用文档 <br />
 https://github.com/Tencent/APIJSON/blob/master/Document.md
-
 <br />
