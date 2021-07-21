@@ -38,4 +38,6 @@ python test.py<br />
 看 命令行控制台。<br />
 如果默认url不可用，修改为一个可用的，比如正在运行APIJSON后端工程的电脑的IPV4地址，然后重新运行。
 
+也可以直接使用 [APIAuto-机器学习 HTTP 接口工具](http://apijson.cn/api) 或 Postman 等其它 HTTP 接口工具，格式为 HTTP POST JSON，具体示例参考通用文档 <br />
+https://github.com/Tencent/APIJSON/blob/master/Document.md
 <br />
