@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-druid</artifactId>
-	<version>4.7.1</version>
+	<version>4.7.2</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONDemo-Druid</name>
