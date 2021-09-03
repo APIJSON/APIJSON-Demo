@@ -34,7 +34,7 @@
 
 		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 
 			<<<<<<<<< -->
-<!-- 		<dependency>
+ 		<dependency>
 			<groupId>com.github.TommyLemon</groupId>
 			<artifactId>unitauto-java</artifactId>
 			<version>2.6.0</version>
@@ -43,7 +43,7 @@
 			<groupId>com.github.TommyLemon</groupId>
 			<artifactId>unitauto-jar</artifactId>
 			<version>2.6.1</version>
-		</dependency> -->
+		</dependency>
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
 			<artifactId>classgraph</artifactId>
@@ -53,7 +53,7 @@
 
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-		<!-- <dependency>
+		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
 			<version>4.7.2</version>
@@ -67,7 +67,7 @@
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-column</artifactId>
 			<version>1.1.2</version>
-		</dependency> -->
+		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
