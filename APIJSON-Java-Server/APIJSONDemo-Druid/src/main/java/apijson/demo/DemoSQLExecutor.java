@@ -34,7 +34,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 	public Connection getConnection(SQLConfig config) throws Exception {
 	    //		Log.d(TAG, "getConnection  config.getDatasource() = " + config.getDatasource());
 		
-		String key = config.getDatabase() + "-" + config.getDatasource();
+		String key = config.getDatasource() + "-" + config.getDatabase();
 		Connection c = connectionMap.get(key);
 		if (c == null || c.isClosed()) {
 			try {
