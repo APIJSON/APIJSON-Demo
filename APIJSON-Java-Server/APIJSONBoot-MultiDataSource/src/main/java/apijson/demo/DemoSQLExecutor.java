@@ -70,11 +70,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 					switch (datasource) {
 					case "DRUID-TEST":
 						ds = dsMap.get("druidTestDataSource");
+						break;
 					case "DRUID-ONLINE":
 						ds = dsMap.get("druidOnlineDataSource");
 						break;
 					case "DRUID":
 						ds = dsMap.get("druidDataSource");
+						break;
 					default:
 						ds = null;
 						break;
