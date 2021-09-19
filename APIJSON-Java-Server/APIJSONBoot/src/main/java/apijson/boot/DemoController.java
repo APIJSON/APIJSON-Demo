@@ -186,6 +186,96 @@ public class DemoController extends APIJSONController {
 		return super.delete(request, session);
 	}
 
+	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+	/**获取
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#GET}
+	 */
+	@PostMapping("get/{tag}")  // 虽然看起来 APIAuto 更好识别是否为 APIJSON 万能接口，但 tag 导致空格截断前 Host 不固定不方便批量测试  {tag}/get")
+	@Override
+	public String getByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.getByTag(tag, params, request, session);
+	}
+
+	/**计数
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#HEAD}
+	 */
+	@PostMapping("head/{tag}")
+	@Override
+	public String headByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.headByTag(tag, params, request, session);
+	}
+
+	/**限制性GET，request和response都非明文，浏览器看不到，用于对安全性要求高的GET请求
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#GETS}
+	 */
+	@PostMapping("gets/{tag}")
+	@Override
+	public String getsByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.getsByTag(tag, params, request, session);
+	}
+
+	/**限制性HEAD，request和response都非明文，浏览器看不到，用于对安全性要求高的HEAD请求
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#HEADS}
+	 */
+	@PostMapping("heads/{tag}")
+	@Override
+	public String headsByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.headsByTag(tag, params, request, session);
+	}
+
+	/**新增
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#POST}
+	 */
+	@PostMapping("post/{tag}")
+	@Override
+	public String postByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.postByTag(tag, params, request, session);
+	}
+
+	/**修改
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#PUT}
+	 */
+	@PostMapping("put/{tag}")
+	@Override
+	public String putByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.putByTag(tag, params, request, session);
+	}
+
+	/**删除
+	 * @param request 只用String，避免encode后未decode
+	 * @param session
+	 * @return
+	 * @see {@link RequestMethod#DELETE}
+	 */
+	@PostMapping("delete/{tag}")
+	@Override
+	public String deleteByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.deleteByTag(tag, params, request, session);
+	}
+
 
 
 
@@ -197,7 +287,7 @@ public class DemoController extends APIJSONController {
 	 * @return
 	 * @see {@link RequestMethod#GET}
 	 */
-	@RequestMapping("get/{request}")
+	@GetMapping("get/{request}")
 	public String openGet(@PathVariable String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
@@ -214,7 +304,7 @@ public class DemoController extends APIJSONController {
 	 * @return
 	 * @see {@link RequestMethod#HEAD}
 	 */
-	@RequestMapping("head/{request}")
+	@GetMapping("head/{request}")
 	public String openHead(@PathVariable String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
