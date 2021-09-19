@@ -54,7 +54,8 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 		String datasource = config.getDatasource();
 		Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
 
-		Connection c = connectionMap.get(datasource);
+		String key = datasource + "-" + config.getDatabase();
+		Connection c = connectionMap.get(key);
 		if (datasource != null && (c == null || c.isClosed())) {
 			try {
 				DataSource ds;
@@ -69,11 +70,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 					switch (datasource) {
 					case "DRUID-TEST":
 						ds = dsMap.get("druidTestDataSource");
+						break;
 					case "DRUID-ONLINE":
 						ds = dsMap.get("druidOnlineDataSource");
 						break;
 					case "DRUID":
 						ds = dsMap.get("druidDataSource");
+						break;
 					default:
 						ds = null;
 						break;
@@ -81,7 +84,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 					break;
 				}
 
-				connectionMap.put(datasource, ds == null ? null : ds.getConnection());
+				connectionMap.put(key, ds == null ? null : ds.getConnection());
 			} catch (Exception e) {
 				Log.e(TAG, "getConnection   try { "
 						+ "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
