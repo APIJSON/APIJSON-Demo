@@ -14,9 +14,9 @@ limitations under the License.*/
 
 package apijson.demo.model;
 
-import static apijson.RequestRole.ADMIN;
-import static apijson.RequestRole.OWNER;
-import static apijson.RequestRole.UNKNOWN;
+import static apijson.orm.AbstractVerifier.ADMIN;
+import static apijson.orm.AbstractVerifier.OWNER;
+import static apijson.orm.AbstractVerifier.UNKNOWN;
 
 import com.alibaba.fastjson.annotation.JSONField;
 

@@ -70,20 +70,20 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 			//取消注释来实现自定义各个表的主键名
 			//			@Override
-			//			public String getIdKey(String database, String schema, String table) {
+			//			public String getIdKey(String database, String schema, String datasource, String table) {
 			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
 			//				//		return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
 			//				//		return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
 			//			}
 
 			@Override
-			public String getUserIdKey(String database, String schema, String table) {
+			public String getUserIdKey(String database, String schema,String datasource, String table) {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
 			//取消注释来实现数据库自增 id
 			//			@Override
-			//			public Object newId(RequestMethod method, String database, String schema, String table) {
+			//			public Object newId(RequestMethod method, String database, String schema, String datasource, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 
