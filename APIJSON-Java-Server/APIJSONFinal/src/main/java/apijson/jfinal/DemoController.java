@@ -73,7 +73,7 @@ import apijson.orm.exception.OutOfRangeException;
  * <br > 建议全通过HTTP POST来请求:
  * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
  * <br > 2.提高性能 - 无需URL encode和decode
- * <br > 3.调试方便 - 建议使用 APIJSON在线测试工具 或 Postman
+ * <br > 3.调试方便 - 建议使用 APIAuto(http://apijson.cn/api) 或 Postman
  * @author Lemon
  */
 public class DemoController extends Controller {

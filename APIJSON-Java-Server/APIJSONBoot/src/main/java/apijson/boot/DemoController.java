@@ -90,7 +90,7 @@ import apijson.orm.exception.OutOfRangeException;
  * <br > 建议全通过HTTP POST来请求:
  * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
  * <br > 2.提高性能 - 无需URL encode和decode
- * <br > 3.调试方便 - 建议使用 APIJSON在线测试工具 或 Postman
+ * <br > 3.调试方便 - 建议使用 APIAuto(http://apijson.cn/api) 或 Postman
  * @author Lemon
  */
 @Service
@@ -186,11 +186,8 @@ public class DemoController extends APIJSONController {
 		return super.delete(request, session);
 	}
 
-	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -276,6 +273,7 @@ public class DemoController extends APIJSONController {
 		return super.deleteByTag(tag, params, request, session);
 	}
 
+	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true..  >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
