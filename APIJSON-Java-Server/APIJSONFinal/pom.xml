@@ -23,7 +23,7 @@
 		</dependency>
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
 			<version>4.7.2</version>
@@ -32,7 +32,7 @@
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
 			<version>4.7.2</version>
-		</dependency>
+		</dependency> -->
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
 		<!-- 需要用的数据库 JDBC 驱动 -->

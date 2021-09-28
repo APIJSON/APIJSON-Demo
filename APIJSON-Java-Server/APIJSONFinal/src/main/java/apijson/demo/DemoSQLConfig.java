@@ -70,7 +70,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			}
 
 			@Override
-			public String getUserIdKey(String database, String schema, String table) {
+			public String getUserIdKey(String database, String schema, String datasource, String table) {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 

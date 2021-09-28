@@ -14,12 +14,12 @@ limitations under the License.*/
 
 package apijson.demo.model;
 
-import static apijson.RequestRole.ADMIN;
-import static apijson.RequestRole.CIRCLE;
-import static apijson.RequestRole.CONTACT;
-import static apijson.RequestRole.LOGIN;
-import static apijson.RequestRole.OWNER;
-import static apijson.RequestRole.UNKNOWN;
+import static apijson.orm.AbstractVerifier.ADMIN;
+import static apijson.orm.AbstractVerifier.CIRCLE;
+import static apijson.orm.AbstractVerifier.CONTACT;
+import static apijson.orm.AbstractVerifier.LOGIN;
+import static apijson.orm.AbstractVerifier.OWNER;
+import static apijson.orm.AbstractVerifier.UNKNOWN;
 
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;

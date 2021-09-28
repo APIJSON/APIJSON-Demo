@@ -33,8 +33,15 @@ import static apijson.framework.APIJSONConstant.VERSION;
 import static apijson.framework.APIJSONConstant.VISITOR_;
 import static apijson.framework.APIJSONConstant.VISITOR_ID;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.rmi.ServerException;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpSession;
@@ -61,6 +68,7 @@ import apijson.demo.model.Verify;
 import apijson.framework.APIJSONController;
 import apijson.framework.APIJSONParser;
 import apijson.framework.BaseModel;
+import apijson.orm.AbstractParser;
 import apijson.orm.JSONRequest;
 import apijson.orm.Parser;
 import apijson.orm.exception.ConditionErrorException;
@@ -87,9 +95,49 @@ public class DemoController extends Controller {
 		}
 		return parser;
 	}
-
+	
+	/**处理万能通用接口
+	 * @param method
+	 * @see https://github.com/Tencent/APIJSON/blob/master/Document.md#3.1
+	 */
 	public void parseAndResponse(RequestMethod method) {
-		renderJson(newParser(getSession(), method).parse(HttpKit.readData(getRequest())));
+		String tag = getPara();
+		
+		if (StringUtil.isEmpty(tag, true) == false) {
+			try {
+				tag = URLDecoder.decode(tag, "UTF-8");
+			} catch (Throwable e) {
+				e.printStackTrace();
+			}
+		}
+		
+		if (StringUtil.isEmpty(tag, true)) {
+			// /get， /gets， /put  等万能通用接口 
+			renderJson(newParser(getSession(), method).parse(getRawData()));
+			return;
+		}
+		
+		// /get/User， /gets/Moment[]， /put/Comment:[]  等简版接口，APIJSON 4.8.0+ 可用，对不兼容的低版本需要注释以下代码
+		JSONObject req = AbstractParser.wrapRequest(method, tag, JSON.parseObject(getRawData()), false);
+		if (req == null) {
+			req = new JSONObject(true);
+		}
+		
+		Map<String, String[]> paraMap = getParaMap();
+		Set<Entry<String, String[]>> set = paraMap == null ? null : paraMap.entrySet();
+		if (set != null) {  // 最外层的全局参数
+			for (Entry<String, String[]> entry : set) {
+				String[] values = entry == null ? null : entry.getValue();
+				String value = values == null || values.length <= 0 ? null : values[0];
+				if (StringUtil.isEmpty(tag, false)) {
+					continue;
+				}
+				
+				req.put(entry.getKey(), value);
+			}
+		}
+		
+		renderJson(newParser(getSession(), method).parse(req));
 	}
 
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -157,6 +205,8 @@ public class DemoController extends Controller {
 		parseAndResponse(DELETE);
 	}
 
+	
+	
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 

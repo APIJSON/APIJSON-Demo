@@ -14,19 +14,18 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 
 import javax.servlet.http.HttpSession;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.framework.APIJSONFunctionParser;
 import apijson.orm.JSONRequest;
@@ -212,8 +211,8 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 */
 	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
 		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
-		RequestRole role = RequestRole.get(current.getString(JSONRequest.KEY_ROLE));
-		if (role == RequestRole.OWNER && userId != DemoVerifier.getVisitorId(getSession())) {
+		String role = current.getString(JSONRequest.KEY_ROLE);
+		if (role == apijson.orm.AbstractVerifier.OWNER && userId != DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
 		return null;
