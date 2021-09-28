@@ -70,20 +70,20 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 			//取消注释来实现自定义各个表的主键名
 			//			@Override
-			//			public String getIdKey(String database, String schema, String table) {
+			//			public String getIdKey(String database, String schema, String datasource, String table) {
 			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
 			//				//		return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
 			//				//		return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
 			//			}
 
 			@Override
-			public String getUserIdKey(String database, String schema, String table) {
+			public String getUserIdKey(String database, String schema,String datasource, String table) {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
 			//取消注释来实现数据库自增 id
 			//			@Override
-			//			public Object newId(RequestMethod method, String database, String schema, String table) {
+			//			public Object newId(RequestMethod method, String database, String schema, String datasource, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 
@@ -165,7 +165,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) {
-			return "jdbc:postgresql://localhost:5432/postgres"; //TODO 改成你自己的
+			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
 		}
 		if (isSQLServer()) {
 			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的

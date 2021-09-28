@@ -8,7 +8,7 @@ spring:
     hikari:
       type: com.zaxxer.hikari.HikariDataSource
       driver-class-name: org.postgresql.Driver
-      jdbc-url: jdbc:postgresql://localhost:5432/postgres
+      jdbc-url: jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified
       username: postgres
       password: 
       minimum-idle: 5

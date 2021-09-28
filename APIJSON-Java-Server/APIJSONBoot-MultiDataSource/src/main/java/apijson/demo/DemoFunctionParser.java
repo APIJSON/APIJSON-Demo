@@ -26,9 +26,9 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.RequestRole;
 import apijson.StringUtil;
 import apijson.framework.APIJSONFunctionParser;
+import apijson.orm.AbstractVerifier;
 import apijson.orm.JSONRequest;
 
 
@@ -212,8 +212,8 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 */
 	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
 		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
-		RequestRole role = RequestRole.get(current.getString(JSONRequest.KEY_ROLE));
-		if (role == RequestRole.OWNER && userId != DemoVerifier.getVisitorId(getSession())) {
+		String role = current.getString(JSONRequest.KEY_ROLE);
+		if (AbstractVerifier.OWNER.equals(role) && userId != DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
 		return null;
