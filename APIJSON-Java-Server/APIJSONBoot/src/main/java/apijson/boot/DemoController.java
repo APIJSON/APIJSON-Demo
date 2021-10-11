@@ -65,6 +65,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.util.LRUMap;
 
 import apijson.JSON;
 import apijson.JSONResponse;
@@ -714,6 +715,8 @@ public class DemoController extends APIJSONController {
 	@PostMapping("logout")
 	@Override
 	public JSONObject logout(HttpSession session) {
+		SESSION_MAP.remove(session.getId());
+
 		long userId;
 		try {
 			userId = DemoVerifier.getVisitorId(session);//必须在session.invalidate();前！
@@ -1074,10 +1077,24 @@ public class DemoController extends APIJSONController {
 	
 	
 	// 为 APIAuto 提供的代理接口(解决跨域问题) 和 导入第三方文档的测试接口 https://github.com/TommyLemon/APIAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
+	
+	public static class SessionMap extends LRUMap<String, HttpSession> {
+		public SessionMap() {
+			super(16, 1000000);
+		}
+		public void remove(String key) {
+			_map.remove(key);
+		}
+	}
+	
+	public static final SessionMap SESSION_MAP;
 
 	public static final String ADD_COOKIE = "Add-Cookie";
+	public static final String APIJSON_DELEGATE_ID = "APIJSON-DELEGATE-ID";
 	public static final List<String> EXCEPT_HEADER_LIST;
 	static {
+		SESSION_MAP = new SessionMap();
+		
 		EXCEPT_HEADER_LIST = Arrays.asList(  //accept-encoding 在某些情况下导致乱码，origin 和 sec-fetch-mode 等 CORS 信息导致服务器代理失败
 				"accept-encoding", "accept-language", // "accept", "connection"
 				"host", "origin", "referer", "user-agent", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-dest", "sec-fetch-user"
@@ -1100,9 +1117,10 @@ public class DemoController extends APIJSONController {
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "delegate")
 	public String delegate(
+			@RequestParam("$_delegate_url") String url, 
 			@RequestParam(value = "$_type", required = false) String type,
 			@RequestParam(value = "$_except_headers", required = false) String exceptHeaders,
-			@RequestParam("$_delegate_url") String url, 
+			@RequestParam(value = "$_delegate_id", required = false) String sessionId, 
 			@RequestBody(required = false) String body, 
 			HttpMethod method, HttpSession session
 			) {
@@ -1110,6 +1128,7 @@ public class DemoController extends APIJSONController {
 		if (Log.DEBUG == false) {
 			return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")).toJSONString();
 		}
+		
 
 		if ("GRPC".equals(type)) {
 			int index = url.indexOf("://");
@@ -1145,6 +1164,7 @@ public class DemoController extends APIJSONController {
 
 			List<String> setCookie = null;
 			List<String> addCookie = null;
+			List<String> apijsonDelegateId = null;
 
 			while (names.hasMoreElements()) {
 				name = names.nextElement();
@@ -1156,15 +1176,29 @@ public class DemoController extends APIJSONController {
 					else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
 						addCookie = Arrays.asList(request.getHeader(name));
 					}
+					else if (APIJSON_DELEGATE_ID.toLowerCase().equals(name.toLowerCase())) {
+						apijsonDelegateId = Arrays.asList(request.getHeader(name));
+					}
 					else {
 						headers.add(name, request.getHeader(name));
 					}
+				}
+			}
+			
+			if (sessionId == null) {
+				sessionId = apijsonDelegateId == null || apijsonDelegateId.isEmpty() ? null : apijsonDelegateId.get(0);
+			}
+			if (sessionId != null) {
+				HttpSession s = SESSION_MAP.get(sessionId);
+				if (s != null) {
+					s = session;
 				}
 			}
 
 			if (setCookie == null && session != null) {
 				setCookie = (List<String>) session.getAttribute(COOKIE);
 			}
+			
 			if (addCookie != null && addCookie.isEmpty() == false) {
 				if (setCookie == null) {
 					setCookie = addCookie;
@@ -1223,6 +1257,10 @@ public class DemoController extends APIJSONController {
 				session.setAttribute(COOKIE, cookie);
 			}
 		}
+		
+		SESSION_MAP.put(session.getId(), session);
+		response.setHeader(APIJSON_DELEGATE_ID, session.getId());
+		
 		return entity.getBody();
 	}
 

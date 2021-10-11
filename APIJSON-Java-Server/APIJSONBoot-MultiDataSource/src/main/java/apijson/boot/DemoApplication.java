@@ -21,7 +21,6 @@ import java.util.regex.Pattern;
 
 import javax.naming.Context;
 
-import apijson.framework.APIJSONParser;
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -48,6 +47,7 @@ import apijson.demo.DemoSQLExecutor;
 import apijson.demo.DemoVerifier;
 import apijson.framework.APIJSONApplication;
 import apijson.framework.APIJSONCreator;
+import apijson.framework.APIJSONParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
 import apijson.orm.Parser;
@@ -278,6 +278,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 				.allowedOriginPatterns("*")  
 				.allowedMethods("*")
 				.allowCredentials(true)
+				.exposedHeaders(DemoController.APIJSON_DELEGATE_ID)  // Cookie 和 Set-Cookie 怎么设置都没用 ,Cookie,Set-Cookie")   // .exposedHeaders("*")
 				.maxAge(3600);  
 			}
 		};

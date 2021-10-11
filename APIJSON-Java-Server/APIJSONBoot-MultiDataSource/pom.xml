@@ -4,9 +4,9 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>apijson.boot</groupId>
-	<artifactId>apijson-boot-multi-datasource</artifactId>
-	<version>4.7.2</version>
-	<packaging>jar</packaging>
+	<artifactId>apijson-boot</artifactId>
+	<version>4.8.0</version>
+	<!-- <packaging>jar</packaging> -->
 
 	<name>APIJSONBoot-MultiDataSource</name>
 	<description>Demo project for APIJSON Server based on SpringBoot</description>
