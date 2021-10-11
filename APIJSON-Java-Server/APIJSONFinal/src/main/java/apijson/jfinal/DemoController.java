@@ -112,7 +112,7 @@ public class DemoController extends Controller {
 		}
 		
 		if (StringUtil.isEmpty(tag, true)) {
-			// /get， /gets， /put  等万能通用接口 
+			// /get， /gets， /head， /heads， /post， /put， /delete 等万能通用接口 
 			renderJson(newParser(getSession(), method).parse(getRawData()));
 			return;
 		}

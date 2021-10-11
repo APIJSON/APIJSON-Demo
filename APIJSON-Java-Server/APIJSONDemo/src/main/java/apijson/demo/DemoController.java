@@ -18,6 +18,7 @@ import java.net.URLDecoder;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -55,7 +56,7 @@ public class DemoController extends APIJSONController {
 	 * @return
 	 * @see {@link RequestMethod#GET}
 	 */
-	@RequestMapping("get/{request}")
+	@GetMapping("get/{request}")
 	public String openGet(@PathVariable String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
