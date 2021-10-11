@@ -7,7 +7,7 @@
 ### 连接池 Demo
 [APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid 的简单初级使用 Demo；<br />
 [APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) 为 APIJSON + SpringBoot + HikariCP 的简单初级使用 Demo；<br />
-[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP 的接近生产环境成品的多数据源 Demo。<br />
+[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP 的接近生产环境成品的多数据源 Demo，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。<br />
 
 <br />
 其中 APIJSONDemo 关闭了权限校验，不需要配置权限即可体验 /get 这个万能查询接口。<br />
