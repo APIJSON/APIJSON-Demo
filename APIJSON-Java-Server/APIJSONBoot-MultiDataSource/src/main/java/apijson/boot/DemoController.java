@@ -1090,7 +1090,7 @@ public class DemoController extends APIJSONController {
 	public static final SessionMap SESSION_MAP;
 
 	public static final String ADD_COOKIE = "Add-Cookie";
-	public static final String APIJSON_DELEGATE_ID = "APIJSON-DELEGATE-ID";
+	public static final String APIJSON_DELEGATE_ID = "Apijson-Delegate-Id";  // 有些 Web 框架会强制把全大写改为全小写或大驼峰
 	public static final List<String> EXCEPT_HEADER_LIST;
 	static {
 		SESSION_MAP = new SessionMap();
@@ -1191,7 +1191,7 @@ public class DemoController extends APIJSONController {
 			if (sessionId != null) {
 				HttpSession s = SESSION_MAP.get(sessionId);
 				if (s != null) {
-					s = session;
+					session = s;
 				}
 			}
 

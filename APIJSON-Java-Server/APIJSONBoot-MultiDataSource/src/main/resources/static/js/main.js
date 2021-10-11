@@ -3506,9 +3506,10 @@
       //请求
       request: function (isAdminOperation, type, url, req, header, callback) {
         type = type || REQUEST_TYPE_JSON
+        var isDelegate = (isAdminOperation == false && this.isDelegateEnabled) || (isAdminOperation && url.indexOf('://apijson.cn') > 0)
 
         if (header != null && header.Cookie != null) {
-          if (this.isDelegateEnabled) {
+          if (isDelegate) {
             header['Set-Cookie'] = header.Cookie
             delete header.Cookie
           }
@@ -3517,11 +3518,24 @@
           }
         }
 
+        if (isDelegate && this.delegateId != null && (header == null || header['Apijson-Delegate-Id'] == null)) {
+          if (header == null) {
+            header = {};
+          }
+          header['Apijson-Delegate-Id'] = this.delegateId
+        }
+
         // axios.defaults.withcredentials = true
         axios({
           method: (type == REQUEST_TYPE_PARAM ? 'get' : 'post'),
-          url: (isAdminOperation == false && this.isDelegateEnabled ? (this.server + '/delegate?' + (type == REQUEST_TYPE_GRPC ? '$_type=GRPC&' : '') + '$_delegate_url=') : '' )
-          + (this.isEncodeEnabled ? encodeURI(StringUtil.noBlank(url)) : StringUtil.noBlank(url)),
+          url: (isDelegate
+              ? (
+                this.server + '/delegate?' + (type == REQUEST_TYPE_GRPC ? '$_type=GRPC&' : '')
+                + (StringUtil.isEmpty(this.delegateId, true) ? '' : '$_delegate_id=' + this.delegateId + '&') + '$_delegate_url=' + encodeURIComponent(url)
+              ) : (
+                this.isEncodeEnabled ? encodeURI(url) : url
+              )
+          ),
           params: (type == REQUEST_TYPE_PARAM || type == REQUEST_TYPE_FORM ? req : null),
           data: (type == REQUEST_TYPE_JSON || type == REQUEST_TYPE_GRPC ? req : (type == REQUEST_TYPE_DATA ? toFormData(req) : null)),
           headers: header,  //Accept-Encoding（HTTP Header 大小写不敏感，SpringBoot 接收后自动转小写）可能导致 Response 乱码
@@ -3530,6 +3544,16 @@
         })
           .then(function (res) {
             res = res || {}
+
+            if (isDelegate) {
+              var hs = res.headers || {}
+              var delegateId = hs['Apijson-Delegate-Id'] || hs['apijson-delegate-id']
+              if (delegateId != null && delegateId != App.delegateId) {
+                App.delegateId = delegateId;
+                App.saveCache(App.server, 'delegateId', delegateId)
+              }
+            }
+
 	    //any one of then callback throw error will cause it calls then(null)
             // if ((res.config || {}).method == 'options') {
             //   return
