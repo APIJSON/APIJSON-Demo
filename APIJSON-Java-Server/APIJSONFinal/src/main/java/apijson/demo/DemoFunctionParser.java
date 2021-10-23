@@ -28,6 +28,7 @@ import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.framework.APIJSONFunctionParser;
+import apijson.orm.AbstractVerifier;
 import apijson.orm.JSONRequest;
 
 
@@ -212,7 +213,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
 		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
 		String role = current.getString(JSONRequest.KEY_ROLE);
-		if (role == apijson.orm.AbstractVerifier.OWNER && userId != DemoVerifier.getVisitorId(getSession())) {
+		if (AbstractVerifier.OWNER.equals(role) && userId != DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
 		return null;
