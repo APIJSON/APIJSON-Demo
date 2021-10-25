@@ -103,6 +103,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("substring_index(substring_index(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
 		RAW_MAP.put("to_days(now())-to_days(`date`)<=7","");  // 给 @having 使用
+		RAW_MAP.put("sexShowStr","CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
 
 
 		// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
@@ -270,7 +271,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//	public String getKey(String key) {
 	//		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
 	//	}
-	
+
 	// 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库
 	//	public Object getValue(@NotNull Object value) {
 	//		if (isOracle() && RequestMethod.isQueryMethod(getMethod()) == false && value instanceof String) {
