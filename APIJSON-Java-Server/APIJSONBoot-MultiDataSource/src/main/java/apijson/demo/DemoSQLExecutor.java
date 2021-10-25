@@ -105,4 +105,11 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 	//		return ColumnUtil.compatOutputKey(super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap), config.getTable(), config.getMethod());
 	//	}
 
+	// 不需要隐藏字段这个功能时，取消注释来提升性能
+	//	@Override
+	//	protected boolean isHideColumn(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+	//			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
+	//		return false;
+	//	}
+
 }

@@ -627,7 +627,7 @@
       host: '',
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
-      server: 'http://localhost:8080',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
+      server: 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
       // thirdParty: 'RAP /repository/joined /repository/get',
@@ -848,8 +848,8 @@
         return req == null ? null : req.tag
       },
 
-      getRequest: function (json, defaultValue) {
-        var s = this.toDoubleJSON(json, defaultValue);
+      getRequest: function (json, defaultValue, isRaw) {  // JSON5 兜底，减少修改范围  , isSingle) {
+        var s = isRaw != true && isSingle ? this.switchQuote(json) : json; // this.toDoubleJSON(json, defaultValue);
         if (StringUtil.isEmpty(s, true)) {
           return defaultValue
         }
@@ -857,11 +857,20 @@
           return jsonlint.parse(s);
         }
         catch (e) {
-          log('main.getRequest', 'try { return jsonlint.parse(s); \n } catch (e) {\n' + e.message)
+          log('main.getRequest', 'try { return jsonlint.parse(s); \n } catch (e2) {\n' + e.message)
           log('main.getRequest', 'return jsonlint.parse(this.removeComment(s));')
-          return jsonlint.parse(this.removeComment(s));
+          return JSON5.parse(s);  // jsonlint.parse(this.removeComment(s));
         }
       },
+      getExtraComment: function(json) {
+        var it = json != null ? json : StringUtil.trim(vInput.value);
+
+        var start = it.lastIndexOf('\n\/*');
+        var end = it.lastIndexOf('\n*\/');
+
+        return start < 0 || end <= start ? null : it.substring(start + '\n\/*'.length, end);
+      },
+
       getHeader: function (text) {
         var header = {}
         var hs = StringUtil.isEmpty(text, true) ? null : StringUtil.split(text, '\n')
@@ -1123,7 +1132,10 @@
                 try {
                   this.getThirdPartyApiList(this.thirdParty, function (platform, docUrl, listUrl, itemUrl, url_, res, err) {
                     CodeUtil.thirdParty = platform
-                    if (err != null || ((res || {}).data || {}).errCode != 0) {
+                    var data = err != null ? null : (res || {}).data;
+                    var code = data == null ? null : data.errCode || data.errcode || data.err_code
+
+                    if (err != null || (code != null && code != 0)) {
                       App.isHeaderShow = true
                       App.isRandomShow = false
                       alert('请把 YApi/Rap/Swagger 等网站的有效 Cookie 粘贴到请求头 Request Header 输入框后再试！')
@@ -1140,6 +1152,14 @@
                       return true
                     }
                     else if (platform == PLATFORM_SWAGGER) {
+                      var apis = data == null ? null : data.paths
+                      if (apis != null) {
+                        // var i = 0
+                        for (var url in apis) {
+                          var item = apis[url]
+                          apiMap[url] = item.post || item.get || item.put || item.delete
+                        }
+                      }
                     }
                     else if (platform == PLATFORM_RAP) {
                     }
@@ -1383,6 +1403,7 @@
         } else {
           if (this.isLocalShow) {
             this.locals.splice(index, 1)
+            this.saveCache('', 'locals', this.locals)
             return
           }
 
@@ -1602,6 +1623,7 @@
           }
 
           var isExportRandom = this.isExportRandom
+          var isEditResponse = this.isEditResponse
 
           if (isExportRandom != true && StringUtil.isEmpty(this.exTxt.name, true)) {
             alert('请输入接口名！')
@@ -1621,7 +1643,7 @@
           var currentAccountId = this.getCurrentAccountId()
           var currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(JSON.parse(this.jsoncon));
 
-          var after = this.toDoubleJSON(inputted);
+          var after = isSingle ? this.switchQuote(inputted) : inputted;  // this.toDoubleJSON(inputted);
           var inputObj = this.getRequest(after, {});
 
           var commentObj = null;
@@ -1629,7 +1651,7 @@
             var m = this.getMethod();
             var commentStddObj = null
             try {
-              commentStddObj = JSON.parse(this.isEditResponse ? tr.standard : doc.standard);
+              commentStddObj = JSON.parse(isEditResponse ? tr.standard : doc.standard);
             }
             catch(e) {
               log(e)
@@ -1638,7 +1660,7 @@
             inputObj.code = null  // delete inputObj.code
 
             commentObj = JSONResponse.updateStandard(commentStddObj, inputObj);
-            CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, true, commentObj, true);
+            CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, isEditResponse != true, commentObj, true);
 
             inputObj.code = code_
           }
@@ -1655,7 +1677,7 @@
           currentResponse.code = code;
           currentResponse.throw = thrw;
 
-          var url = this.server + (isExportRandom || this.isEditResponse || did == null ? '/post' : '/put')
+          var url = this.server + (isExportRandom || isEditResponse || did == null ? '/post' : '/put')
           var req = isExportRandom ? {
             format: false,
             'Random': {
@@ -1672,7 +1694,7 @@
             'tag': 'Random'
           } : {
             format: false,
-            'Document': this.isEditResponse ? null : {
+            'Document': isEditResponse ? null : {
               'id': did == null ? undefined : did,
               'testAccountId': currentAccountId,
               'name': this.exTxt.name,
@@ -1680,17 +1702,19 @@
               'url': '/' + this.getMethod(),
               'request': JSON.stringify(inputObj, null, '    '),
               'standard': JSON.stringify(commentObj, null, '    '),
-              'header': vHeader.value
+              'header': vHeader.value,
+              'detail': this.getExtraComment() || ((this.currentRemoteItem || {}).Document || {}).detail,
             },
-            'TestRecord': this.isEditResponse != true && did != null ? null : {
-              'documentId': this.isEditResponse ? did : undefined,
+            'TestRecord': isEditResponse != true && did != null ? null : {
+              'documentId': isEditResponse ? did : undefined,
               'randomId': 0,
               'host': this.getBaseUrl(),
               'testAccountId': currentAccountId,
-              'response': JSON.stringify(this.isEditResponse ? inputObj : currentResponse),
-              'standard': isML || this.isEditResponse ? JSON.stringify(this.isEditResponse ? commentObj : stddObj) : undefined
+              'response': JSON.stringify(isEditResponse ? inputObj : currentResponse),
+              'standard': isML || isEditResponse ? JSON.stringify(isEditResponse ? commentObj : stddObj) : undefined,
+              // 没必要，直接都在请求中说明，查看也方便 'detail': (isEditResponse ? this.getExtraComment() : null) || ((this.currentRemoteItem || {}).TestRecord || {}).detail,
             },
-            'tag': this.isEditResponse ? 'TestRecord' : 'Document'
+            'tag': isEditResponse ? 'TestRecord' : 'Document'
           }
 
           this.request(true, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
@@ -2090,8 +2114,12 @@
             }
             else {
               App.request(false, REQUEST_TYPE_PARAM, docUrl, {}, header, function (url_, res, err) {
-                if (listCallback != null) {
-                  listCallback(platform, docUrl, listUrl, itemUrl, url_, res, err)
+                if (listCallback != null && listCallback(platform, docUrl, listUrl, itemUrl, url_, res, err)) {
+                  return
+                }
+
+                if (itemCallback != null) {
+                  itemCallback(platform, docUrl, listUrl, itemUrl, itemUrl, res, err)
                 }
               })
             }
@@ -3100,6 +3128,9 @@
 
         if (isAdminOperation) {
           // alert('logout  isAdminOperation  this.saveCache(this.server, User, {})')
+          this.delegateId = null
+          this.saveCache(this.server, 'delegateId', null)
+
           this.saveCache(this.server, 'User', {})
         }
 
@@ -3157,7 +3188,9 @@
         this.User.id = 0
         this.Privacy = {}
         this.remotes = []
+        // 导致刚登录成功就马上退出 this.delegateId = null
         this.saveCache(this.server, 'User', this.User) //应该用lastBaseUrl,baseUrl应随watch输入变化重新获取
+        // this.saveCache(this.server, 'delegateId', this.delegateId) //应该用lastBaseUrl,baseUrl应随watch输入变化重新获取
       },
 
       /**计时回调
@@ -3171,6 +3204,7 @@
 
         this.view = 'output';
         vComment.value = '';
+        vWarning.value = '';
         // vUrlComment.value = '';
         vOutput.value = 'resolving...';
 
@@ -3184,53 +3218,58 @@
             throw new Error(e2.message)
           }
 
-          before = this.toDoubleJSON(StringUtil.trim(before));
-          log('onHandle  before = \n' + before);
+          before = StringUtil.trim(before);
 
           var afterObj;
           var after;
-          try {
-            afterObj = jsonlint.parse(before);
-            after = JSON.stringify(afterObj, null, "    ");
-            before = after;
-          }
-          catch (e) {
-            log('main.onHandle', 'try { return jsonlint.parse(before); \n } catch (e) {\n' + e.message)
-            log('main.onHandle', 'return jsonlint.parse(this.removeComment(before));')
-
-            try {
-              afterObj = jsonlint.parse(this.removeComment(before));
-              after = JSON.stringify(afterObj, null, "    ");
-            } catch (e2) {
-              throw new Error('请求 JSON 格式错误！请检查并编辑请求！\n\n如果JSON中有注释，请 手动删除 或 点击左边的 \'/" 按钮 来去掉。\n\n' + e2.message)
-            }
-          }
-
-          //关键词let在IE和Safari上不兼容
           var code = '';
-          if (this.isEditResponse != true) {
+
+          if (StringUtil.isEmpty(before)) {
+            afterObj = {};
+            after = '';
+          } else {
+            before = StringUtil.trim(before); // this.toDoubleJSON(StringUtil.trim(before));
+            log('onHandle  before = \n' + before);
+
+            var json = isSingle ? this.switchQuote(before) : before;
             try {
-              code = this.getCode(after); //必须在before还是用 " 时使用，后面用会因为解析 ' 导致失败
-            } catch (e) {
-              code = '\n\n\n建议:\n使用其它浏览器，例如 谷歌Chrome、火狐FireFox 或者 微软Edge， 因为这样能自动生成请求代码.'
-                + '\nError:\n' + e.message + '\n\n\n';
+              afterObj = jsonlint.parse(json);
+              after = JSON.stringify(afterObj, null, "    ");
+              before = isSingle ? this.switchQuote(after) : after;
             }
+            catch (e) {
+              log('main.onHandle', 'try { return jsonlint.parse(before); \n } catch (e) {\n' + e.message)
+              log('main.onHandle', 'return jsonlint.parse(this.removeComment(before));')
+
+              try {
+                afterObj = JSON5.parse(json);  // jsonlint.parse(this.removeComment(before));
+                after = JSON.stringify(afterObj, null, "    ");
+              } catch (e2) {
+                throw new Error('请求 JSON 格式错误！请检查并编辑请求！\n\n如果JSON中有注释，请 手动删除 或 点击左边的 \'/" 按钮 来去掉。\n\n' + e.message + '\n\n' + e2.message)
+              }
+            }
+
+            //关键词let在IE和Safari上不兼容
+            if (this.isEditResponse != true) {
+              try {
+                code = this.getCode(after); //必须在before还是用 " 时使用，后面用会因为解析 ' 导致失败
+              } catch (e) {
+                code = '\n\n\n建议:\n使用其它浏览器，例如 谷歌Chrome、火狐FireFox 或者 微软Edge， 因为这样能自动生成请求代码.'
+                  + '\nError:\n' + e.message + '\n\n\n';
+              }
+            }
+
+            var selectionStart = vInput.selectionStart
+            var selectionEnd = vInput.selectionEnd
+            vInput.value = before
+              + '\n\n\n                                                                                                       '
+              + '                                                                                                       \n';  //解决遮挡
+
+            vInput.selectionStart = selectionStart
+            vInput.selectionEnd = selectionEnd
+            vInput.setSelectionRange(selectionStart, selectionEnd)
           }
 
-          if (isSingle) {
-            if (before.indexOf('"') >= 0) {
-              before = before.replace(/"/g, "'");
-            }
-          }
-          else {
-            if (before.indexOf("'") >= 0) {
-              before = before.replace(/'/g, '"');
-            }
-          }
-
-          vInput.value = StringUtil.trim(before)
-            + '\n                                                                                                       '
-            + '                                                                                                       \n';  //解决遮挡
           vSend.disabled = false;
 
           if (this.isEditResponse != true) {
@@ -3239,27 +3278,48 @@
             this.showDoc()
           }
 
+          var docKey = this.isEditResponse ? 'TestRecord' : 'Document';
+          var detail = ((this.currentRemoteItem || {})[docKey] || {}).detail;
+          var extraComment = this.getExtraComment()
+
           try {
             var standardObj = null;
             try {
-              standardObj = JSON.parse(((this.currentRemoteItem || {})[this.isEditResponse ? 'TestRecord' : 'Document'] || {}).standard);
+              standardObj = JSON.parse(((this.currentRemoteItem || {})[docKey] || {}).standard);
             } catch (e3) {
               log(e3)
             }
 
             var m = this.getMethod();
-            var c = isSingle ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj))
-              + '\n                                                                                                       '
-              + '                                                                                                       \n';  //解决遮挡
-            //TODO 统计行数，补全到一致 vInput.value.lineNumbers
+            var w = isSingle || this.isEditResponse ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj, null, true));
+            var c = isSingle ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj));
 
-            if (isSingle != true && afterObj.tag == null) {
-              m = m == null ? 'GET' : m.toUpperCase()
-              if (['GETS', 'HEADS', 'POST', 'PUT', 'DELETE'].indexOf(m) >= 0) {
-                c += ' ! 非开放请求必须设置 tag ！例如 "tag": "User"'
+
+            //TODO 统计行数，补全到一致 vInput.value.lineNumbers
+            if (isSingle != true) {
+              if (afterObj.tag == null) {
+                m = m == null ? 'GET' : m.toUpperCase()
+                if (['GETS', 'HEADS', 'POST', 'PUT', 'DELETE'].indexOf(m) >= 0) {
+                  w += ' ! 非开放请求必须设置 tag ！例如 "tag": "User"'
+                  c += ' ! 非开放请求必须设置 tag ！例如 "tag": "User"'
+                }
+              }
+
+              if (StringUtil.isEmpty(detail, true)) {
+                c += extraComment == null ? '' : ('\n\n/*' + extraComment + '\n*/');
+              } else {
+                c += '\n\n/*' + (extraComment == null ? '' : extraComment + '\n\n') + detail + '\n*/';
               }
             }
+
+
+            vWarning.value = w
+              + '\n\n\n                                                                                                       '
+              + '                                                                                                       \n';  //解决遮挡
             vComment.value = c
+              + '\n\n\n                                                                                                       '
+              + '                                                                                                       \n';  //解决遮挡
+
             vUrlComment.value = isSingle || StringUtil.isEmpty(this.urlComment, true)
               ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, '  ')
               + ' - ' + (this.requestVersion > 0 ? 'V' + this.requestVersion : 'V*');
@@ -3285,19 +3345,19 @@
             log('onHandle   try { vComment.value = CodeUtil.parseComment >> } catch (e) {\n' + e.message);
           }
 
-          try {
-            // 去掉前面的 JSON
-            var it = StringUtil.trim(vInput.value);
-            var ct = StringUtil.trim(vComment.value);
+          if (this.isPreviewEnabled) {
+            try {
+              // 去掉前面的 JSON
+              var raw = StringUtil.trim(isSingle ? vInput.value : vComment.value);
+              var start = raw.lastIndexOf('\n\/*')
+              var end = raw.lastIndexOf('\n*\/')
+              var ct = start < 0 || end <= start ? '' : StringUtil.trim(raw.substring(start + '\n\/*'.length, end))
 
-            var raw = (it.lastIndexOf('\n\/*') < 0 || it.lastIndexOf('\n*\/') < 0 ? ct : it) || '';
-            var start = raw.lastIndexOf('\n\/*')
-            var end = raw.lastIndexOf('\n*\/')
-            markdownToHTML('```js\n' + (StringUtil.isEmpty(ct) ? (start < 0 || end <= start ? raw.substring(0, start) : '') : ct) + '\n```\n'
-              // + this.toMD(start < 0 || end <= start ? '' : raw.substring(start + '\n\/*'.length, end) ), true);
-              + (start < 0 || end <= start ? '' : raw.substring(start + '\n\/*'.length, end) ), true);
-          } catch (e3) {
-            log(e3)
+              markdownToHTML('```js\n' + (start < 0 || end <= start ? raw : raw.substring(0, start)) + '\n```\n'
+                + (StringUtil.isEmpty(ct, true) ? '' : ct + '\n\n```js\n' + ct + '\n```\n'), true);
+            } catch (e3) {
+              log(e3)
+            }
           }
 
           if (this.isEditResponse) {
@@ -3323,6 +3383,7 @@
         this.setBaseUrl();
         inputted = new String(vInput.value);
         vComment.value = '';
+        vWarning.value = '';
         // vUrlComment.value = '';
 
         clearTimeout(handler);
@@ -3342,6 +3403,8 @@
        */
       transfer: function () {
         isSingle = ! isSingle;
+
+        vInput.value = this.switchQuote(vInput.value);
 
         this.isTestCaseShow = false
 
@@ -3508,7 +3571,7 @@
         type = type || REQUEST_TYPE_JSON
         url = StringUtil.noBlank(url)
 
-        var isDelegate = (isAdminOperation == false && this.isDelegateEnabled) || (isAdminOperation && url.indexOf('://apijson.cn') > 0)
+        var isDelegate = (isAdminOperation == false && this.isDelegateEnabled) || (isAdminOperation && url.indexOf('://apijson.cn:9090') > 0)
 
         if (header != null && header.Cookie != null) {
           if (isDelegate) {
@@ -3551,7 +3614,7 @@
               var hs = res.headers || {}
               var delegateId = hs['Apijson-Delegate-Id'] || hs['apijson-delegate-id']
               if (delegateId != null && delegateId != App.delegateId) {
-                App.delegateId = delegateId;
+                App.delegateId = delegateId
                 App.saveCache(App.server, 'delegateId', delegateId)
               }
             }
@@ -3587,6 +3650,10 @@
           })
           .catch(function (err) {
             log('send >> error:\n' + err)
+            if (isAdminOperation) {
+              App.delegateId = null
+            }
+
             if (callback != null) {
               callback(url, {}, err)
               return
@@ -4270,14 +4337,35 @@
 
       },
 
-      toDoubleJSON: function (json, defaultValue) {
-        if (StringUtil.isEmpty(json)) {
-          return defaultValue == null ? '{}' : JSON.stringify(defaultValue)
+      // toDoubleJSON: function (json, defaultValue) {
+      //   if (StringUtil.isEmpty(json)) {
+      //     return defaultValue == null ? '{}' : JSON.stringify(defaultValue)
+      //   }
+      //   else if (json.indexOf("'") >= 0) {
+      //     json = json.replace(/'/g, '"');
+      //   }
+      //   return json;
+      // },
+
+      switchQuote: function (before) {
+        if (before == null) {
+          return before;
         }
-        else if (json.indexOf("'") >= 0) {
-          json = json.replace(/'/g, '"');
+
+        var newBefore = '';
+        for (var i = 0; i < before.length; i++) {
+          var chr = before.substring(i, i + 1); // .charAt(i);
+          if (chr == '"') {
+            newBefore += "'"; // chr = "'";
+          }
+          else if (chr == "'") {
+            newBefore += '"'; // chr = '"';
+          }
+          else {
+            newBefore += chr;
+          }
         }
-        return json;
+        return newBefore;
       },
 
       /**转为Markdown格式
@@ -4475,7 +4563,7 @@
             this.resetCount(this.currentRandomItem)
           }
 
-          var json = this.getRequest(vInput.value) || {}
+          var json = this.getRequest(vInput.value, {})
           var url = this.getUrl()
           var header = this.getHeader(vHeader.value)
 
@@ -4632,7 +4720,7 @@
                 config: vRandom.value
               }
             },
-            this.type, this.getUrl(), this.getRequest(vInput.value), this.getHeader(vHeader.value), callback
+            this.type, this.getUrl(), this.getRequest(vInput.value, {}), this.getHeader(vHeader.value), callback
           )
         }
         catch (e) {
@@ -4700,7 +4788,7 @@
           // path User/id  key id@
           const index = line.indexOf(': '); //APIJSON Table:alias 前面不会有空格 //致后面就接 { 'a': 1} 报错 Unexpected token ':'   lastIndexOf(': '); // indexOf(': '); 可能会有 Comment:to
           const p_k = line.substring(0, index);
-          const bi = p_k.indexOf(' ');
+          const bi = -1;  //没必要支持，用 before: undefined, after: .. 同样支持替换，反而这样导致不兼容包含空格的 key   p_k.indexOf(' ');
           const path = bi < 0 ? p_k : p_k.substring(0, bi); // User/id
 
           const pathKeys = path.split('/')
@@ -4812,22 +4900,37 @@
             vOutput.value = 'requesting value for ' + tableName + '/' + key + ' from database...';
 
             const args = StringUtil.split(value.substring(start + 1, end)) || [];
-            const min = StringUtil.isEmpty(args[0], true) ? null : +args[0];
-            const max = StringUtil.isEmpty(args[1], true) ? null : +args[1]
+            var min = StringUtil.trim(args[0]);
+            var max = StringUtil.trim(args[1]);
+            var table = StringUtil.trim(args[2]) || '';
+            var column = StringUtil.trim(args[3]) || '';
+
+            min = min == '' || min == 'null' || min == 'undefined' ? null : +min;
+            max = max == '' || max == 'null' || max == 'undefined' ? null : +max;
+
+            if ((table.startsWith('"') && table.endsWith('"')) || (table.startsWith("'") && table.endsWith("'"))) {
+              table = table.substring(1, table.length - 1);
+            }
+            if ((column.startsWith('"') && column.endsWith('"')) || (column.startsWith("'") && column.endsWith("'"))) {
+              column = column.substring(1, column.length - 1);
+            }
+
+            const finalTableName = StringUtil.isEmpty(table, true) ? tableName : table;
+            const finalColumnName = StringUtil.isEmpty(column, true) ? lastKeyInPath : column;
 
             const tableReq = {
-              '@column': lastKeyInPath,
-              '@order': isRandom ? 'rand()' : (lastKeyInPath + (isDesc ? '-' : '+'))
+              '@column': isRandom ? finalColumnName : ('DISTINCT ' + finalColumnName),
+              '@order': isRandom ? 'rand()' : (finalColumnName + (isDesc ? '-' : '+'))
             };
-            tableReq[lastKeyInPath + '>='] = min;
-            tableReq[lastKeyInPath + '<='] = max;
+            tableReq[finalColumnName + '>='] = min;
+            tableReq[finalColumnName + '<='] = max;
 
             const req = {};
-            const listName = isRandom ? null : tableName + '-' + lastKeyInPath + '[]';
+            const listName = isRandom ? null : finalTableName + '-' + finalColumnName + '[]';
             const orderIndex = isRandom ? null : getOrderIndex(randomId, line, null)
 
             if (isRandom) {
-              req[tableName] = tableReq;
+              req[finalTableName] = tableReq;
             }
             else {
               // 从数据库获取时不考虑边界，不会在越界后自动循环
@@ -4835,7 +4938,7 @@
                 count: 1, // count <= 100 ? count : 0,
                 page: (step*orderIndex) % 100  //暂时先这样，APIJSON 应该改为 count*page <= 10000  //FIXME 上限 100 怎么破，lastKeyInPath 未必是 id
               };
-              listReq[tableName] = tableReq;
+              listReq[finalTableName] = tableReq;
               req[listName] = listReq;
             }
 
@@ -4856,7 +4959,7 @@
               }
 
               if (isRandom) {
-                invoke((data[tableName] || {})[lastKeyInPath], which, p_k, pathKeys, key, lastKeyInPath);
+                invoke((data[finalTableName] || {})[finalColumnName], which, p_k, pathKeys, key, lastKeyInPath);
               }
               else {
                 var val = (data[listName] || [])[0];
@@ -5071,7 +5174,7 @@
             this.log('test  for ' + i + ' >> try { header = this.getHeader(document.header) } catch (e) { \n' + e.message)
           }
 
-          this.request(false, document.type, baseUrl + document.url, this.getRequest(document.request), header, function (url, res, err) {
+          this.request(false, document.type, baseUrl + document.url, this.getRequest(document.request, null, true), header, function (url, res, err) {
 
             try {
               App.onResponse(url, res, err)
@@ -5669,7 +5772,7 @@
           this.$refs[toId <= 0 ? 'randomTexts' : 'randomSubTexts'][index].setAttribute('data-hint', (d || {}).config == null ? '' : d.config);
         }
         else {
-          this.$refs['testCaseTexts'][index].setAttribute('data-hint', JSON.stringify(this.getRequest(d.request), null, ' '));
+          this.$refs['testCaseTexts'][index].setAttribute('data-hint', StringUtil.isEmpty(d.request, true) ? '' : JSON.stringify(this.getRequest(d.request, {}, true), null, ' '));
         }
       },
 
@@ -5771,6 +5874,7 @@
         this.randomCount = this.getCache(this.server, 'randomCount', this.randomCount)
         this.randomSubPage = this.getCache(this.server, 'randomSubPage', this.randomSubPage)
         this.randomSubCount = this.getCache(this.server, 'randomSubCount', this.randomSubCount)
+        this.delegateId = this.getCache(this.server, 'delegateId', this.delegateId)
 
         CodeUtil.thirdPartyApiMap = this.getCache(this.thirdParty, 'thirdPartyApiMap')
       } catch (e) {
@@ -5788,7 +5892,9 @@
         this.transfer()
 
         if (this.User != null && this.User.id != null && this.User.id > 0) {
-          this.showTestCase(true, false)  // 本地历史仍然要求登录  this.User == null || this.User.id == null)
+          setTimeout(function () {
+            App.showTestCase(true, false)  // 本地历史仍然要求登录  this.User == null || this.User.id == null)
+          }, 1000)
         }
       }
       else {
@@ -5874,6 +5980,7 @@
           if (hasTestArg) {
             vUrlComment.value = ""
             vComment.value = ""
+            vWarning.value = ""
           }
 
           App.onChange(false)
@@ -5903,6 +6010,21 @@
         }, 2000)
 
       }
+
+
+      // 快捷键 CTRL + I 格式化 JSON
+      document.addEventListener('keydown',function(event) {
+        // alert(event.key) 小写字母 i 而不是 KeyI
+        // if (event.ctrlKey && event.keyCode === 73) { // KeyI 无效  event.key === 'KeyI' && event.target == vInput){
+        if (event.keyCode === 73 && (event.ctrlKey || event.metaKey)) {
+          try {
+            var json = JSON.stringify(JSON5.parse(vInput.value), null, '    ');
+            vInput.value = inputted = isSingle ? App.switchQuote(json) : json;
+          } catch (e) {
+            log(e)
+          }
+        }
+      })
 
     }
   })
