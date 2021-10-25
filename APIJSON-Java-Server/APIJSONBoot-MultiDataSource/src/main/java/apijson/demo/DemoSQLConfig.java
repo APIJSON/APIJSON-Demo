@@ -270,5 +270,25 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//	public String getKey(String key) {
 	//		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
 	//	}
-	
+
+	// 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库
+	//	public Object getValue(@NotNull Object value) {
+	//		if (isOracle() && RequestMethod.isQueryMethod(getMethod()) == false && value instanceof String) {
+	//			try {
+	//				SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	//				parser.parse((String) value);
+	//				if (isPrepared()) {
+	//					preparedValueList.add(value);
+	//				}
+	//				return "to_date(" + (isPrepared() ? "?" : getSQLValue(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
+	//			} 
+	//			catch (Throwable e) {
+	//				if (Log.DEBUG) {
+	//					e.printStackTrace();
+	//				}
+	//			}
+	//		}
+	//		return super.getValue(value);
+	//	}
+
 }
