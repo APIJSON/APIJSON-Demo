@@ -33,10 +33,7 @@ import static apijson.framework.APIJSONConstant.VERSION;
 import static apijson.framework.APIJSONConstant.VISITOR_;
 import static apijson.framework.APIJSONConstant.VISITOR_ID;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.charset.Charset;
 import java.rmi.ServerException;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -93,6 +90,10 @@ public class DemoController extends Controller {
 		if (parser instanceof APIJSONParser) {
 			((APIJSONParser) parser).setSession(session);
 		}
+		//		// 取消注释可以更方便地通过日志排查错误
+		//		if (parser instanceof AbstractParser) {
+		//			((AbstractParser<?>) parser).setRequestURL(getRequest().getRequestURL().toString());
+		//		}
 		return parser;
 	}
 	

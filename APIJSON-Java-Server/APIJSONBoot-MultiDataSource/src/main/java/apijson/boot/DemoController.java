@@ -100,8 +100,13 @@ import apijson.orm.exception.OutOfRangeException;
 public class DemoController extends APIJSONController {
 	private static final String TAG = "DemoController";
 
+	// 可以更方便地通过日志排查错误
+	@Override
+	public String getRequestURL() {
+		return httpServletRequest.getRequestURL().toString();
+	}
+	
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -1102,9 +1107,9 @@ public class DemoController extends APIJSONController {
 	}
 
 	@Autowired
-	HttpServletRequest request;
+	HttpServletRequest httpServletRequest;
 	@Autowired
-	HttpServletResponse response;
+	HttpServletResponse httpServletResponse;
 
 	/**代理接口，解决前端（APIAuto等）跨域问题
 	 * @param exceptHeaders 排除请求头，必须放在最前面，放后面可能被当成 $_delegate_url 的一部分
@@ -1152,7 +1157,7 @@ public class DemoController extends APIJSONController {
 			body = obj.toJSONString();
 		}
 		
-		Enumeration<String> names = request.getHeaderNames();
+		Enumeration<String> names = httpServletRequest.getHeaderNames();
 		HttpHeaders headers = null;
 		String name;
 		if (names != null) {
@@ -1171,16 +1176,16 @@ public class DemoController extends APIJSONController {
 				if (name != null && exceptHeaderList.contains(name.toLowerCase()) == false) {
 					//APIAuto 是一定精准发送 Set-Cookie 名称过来的，预留其它命名可实现覆盖原 Cookie Header 等更多可能 
 					if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
-						setCookie = Arrays.asList(request.getHeader(name));  // JSON.parseArray(request.getHeader(name), String.class);
+						setCookie = Arrays.asList(httpServletRequest.getHeader(name));  // JSON.parseArray(request.getHeader(name), String.class);
 					}
 					else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
-						addCookie = Arrays.asList(request.getHeader(name));
+						addCookie = Arrays.asList(httpServletRequest.getHeader(name));
 					}
 					else if (APIJSON_DELEGATE_ID.toLowerCase().equals(name.toLowerCase())) {
-						apijsonDelegateId = Arrays.asList(request.getHeader(name));
+						apijsonDelegateId = Arrays.asList(httpServletRequest.getHeader(name));
 					}
 					else {
-						headers.add(name, request.getHeader(name));
+						headers.add(name, httpServletRequest.getHeader(name));
 					}
 				}
 			}
@@ -1215,7 +1220,7 @@ public class DemoController extends APIJSONController {
 		}
 
 		//可能是 HTTP POST FORM，即便是 HTTP POST JSON，URL 的参数也要拼接，尽可能保持原样  if (method == HttpMethod.GET) {
-		Map<String, String[]> map = request.getParameterMap();
+		Map<String, String[]> map = httpServletRequest.getParameterMap();
 
 		if (map != null) {
 			map = new HashMap<>(map);  //解决 throw exception: Unmodified Map
@@ -1259,7 +1264,7 @@ public class DemoController extends APIJSONController {
 		}
 		
 		SESSION_MAP.put(session.getId(), session);
-		response.setHeader(APIJSON_DELEGATE_ID, session.getId());
+		httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
 		
 		return entity.getBody();
 	}
