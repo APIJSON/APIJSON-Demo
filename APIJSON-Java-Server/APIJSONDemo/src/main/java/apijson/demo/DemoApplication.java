@@ -16,6 +16,8 @@ package apijson.demo;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.server.WebServerFactoryCustomizer;
+import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -32,7 +34,7 @@ import apijson.orm.SQLConfig;
  */
 @Configuration
 @SpringBootApplication
-public class DemoApplication {
+public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
 	static {
 		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
@@ -70,6 +72,12 @@ public class DemoApplication {
 		APIJSONApplication.init(false);  // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
 	}
 	
+	
+	// SpringBoot 2.x 自定义端口方式
+	@Override
+	public void customize(ConfigurableServletWebServerFactory server) {
+		server.setPort(8080);
+	}
 	
 	// 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

@@ -21,16 +21,18 @@ import org.springframework.context.annotation.Configuration;
 import com.alibaba.druid.pool.DruidDataSource;
 
 
-/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置
+/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置。
+ * 也可以直接 new 再 set 属性，具体见 Druid 的 DbTestCase  
+ * https://github.com/alibaba/druid/blob/master/src/test/java/com/alibaba/druid/DbTestCase.java
  * @author Lemon
  */
 @Configuration
 public class DemoDataSourceConfig {
-	  
-	  @Bean
-	  @ConfigurationProperties(prefix = "spring.datasource.druid")
-	  public DruidDataSource druidDataSource() {
-	      return new DruidDataSource();
-	  }
+
+	@Bean
+	@ConfigurationProperties(prefix = "spring.datasource.druid")
+	public DruidDataSource druidDataSource() {
+		return new DruidDataSource();
+	}
 
 }

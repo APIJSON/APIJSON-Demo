@@ -18,20 +18,22 @@ import com.zaxxer.hikari.HikariDataSource;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
- 
+
 import javax.sql.DataSource;
 
 
-/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置
+/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置。
+ * 也可以直接 new 再 set 属性，具体见 HikariCP 的文档  
+ * https://github.com/brettwooldridge/HikariCP#rocket-initialization
  * @author Lemon
  */
 @Configuration
 public class DemoDataSourceConfig {
-	
-	  @Bean
-	  @ConfigurationProperties(prefix = "spring.datasource.hikari")
-	  public DataSource dataSource() {
-	      return new HikariDataSource();
-	  }
- 
+
+	@Bean
+	@ConfigurationProperties(prefix = "spring.datasource.hikari")
+	public DataSource dataSource() {
+		return new HikariDataSource();
+	}
+
 }

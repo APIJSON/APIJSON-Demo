@@ -27,30 +27,39 @@ import com.zaxxer.hikari.HikariDataSource;
  */
 @Configuration
 public class DemoDataSourceConfig {
-	
-	  @Bean
-	  @ConfigurationProperties(prefix = "spring.datasource.hikari")
-	  public HikariDataSource hikaricpDataSource() {
-	      return new HikariDataSource();
-	  }
-	  
-	  
-	  @Bean
-	  @ConfigurationProperties(prefix = "spring.datasource.druid")
-	  public DruidDataSource druidDataSource() {
-	      return new DruidDataSource();
-	  }
-	  
-	  @Bean
-	  @ConfigurationProperties(prefix = "spring.datasource.druid-test")
-	  public DruidDataSource druidTestDataSource(){
-		  return new DruidDataSource();
-	  }
-	  
-	  @Bean
-	  @ConfigurationProperties(prefix = "spring.datasource.druid-online")
-	  public DruidDataSource druidOnlineDataSource(){
-		  return new DruidDataSource();
-	  }
+
+	/** 数据源配置，对应 application.yml 的数据库连接池 datasource 配置。
+	 * 也可以直接 new 再 set 属性，具体见 HikariCP 的文档  
+	 * https://github.com/brettwooldridge/HikariCP#rocket-initialization
+	 */
+	@Bean
+	@ConfigurationProperties(prefix = "spring.datasource.hikari")
+	public HikariDataSource hikaricpDataSource() {
+		return new HikariDataSource();
+	}
+
+
+	/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置。
+	 * 也可以直接 new 再 set 属性，具体见 Druid 的 DbTestCase  
+	 * https://github.com/alibaba/druid/blob/master/src/test/java/com/alibaba/druid/DbTestCase.java
+	 * @author Lemon
+	 */
+	@Bean
+	@ConfigurationProperties(prefix = "spring.datasource.druid")
+	public DruidDataSource druidDataSource() {
+		return new DruidDataSource();
+	}
+
+	@Bean
+	@ConfigurationProperties(prefix = "spring.datasource.druid-test")
+	public DruidDataSource druidTestDataSource(){
+		return new DruidDataSource();
+	}
+
+	@Bean
+	@ConfigurationProperties(prefix = "spring.datasource.druid-online")
+	public DruidDataSource druidOnlineDataSource(){
+		return new DruidDataSource();
+	}
 
 }

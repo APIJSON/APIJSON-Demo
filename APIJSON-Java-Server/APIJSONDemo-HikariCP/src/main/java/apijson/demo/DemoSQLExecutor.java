@@ -15,16 +15,10 @@ limitations under the License.*/
 package apijson.demo;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.util.Map;
 
 import javax.sql.DataSource;
 
-import com.alibaba.fastjson.JSONObject;
-
 import apijson.Log;
-import apijson.demo.DemoApplication;
 import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
