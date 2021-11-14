@@ -52,7 +52,7 @@ import apijson.orm.Verifier;
  * @author Lemon
  */
 public class DemoAppConfig extends JFinalConfig {
-	
+
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -86,8 +86,8 @@ public class DemoAppConfig extends JFinalConfig {
 		};
 
 		// APIJSON 配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		
-		
+
+
 		// 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
 		//		try { //加载驱动程序
 		//			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
@@ -118,12 +118,12 @@ public class DemoAppConfig extends JFinalConfig {
 		//			e.printStackTrace();
 		//			Log.e(TAG, "加载 DB2 驱动失败，请检查 pom.xml 中 com.ibm.db2 版本是否存在以及可用 ！！！");
 		//		}
-		
+
 	}
 
 
 	public static void main(String[] args) throws Exception {
-		UndertowServer.start(DemoAppConfig.class);
+		UndertowServer.start(DemoAppConfig.class);   // src/main/resources/undertow.txt 中配置 undertow.port 优先于 UndertowServer.start 传参 int port
 
 		Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
 		APIJSONApplication.init();
@@ -154,23 +154,23 @@ public class DemoAppConfig extends JFinalConfig {
 				if (request == null) {
 					return;
 				}
-				
+
 				String origin = request.getHeader("origin");
-		        String corsHeaders = request.getHeader("access-control-request-headers");
-		        String corsMethod = request.getHeader("access-control-request-method");
+				String corsHeaders = request.getHeader("access-control-request-headers");
+				String corsMethod = request.getHeader("access-control-request-method");
 
-		        HttpServletResponse response = controller.getResponse();
-		        response.setHeader("Access-Control-Allow-Origin", StringUtil.isEmpty(origin, true) ? "*" : origin);
-		        response.setHeader("Access-Control-Allow-Credentials", "true");
-		        response.setHeader("Access-Control-Allow-Headers", StringUtil.isEmpty(corsHeaders, true) ? "*" : corsHeaders);
-		        response.setHeader("Access-Control-Allow-Methods", StringUtil.isEmpty(corsMethod, true) ? "*" : corsMethod);
-		        response.setHeader("Access-Control-Max-Age", "86400");
+				HttpServletResponse response = controller.getResponse();
+				response.setHeader("Access-Control-Allow-Origin", StringUtil.isEmpty(origin, true) ? "*" : origin);
+				response.setHeader("Access-Control-Allow-Credentials", "true");
+				response.setHeader("Access-Control-Allow-Headers", StringUtil.isEmpty(corsHeaders, true) ? "*" : corsHeaders);
+				response.setHeader("Access-Control-Allow-Methods", StringUtil.isEmpty(corsMethod, true) ? "*" : corsMethod);
+				response.setHeader("Access-Control-Max-Age", "86400");
 
-		        if("OPTIONS".equals(request.getMethod().toUpperCase())){
+				if("OPTIONS".equals(request.getMethod().toUpperCase())){
 					controller.renderJson("{}");
 					return;
 				}
-				
+
 				inv.invoke();
 			}
 		});
