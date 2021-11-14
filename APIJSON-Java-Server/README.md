@@ -76,7 +76,7 @@ APIJSONFinal: 右键 DemoAppConfig > Run DemoAppConfig.main
 
 如果是 Address already in use，说明 8080 端口被占用，<br />
 可以关闭占用这个端口的程序(可能就是已运行的 APIJSON 工程) <br />
-或者 改下 APIJSON 工程的端口号，参考 [SpringBoot 改端口](https://stackoverflow.com/questions/21083170/spring-boot-how-to-configure-port)。<br />
+或者 改下 APIJSON 工程的端口号，参考 [SpringBoot 改端口](https://segmentfault.com/a/1190000021639114)。<br />
 其它问题请谷歌或百度。
 
 
