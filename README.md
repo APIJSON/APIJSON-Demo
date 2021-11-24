@@ -21,3 +21,8 @@ Demo projects for Tencent [APIJSON](https://github.com/Tencent/APIJSON) with dif
 
 测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
+
+
+### 贡献者
+2 个腾讯工程师、1 个平安科技工程师 等
+https://github.com/APIJSON/APIJSON-Demo/graphs/contributors
