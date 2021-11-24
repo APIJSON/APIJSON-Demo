@@ -1,4 +1,9 @@
 spring:
+# If using flyway-core dependency, either comment this out or use @FlywayDatasource in DemoDataSourceConfig
+#  flyway:
+#    url: ${spring.datasource.hikari.jdbc-url}
+#    user: ${spring.datasource.hikari.username}
+#    password: ${spring.datasource.hikari.password}
   datasource:
     # type: com.zaxxer.hikari.HikariDataSource
     # driver-class-name: com.mysql.cj.jdbc.Driver
