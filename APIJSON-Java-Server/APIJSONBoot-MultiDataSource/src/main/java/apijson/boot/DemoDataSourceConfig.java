@@ -44,6 +44,8 @@ public class DemoDataSourceConfig {
 	 * https://github.com/alibaba/druid/blob/master/src/test/java/com/alibaba/druid/DbTestCase.java
 	 * @author Lemon
 	 */
+	// Need to be specify to explicit one when using multiple datasource. Use this or config in application.yml
+	// @FlywayDataSource
 	@Bean
 	@ConfigurationProperties(prefix = "spring.datasource.druid")
 	public DruidDataSource druidDataSource() {
