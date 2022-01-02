@@ -70,6 +70,24 @@ import unitauto.jar.UnitAutoApp;
 public class DemoApplication implements ApplicationContextAware, WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 	private static final String TAG = "DemoApplication";
 
+	public static void main(String[] args) throws Exception {
+		SpringApplication.run(DemoApplication.class, args);
+
+		// FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
+		// 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
+		unitauto.Log.DEBUG = Log.DEBUG = true;
+		APIJSONParser.IS_PRINT_BIG_LOG = true;
+		APIJSONApplication.init();
+		System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");
+	}
+
+	// SpringBoot 2.x 自定义端口方式
+	@Override
+	public void customize(ConfigurableServletWebServerFactory server) {
+		server.setPort(8080);
+	}
+	
+	
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -240,22 +258,6 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	}
 
 
-	public static void main(String[] args) throws Exception {
-		SpringApplication.run(DemoApplication.class, args);
-
-		// FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
-		// 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-		unitauto.Log.DEBUG = Log.DEBUG = true;
-		APIJSONParser.IS_PRINT_BIG_LOG = true;
-		APIJSONApplication.init();
-		System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");
-	}
-
-	// SpringBoot 2.x 自定义端口方式
-	@Override
-	public void customize(ConfigurableServletWebServerFactory server) {
-		server.setPort(8080);
-	}
 
 	// 全局 ApplicationContext 实例，方便 getBean 拿到 Spring/SpringBoot 注入的类实例
 	private static ApplicationContext APPLICATION_CONTEXT;
