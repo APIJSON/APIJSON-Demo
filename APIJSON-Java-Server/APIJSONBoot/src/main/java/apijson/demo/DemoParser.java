@@ -23,6 +23,7 @@ import apijson.orm.SQLConfig;
 
 
 /**请求解析器
+ * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
 public class DemoParser extends APIJSONParser {

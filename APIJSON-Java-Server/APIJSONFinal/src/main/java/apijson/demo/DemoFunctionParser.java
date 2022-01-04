@@ -32,7 +32,8 @@ import apijson.orm.AbstractVerifier;
 import apijson.orm.JSONRequest;
 
 
-/**可远程调用的函数类
+/**可远程调用的函数类，用于自定义业务逻辑处理
+ * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
 public class DemoFunctionParser extends APIJSONFunctionParser {

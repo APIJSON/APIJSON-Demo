@@ -74,7 +74,11 @@ import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.OutOfRangeException;
 
 
-/**request controller
+/**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理
+ * 具体见 JFinal 文档
+ * https://jfinal.com/doc/3-1 
+ * 以及 APIJSON 通用文档 3.设计规范 3.1 操作方法  
+ * https://github.com/Tencent/APIJSON/blob/master/Document.md#3.1
  * <br > 建议全通过HTTP POST来请求:
  * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
  * <br > 2.提高性能 - 无需URL encode和decode

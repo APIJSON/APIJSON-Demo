@@ -15,13 +15,16 @@ limitations under the License.*/
 package apijson.demo;
 
 import java.net.URLDecoder;
+import java.util.Map;
 
 import javax.servlet.http.HttpSession;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import apijson.RequestMethod;
@@ -30,7 +33,15 @@ import apijson.framework.APIJSONController;
 import apijson.orm.Parser;
 
 
-/**提供入口，转交给 APIJSON 的 Parser 来处理
+/**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理
+ * 具体见 SpringBoot 文档
+ * https://www.springcloud.cc/spring-boot.html#boot-features-spring-mvc
+ * 以及 APIJSON 通用文档 3.设计规范 3.1 操作方法  
+ * https://github.com/Tencent/APIJSON/blob/master/Document.md#3.1
+ * <br > 建议全通过HTTP POST来请求:
+ * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
+ * <br > 2.提高性能 - 无需URL encode和decode
+ * <br > 3.调试方便 - 建议使用 APIAuto(http://apijson.cn/api) 或 Postman
  * @author Lemon
  */
 @RestController
@@ -39,7 +50,7 @@ public class DemoController extends APIJSONController {
 	
 	@Override
 	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
-		return super.newParser(session, method).setNeedVerify(false); //TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
+		return super.newParser(session, method).setNeedVerify(false);  // TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
 	}
 	
 	@PostMapping(value = "get")
@@ -47,7 +58,13 @@ public class DemoController extends APIJSONController {
 	public String get(@RequestBody String request, HttpSession session) {
 		return super.get(request, session);
 	}
-
+	
+	@PostMapping("get/{tag}")
+	@Override
+	public String getByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.getByTag(tag, params, request, session);
+	}
+	
 	/**获取
 	 * 只为兼容HTTP GET请求，推荐用HTTP POST，可删除
 	 * @param request 只用String，避免encode后未decode
@@ -55,12 +72,12 @@ public class DemoController extends APIJSONController {
 	 * @return
 	 * @see {@link RequestMethod#GET}
 	 */
-	@RequestMapping("get/{request}")
+	@GetMapping("get/{request}")
 	public String openGet(@PathVariable String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
 		} catch (Exception e) {
-			// Parser会报错
+			// Parser 会报错
 		}
 		return get(request, session);
 	}

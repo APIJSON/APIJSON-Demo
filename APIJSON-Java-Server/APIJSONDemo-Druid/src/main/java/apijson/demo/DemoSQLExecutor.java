@@ -18,12 +18,12 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import apijson.Log;
 import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 
-/**SQL 执行
+/**SQL 执行器，支持连接池及多数据源
+ * 具体见 https://github.com/Tencent/APIJSON/issues/151
  * @author Lemon
  */
 public class DemoSQLExecutor extends APIJSONSQLExecutor {
@@ -32,20 +32,14 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
 	@Override
 	public Connection getConnection(SQLConfig config) throws Exception {
-	    //		Log.d(TAG, "getConnection  config.getDatasource() = " + config.getDatasource());
-		
+		//		Log.d(TAG, "getConnection  config.getDatasource() = " + config.getDatasource());
+
 		String key = config.getDatasource() + "-" + config.getDatabase();
 		Connection c = connectionMap.get(key);
 		if (c == null || c.isClosed()) {
-			try {
-				DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class);
-				// 另一种方式是 DruidConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DruidConfig.DATA_SOURCE.getConnection();
-				connectionMap.put(key, ds == null ? null : ds.getConnection());
-			} catch (Exception e) {
-				Log.e(TAG, "getConnection   try { "
-						+ "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
-						+ "} catch (Exception e) = " + e.getMessage());
-			}
+			DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class);
+			// 另一种方式是 DemoDataSourceConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DemoDataSourceConfig.DATA_SOURCE.getConnection();
+			connectionMap.put(key, ds == null ? null : ds.getConnection());
 		}
 
 		// 必须最后执行 super 方法，因为里面还有事务相关处理。

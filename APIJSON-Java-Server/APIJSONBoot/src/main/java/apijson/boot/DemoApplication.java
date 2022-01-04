@@ -61,8 +61,10 @@ import unitauto.MethodUtil.JSONCallback;
 import unitauto.jar.UnitAutoApp;
 
 
-/**SpringBootApplication
- * 右键这个类 > Run As > Java Application
+/**Demo SpringBoot Application 主应用程序启动类  
+ * 右键这个类 > Run As > Java Application  
+ * 具体见 SpringBoot 文档  
+ * https://www.springcloud.cc/spring-boot.html#using-boot-locating-the-main-class
  * @author Lemon
  */
 @Configuration

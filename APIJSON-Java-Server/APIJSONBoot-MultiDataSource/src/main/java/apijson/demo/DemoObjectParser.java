@@ -27,7 +27,7 @@ import apijson.orm.Join;
 import apijson.orm.SQLConfig;
 
 
-/**简化Parser，getObject和getArray(getArrayConfig)都能用
+/**对象解析器，用来简化 Parser
  * @author Lemon
  */
 public class DemoObjectParser extends APIJSONObjectParser {

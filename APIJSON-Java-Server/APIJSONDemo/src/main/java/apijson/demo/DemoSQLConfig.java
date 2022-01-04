@@ -19,8 +19,10 @@ import com.alibaba.fastjson.annotation.JSONField;
 import apijson.framework.APIJSONSQLConfig;
 
 
-/**SQL配置
+/**SQL 配置
  * TiDB 用法和 MySQL 一致
+ * 具体见详细的说明文档 C.开发说明 C-1-1.修改数据库链接  
+ * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
 public class DemoSQLConfig extends APIJSONSQLConfig {

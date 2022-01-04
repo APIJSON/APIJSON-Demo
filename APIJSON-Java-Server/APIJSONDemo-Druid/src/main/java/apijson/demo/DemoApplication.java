@@ -35,8 +35,10 @@ import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
 
 
-/**SpringBootApplication
- * 右键这个类 > Run As > Java Application
+/**Demo SpringBoot Application 主应用程序启动类  
+ * 右键这个类 > Run As > Java Application  
+ * 具体见 SpringBoot 文档  
+ * https://www.springcloud.cc/spring-boot.html#using-boot-locating-the-main-class
  * @author Lemon
  */
 @Configuration
@@ -44,8 +46,23 @@ import apijson.orm.SQLExecutor;
 @EnableAutoConfiguration
 @EnableConfigurationProperties
 public class DemoApplication implements ApplicationContextAware, WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+	
+	public static void main(String[] args) throws Exception {
+		SpringApplication.run(DemoApplication.class, args);
 
+        Log.DEBUG = true;
+		APIJSONApplication.init(false);  // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
+	}
+	
+	// SpringBoot 2.x 自定义端口方式  
+	@Override
+	public void customize(ConfigurableServletWebServerFactory server) {
+		server.setPort(8080);
+	}
+	
+	
 	static {
+		// 使用本项目的自定义处理类
 		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
 			@Override
 			public SQLConfig createSQLConfig() {
@@ -90,20 +107,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		APPLICATION_CONTEXT = applicationContext;		
 	}
 
-	
-	public static void main(String[] args) throws Exception {
-		SpringApplication.run(DemoApplication.class, args);
 
-        Log.DEBUG = true;
-		APIJSONApplication.init(false);  // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
-	}
-	
-	
-	// SpringBoot 2.x 自定义端口方式
-	@Override
-	public void customize(ConfigurableServletWebServerFactory server) {
-		server.setPort(8080);
-	}
 	
 	// 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

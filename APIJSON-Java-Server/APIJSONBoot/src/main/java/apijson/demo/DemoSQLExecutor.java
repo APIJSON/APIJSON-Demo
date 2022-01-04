@@ -24,7 +24,8 @@ import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 
-/**SQL 执行
+/**SQL 执行器，支持连接池及多数据源
+ * 具体见 https://github.com/Tencent/APIJSON/issues/151
  * @author Lemon
  */
 public class DemoSQLExecutor extends APIJSONSQLExecutor {

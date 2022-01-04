@@ -4,5 +4,5 @@
 
 undertow.devMode=false
 undertow.host=localhost
-undertow.port=8081
+undertow.port=8080
 
