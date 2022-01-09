@@ -554,7 +554,7 @@
       tests: { '-1':{}, '0':{}, '1':{}, '2': {} },
       crossProcess: '交叉账号:已关闭',
       testProcess: '机器学习:已关闭',
-      randomTestTitle: '随机测试 Random Test',
+      randomTestTitle: '参数注入 Random Test',
       testRandomCount: 1,
       testRandomProcess: '',
       compareColor: '#0000',
@@ -582,7 +582,15 @@
           "name": "测试查询" ,
           "type": "JSON" ,
           "url": "/get" ,
-          "date": "2019-06-11 17:22:20.0"
+          "date": "2019-06-11 17:22:20.0",
+// 导致清空文本后，在说明文档后面重叠显示这个绿色注释          "detail": `
+// 以上 JSON 文本支持 JSON5 格式。清空文本内容可查看规则。
+// 注释可省略。行注释前必须有两个空格；段注释必须在 JSON 下方。
+//
+// ## 快捷键
+// Ctrl + I 或 Command + I 格式化 JSON
+//
+// #### 右上角设置项 > 预览请求输入框，显示对应的预览效果`
         },
         "TestRecord":  {
           "id": 1615135440014 ,
@@ -1000,11 +1008,11 @@
           if (isRemote) { //共享测试用例
             this.isExportRandom = isRandom
 
-            if (isRandom != true) {  // 分享搜索关键词和分页信息也挺好 } && this.isTestCaseShow != true) {  // 没有拿到列表，没用
-              setTimeout(function () {
-                App.shareLink(App.isRandomTest)
-              }, 1000)
-            }
+            // if (isRandom != true) {  // 分享搜索关键词和分页信息也挺好 } && this.isTestCaseShow != true) {  // 没有拿到列表，没用
+            //   setTimeout(function () {
+            //     App.shareLink(App.isRandomTest)
+            //   }, 1000)
+            // }
 
             if (this.isTestCaseShow) {
               alert('请先输入请求内容！')
@@ -1416,7 +1424,7 @@
         }
       },
 
-      // 根据随机测试用例恢复数据
+      // 根据参数注入用例恢复数据
       restoreRandom: function (index, item) {
         this.currentRandomItem = item
         this.isRandomListShow = false
@@ -2953,7 +2961,7 @@
           version: 1, // 全局默认版本号，非必须
           remember: vRemember.checked,
           format: false,
-          defaults: {
+          defaults: isAdminOperation ? undefined : {
             '@database': StringUtil.isEmpty(this.database, true) ? undefined : this.database,
             '@schema': StringUtil.isEmpty(this.schema, true) ? undefined : this.schema
           }
@@ -4520,7 +4528,7 @@
         this.showTestCase(true, false)
       },
 
-      /**随机测试，动态替换键值对
+      /**参数注入，动态替换键值对
        * @param show
        */
       onClickTestRandom: function () {
@@ -4599,7 +4607,7 @@
           }
         }
       },
-      /**随机测试，动态替换键值对
+      /**参数注入，动态替换键值对
        * @param show
        * @param callback
        */
@@ -4703,7 +4711,7 @@
         randomItem.redCount = 0
       },
 
-      /**随机测试，动态替换键值对
+      /**参数注入，动态替换键值对
        * @param show
        * @param callback
        */
@@ -4745,7 +4753,7 @@
        *    json: {} //const json
        *  }
        */
-      /**随机测试，动态替换键值对
+      /**参数注入，动态替换键值对
        * @param show
        * @param callback
        */
@@ -4793,7 +4801,7 @@
 
           const pathKeys = path.split('/')
           if (pathKeys == null || pathKeys.length <= 0) {
-            throw new Error('随机测试 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + path + ' 不符合 JSON 路径的格式 key0/key1/../targetKey !' +
+            throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + path + ' 不符合 JSON 路径的格式 key0/key1/../targetKey !' +
               '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
               '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
               '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
@@ -4804,7 +4812,7 @@
           const customizeKey = bi > 0;
           const key = customizeKey ? p_k.substring(bi + 1) : lastKeyInPath;
           if (key == null || key.trim().length <= 0) {
-            throw new Error('随机测试 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + key + ' 不是合法的 JSON key!' +
+            throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + key + ' 不是合法的 JSON key!' +
               '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
               '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
               '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
@@ -4862,7 +4870,7 @@
                     current = parent[pathKeys[j]] = {}
                   }
                   if (parent instanceof Object == false) {
-                    throw new Error('随机测试 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中' +
+                    throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中' +
                       ' pathKeys[' + j + '] = ' + pathKeys[j] + ' 在实际请求 JSON 内对应的值不是对象 {} 或 数组 [] !');
                   }
                   parent = current;
@@ -4952,10 +4960,10 @@
               var data = (res || {}).data || {}
               if (data.code != CODE_SUCCESS) {
                 respCount = -reqCount;
-                vOutput.value = '随机测试 为第 ' + (which + 1) + ' 行\n  ' + p_k + '  \n获取数据库数据 异常：\n' + data.msg;
+                vOutput.value = '参数注入 为第 ' + (which + 1) + ' 行\n  ' + p_k + '  \n获取数据库数据 异常：\n' + data.msg;
                 alert(StringUtil.get(vOutput.value));
                 return
-                // throw new Error('随机测试 为\n  ' + tableName + '/' + key + '  \n获取数据库数据 异常：\n' + data.msg)
+                // throw new Error('参数注入 为\n  ' + tableName + '/' + key + '  \n获取数据库数据 异常：\n' + data.msg)
               }
 
               if (isRandom) {
@@ -4990,7 +4998,7 @@
 
           //支持 1, "a" 这种原始值
           // if (start < 0 || end <= start) {  //(1) 表示原始值  start*end <= 0 || start >= end) {
-          //   throw new Error('随机测试 第 ' + (i + 1) + ' 行格式错误！字符 ' + value + ' 不是合法的随机函数!');
+          //   throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！字符 ' + value + ' 不是合法的随机函数!');
           // }
 
           var toEval = value;
@@ -5014,7 +5022,7 @@
               if (Number.isSafeInteger(step) != true || step <= 0
                 || (StringUtil.isEmpty(stepStr, false) != true && StringUtil.isNumber(stepStr) != true)
               ) {
-                throw new Error('随机测试 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中字符 ' + stepStr + ' 不符合跨步 step 格式！'
+                throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中字符 ' + stepStr + ' 不符合跨步 step 格式！'
                   + '\n顺序整数 和 顺序取值 可以通过以下格式配置 升降序 和 跨步：'
                   + '\n  ODER_REAL+step(arg0, arg1...)\n  ODER_REAL-step(arg0, arg1...)'
                   + '\n  ODER_INT+step(arg0, arg1...)\n  ODER_INT-step(arg0, arg1...)'
@@ -5189,7 +5197,7 @@
 
       },
 
-      compareResponse: function (allCount, list, index, item, response, isRandom, accountIndex, justRecoverTest, err) {
+      compareResponse: function (allCount, list, index, item, response, isRandom, accountIndex, justRecoverTest, err, ignoreTrend) {
         var it = item || {} //请求异步
         var d = (isRandom ? this.currentRemoteItem.Document : it.Document) || {} //请求异步
         var r = isRandom ? it.Random : null //请求异步
@@ -5227,7 +5235,7 @@
         else {
           var standardKey = this.isMLEnabled != true ? 'response' : 'standard'
           var standard = StringUtil.isEmpty(tr[standardKey], true) ? null : JSON.parse(tr[standardKey])
-          tr.compare = JSONResponse.compareResponse(standard, this.removeDebugInfo(response) || {}, '', this.isMLEnabled) || {}
+          tr.compare = JSONResponse.compareResponse(standard, this.removeDebugInfo(response) || {}, '', this.isMLEnabled, null, null, ignoreTrend) || {}
           tr.compare.duration = it.durationHint
         }
 
@@ -5315,7 +5323,7 @@
 
         if (doneCount >= allCount && this.isCrossEnabled && isRandom != true) {
           // alert('onTestResponse  accountIndex = ' + accountIndex)
-          //TODO 自动给非 红色 报错的接口跑随机测试
+          //TODO 自动给非 红色 报错的接口跑参数注入
 
           this.test(false, accountIndex + 1)
         }
@@ -5368,10 +5376,12 @@
        */
       removeDebugInfo: function (obj) {
         if (obj != null) {
-          delete obj["trace"]
+          delete obj["debug:info|help"]
           delete obj["sql:generate|cache|execute|maxExecute"]
           delete obj["depth:count|max"]
           delete obj["time:start|duration|end"]
+          // 保留 delete obj["trace:throw"]
+          delete obj["trace:stack"]
         }
         return obj
       },
@@ -5713,7 +5723,6 @@
                 item.TestRecord = testRecord
 
 
-
                 // if (! isNewRandom) {
                 //   if (isRandom) {
                 //     App.showRandomList(true, App.currentRemoteItem)
@@ -5723,7 +5732,7 @@
                 //   }
                 // }
 
-                App.updateTestRecord(0, list, index, item, currentResponse, isRandom)
+                App.updateTestRecord(0, list, index, item, currentResponse, isRandom, true)
               }
 
             })
@@ -5732,7 +5741,7 @@
         }
       },
 
-      updateTestRecord: function (allCount, list, index, item, response, isRandom) {
+      updateTestRecord: function (allCount, list, index, item, response, isRandom, ignoreTrend) {
         item = item || {}
         var doc = (isRandom ? item.Random : item.Document) || {}
 
@@ -5756,7 +5765,7 @@
           }
 
           item.TestRecord = data.TestRecord
-          App.compareResponse(allCount, list, index, item, response, isRandom, App.currentAccountIndex, true, err);
+          App.compareResponse(allCount, list, index, item, response, isRandom, App.currentAccountIndex, true, err, ignoreTrend);
         })
       },
 
