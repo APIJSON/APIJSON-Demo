@@ -49,7 +49,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(DemoApplication.class, args);
 
-        Log.DEBUG = true;
+		Log.DEBUG = true;
 		APIJSONApplication.init(false);  // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
 	}
 	
