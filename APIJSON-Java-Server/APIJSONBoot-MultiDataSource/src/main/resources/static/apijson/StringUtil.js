@@ -32,7 +32,7 @@ var StringUtil = {
    * @return
    */
   trim: function(s) {
-    return StringUtil.get(s).trim();
+    return s == null ? '' : s.trim();
   },
 
   /**获取去掉所有空格后的string,为null则返回''
@@ -40,7 +40,7 @@ var StringUtil = {
    * @return
    */
   noBlank: function(s) {
-    return StringUtil.get(s).replace(/ /g, '');
+    return s == null ? '' : s.replace(/ /g, '');
   },
 
   /**判断字符是否为空
@@ -55,11 +55,7 @@ var StringUtil = {
     if (trim) {
       s = s.trim();
     }
-    if (s == '') {
-      return true;
-    }
-
-    return false;
+    return s.length <= 0;
   },
 
   /**判断是否为代码名称，只能包含字母，数字或下划线

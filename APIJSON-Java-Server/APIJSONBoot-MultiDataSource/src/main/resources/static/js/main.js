@@ -364,8 +364,8 @@
 // APIJSON <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-  function getRequestFromURL() {
-    var url = window.location.search;
+  function getRequestFromURL(url_) {
+    var url = url_ || window.location.search;
 
     var index = url == null ? -1 : url.indexOf("?")
     if(index < 0) { //判断是否有参数
@@ -403,6 +403,24 @@
   var REQUEST_TYPE_DATA = 'DATA'  // POST form-data
   var REQUEST_TYPE_JSON = 'JSON'  // POST application/json
   var REQUEST_TYPE_GRPC = 'GRPC'  // POST application/json
+
+  var CONTENT_TYPE_MAP = {
+    // 'PARAM': 'plain/text',
+    'FORM': 'x-www-form-urlencoded',
+    'DATA': 'form-data',
+    'JSON': 'application/json',
+    'GRPC': 'application/json',
+  }
+  var CONTENT_VALUE_TYPE_MAP = {
+    'plain/text': 'JSON',
+    'x-www-form-urlencoded': 'FORM',
+    'form-data': 'DATA',
+    'application/json': 'JSON'
+  }
+
+  var IGNORE_HEADERS = ['status code', 'remote address', 'referrer policy', 'connection', 'content-length'
+    , 'content-type', 'date', 'keep-alive', 'proxy-connection', 'set-cookie', 'vary', 'accept', 'cache-control', 'dnt'
+    , 'host', 'origin', 'pragma', 'referer', 'user-agent']
 
   var RANDOM_DB = 'RANDOM_DB'
   var RANDOM_IN = 'RANDOM_IN'
@@ -635,7 +653,7 @@
       host: '',
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
-      server: 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
+      server: 'http://localhost:8080',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
       // thirdParty: 'RAP /repository/joined /repository/get',
@@ -886,8 +904,10 @@
         if (hs != null && hs.length > 0) {
           var item
           for (var i = 0; i < hs.length; i++) {
-            item = hs[i]
-            var index = item.lastIndexOf('  //')  // 不加空格会导致 http:// 被截断  ('//')  //这里只支持单行注释，不用 removeComment 那种带多行的去注释方式
+            item = hs[i] || ''
+
+            // 解决整体 trim 后第一行  // 被当成正常的 key 路径而不是注释
+            var index = StringUtil.trim(item).startsWith('//') ? 0 : item.lastIndexOf('  //')  // 不加空格会导致 http:// 被截断  ('//')  //这里只支持单行注释，不用 removeComment 那种带多行的去注释方式
             var item2 = index < 0 ? item : item.substring(0, index)
             item2 = item2.trim()
             if (item2.length <= 0) {
@@ -3281,7 +3301,7 @@
           vSend.disabled = false;
 
           if (this.isEditResponse != true) {
-            vOutput.value = output = 'OK，请点击 [发送请求] 按钮来测试。[点击这里查看视频教程](https://i.youku.com/i/UNTg1NzI1MjQ4MA==/videos?spm=a2hzp.8244740.0.0)' + code;
+            vOutput.value = output = '登录后点 ↑ 上方左侧最后图标按钮可查看用例列表，点上方右侧中间图标按钮可上传用例并且添加到列表中 ↑ \nOK，请点左上方 [发送请求] 按钮来测试。[点击这里查看视频教程](https://i.youku.com/i/UNTg1NzI1MjQ4MA==/videos?spm=a2hzp.8244740.0.0)' + code;
 
             this.showDoc()
           }
@@ -3702,6 +3722,215 @@
       },
 
 
+      /**处理复制事件
+       * @param event
+       */
+      doOnCopy: function(event) {
+        var target = event.target;
+        var selectionStart = target.selectionStart;
+        var selectionEnd = target.selectionEnd;
+
+        if (target == vUrl) {
+          try {
+            var contentType = CONTENT_TYPE_MAP[this.type];
+            var json = this.getRequest(vInput.value)
+            var header = this.getHeader(vHeader.value);
+            var headerStr = '';
+            if (header != null) {
+              for (var k in header) {
+                var v = header[k];
+                headerStr += '\n' + k + ': ' + StringUtil.get(v);
+              }
+            }
+
+            console.log('复制时自动转换:\n'
+            + `Request URL: ` + vUrl.value + `
+Request Method: ` + (this.type == REQUEST_TYPE_PARAM ? 'GET' : 'POST') + (StringUtil.isEmpty(contentType, true) ? '' : `
+Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : headerStr)
+              + '\n\n' + JSON.stringify(json));
+          } catch (e) {
+            log(e)
+          }
+        }
+        else if (target == vHeader || target == vRandom) {  // key: value 转 { "key": value }
+          if (selectionStart < 0 || selectionStart <= selectionEnd) {
+            try {
+              var selection = selectionStart < 0 ? target.value : StringUtil.get(target.value).substring(selectionStart, selectionEnd);
+              var lines = StringUtil.split(selection, '\n');
+              var json = {};
+
+              for (var i = 0; i < lines.length; i ++) {
+                var l = StringUtil.trim(lines[i]) || '';
+                if (l.startsWith('//')) {
+                  continue;
+                }
+
+                var ind = l.lastIndexOf('  //');
+                l = ind < 0 ? l : StringUtil.trim(l.substring(0, ind));
+
+                ind = l.indexOf(':');
+                if (ind >= 0) {
+                  var left = target == vHeader ? StringUtil.trim(l.substring(0, ind)) : l.substring(0, ind);
+                  json[left] = StringUtil.trim(l.substring(ind + 1));
+                }
+              }
+
+              if (Object.keys(json).length > 0) {
+                var txt = JSON.stringify(json)
+                console.log('复制时自动转换:\n' +  txt)
+                navigator.clipboard.writeText(selection + '\n\n' + txt);
+                alert('复制内容最后拼接了，控制台 Console 也打印了：\n' + txt);
+              }
+            } catch (e) {
+              log(e)
+            }
+          }
+        }
+
+      },
+
+      /**处理粘贴事件
+       * @param event
+       */
+      doOnPaste: function(event) {
+        var paste = (event.clipboardData || window.clipboardData || navigator.clipboard).getData('text');
+        var target = event.target;
+        var selectionStart = target.selectionStart;
+        var selectionEnd = target.selectionEnd;
+
+        if ((selectionStart <= 0 && selectionEnd >= StringUtil.get(target.value).length) || StringUtil.isEmpty(target.value, true)) {
+          if (target == vUrl) {  //TODO 把 Chrome 或 Charles 等抓到的 Header 和 Content 自动粘贴到 vUrl, vHeader
+            try {
+              var contentStart = 0;
+              var lines = StringUtil.split(paste, '\n');
+              var header = '';
+
+              for (var i = 0; i < lines.length; i ++) {
+                var l = StringUtil.trim(lines[i]);
+                ind = l.indexOf(':');
+                var left = ind < 0 ? '' : StringUtil.trim(l.substring(0, ind));
+
+                if (/^[a-zA-Z0-9\- ]+$/g.test(left)) {
+                  var lowerKey = left.toLowerCase();
+                  var value = l.substring(ind + 1);
+
+                  if (lowerKey == 'request method') {
+                    value = StringUtil.trim(value).toUpperCase();
+                    this.type = value == 'GET' ? 'PARAM' : (value == 'POST' ? 'JSON' : value);
+                    event.preventDefault();
+                  }
+                  else if (lowerKey == 'content-type') {
+                    var type = vType.value != 'JSON' ? null : CONTENT_VALUE_TYPE_MAP[StringUtil.trim(value)];
+                    if (StringUtil.isEmpty(type, true) != true) {
+                      this.type = type;
+                      event.preventDefault();
+                    }
+                  }
+                  else if (lowerKey == 'request url') {
+                    vUrl.value = StringUtil.trim(value);
+                    event.preventDefault();
+                  }
+                  else if (StringUtil.isEmpty(lowerKey, true) || lowerKey.startsWith('accept-')
+                    || lowerKey.startsWith('access-control-') || IGNORE_HEADERS.indexOf(lowerKey) >= 0) {
+                    // 忽略
+                  }
+                  else {
+                    header += '\n' + left + ': ' +  StringUtil.trim(l.substring(ind + 1));
+                  }
+                  
+                  contentStart += lines[i].length + 1;
+                }
+                else {
+                  if (l.startsWith('HTTP/') || l.startsWith('HTTPS/')) {  // HTTP/1.1 200
+                    contentStart += lines[i].length + 1;
+                    continue;
+                  }
+
+                  var ind = l.indexOf(' ');
+                  var m = ind < 0 ? '' :  StringUtil.trim(l.substring(0, ind));
+                  if (APIJSON_METHODS.indexOf(m.toLowerCase()) >= 0) {  // POST /gets HTTP/1.1
+                    contentStart += lines[i].length + 1;
+                    continue;
+                  }
+
+                  var content = StringUtil.trim(paste.substring(contentStart));
+                  var json = null;
+                  try {
+                    json = JSON5.parse(content);  // { "a":1, "b": "c" }
+                  } catch (e) {
+                    log(e)
+                    try {
+                      json = getRequestFromURL(content);  // a=1&b=c
+                    } catch (e2) {
+                      log(e2)
+                    }
+                  }
+
+                  vInput.value = json == null || Object.keys(json).length < 0 ? '' : JSON.stringify(json, null, '    ');
+                  event.preventDefault();
+                  break;
+                }
+
+              }
+
+              if (StringUtil.isEmpty(header, true) != true) {
+                vHeader.value = StringUtil.trim(header);
+                event.preventDefault();
+              }
+            } catch (e) {
+              log(e)
+            }
+          }
+          else if (target == vHeader || target == vRandom) {  // { "key": value } 转 key: value
+            try {
+              var json = JSON5.parse(paste);
+              var newStr = '';
+              for (var k in json) {
+                var v = json[k];
+                if (v instanceof Object || v instanceof Array) {
+                  v = JSON.stringify(v);
+                }
+                newStr += '\n' + k + ': ' + (target != vHeader && typeof v == 'string' ? "'" + v.replaceAll("'", "\\'") + "'" : StringUtil.get(v));
+              }
+              target.value = StringUtil.trim(newStr);
+              event.preventDefault();
+            } catch (e) {
+              log(e)
+            }
+          }
+          else if (target == vInput) {  // key: value 转 { "key": value }
+            try {
+              var lines = StringUtil.split(paste, '\n');
+              var json = {};
+
+              for (var i = 0; i < lines.length; i ++) {
+                var l = StringUtil.trim(lines[i]) || '';
+                if (l.startsWith('//')) {
+                  continue;
+                }
+
+                var ind = l.lastIndexOf('  //');
+                l = ind < 0 ? l : StringUtil.trim(l.substring(0, ind));
+
+                ind = l.indexOf(':');
+                if (ind >= 0) {
+                  var left = target == vHeader ? StringUtil.trim(l.substring(0, ind)) : l.substring(0, ind);
+                  json[left] = StringUtil.trim(l.substring(ind + 1));
+                }
+              }
+
+              if (Object.keys(json).length > 0) {
+                vInput.value = JSON.stringify(json, null, '    ');
+                event.preventDefault();
+              }
+            } catch (e) {
+              log(e)
+            }
+          }
+        }
+
+      },
+
       /**处理按键事件
        * @param event
        */
@@ -3971,13 +4200,13 @@
           s += '\n\n#### 开放源码 '
             + '\nAPIJSON 接口测试: https://github.com/TommyLemon/APIAuto '
             + '\nAPIJSON 单元测试: https://github.com/TommyLemon/UnitAuto '
-            + '\nAPIJSON 官方文档: https://github.com/vincentCheng/apijson-doc '
+            + '\nAPIJSON 中文文档: https://github.com/vincentCheng/apijson-doc '
             + '\nAPIJSON 英文文档: https://github.com/ruoranw/APIJSONdocs '
-            + '\nAPIJSON 官方网站: https://github.com/APIJSON/apijson.org '
+            + '\nAPIJSON 官方网站: https://github.com/APIJSON/apijson.cn '
             + '\nAPIJSON -Java版: https://github.com/Tencent/APIJSON '
-            + '\nAPIJSON - Go 版: https://gitee.com/tiangao/apijson-go '
             + '\nAPIJSON - C# 版: https://github.com/liaozb/APIJSON.NET '
-            + '\nAPIJSON - PHP版: https://github.com/xianglong111/APIJSON-php '
+            + '\nAPIJSON - Go 版: https://github.com/j2go/apijson-go '
+            + '\nAPIJSON - PHP版: https://github.com/kvnZero/hyperf-APIJSON '
             + '\nAPIJSON -Node版: https://github.com/kevinaskin/apijson-node '
             + '\nAPIJSON -Python: https://github.com/zhangchunlin/uliweb-apijson '
             + '\n感谢热心的作者们的贡献，GitHub 右上角点 ⭐Star 支持下他们吧 ^_^';
@@ -4777,12 +5006,12 @@
 
         // alert('< json = ' + JSON.stringify(json, null, '    '))
 
-        for (let i = 0; i < reqCount; i ++) {
+        for (let i = 0; i < lines.length; i ++) {
           const which = i;
           const lineItem = lines[i] || '';
 
-          // remove comment
-          const commentIndex = lineItem.lastIndexOf('  //'); //  -1; // eval 本身支持注释 eval('1 // test') = 1 lineItem.indexOf('  //');
+          // remove comment   // 解决整体 trim 后第一行  // 被当成正常的 key 路径而不是注释
+          const commentIndex = StringUtil.trim(lineItem).startsWith('//') ? 0 : lineItem.lastIndexOf('  //'); //  -1; // eval 本身支持注释 eval('1 // test') = 1 lineItem.indexOf('  //');
           const line = commentIndex < 0 ? lineItem : lineItem.substring(0, commentIndex).trim();
 
           if (line.length <= 0) {
@@ -5206,9 +5435,10 @@
         var bdt = tr.duration || 0
         it.durationBeforeShowStr = bdt <= 0 ? '' : (bdt < 1000 ? bdt + 'ms' : (bdt < 1000*60 ? (bdt/1000).toFixed(1) + 's' : (bdt <= 1000*60*60 ? (bdt/1000/60).toFixed(1) + 'm' : '>1h')))
         try {
-          var durationInfo = response['time:start|duration|end']
+          var durationInfo = response['time:start|duration|end|parse|sql']
           it.durationInfo = durationInfo
-          it.duration = durationInfo.substring(durationInfo.indexOf('\|') + 1, durationInfo.lastIndexOf('\|') || durationInfo.length) || 0
+          var di = durationInfo.substring(durationInfo.indexOf('\|') + 1)
+          it.duration = di.substring(0, di.indexOf('\|') || di.length) || 0
           var dt = + it.duration
           it.duration = dt
           it.durationShowStr = dt <= 0 ? '' : (dt < 1000 ? dt + 'ms' : (dt < 1000*60 ? (dt/1000).toFixed(1) + 's' : (dt <= 1000*60*60 ? (dt/1000/60).toFixed(1) + 'm' : '>1h')))
@@ -5222,7 +5452,7 @@
         catch (e) {
           log(e)
           it.durationShowStr = it.durationShowStr || it.duration
-          it.durationHint = it.durationHint || '最外层缺少字段 "time:start|duration|end": "1613039123780|10|1613039123790"，无法对比耗时'
+          it.durationHint = it.durationHint || '最外层缺少字段 "time:start|duration|end|parse|sql": "1613039123780|10|1613039123790|1|9"，无法对比耗时'
         }
 
         if (err != null) {
@@ -5380,8 +5610,11 @@
           delete obj["sql:generate|cache|execute|maxExecute"]
           delete obj["depth:count|max"]
           delete obj["time:start|duration|end"]
+          delete obj["time:start|duration|end|parse|sql"]
+          // 保留 delete obj["throw"]
           // 保留 delete obj["trace:throw"]
           delete obj["trace:stack"]
+          delete obj["stack"]
         }
         return obj
       },
@@ -5549,7 +5782,7 @@
             var maxDuration = testRecord.maxDuration
             if (isDuration) {
               if (item.duration == null) {  // 没有获取到
-                alert('最外层缺少字段 "time:start|duration|end": "1613039123780|10|1613039123790"，无法对比耗时！')
+                alert('最外层缺少字段 "time:start|duration|end|parse|sql": "1613039123780|10|1613039123790|1|9"，无法对比耗时！')
                 return
               }
               else if (maxDuration == null && minDuration == null) {
@@ -5770,7 +6003,7 @@
       },
 
       //显示详细信息, :data-hint :data, :hint 都报错，只能这样
-      setRequestHint(index, item, isRandom) {
+      setRequestHint: function(index, item, isRandom) {
         item = item || {}
         var d = isRandom ? item.Random : item.Document;
         // var r = d == null ? null : (isRandom ? d.config : d.request);
@@ -5786,14 +6019,12 @@
       },
 
       //显示详细信息, :data-hint :data, :hint 都报错，只能这样
-      setTestHint(index, item, isRandom, isDuration) {
+      setTestHint: function(index, item, isRandom, isDuration) {
         item = item || {};
         var toId = isRandom ? ((item.Random || {}).toId || 0) : 0;
         var h = isDuration ? item.durationHint : item.hintMessage;
         this.$refs[(isRandom ? (toId <= 0 ? 'testRandomResult' : 'testRandomSubResult') : 'testResult') + (isDuration ? 'Duration' : '') + 'Buttons'][index].setAttribute('data-hint', h || '');
-      },
-
-// APIJSON >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      }
 
     },
     watch: {
@@ -6022,19 +6253,112 @@
 
 
       // 快捷键 CTRL + I 格式化 JSON
-      document.addEventListener('keydown',function(event) {
+      document.addEventListener('keydown', function(event) {
         // alert(event.key) 小写字母 i 而不是 KeyI
         // if (event.ctrlKey && event.keyCode === 73) { // KeyI 无效  event.key === 'KeyI' && event.target == vInput){
-        if (event.keyCode === 73 && (event.ctrlKey || event.metaKey)) {
-          try {
-            var json = JSON.stringify(JSON5.parse(vInput.value), null, '    ');
-            vInput.value = inputted = isSingle ? App.switchQuote(json) : json;
-          } catch (e) {
-            log(e)
+        if (event.ctrlKey || event.metaKey) {
+          var target = event.target;
+          var selectionStart = target.selectionStart;
+          var selectionEnd = target.selectionEnd;
+
+          // 这里拿不到 clipboardData  if (event.keyCode === 86) {
+
+          if (event.keyCode === 73) {  // Ctrl + 'I'  格式化
+            try {
+              if (target == vInput) {
+                var json = JSON.stringify(JSON5.parse(vInput.value), null, '    ');
+                vInput.value = inputted = isSingle ? App.switchQuote(json) : json;
+              }
+              else {
+                var lines = StringUtil.split(target.value, '\n');
+                var newStr = '';
+
+                for (var i = 0; i < lines.length; i ++) {
+                  var l = StringUtil.trim(lines[i]) || '';
+                  if (l.startsWith('//')) {
+                   continue;
+                  }
+
+                  var ind = l.lastIndexOf('  //');
+                  l = ind < 0 ? l : StringUtil.trim(l.substring(0, ind));
+
+                  if (target == vHeader || target == vRandom) {
+                    ind = l.indexOf(':');
+                    if (ind >= 0) {
+                      var left = target == vHeader ? StringUtil.trim(l.substring(0, ind)) : l.substring(0, ind);
+                      l = left + ': ' + StringUtil.trim(l.substring(ind + 1));
+                    }
+                  }
+
+                  if (l.length > 0) {
+                    newStr += '\n' + l;
+                  }
+                }
+
+                target.value = StringUtil.trim(newStr);
+              }
+            } catch (e) {
+              log(e)
+            }
           }
+          else if (event.keyCode === 191) {  // Ctrl + '/' 注释与取消注释
+            try {
+              var json = StringUtil.get(target.value);
+              var before = json.substring(0, selectionStart);
+              var after = json.substring(selectionEnd);
+
+              var ind = before.lastIndexOf('\n');
+              var start = ind < 0 ? 0 : ind + 1;
+              ind = after.indexOf('\n');
+              var end = ind < 0 ? json.length : selectionEnd + ind - 1;
+
+              var selection = json.substring(start, end);
+              var lines = StringUtil.split(selection, '\n');
+
+              var newStr = json.substring(0, start);
+
+              for (var i = 0; i < lines.length; i ++) {
+                var l = lines[i] || '';
+                if (i > 0) {
+                  newStr += '\n';
+                }
+
+                if (StringUtil.trim(l).startsWith('//')) {
+                  var ind = l.indexOf('//');
+                  var suffix = l.substring(ind + 2);
+                  if (suffix.startsWith('  ')) {
+                    suffix = suffix.substring(2);
+                    selectionEnd -= 2;
+                  }
+
+                  newStr += StringUtil.get(l.substring(0, ind)) + StringUtil.get(suffix)
+                  selectionEnd -= 2;
+                }
+                else {
+                  newStr += '//  ' + l;
+                  selectionEnd += 4;
+                }
+              }
+
+              newStr += json.substring(end);
+
+              target.value = newStr;
+              if (target == vInput) {
+                inputted = newStr;
+              }
+            } catch (e) {
+              log(e)
+            }
+          }
+
+          target.selectionStart = selectionStart;
+          target.selectionEnd = selectionEnd;
         }
       })
 
     }
   })
 })()
+
+// APIJSON >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
