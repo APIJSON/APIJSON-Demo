@@ -14,12 +14,9 @@ limitations under the License.*/
 
 package apijson.boot;
 
-import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.naming.Context;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.serializer.PropertyFilter;
 
 import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
@@ -33,9 +30,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.PropertyFilter;
+import java.lang.reflect.Modifier;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.naming.Context;
 
 import apijson.Log;
 import apijson.NotNull;

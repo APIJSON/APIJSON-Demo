@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-hikaricp</artifactId>
-	<version>4.8.3</version>
+	<version>4.9.1</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONDemo</name>
