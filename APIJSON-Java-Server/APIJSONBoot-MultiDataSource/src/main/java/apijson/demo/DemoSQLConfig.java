@@ -31,6 +31,8 @@ import apijson.StringUtil;
 import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
+import apijson.orm.Join;
+import apijson.orm.Join.On;
 
 
 /**SQL配置
@@ -293,5 +295,19 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		}
 	//		return super.getValue(value);
 	//	}
+	
+	
+	@Override
+	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
+		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
+	}
+	@Override
+	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
+	}
+	@Override
+	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
+	}
 
 }
