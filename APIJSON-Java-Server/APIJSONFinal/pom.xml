@@ -4,7 +4,7 @@
 	<groupId>apijson.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>4.9.1</version>
+	<version>5.0.0</version>
 	<name>Demo project for APIJSON Server based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -12,7 +12,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.74</version>
+			<version>1.2.79</version>
 		</dependency>
 
 		<!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
@@ -26,12 +26,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>4.9.1</version>
+			<version>5.0.0</version>
 		</dependency>
 		 <dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>4.9.1</version>
+			<version>5.0.0</version>
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
