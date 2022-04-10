@@ -11,7 +11,9 @@
 通过 application.yml 文件配置数据库，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。<br />
 
 <br />
-其中 APIJSONDemo [关闭了权限校验](/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#L52-L54) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
+
+[其中 APIJSONDemo 关闭了权限校验，不需要配置权限即可体验 /get 这个万能查询接口](/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#) 
+<br />
 新手建议先从 APIJSONDemo 入手体验，然后再转用 APIJSONBoot/APIJSONFinal。
 
 Oracle, SQLServer 的 JDBC 驱动用了 GPL 类协议，所以示例项目的 pom.xml 都没有加它们的 Maven 依赖，需要自己加。<br />
