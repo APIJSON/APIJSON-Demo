@@ -1,17 +1,19 @@
 # APIJSON后端上手 - Java
 ### JDBC Demo：
-[APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) 为 APIJSON + SpringBoot 的最简单的初级使用 Demo；<br />
-[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot 的接近生产环境成品的 Demo；<br />
-[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo。<br />
+[APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) 为 APIJSON + SpringBoot 的最简单的初级使用 Demo，通过 DemoSQLConfig 代码配置数据库；<br />
+[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot 的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库；<br />
+[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库。<br />
 
 ### 连接池 Demo
-[APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid 的简单初级使用 Demo；<br />
-[APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) 为 APIJSON + SpringBoot + HikariCP 的简单初级使用 Demo；<br />
-[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP 的接近生产环境成品的多数据源 Demo，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。<br />
+[APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid 的简单初级使用 Demo，通过 application.yml 文件配置数据库；<br />
+[APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) 为 APIJSON + SpringBoot + HikariCP 的简单初级使用 Demo，通过 application.yml 文件配置数据库；<br />
+[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP 的接近生产环境成品的多数据源 Demo，<br />
+通过 application.yml 文件配置数据库，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。<br />
 
 <br />
-其中 APIJSONDemo 关闭了权限校验，不需要配置权限即可体验 /get 这个万能查询接口。<br />
-新手建议先从 APIJSONDemo 入手体验，然后再转用 APIJSONBoot/APIJSONFinal。
+
+**其中 APIJSONDemo [关闭了权限校验](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#L52-L54) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
+新手建议先从 APIJSONDemo 入手体验，然后再转用 APIJSONBoot/APIJSONFinal。**
 
 Oracle, SQLServer 的 JDBC 驱动用了 GPL 类协议，所以示例项目的 pom.xml 都没有加它们的 Maven 依赖，需要自己加。<br />
 <br />
