@@ -12,9 +12,8 @@
 
 <br />
 
-[其中 APIJSONDemo 关闭了权限校验，不需要配置权限即可体验 /get 这个万能查询接口](/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#) 
-<br />
-新手建议先从 APIJSONDemo 入手体验，然后再转用 APIJSONBoot/APIJSONFinal。
+**其中 APIJSONDemo [关闭了权限校验](/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
+新手建议先从 APIJSONDemo 入手体验，然后再转用 APIJSONBoot/APIJSONFinal。**
 
 Oracle, SQLServer 的 JDBC 驱动用了 GPL 类协议，所以示例项目的 pom.xml 都没有加它们的 Maven 依赖，需要自己加。<br />
 <br />
