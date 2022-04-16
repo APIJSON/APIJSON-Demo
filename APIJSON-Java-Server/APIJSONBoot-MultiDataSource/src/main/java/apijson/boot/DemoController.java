@@ -109,8 +109,23 @@ public class DemoController extends APIJSONController {
 	public String getRequestURL() {
 		return httpServletRequest.getRequestURL().toString();
 	}
-	
+
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+	//	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
+	//	 * @param method
+	//	 * @param tag
+	//	 * @param params
+	//	 * @param request
+	//	 * @param session
+	//	 * @return
+	//	 */
+	//	@PostMapping(value = "crud/{method}")  // 直接 {method} 或 apijson/{method} 会和内置网页的路由有冲突
+	//	@Override
+	//	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
+	//		return super.crud(method, request, session);
+	//	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -198,6 +213,19 @@ public class DemoController extends APIJSONController {
 
 
 	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
+
+
+	//	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
+	//	 * @param request 只用String，避免encode后未decode
+	//	 * @param session
+	//	 * @return
+	//	 * @see {@link RequestMethod#DELETE}
+	//	 */
+	//	@PostMapping("crud/{method}/{tag}")  // 直接 {method}/{tag} 或 apijson/{method}/{tag} 会和内置网页的路由有冲突
+	//	@Override
+	//	public String crudByTag(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+	//		return super.crudByTag(method, tag, params, request, session);
+	//	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -1083,10 +1111,10 @@ public class DemoController extends APIJSONController {
 		return new DemoParser(PUT).setSession(session).parseResponse(requestObject);
 	}
 
-	
-	
+
+
 	// 为 APIAuto 提供的代理接口(解决跨域问题) 和 导入第三方文档的测试接口 https://github.com/TommyLemon/APIAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
-	
+
 	public static class SessionMap extends LRUMap<String, HttpSession> {
 		public SessionMap() {
 			super(16, 1000000);
@@ -1095,7 +1123,7 @@ public class DemoController extends APIJSONController {
 			_map.remove(key);
 		}
 	}
-	
+
 	public static final SessionMap SESSION_MAP;
 
 	public static final String ADD_COOKIE = "Add-Cookie";
@@ -1103,7 +1131,7 @@ public class DemoController extends APIJSONController {
 	public static final List<String> EXCEPT_HEADER_LIST;
 	static {
 		SESSION_MAP = new SessionMap();
-		
+
 		EXCEPT_HEADER_LIST = Arrays.asList(  //accept-encoding 在某些情况下导致乱码，origin 和 sec-fetch-mode 等 CORS 信息导致服务器代理失败
 				"accept-encoding", "accept-language", // "accept", "connection"
 				"host", "origin", "referer", "user-agent", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-dest", "sec-fetch-user"
@@ -1133,22 +1161,22 @@ public class DemoController extends APIJSONController {
 			@RequestBody(required = false) String body, 
 			HttpMethod method, HttpSession session
 			) {
-		
+
 		if (Log.DEBUG == false) {
 			return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")).toJSONString();
 		}
-		
+
 
 		if ("GRPC".equals(type)) {
 			int index = url.indexOf("://");
 			String endpoint = index < 0 ? url : url.substring(index + 3);
-			
+
 			index = endpoint.indexOf("/");
 			String remoteMethod = index < 0 ? "" : endpoint.substring(index);
-			
+
 			url = "http://localhost:50050" + remoteMethod;
-			
-			
+
+
 			JSONObject obj = JSON.parseObject(body);
 			if (obj == null) {
 				obj = new JSONObject(true);
@@ -1157,10 +1185,10 @@ public class DemoController extends APIJSONController {
 				endpoint = index < 0 ? endpoint : endpoint.substring(0, index);
 				obj.put("endpoint", endpoint);
 			}
-			
+
 			body = obj.toJSONString();
 		}
-		
+
 		Enumeration<String> names = httpServletRequest.getHeaderNames();
 		HttpHeaders headers = null;
 		String name;
@@ -1193,7 +1221,7 @@ public class DemoController extends APIJSONController {
 					}
 				}
 			}
-			
+
 			if (sessionId == null) {
 				sessionId = apijsonDelegateId == null || apijsonDelegateId.isEmpty() ? null : apijsonDelegateId.get(0);
 			}
@@ -1207,7 +1235,7 @@ public class DemoController extends APIJSONController {
 			if (setCookie == null && session != null) {
 				setCookie = (List<String>) session.getAttribute(COOKIE);
 			}
-			
+
 			if (addCookie != null && addCookie.isEmpty() == false) {
 				if (setCookie == null) {
 					setCookie = addCookie;
@@ -1217,7 +1245,7 @@ public class DemoController extends APIJSONController {
 					setCookie.addAll(addCookie);
 				}
 			}
-			
+
 			if (setCookie != null) { //允许传空的 Cookie && setCookie.isEmpty() == false) {
 				headers.put(COOKIE, setCookie);
 			}
@@ -1266,10 +1294,10 @@ public class DemoController extends APIJSONController {
 				session.setAttribute(COOKIE, cookie);
 			}
 		}
-		
+
 		SESSION_MAP.put(session.getId(), session);
 		httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
-		
+
 		return entity.getBody();
 	}
 
@@ -1346,52 +1374,52 @@ public class DemoController extends APIJSONController {
 	@GetMapping("repository/joined")
 	public String rapJoinedRepository() {
 		return 	"{\n" +
-        "    \"data\": [\n" +
-        "        {\n" +
-        "            \"id\": 1243,\n" +
-        "            \"name\": \"Test\",\n" +
-        "            \"description\": \"4 test\",\n" +
-        "            \"logo\": null,\n" +
-        "            \"token\": \"JrA78ktHhsGJtlhtUwt4Bpk3i96-QQLE\",\n" +
-        "            \"visibility\": true,\n" +
-        "            \"ownerId\": 1803,\n" +
-        "            \"organizationId\": null,\n" +
-        "            \"creatorId\": 1803,\n" +
-        "            \"lockerId\": null,\n" +
-        "            \"createdAt\": \"2017-12-05T08:48:44.000Z\",\n" +
-        "            \"updatedAt\": \"2019-12-30T02:36:48.000Z\",\n" +
-        "            \"deletedAt\": null,\n" +
-        "            \"creator\": {\n" +
-        "                \"id\": 1803,\n" +
-        "                \"fullname\": \"TommyLemon\",\n" +
-        "                \"email\": \"111@qq.com\"\n" +
-        "            },\n" +
-        "            \"owner\": {\n" +
-        "                \"id\": 1803,\n" +
-        "                \"fullname\": \"TommyLemon\",\n" +
-        "                \"email\": \"111@qq.com\"\n" +
-        "            },\n" +
-        "            \"locker\": null,\n" +
-        "            \"members\": [\n" +
-        "                {\n" +
-        "                    \"id\": 1803,\n" +
-        "                    \"fullname\": \"TommyLemon\",\n" +
-        "                    \"email\": \"111@qq.com\"\n" +
-        "                }\n" +
-        "            ],\n" +
-        "            \"organization\": null,\n" +
-        "            \"collaborators\": [],\n" +
-        "            \"RepositoriesMembers\": {\n" +
-        "                \"userId\": 1803,\n" +
-        "                \"repositoryId\": 1243\n" +
-        "            },\n" +
-        "            \"canUserEdit\": true\n" +
-        "        }\n" +
-        "    ]\n" +
-        "}";
+				"    \"data\": [\n" +
+				"        {\n" +
+				"            \"id\": 1243,\n" +
+				"            \"name\": \"Test\",\n" +
+				"            \"description\": \"4 test\",\n" +
+				"            \"logo\": null,\n" +
+				"            \"token\": \"JrA78ktHhsGJtlhtUwt4Bpk3i96-QQLE\",\n" +
+				"            \"visibility\": true,\n" +
+				"            \"ownerId\": 1803,\n" +
+				"            \"organizationId\": null,\n" +
+				"            \"creatorId\": 1803,\n" +
+				"            \"lockerId\": null,\n" +
+				"            \"createdAt\": \"2017-12-05T08:48:44.000Z\",\n" +
+				"            \"updatedAt\": \"2019-12-30T02:36:48.000Z\",\n" +
+				"            \"deletedAt\": null,\n" +
+				"            \"creator\": {\n" +
+				"                \"id\": 1803,\n" +
+				"                \"fullname\": \"TommyLemon\",\n" +
+				"                \"email\": \"111@qq.com\"\n" +
+				"            },\n" +
+				"            \"owner\": {\n" +
+				"                \"id\": 1803,\n" +
+				"                \"fullname\": \"TommyLemon\",\n" +
+				"                \"email\": \"111@qq.com\"\n" +
+				"            },\n" +
+				"            \"locker\": null,\n" +
+				"            \"members\": [\n" +
+				"                {\n" +
+				"                    \"id\": 1803,\n" +
+				"                    \"fullname\": \"TommyLemon\",\n" +
+				"                    \"email\": \"111@qq.com\"\n" +
+				"                }\n" +
+				"            ],\n" +
+				"            \"organization\": null,\n" +
+				"            \"collaborators\": [],\n" +
+				"            \"RepositoriesMembers\": {\n" +
+				"                \"userId\": 1803,\n" +
+				"                \"repositoryId\": 1243\n" +
+				"            },\n" +
+				"            \"canUserEdit\": true\n" +
+				"        }\n" +
+				"    ]\n" +
+				"}";
 	}
-	
-	
+
+
 	/**Rap 文档 Demo，供 APIAuto 测试导入 Rap 文档到数据库用
 	 * @param id
 	 * @return
@@ -1399,297 +1427,297 @@ public class DemoController extends APIJSONController {
 	@GetMapping("repository/get")
 	public String rapRepositoryDetail(@RequestParam("id") String id) {
 		return "{\n" +
-        "    \"data\": {\n" +
-        "        \"id\": " + id + ",\n" +
-        "        \"name\": \"Test\",\n" +
-        "        \"description\": \"4 test\",\n" +
-        "        \"logo\": null,\n" +
-        "        \"token\": \"JrA78ktHhsGJtlhtUwt4Bpk3i96-QQLE\",\n" +
-        "        \"visibility\": true,\n" +
-        "        \"ownerId\": 1803,\n" +
-        "        \"organizationId\": null,\n" +
-        "        \"creatorId\": 1803,\n" +
-        "        \"lockerId\": null,\n" +
-        "        \"createdAt\": \"2017-12-05T08:48:44.000Z\",\n" +
-        "        \"updatedAt\": \"2019-12-30T02:36:48.000Z\",\n" +
-        "        \"deletedAt\": null,\n" +
-        "        \"creator\": {\n" +
-        "            \"id\": 1803,\n" +
-        "            \"fullname\": \"TommyLemon\",\n" +
-        "            \"email\": \"111@qq.com\"\n" +
-        "        },\n" +
-        "        \"owner\": {\n" +
-        "            \"id\": 1803,\n" +
-        "            \"fullname\": \"TommyLemon\",\n" +
-        "            \"email\": \"111@qq.com\"\n" +
-        "        },\n" +
-        "        \"locker\": null,\n" +
-        "        \"members\": [\n" +
-        "            {\n" +
-        "                \"id\": 1803,\n" +
-        "                \"fullname\": \"TommyLemon\",\n" +
-        "                \"email\": \"111@qq.com\"\n" +
-        "            }\n" +
-        "        ],\n" +
-        "        \"organization\": null,\n" +
-        "        \"collaborators\": [],\n" +
-        "        \"modules\": [\n" +
-        "            {\n" +
-        "                \"id\": 1973,\n" +
-        "                \"name\": \"示例模块\",\n" +
-        "                \"description\": \"示例模块\",\n" +
-        "                \"priority\": 1,\n" +
-        "                \"creatorId\": 1803,\n" +
-        "                \"repositoryId\": 1243,\n" +
-        "                \"createdAt\": \"2017-12-05T08:48:44.000Z\",\n" +
-        "                \"updatedAt\": \"2017-12-05T08:48:44.000Z\",\n" +
-        "                \"deletedAt\": null,\n" +
-        "                \"interfaces\": [\n" +
-        "                    {\n" +
-        "                        \"id\": 4042,\n" +
-        "                        \"name\": \"getUser\",\n" +
-        "                        \"url\": \"/get\",\n" +
-        "                        \"method\": \"POST\",\n" +
-        "                        \"description\": \"get an User\",\n" +
-        "                        \"priority\": 1,\n" +
-        "                        \"status\": 200,\n" +
-        "                        \"creatorId\": 1803,\n" +
-        "                        \"lockerId\": null,\n" +
-        "                        \"moduleId\": 1973,\n" +
-        "                        \"repositoryId\": 1243,\n" +
-        "                        \"createdAt\": \"2017-12-05T08:51:02.000Z\",\n" +
-        "                        \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
-        "                        \"deletedAt\": null,\n" +
-        "                        \"locker\": null,\n" +
-        "                        \"properties\": [\n" +
-        "                            {\n" +
-        "                                \"id\": 81553,\n" +
-        "                                \"scope\": \"request\",\n" +
-        "                                \"type\": \"Object\",\n" +
-        "                                \"pos\": 2,\n" +
-        "                                \"name\": \"User\",\n" +
-        "                                \"rule\": \"\",\n" +
-        "                                \"value\": \"{}\",\n" +
-        "                                \"description\": \"\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 43204,\n" +
-        "                                \"interfaceId\": 4042,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2017-12-05T08:52:03.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            },\n" +
-        "                            {\n" +
-        "                                \"id\": 81562,\n" +
-        "                                \"scope\": \"response\",\n" +
-        "                                \"type\": \"Object\",\n" +
-        "                                \"pos\": 2,\n" +
-        "                                \"name\": \"User\",\n" +
-        "                                \"rule\": \"\",\n" +
-        "                                \"value\": \"{\\n\\\"id\\\": 38710 ,\\n\\\"sex\\\": 0 ,\\n\\\"name\\\": \\\"TommyLemon\\\" ,\\n\\\"contactIdList\\\":  [\\n82003 ,\\n82005 ,\\n90814 \\n],\\n\\\"pictureList\\\":  [\\n\\\"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000\\\" \\n]\\n}\",\n" +
-        "                                \"description\": \"\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1,\n" +
-        "                                \"interfaceId\": 4042,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2017-12-05T08:54:16.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            },\n" +
-        "                            {\n" +
-        "                                \"id\": 17621689,\n" +
-        "                                \"scope\": \"request\",\n" +
-        "                                \"type\": \"String\",\n" +
-        "                                \"pos\": 1,\n" +
-        "                                \"name\": \"site\",\n" +
-        "                                \"rule\": null,\n" +
-        "                                \"value\": \"apijson\",\n" +
-        "                                \"description\": \"来源网站\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590855928395,\n" +
-        "                                \"interfaceId\": 4042,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-30T16:25:28.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            }\n" +
-        "                        ]\n" +
-        "                    },\n" +
-        "                    {\n" +
-        "                        \"id\": 1446108,\n" +
-        "                        \"name\": \"post\",\n" +
-        "                        \"url\": \"/post\",\n" +
-        "                        \"method\": \"POST\",\n" +
-        "                        \"description\": \"post user\",\n" +
-        "                        \"priority\": 2,\n" +
-        "                        \"status\": 200,\n" +
-        "                        \"creatorId\": 1803,\n" +
-        "                        \"lockerId\": null,\n" +
-        "                        \"moduleId\": 1973,\n" +
-        "                        \"repositoryId\": 1243,\n" +
-        "                        \"createdAt\": \"2020-01-13T10:32:51.000Z\",\n" +
-        "                        \"updatedAt\": \"2020-05-30T16:29:13.000Z\",\n" +
-        "                        \"deletedAt\": null,\n" +
-        "                        \"locker\": null,\n" +
-        "                        \"properties\": [\n" +
-        "                            {\n" +
-        "                                \"id\": 17394319,\n" +
-        "                                \"scope\": \"request\",\n" +
-        "                                \"type\": \"String\",\n" +
-        "                                \"pos\": 1,\n" +
-        "                                \"name\": \"he\",\n" +
-        "                                \"rule\": null,\n" +
-        "                                \"value\": \"test\",\n" +
-        "                                \"description\": \"\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590334790882,\n" +
-        "                                \"interfaceId\": 1446108,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-24T15:39:50.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:29:13.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            }\n" +
-        "                        ]\n" +
-        "                    },\n" +
-        "                    {\n" +
-        "                        \"id\": 1596193,\n" +
-        "                        \"name\": \"login\",\n" +
-        "                        \"url\": \"/login\",\n" +
-        "                        \"method\": \"POST\",\n" +
-        "                        \"description\": \"\",\n" +
-        "                        \"priority\": 1590853798312,\n" +
-        "                        \"status\": 200,\n" +
-        "                        \"creatorId\": 1803,\n" +
-        "                        \"lockerId\": null,\n" +
-        "                        \"moduleId\": 1973,\n" +
-        "                        \"repositoryId\": 1243,\n" +
-        "                        \"createdAt\": \"2020-05-30T15:49:58.000Z\",\n" +
-        "                        \"updatedAt\": \"2020-05-30T16:25:08.000Z\",\n" +
-        "                        \"deletedAt\": null,\n" +
-        "                        \"locker\": null,\n" +
-        "                        \"properties\": [\n" +
-        "                            {\n" +
-        "                                \"id\": 17621552,\n" +
-        "                                \"scope\": \"request\",\n" +
-        "                                \"type\": \"String\",\n" +
-        "                                \"pos\": 3,\n" +
-        "                                \"name\": \"phone\",\n" +
-        "                                \"rule\": null,\n" +
-        "                                \"value\": \"13000082001\",\n" +
-        "                                \"description\": \"手机号\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590853936991,\n" +
-        "                                \"interfaceId\": 1596193,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            },\n" +
-        "                            {\n" +
-        "                                \"id\": 17621553,\n" +
-        "                                \"scope\": \"request\",\n" +
-        "                                \"type\": \"String\",\n" +
-        "                                \"pos\": 3,\n" +
-        "                                \"name\": \"password\",\n" +
-        "                                \"rule\": null,\n" +
-        "                                \"value\": \"123456\",\n" +
-        "                                \"description\": \"密码\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590853936994,\n" +
-        "                                \"interfaceId\": 1596193,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            },\n" +
-        "                            {\n" +
-        "                                \"id\": 17621554,\n" +
-        "                                \"scope\": \"response\",\n" +
-        "                                \"type\": \"String\",\n" +
-        "                                \"pos\": 3,\n" +
-        "                                \"name\": \"msg\",\n" +
-        "                                \"rule\": null,\n" +
-        "                                \"value\": \"\",\n" +
-        "                                \"description\": \"success\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590853936997,\n" +
-        "                                \"interfaceId\": 1596193,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            },\n" +
-        "                            {\n" +
-        "                                \"id\": 17621565,\n" +
-        "                                \"scope\": \"response\",\n" +
-        "                                \"type\": \"Number\",\n" +
-        "                                \"pos\": 3,\n" +
-        "                                \"name\": \"code\",\n" +
-        "                                \"rule\": \"\",\n" +
-        "                                \"value\": \"200\",\n" +
-        "                                \"description\": null,\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590853937020,\n" +
-        "                                \"interfaceId\": 1596193,\n" +
-        "                                \"creatorId\": null,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-30T15:52:17.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            },\n" +
-        "                            {\n" +
-        "                                \"id\": 17621688,\n" +
-        "                                \"scope\": \"request\",\n" +
-        "                                \"type\": \"String\",\n" +
-        "                                \"pos\": 1,\n" +
-        "                                \"name\": \"head\",\n" +
-        "                                \"rule\": null,\n" +
-        "                                \"value\": \"apijson\",\n" +
-        "                                \"description\": \"请求头\",\n" +
-        "                                \"parentId\": -1,\n" +
-        "                                \"priority\": 1590855907992,\n" +
-        "                                \"interfaceId\": 1596193,\n" +
-        "                                \"creatorId\": 1803,\n" +
-        "                                \"moduleId\": 1973,\n" +
-        "                                \"repositoryId\": 1243,\n" +
-        "                                \"required\": false,\n" +
-        "                                \"createdAt\": \"2020-05-30T16:25:07.000Z\",\n" +
-        "                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
-        "                                \"deletedAt\": null\n" +
-        "                            }\n" +
-        "                        ]\n" +
-        "                    }\n" +
-        "                ]\n" +
-        "            }\n" +
-        "        ],\n" +
-        "        \"canUserEdit\": true\n" +
-        "    }\n" +
-        "}";
+				"    \"data\": {\n" +
+				"        \"id\": " + id + ",\n" +
+				"        \"name\": \"Test\",\n" +
+				"        \"description\": \"4 test\",\n" +
+				"        \"logo\": null,\n" +
+				"        \"token\": \"JrA78ktHhsGJtlhtUwt4Bpk3i96-QQLE\",\n" +
+				"        \"visibility\": true,\n" +
+				"        \"ownerId\": 1803,\n" +
+				"        \"organizationId\": null,\n" +
+				"        \"creatorId\": 1803,\n" +
+				"        \"lockerId\": null,\n" +
+				"        \"createdAt\": \"2017-12-05T08:48:44.000Z\",\n" +
+				"        \"updatedAt\": \"2019-12-30T02:36:48.000Z\",\n" +
+				"        \"deletedAt\": null,\n" +
+				"        \"creator\": {\n" +
+				"            \"id\": 1803,\n" +
+				"            \"fullname\": \"TommyLemon\",\n" +
+				"            \"email\": \"111@qq.com\"\n" +
+				"        },\n" +
+				"        \"owner\": {\n" +
+				"            \"id\": 1803,\n" +
+				"            \"fullname\": \"TommyLemon\",\n" +
+				"            \"email\": \"111@qq.com\"\n" +
+				"        },\n" +
+				"        \"locker\": null,\n" +
+				"        \"members\": [\n" +
+				"            {\n" +
+				"                \"id\": 1803,\n" +
+				"                \"fullname\": \"TommyLemon\",\n" +
+				"                \"email\": \"111@qq.com\"\n" +
+				"            }\n" +
+				"        ],\n" +
+				"        \"organization\": null,\n" +
+				"        \"collaborators\": [],\n" +
+				"        \"modules\": [\n" +
+				"            {\n" +
+				"                \"id\": 1973,\n" +
+				"                \"name\": \"示例模块\",\n" +
+				"                \"description\": \"示例模块\",\n" +
+				"                \"priority\": 1,\n" +
+				"                \"creatorId\": 1803,\n" +
+				"                \"repositoryId\": 1243,\n" +
+				"                \"createdAt\": \"2017-12-05T08:48:44.000Z\",\n" +
+				"                \"updatedAt\": \"2017-12-05T08:48:44.000Z\",\n" +
+				"                \"deletedAt\": null,\n" +
+				"                \"interfaces\": [\n" +
+				"                    {\n" +
+				"                        \"id\": 4042,\n" +
+				"                        \"name\": \"getUser\",\n" +
+				"                        \"url\": \"/get\",\n" +
+				"                        \"method\": \"POST\",\n" +
+				"                        \"description\": \"get an User\",\n" +
+				"                        \"priority\": 1,\n" +
+				"                        \"status\": 200,\n" +
+				"                        \"creatorId\": 1803,\n" +
+				"                        \"lockerId\": null,\n" +
+				"                        \"moduleId\": 1973,\n" +
+				"                        \"repositoryId\": 1243,\n" +
+				"                        \"createdAt\": \"2017-12-05T08:51:02.000Z\",\n" +
+				"                        \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+				"                        \"deletedAt\": null,\n" +
+				"                        \"locker\": null,\n" +
+				"                        \"properties\": [\n" +
+				"                            {\n" +
+				"                                \"id\": 81553,\n" +
+				"                                \"scope\": \"request\",\n" +
+				"                                \"type\": \"Object\",\n" +
+				"                                \"pos\": 2,\n" +
+				"                                \"name\": \"User\",\n" +
+				"                                \"rule\": \"\",\n" +
+				"                                \"value\": \"{}\",\n" +
+				"                                \"description\": \"\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 43204,\n" +
+				"                                \"interfaceId\": 4042,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2017-12-05T08:52:03.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            },\n" +
+				"                            {\n" +
+				"                                \"id\": 81562,\n" +
+				"                                \"scope\": \"response\",\n" +
+				"                                \"type\": \"Object\",\n" +
+				"                                \"pos\": 2,\n" +
+				"                                \"name\": \"User\",\n" +
+				"                                \"rule\": \"\",\n" +
+				"                                \"value\": \"{\\n\\\"id\\\": 38710 ,\\n\\\"sex\\\": 0 ,\\n\\\"name\\\": \\\"TommyLemon\\\" ,\\n\\\"contactIdList\\\":  [\\n82003 ,\\n82005 ,\\n90814 \\n],\\n\\\"pictureList\\\":  [\\n\\\"http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000\\\" \\n]\\n}\",\n" +
+				"                                \"description\": \"\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1,\n" +
+				"                                \"interfaceId\": 4042,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2017-12-05T08:54:16.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            },\n" +
+				"                            {\n" +
+				"                                \"id\": 17621689,\n" +
+				"                                \"scope\": \"request\",\n" +
+				"                                \"type\": \"String\",\n" +
+				"                                \"pos\": 1,\n" +
+				"                                \"name\": \"site\",\n" +
+				"                                \"rule\": null,\n" +
+				"                                \"value\": \"apijson\",\n" +
+				"                                \"description\": \"来源网站\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590855928395,\n" +
+				"                                \"interfaceId\": 4042,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:28.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            }\n" +
+				"                        ]\n" +
+				"                    },\n" +
+				"                    {\n" +
+				"                        \"id\": 1446108,\n" +
+				"                        \"name\": \"post\",\n" +
+				"                        \"url\": \"/post\",\n" +
+				"                        \"method\": \"POST\",\n" +
+				"                        \"description\": \"post user\",\n" +
+				"                        \"priority\": 2,\n" +
+				"                        \"status\": 200,\n" +
+				"                        \"creatorId\": 1803,\n" +
+				"                        \"lockerId\": null,\n" +
+				"                        \"moduleId\": 1973,\n" +
+				"                        \"repositoryId\": 1243,\n" +
+				"                        \"createdAt\": \"2020-01-13T10:32:51.000Z\",\n" +
+				"                        \"updatedAt\": \"2020-05-30T16:29:13.000Z\",\n" +
+				"                        \"deletedAt\": null,\n" +
+				"                        \"locker\": null,\n" +
+				"                        \"properties\": [\n" +
+				"                            {\n" +
+				"                                \"id\": 17394319,\n" +
+				"                                \"scope\": \"request\",\n" +
+				"                                \"type\": \"String\",\n" +
+				"                                \"pos\": 1,\n" +
+				"                                \"name\": \"he\",\n" +
+				"                                \"rule\": null,\n" +
+				"                                \"value\": \"test\",\n" +
+				"                                \"description\": \"\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590334790882,\n" +
+				"                                \"interfaceId\": 1446108,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-24T15:39:50.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:29:13.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            }\n" +
+				"                        ]\n" +
+				"                    },\n" +
+				"                    {\n" +
+				"                        \"id\": 1596193,\n" +
+				"                        \"name\": \"login\",\n" +
+				"                        \"url\": \"/login\",\n" +
+				"                        \"method\": \"POST\",\n" +
+				"                        \"description\": \"\",\n" +
+				"                        \"priority\": 1590853798312,\n" +
+				"                        \"status\": 200,\n" +
+				"                        \"creatorId\": 1803,\n" +
+				"                        \"lockerId\": null,\n" +
+				"                        \"moduleId\": 1973,\n" +
+				"                        \"repositoryId\": 1243,\n" +
+				"                        \"createdAt\": \"2020-05-30T15:49:58.000Z\",\n" +
+				"                        \"updatedAt\": \"2020-05-30T16:25:08.000Z\",\n" +
+				"                        \"deletedAt\": null,\n" +
+				"                        \"locker\": null,\n" +
+				"                        \"properties\": [\n" +
+				"                            {\n" +
+				"                                \"id\": 17621552,\n" +
+				"                                \"scope\": \"request\",\n" +
+				"                                \"type\": \"String\",\n" +
+				"                                \"pos\": 3,\n" +
+				"                                \"name\": \"phone\",\n" +
+				"                                \"rule\": null,\n" +
+				"                                \"value\": \"13000082001\",\n" +
+				"                                \"description\": \"手机号\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590853936991,\n" +
+				"                                \"interfaceId\": 1596193,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            },\n" +
+				"                            {\n" +
+				"                                \"id\": 17621553,\n" +
+				"                                \"scope\": \"request\",\n" +
+				"                                \"type\": \"String\",\n" +
+				"                                \"pos\": 3,\n" +
+				"                                \"name\": \"password\",\n" +
+				"                                \"rule\": null,\n" +
+				"                                \"value\": \"123456\",\n" +
+				"                                \"description\": \"密码\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590853936994,\n" +
+				"                                \"interfaceId\": 1596193,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            },\n" +
+				"                            {\n" +
+				"                                \"id\": 17621554,\n" +
+				"                                \"scope\": \"response\",\n" +
+				"                                \"type\": \"String\",\n" +
+				"                                \"pos\": 3,\n" +
+				"                                \"name\": \"msg\",\n" +
+				"                                \"rule\": null,\n" +
+				"                                \"value\": \"\",\n" +
+				"                                \"description\": \"success\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590853936997,\n" +
+				"                                \"interfaceId\": 1596193,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-30T15:52:16.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            },\n" +
+				"                            {\n" +
+				"                                \"id\": 17621565,\n" +
+				"                                \"scope\": \"response\",\n" +
+				"                                \"type\": \"Number\",\n" +
+				"                                \"pos\": 3,\n" +
+				"                                \"name\": \"code\",\n" +
+				"                                \"rule\": \"\",\n" +
+				"                                \"value\": \"200\",\n" +
+				"                                \"description\": null,\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590853937020,\n" +
+				"                                \"interfaceId\": 1596193,\n" +
+				"                                \"creatorId\": null,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-30T15:52:17.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            },\n" +
+				"                            {\n" +
+				"                                \"id\": 17621688,\n" +
+				"                                \"scope\": \"request\",\n" +
+				"                                \"type\": \"String\",\n" +
+				"                                \"pos\": 1,\n" +
+				"                                \"name\": \"head\",\n" +
+				"                                \"rule\": null,\n" +
+				"                                \"value\": \"apijson\",\n" +
+				"                                \"description\": \"请求头\",\n" +
+				"                                \"parentId\": -1,\n" +
+				"                                \"priority\": 1590855907992,\n" +
+				"                                \"interfaceId\": 1596193,\n" +
+				"                                \"creatorId\": 1803,\n" +
+				"                                \"moduleId\": 1973,\n" +
+				"                                \"repositoryId\": 1243,\n" +
+				"                                \"required\": false,\n" +
+				"                                \"createdAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+				"                                \"updatedAt\": \"2020-05-30T16:25:07.000Z\",\n" +
+				"                                \"deletedAt\": null\n" +
+				"                            }\n" +
+				"                        ]\n" +
+				"                    }\n" +
+				"                ]\n" +
+				"            }\n" +
+				"        ],\n" +
+				"        \"canUserEdit\": true\n" +
+				"    }\n" +
+				"}";
 	}
-	
+
 	// 为 APIAuto 提供的代理接口(解决跨域问题) 和 导入第三方文档的测试接口 https://github.com/TommyLemon/APIAuto   https://github.com/TommyLemon/APIAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -1700,7 +1728,7 @@ public class DemoController extends APIJSONController {
 	public JSONObject listMethod(@RequestBody String request) {
 		return super.listMethod(request);
 	}
-	
+
 	@PostMapping("method/invoke")
 	public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
 		super.invokeMethod(request, servletRequest);

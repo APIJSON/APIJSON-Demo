@@ -47,7 +47,7 @@ import apijson.orm.Parser;
 @RestController
 @RequestMapping("")
 public class DemoController extends APIJSONController {
-	
+
 	@Override
 	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
 		return super.newParser(session, method).setNeedVerify(false);  // TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
@@ -59,12 +59,19 @@ public class DemoController extends APIJSONController {
 		return super.get(request, session);
 	}
 	
+
+	//	@PostMapping(value = "{method}")  // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 apijson/{method} 或 Controller 注解 @RequestMapping("apijson")
+	//	@Override
+	//	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
+	//		return super.crud(method, request, session);
+	//	}
+
 	@PostMapping("get/{tag}")
 	@Override
 	public String getByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
 		return super.getByTag(tag, params, request, session);
 	}
-	
+
 	/**获取
 	 * 只为兼容HTTP GET请求，推荐用HTTP POST，可删除
 	 * @param request 只用String，避免encode后未decode
@@ -81,5 +88,5 @@ public class DemoController extends APIJSONController {
 		}
 		return get(request, session);
 	}
-	
+
 }
