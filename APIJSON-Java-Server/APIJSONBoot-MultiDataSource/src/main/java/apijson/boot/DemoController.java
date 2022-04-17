@@ -78,13 +78,13 @@ import apijson.demo.DemoVerifier;
 import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
 import apijson.demo.model.Verify;
-import apijson.framework.APIJSONController;
 import apijson.framework.BaseModel;
 import apijson.orm.JSONRequest;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.OutOfRangeException;
+import apijson.router.APIJSONRouterController;
 
 
 /**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理
@@ -101,7 +101,7 @@ import apijson.orm.exception.OutOfRangeException;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONController {
+public class DemoController extends APIJSONRouterController {  // APIJSONController {  // 
 	private static final String TAG = "DemoController";
 
 	// 可以更方便地通过日志排查错误
@@ -126,6 +126,13 @@ public class DemoController extends APIJSONController {
 	//	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
 	//		return super.crud(method, request, session);
 	//	}
+
+	//  增删改查统一的类 RESTful API 入口，牺牲一些路由解析性能来提升一点开发效率
+	@PostMapping("router/{method}/{tag}")
+	@Override
+	public String router(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.router(method, tag, params, request, session);
+	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -1259,6 +1266,7 @@ public class DemoController extends APIJSONController {
 			map.remove("$_type");
 			map.remove("$_except_headers");
 			map.remove("$_delegate_url");
+			map.remove("$_delegate_id");
 
 			Set<Entry<String, String[]>> set = map == null ? null : map.entrySet();
 

@@ -54,6 +54,7 @@ import apijson.orm.Parser;
 import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
 import apijson.orm.Verifier;
+import apijson.router.APIJSONRouterApplication;
 import unitauto.MethodUtil;
 import unitauto.MethodUtil.Argument;
 import unitauto.MethodUtil.InstanceGetter;
@@ -80,6 +81,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		unitauto.Log.DEBUG = Log.DEBUG = true;
 		APIJSONParser.IS_PRINT_BIG_LOG = true;
 		APIJSONApplication.init();
+		APIJSONRouterApplication.init();
 		System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");
 	}
 
