@@ -101,7 +101,7 @@ import apijson.router.APIJSONRouterController;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONRouterController {  // APIJSONController {  // 
+public class DemoController extends APIJSONRouterController<Long> {  // APIJSONController<Long> {  // 
 	private static final String TAG = "DemoController";
 
 	// 可以更方便地通过日志排查错误

@@ -101,7 +101,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 
 		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
+		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 
 			@Override
 			public Parser<Long> createParser() {

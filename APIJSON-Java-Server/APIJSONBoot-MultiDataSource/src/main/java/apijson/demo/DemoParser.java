@@ -26,7 +26,7 @@ import apijson.orm.SQLConfig;
  * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
-public class DemoParser extends APIJSONParser {
+public class DemoParser extends APIJSONParser<Long> {
 
     public DemoParser() {
         super();

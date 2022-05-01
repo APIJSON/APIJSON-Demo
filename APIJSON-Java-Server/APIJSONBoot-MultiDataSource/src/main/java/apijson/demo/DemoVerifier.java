@@ -21,7 +21,7 @@ import apijson.router.APIJSONRouterVerifier;
  * 具体见 https://github.com/Tencent/APIJSON/issues/12
  * @author Lemon
  */
-public class DemoVerifier extends APIJSONRouterVerifier {  // APIJSONVerifier {
+public class DemoVerifier extends APIJSONRouterVerifier<Long> {  // APIJSONVerifier<Long> {
 	public static final String TAG = "DemoVerifier";
 
 	// 重写方法来自定义字段名等	

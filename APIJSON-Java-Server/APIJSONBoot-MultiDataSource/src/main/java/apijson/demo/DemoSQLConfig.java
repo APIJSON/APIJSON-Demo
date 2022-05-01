@@ -65,10 +65,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
 		//主键名映射
-		SIMPLE_CALLBACK = new SimpleCallback() {
+		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
 
 			@Override
-			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table) {
+			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
@@ -81,13 +81,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			}
 
 			@Override
-			public String getUserIdKey(String database, String schema,String datasource, String table) {
+			public String getUserIdKey(String database, String schema, String datasource, String table) {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
 			//取消注释来实现数据库自增 id
 			//			@Override
-			//			public Object newId(RequestMethod method, String database, String schema, String datasource, String table) {
+			//			public Long newId(RequestMethod method, String database, String schema, String datasource, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 
