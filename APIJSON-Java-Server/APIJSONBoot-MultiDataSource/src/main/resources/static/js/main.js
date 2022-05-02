@@ -364,7 +364,7 @@
 // APIJSON <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-  function getRequestFromURL(url_) {
+  function getRequestFromURL(url_, tryParse) {
     var url = url_ || window.location.search;
 
     var index = url == null ? -1 : url.indexOf("?")
@@ -389,16 +389,50 @@
       }
 
       var v = decodeURIComponent(part.substring(ind+1));
-      try {
-        v = JSON.parse(v)
+      if (tryParse == true) {
+        try {
+          v = JSON.parse(v)
+        }
+        catch (e) {
+        }
       }
-      catch (e) {}
 
       theRequest[part.substring(0, ind)] = v;
     }
 
     return theRequest;
   }
+
+
+  function markdownToHTML(md, isRequest) {
+    if (editormd == null) {
+      return;
+    }
+
+    if (isRequest) {
+      vRequestMarkdown.innerHTML = '';
+    }
+    else {
+      vMarkdown.innerHTML = '';
+    }
+    editormd.markdownToHTML(isRequest ? 'vRequestMarkdown' : "vMarkdown", {
+      markdown        : md ,//+ "\r\n" + $("#append-test").text(),
+      //htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
+      htmlDecode      : "style,script,iframe",  // you can filter tags decode
+      //toc             : false,
+      tocm            : true,    // Using [TOCM]
+      //tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
+      //gfm             : false,
+      tocDropdown     : true,
+      // markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
+      taskList        : true,
+      tex             : true,  // 默认不解析
+      flowChart       : true,  // 默认不解析
+      sequenceDiagram : true,  // 默认不解析
+    });
+  }
+
+
 
   var PLATFORM_POSTMAN = 'POSTMAN'
   var PLATFORM_SWAGGER = 'SWAGGER'
@@ -587,6 +621,7 @@
       isDelayShow: false,
       isSaveShow: false,
       isExportShow: false,
+      isExportCheckShow: false,
       isExportRandom: false,
       isTestCaseShow: false,
       isHeaderShow: false,
@@ -630,7 +665,7 @@
       isRegister: false,
       isCrossEnabled: false,
       isMLEnabled: false,
-      isDelegateEnabled: true,
+      isDelegateEnabled: false,
       isPreviewEnabled: false,
       isEncodeEnabled: true,
       isEditResponse: false,
@@ -640,6 +675,7 @@
       uploadFailCount: 0,
       exTxt: {
         name: 'APIJSON测试',
+        label: '发布简单接口',
         button: '保存',
         index: 0
       },
@@ -1032,13 +1068,15 @@
       // 显示导出弹窗
       showExport: function (show, isRemote, isRandom) {
         if (show) {
+          // this.isExportCheckShow = isRemote
+
           if (isRemote) { //共享测试用例
             this.isExportRandom = isRandom
 
             // if (isRandom != true) {  // 分享搜索关键词和分页信息也挺好 } && this.isTestCaseShow != true) {  // 没有拿到列表，没用
-            //   setTimeout(function () {
-            //     App.shareLink(App.isRandomTest)
-            //   }, 1000)
+              // setTimeout(function () {
+              //   App.shareLink(App.isRandomTest)
+              // }, 1000)
             // }
 
             if (this.isTestCaseShow) {
@@ -1123,6 +1161,7 @@
             }
           }
         }
+
         this.isExportShow = show
         this.isExportRemote = isRemote
       },
@@ -1534,7 +1573,16 @@
       },
 
       // 导出文本
-      exportTxt: function () {
+      exportTxt: function (btnIndex) {
+        if (btnIndex == null) {
+          btnIndex = 0
+        }
+
+        if (btnIndex == 1 && this.isExportRandom != true) {
+          this.shareLink(this.isRandomTest)
+          return
+        }
+
         this.isExportShow = false
 
         if (this.isExportRemote == false) { //下载到本地
@@ -1657,29 +1705,51 @@
             return
           }
 
-          var isExportRandom = this.isExportRandom
-          var isEditResponse = this.isEditResponse
+          const isExportRandom = this.isExportRandom
+          const isEditResponse = this.isEditResponse
+          const isReleaseRESTful = isExportRandom && btnIndex == 1 && ! isEditResponse
 
-          if (isExportRandom != true && StringUtil.isEmpty(this.exTxt.name, true)) {
+          const method = App.getMethod();
+          const methodInfo = isReleaseRESTful ? (CodeUtil.parseUri(method, true) || {}) : {};
+          if (isReleaseRESTful) {
+            var isRestful = methodInfo.isRestful;
+            var tag = methodInfo.tag;
+            var table = methodInfo.table;
+
+            if (isRestful) {
+              alert('请求 URL 格式不是 APIJSON 万能通用接口！必须为 /get/user 这种 /{method}/{tag} 格式！其中 method 只能为 [' + APIJSON_METHODS.join() + '] 中的一个，tag 不能为 Table, Table[] 这种与 APIJSON 简单接口冲突的格式！ ')
+              return
+            }
+            if (StringUtil.isEmpty(tag, true)) {
+              alert('请求 URL 缺少 tag！必须为 /get/user 这种 /{method}/{tag} 格式！其中 method 只能为 [' + APIJSON_METHODS.join() + '] 中的一个，tag 不能为 Table, Table[] 这种与 APIJSON 简单接口冲突的格式！ ')
+              return
+            }
+            if (JSONObject.isTableKey(table)) {
+              alert('请求 URL 中的字符 ' + table + ' 与 APIJSON 简单接口冲突！必须为 /get/user 这种 /{method}/{tag} 格式！其中 method 只能为 [' + APIJSON_METHODS.join() + '] 中的一个，tag 不能为 Table, Table[] 这种与 APIJSON 简单接口冲突的格式！ ')
+              return
+            }
+          }
+
+          if ((isExportRandom != true || btnIndex == 1) && StringUtil.isEmpty(this.exTxt.name, true)) {
             alert('请输入接口名！')
             return
           }
 
-          var doc = (this.currentRemoteItem || {}).Document || {}
-          var tr = (this.currentRemoteItem || {}).TestRecord || {}
-          var did = doc.id
-          if (isExportRandom && did == null) {
+          const doc = (this.currentRemoteItem || {}).Document || {}
+          const tr = (this.currentRemoteItem || {}).TestRecord || {}
+          const did = isExportRandom && btnIndex == 1 ? null : doc.id
+          if (isExportRandom && btnIndex <= 0 && did == null) {
             alert('请先共享测试用例！')
             return
           }
 
           this.isTestCaseShow = false
 
-          var currentAccountId = this.getCurrentAccountId()
-          var currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(JSON.parse(this.jsoncon));
+          const currentAccountId = this.getCurrentAccountId()
+          const currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(JSON.parse(this.jsoncon));
 
-          var after = isSingle ? this.switchQuote(inputted) : inputted;  // this.toDoubleJSON(inputted);
-          var inputObj = this.getRequest(after, {});
+          const after = isSingle ? this.switchQuote(inputted) : inputted;  // this.toDoubleJSON(inputted);
+          const inputObj = this.getRequest(after, {});
 
           var commentObj = null;
           if (isExportRandom != true) {
@@ -1700,121 +1770,253 @@
             inputObj.code = code_
           }
 
-          var code = currentResponse.code;
-          var thrw = currentResponse.throw;
+          const code = currentResponse.code;
+          const thrw = currentResponse.throw;
           delete currentResponse.code; //code必须一致
           delete currentResponse.throw; //throw必须一致
 
-          var isML = this.isMLEnabled;
-          var stddObj = isML ? JSONResponse.updateStandard({}, currentResponse) : {};
+          const isML = this.isMLEnabled;
+          const stddObj = isML ? JSONResponse.updateStandard({}, currentResponse) : {};
           stddObj.code = code;
           stddObj.throw = thrw;
           currentResponse.code = code;
           currentResponse.throw = thrw;
 
-          var url = this.server + (isExportRandom || isEditResponse || did == null ? '/post' : '/put')
-          var req = isExportRandom ? {
-            format: false,
-            'Random': {
-              toId: 0,
-              documentId: did,
-              count: this.requestCount,
-              name: this.exTxt.name,
-              config: vRandom.value
-            },
-            'TestRecord': {
-              'response': JSON.stringify(currentResponse),
-              'standard': isML ? JSON.stringify(stddObj) : null
-            },
-            'tag': 'Random'
-          } : {
-            format: false,
-            'Document': isEditResponse ? null : {
-              'id': did == null ? undefined : did,
-              'testAccountId': currentAccountId,
-              'name': this.exTxt.name,
-              'type': this.type,
-              'url': '/' + this.getMethod(),
-              'request': JSON.stringify(inputObj, null, '    '),
-              'standard': JSON.stringify(commentObj, null, '    '),
-              'header': vHeader.value,
-              'detail': this.getExtraComment() || ((this.currentRemoteItem || {}).Document || {}).detail,
-            },
-            'TestRecord': isEditResponse != true && did != null ? null : {
-              'documentId': isEditResponse ? did : undefined,
-              'randomId': 0,
-              'host': this.getBaseUrl(),
-              'testAccountId': currentAccountId,
-              'response': JSON.stringify(isEditResponse ? inputObj : currentResponse),
-              'standard': isML || isEditResponse ? JSON.stringify(isEditResponse ? commentObj : stddObj) : undefined,
-              // 没必要，直接都在请求中说明，查看也方便 'detail': (isEditResponse ? this.getExtraComment() : null) || ((this.currentRemoteItem || {}).TestRecord || {}).detail,
-            },
-            'tag': isEditResponse ? 'TestRecord' : 'Document'
+          var config = vRandom.value;
+          const mapReq = {};
+          var mustKeysStr = "";
+          const typeObj = {};
+
+          if (isReleaseRESTful) {
+            var mapReq2 = {}
+
+            var cfgLines = StringUtil.split(config, '\n', true);
+            var newCfg = '';
+            if (cfgLines != null) {
+              for (var i = 0; i < cfgLines.length; i++) {
+                var cfgLine = cfgLines[i];
+                var ind = cfgLine == null ? -1 : cfgLine.indexOf(': ');
+                if (ind <= 0) {
+                  continue;
+                }
+
+                var cInd = cfgLine.indexOf('//');
+                if (cInd >= 0 && cInd <= ind) {
+                  continue;
+                }
+
+                var k = cfgLine.substring(0, ind).replace(/\//g, '.'); // .trim();
+                var ks = StringUtil.split(k, '.')
+                var p = inputObj;
+                for (var j = 0; j < ks.length - 1; j ++) {
+                  if (p == null) {
+                    break;
+                  }
+
+                  var jk = ks[j];
+                  p = jk == null ? null : p[jk];
+                }
+
+                var v = p == null ? null : p[ks[ks.length - 1]];
+                mapReq[k] = v;
+                mapReq2[k] = v;
+
+                mustKeysStr += (i <= 0 ? '' : ',') + k;
+
+                var t = JSONResponse.getType(v);
+                typeObj[k] = t == 'integer' ? 'NUMBER' : (t == 'number' ? 'DECIMAL' : t.toUpperCase());
+
+                newCfg += (i <= 0 ? '' : '\n') + k + ': ' + cfgLine.substring(ind+2).trim();
+              }
+
+              config = newCfg;
+            }
+
+            commentObj = JSONResponse.updateStandard({}, mapReq2);
           }
 
-          this.request(true, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
-            App.onResponse(url, res, err)
 
-            var rpObj = res.data || {}
+          var callback = function (randomName, constConfig, constJson) {
+            // 用现成的测试过的更好，Response 与 Request 严格对应
+            // var mapReq = {};
+            // if (isExportRandom && btnIndex == 1) {
+            //
+            //   var mapReq2 = {}
+            //   var cfgLines = StringUtil.split(constConfig, '\n', true);
+            //   if (cfgLines != null) {
+            //     for (var i = 0; i < cfgLines.length; i++) {
+            //       var cfgLine = cfgLines[i];
+            //       var ind = cfgLine == null ? -1 : cfgLine.indexOf(': ');
+            //       if (ind <= 0) {
+            //         continue;
+            //       }
+            //
+            //       var k = cfgLine.substring(0, ind).replace(/\//g, '.'); // .trim();
+            //       var v = cfgLine.substring(ind + 1).trim();
+            //       try {
+            //         v = JSON.parse(v);
+            //       }
+            //       catch (e) {
+            //         log(e)
+            //       }
+            //
+            //       mapReq[k] = v
+            //       mapReq2[k] = v
+            //     }
+            //   }
+            //
+            //   commentObj = JSONResponse.updateStandard({}, mapReq2);
+            // }
 
-            if (isExportRandom) {
-              if (rpObj.code == CODE_SUCCESS) {
-                App.randoms = []
-                App.showRandomList(true, (App.currentRemoteItem || {}).Document)
-              }
+            const extName = App.exTxt.name;
+            const baseUrl = App.getBaseUrl();
+            const url = (isReleaseRESTful ? baseUrl : App.server) + (isExportRandom || isEditResponse || did == null ? '/post' : '/put')
+            const req = isExportRandom && btnIndex <= 0 ? {
+              format: false,
+              'Random': {
+                toId: 0,
+                documentId: did,
+                count: App.requestCount,
+                name: App.exTxt.name,
+                config: config
+              },
+              'TestRecord': {
+                'response': JSON.stringify(currentResponse),
+                'standard': isML ? JSON.stringify(stddObj) : null
+              },
+              'tag': 'Random'
+            } : {
+              format: false,
+              'Document': isEditResponse ? null : {
+                'id': did == null ? undefined : did,
+                'testAccountId': currentAccountId,
+                'name': extName,
+                'type': App.type,
+                'url': isReleaseRESTful ? ('/' + methodInfo.method + '/' + methodInfo.tag) : ('/' + method),
+                'request': JSON.stringify(btnIndex <= 0 ? constJson : mapReq, null, '    '),
+                'apijson': btnIndex <= 0 ? undefined : JSON.stringify(constJson, null, '    '),
+                'standard': commentObj == null ? null : JSON.stringify(commentObj, null, '    '),
+                'header': vHeader.value,
+                'detail': App.getExtraComment() || ((App.currentRemoteItem || {}).Document || {}).detail,
+              },
+              'TestRecord': isEditResponse != true && did != null ? null : {
+                'documentId': isEditResponse ? did : undefined,
+                'randomId': 0,
+                'host': baseUrl,
+                'testAccountId': currentAccountId,
+                'response': JSON.stringify(isEditResponse ? inputObj : currentResponse),
+                'standard': isML || isEditResponse ? JSON.stringify(isEditResponse ? commentObj : stddObj) : undefined,
+                // 没必要，直接都在请求中说明，查看也方便 'detail': (isEditResponse ? App.getExtraComment() : null) || ((App.currentRemoteItem || {}).TestRecord || {}).detail,
+              },
+              'tag': isEditResponse ? 'TestRecord' : 'Document'
             }
-            else {
-              var isPut = url.indexOf('/put') >= 0
 
-              if (rpObj.code != CODE_SUCCESS) {
-                if (isPut) {  // 修改失败就转为新增
-                  App.currentRemoteItem = null;
-                  alert('修改失败，请重试(自动转为新增)！' + StringUtil.trim(rpObj.msg))
+            App.request(true, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
+              App.onResponse(url, res, err)
+
+              var rpObj = res.data || {}
+
+              if (isExportRandom && btnIndex <= 0) {
+                if (rpObj.code == CODE_SUCCESS) {
+                  App.randoms = []
+                  App.showRandomList(true, (App.currentRemoteItem || {}).Document)
                 }
               }
               else {
-                App.remotes = []
-                App.showTestCase(true, false)
+                var isPut = url.indexOf('/put') >= 0
 
-                if (isPut) {  // 修改失败就转为新增
-                  alert('修改成功')
-                  return
-                }
-
-                //自动生成随机配置（遍历 JSON，对所有可变值生成配置，排除 @key, key@, key() 等固定值）
-                var req = App.getRequest(vInput.value, {})
-                var config = StringUtil.trim(App.newRandomConfig(null, '', req))
-                if (config == '') {
-                  return;
-                }
-
-                App.request(true, REQUEST_TYPE_JSON, App.server + '/post', {
-                  format: false,
-                  'Random': {
-                    documentId: rpObj.Document.id,
-                    count: App.requestCount,
-                    name: '默认配置(上传测试用例时自动生成)',
-                    config: config
-                  },
-                  TestRecord: {
-                    host: App.getBaseUrl(),
-                    response: ''
-                  },
-                  'tag': 'Random'
-                }, {}, function (url, res, err) {
-                  if (res.data != null && res.data.Random != null && res.data.Random.code == CODE_SUCCESS) {
-                    alert('已自动生成并上传随机配置:\n' + config)
-                    App.isRandomListShow = true
+                if (rpObj.code != CODE_SUCCESS) {
+                  if (isPut) {  // 修改失败就转为新增
+                    App.currentRemoteItem = null;
+                    alert('修改失败，请重试(自动转为新增)！' + StringUtil.trim(rpObj.msg))
                   }
-                  else {
-                    alert('已自动生成，但上传以下随机配置失败:\n' + config)
-                    vRandom.value = config
+                }
+                else {
+                  App.remotes = []
+                  App.showTestCase(true, false)
+
+                  if (isPut) {  // 修改失败就转为新增
+                    alert('修改成功')
+                    return
                   }
-                  App.onResponse(url, res, err)
-                })
+
+                  if (isReleaseRESTful) {
+                    var structure = {"MUST": mustKeysStr, "TYPE": typeObj, "REFUSE": "!"};  // TODO 智能判断 count, @key 等
+
+                    var reqObj = {
+                      format: false,
+                      Request: {
+                        method: StringUtil.toUpperCase(methodInfo.method),
+                        tag: methodInfo.tag,
+                        structure: JSON.stringify(structure, null, '    '),
+                        detail: extName
+                      },
+                      tag: 'Request'
+                    };
+
+                    App.request(true, REQUEST_TYPE_JSON, baseUrl + '/post', reqObj, {}, function (url, res, err) {
+                      var reqStr = JSON.stringify(reqObj, null, '  ');
+                      if (res.data != null && res.data.Request != null && res.data.Request.code == CODE_SUCCESS) {
+                        alert('已自动生成并上传 Request 表校验规则配置:\n' + reqStr)
+                      }
+                      else {
+                        console.log('已自动生成，但上传以下 Request 表校验规则配置失败，可能需要手动加表记录:\nPOST ' + baseUrl + '/post' + '\n' + reqStr)
+                        alert('已自动生成，但上传以下 Request 表校验规则配置失败，可能需要手动加表记录，如未自动复制可在控制台复制:\n' + reqStr)
+                        navigator.clipboard.writeText(reqStr);
+                      }
+                      App.onResponse(url, res, err)
+                    })
+                  }
+
+                  //自动生成随机配置（遍历 JSON，对所有可变值生成配置，排除 @key, key@, key() 等固定值）
+
+                  const isGenerate = StringUtil.isEmpty(config, true);
+                  if (isGenerate) {
+                    var req = isReleaseRESTful ? mapReq : App.getRequest(vInput.value, {})
+                    config = StringUtil.trim(App.newRandomConfig(null, '', req))
+
+                    if (StringUtil.isEmpty(config, true)) {
+                      return;
+                    }
+                  }
+
+                  App.request(true, REQUEST_TYPE_JSON, (isReleaseRESTful ? baseUrl : App.server) + '/post', {
+                    format: false,
+                    'Random': {
+                      documentId: rpObj.Document.id,
+                      count: App.requestCount,
+                      name: '默认配置' + (isGenerate ? '(上传测试用例时自动生成)' : ''),
+                      config: config
+                    },
+                    TestRecord: {
+                      host: baseUrl,
+                      response: ''
+                    },
+                    'tag': 'Random'
+                  }, {}, function (url, res, err) {
+                    if (res.data != null && res.data.Random != null && res.data.Random.code == CODE_SUCCESS) {
+                      alert('已' + (isGenerate ? '自动生成并' : '') + '上传随机配置:\n' + config)
+                      App.isRandomListShow = true
+                    }
+                    else {
+                      alert((isGenerate ? '已自动生成，但' : '') + '上传以下随机配置失败:\n' + config)
+                      vRandom.value = config
+                    }
+                    App.onResponse(url, res, err)
+                  })
+                }
               }
-            }
-          })
+            })
+          };
+
+          if (btnIndex == 1) {
+            // this.parseRandom(inputObj, config, null, true, true, false, callback)
+            callback(null, null, inputObj)
+          }
+          else {
+            callback(null, null, inputObj)
+          }
+
         }
       },
 
@@ -3314,20 +3516,29 @@
           }
 
           var docKey = this.isEditResponse ? 'TestRecord' : 'Document';
-          var detail = ((this.currentRemoteItem || {})[docKey] || {}).detail;
+          var currentItem = (this.currentRemoteItem || {})[docKey] || {}
+          var detail = currentItem.detail;
           var extraComment = this.getExtraComment()
 
           try {
             var standardObj = null;
             try {
-              standardObj = JSON.parse(((this.currentRemoteItem || {})[docKey] || {}).standard);
+              standardObj = JSON.parse(currentItem.standard);
+            } catch (e3) {
+              log(e3)
+            }
+
+            var isAPIJSONRouter = false;
+            try {
+              var apijson = JSON.parse(currentItem.apijson);
+              isAPIJSONRouter = JSONResponse.isObject(apijson)
             } catch (e3) {
               log(e3)
             }
 
             var m = this.getMethod();
-            var w = isSingle || this.isEditResponse ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj, null, true));
-            var c = isSingle ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj));
+            var w = isSingle || this.isEditResponse ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj, null, true, isAPIJSONRouter));
+            var c = isSingle ? '' : StringUtil.trim(CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, this.isEditResponse != true, standardObj, null, null, isAPIJSONRouter));
 
 
             //TODO 统计行数，补全到一致 vInput.value.lineNumbers
@@ -3479,7 +3690,7 @@
         var url = StringUtil.get(vUrl.value)
         var index = url.indexOf('?')
         if (index >= 0) {
-          var paramObj = getRequestFromURL(url.substring(index))
+          var paramObj = getRequestFromURL(url.substring(index), true)
           vUrl.value = url.substring(0, index)
           if (paramObj != null && $.isEmptyObject(paramObj) == false) {
             var originVal = this.getRequest(vInput.value, {});
@@ -3879,13 +4090,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     catch (e) {
                       log(e)
                       try {
-                        json = getRequestFromURL('?' + content);  // a=1&b=c
+                        json = getRequestFromURL('?' + content, true);  // a=1&b=c
                       } catch (e2) {
                         log(e2)
                       }
                     }
 
-                    vInput.value = json == null || Object.keys(json).length < 0 ? '' : JSON.stringify(json, null, '    ');
+                    vInput.value = json == null ? '' : JSON.stringify(json, null, '    ');
                     event.preventDefault();
                     break;
                   }
@@ -3943,7 +4154,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     var left = target == vHeader ? StringUtil.trim(l.substring(0, ind)) : l.substring(0, ind);
                     if (left.indexOf('=') >= 0 || left.indexOf('&') >= 0) {
                       try {
-                        json = getRequestFromURL('?' + paste);
+                        json = getRequestFromURL('?' + paste, true);
                         if (Object.keys(json).length > 0) {
                           break;
                         }
@@ -3957,7 +4168,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
 
                 if (Object.keys(json).length <= 0) {
-                  json = getRequestFromURL('?' + paste);
+                  json = getRequestFromURL('?' + paste, true);
                 }
 
                 if (Object.keys(json).length > 0) {

@@ -6,7 +6,7 @@
 
 <p align="center" >
   <a href="https://github.com/TommyLemon/APIAuto#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95">使用文档</a>
-  <a href="http://i.youku.com/apijson">视频教程</a>
+  <a href="https://space.bilibili.com/437134249/search/video?keyword=apiauto">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
 </p>
 
@@ -22,8 +22,22 @@
 不仅适用于 RESTful、类 RESTful、GRPC 的 API，还是腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 官方建议的文档与测试工具。<br />
 腾讯内部用户包括 互动娱乐、技术工程、云与智慧 等，外部用户包含 500强上市公司深圳传音、行业领头羊社保科技 等。
 
+<h3 align="center" style="text-align:center;">
+腾讯 AI 测试圈子演讲(部分)
+</h3>
+
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIAuto/APIAuto_Tencent_TEG_AITestCircle_quick_and_slow.gif)
+
+
+#### 腾讯内先后被 TEG 工具开发组、微信支付部门、IEG 工具开发组、CDG 金融支付组 邀请分享了 
+* APIAuto-机器学习 HTTP 接口工具
+* 零代码测试工具与实践(API•单元•UI)
+* 零代码开发和测试(API测试•单元测试•API开发)
+* 零代码开发和测试(API测试•单元测试•API开发)
+
+
 #### 和华为云副总裁并列，QECon-全球软件质量&效能 大会分享总结
-零代码开发和测试 成为大会主会场回看预约海报唯一分会场演讲范例 <br />
+零代码开发和测试 成为大会主会场回看预约海报唯一分会场演讲范例 <br /><br />
 <img width="1360" alt="wecom-temp-377bbd0daf5aed716baf7ebcb003d94c" src="https://user-images.githubusercontent.com/5738175/121370207-1b35de00-c96f-11eb-840e-cc2ff2995888.png">
 
 <img width="390" src="https://user-images.githubusercontent.com/5738175/125167121-86bed580-e1d1-11eb-9dc6-2ea190146fe6.png">
@@ -32,11 +46,9 @@
 https://www.bilibili.com/video/BV1yv411p7Y4
 <br />
 
-#### 腾讯内先后被 TEG 工具开发组、微信支付部门、IEG 工具开发组、CDG 金融支付组 邀请分享了 
-* APIAuto-机器学习 HTTP 接口工具
-* 零代码测试工具与实践(API•单元•UI)
-* 零代码开发和测试(API测试•单元测试•API开发)
-* 零代码开发和测试(API测试•单元测试•API开发)
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIAuto/APIAuto_mltesting.gif)
+![](https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIAuto/APIAuto_mltest_check_result.gif)
+
 
 ![image](https://user-images.githubusercontent.com/5738175/145665614-f9208e35-9dc2-4a02-a8c9-0d7c9f4a87bc.png)
 ![APIJSON 和 APIAuto - 零代码开发和测试-QECon 大会-图像 008](https://user-images.githubusercontent.com/5738175/145665488-42b04a4b-1f74-4fb8-8a62-db3535f4256c.jpeg)
@@ -66,6 +78,7 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 ![APIJSON 和 APIAuto - 零代码开发和测试-QECon 大会-图像 037](https://user-images.githubusercontent.com/5738175/145665553-68403dcb-4cdd-42d4-9ffc-e32657e16b2b.jpeg)
 
 
+<br /><br />
 
 ### 特点功能
 
@@ -77,38 +90,17 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 * 自动给请求JSON加注释，一键切换
 * 自动保存历史请求记录，一键恢复
 
-<br />
-
-<h3 align="center" style="text-align:center;">
-腾讯 AI 测试圈子演讲(部分)
-</h3>
-
-![](https://oscimg.oschina.net/oscnet/up-88c1699d9e1cd17d67705cb8b0271030daf.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-9cfe7bf3ed3d7f0b5053694f5042b4d36ed.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-520f379b2d0e9be7415963a69e940d0fc4c.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-9ae302efd6c74c20c393ad7ead39be8adba.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-fd316d5b63060f75ec1790a657497ad6286.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-6ffb15bdcc7d54fedb55d2368c1e0ba72f3.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-d3075ac2a481ddd89e28818b461ecc3f66c.JPEG) 
-![](https://oscimg.oschina.net/oscnet/up-442dd6c67edf259327f34b25e4d7e7c5b15.JPEG) 
-
-
-<br />
-
 以上是简略图，机器学习测试、自动生成代码、自动静态检查、自动生成注释 等详细的功能介绍见 <br />
 
 [https://github.com/TommyLemon/APIAuto/blob/master/apijson/README.md](https://github.com/TommyLemon/APIAuto/blob/master/apijson/README.md)
 
-<br />
-<br />
-
 ### 演讲稿件
-
-[APIAuto-机器学习 HTTP 接口工具](https://github.com/TommyLemon/StaticResources/tree/master/APIAuto/Share)
+[APIAuto-机器学习 HTTP 接口工具](https://github.com/TommyLemon/StaticResources/tree/master/APIAuto/Share) <br />
+[QECon 大会-腾讯 Tommy-零代码开发和测试](https://github.com/TommyLemon/StaticResources/tree/master/APIAuto/Share)
 
 ### 视频教程
-
-[http://i.youku.com/apijson](http://i.youku.com/apijson)
+[Bilibili](https://space.bilibili.com/437134249/search/video?keyword=apiauto) <br />
+[优酷](https://i.youku.com/i/UNTg1NzI1MjQ4MA==)
 
 
 ### 部署方法
@@ -116,7 +108,7 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 本项目是纯静态 SPA 网页，下载源码解压后：<br />
 可以用浏览器打开 index.html，建议用 [Chrome](https://www.google.com/intl/zh-CN/chrome) 或 [Firefox](https://www.mozilla.org/zh-CN/firefox) (Safari、Edge、IE 等可能有兼容问题)，注意此方法不显示 svg 图标。<br />
 也可以用 [IntelIJ Webstorm](https://www.jetbrains.com/webstorm/), [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](https://www.eclipse.org/) 等 IDE 来打开。<br />
-也可以部署到服务器并用 [Nginx](https://www.jianshu.com/p/11fa3a1a6d65) 或 [Node](https://segmentfault.com/a/1190000039744899) 反向代理，或者 [把源码放到 SpringBoot 项目的 static 目录](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)。 <br />
+也可以部署到服务器并用 [Nginx](https://www.jianshu.com/p/11fa3a1a6d65) 或 [Node](https://segmentfault.com/a/1190000039744899) 反向代理，或者 [把源码放到 SpringBoot 项目的 resources/static 目录](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)。 <br />
 还可以直接访问官方网站 http://apijson.cn/api <br />
 <br />
 把左侧 URL 输入框内基地址改为你主机的地址(例如 http://localhost:8080 )，<br />
@@ -125,8 +117,10 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 右上角登录的默认管理员账号为 13000082001 密码为 123456，<br />
 右侧上方中间 3 个标签是默认的测试用户账号，点击登录/退出，左侧 - 删除，右侧 + 新增。<br />
 <br />
-自动生成文档、自动管理测试用例 这两个功能 需要部署 APIJSON 后端，建议用 APIJSONBoot 系列之一 Demo，见 <br /> 
+**自动生成文档、自动管理测试用例 这两个功能 需要部署 APIJSON 后端，建议用 APIJSONBoot 系列之一 Demo，见** <br /> 
 https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server
+
+**建议使用已 [内置 APIAuto](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 的 [APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource)，可以避免以下常见问题 1, 3, 4**
 
 ### 常见问题
 
@@ -134,8 +128,17 @@ https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server
 很多问题都不需要看文档/视频，可以直接通过把光标放上去等简单尝试来得到解答**
 
 #### 1.无法访问接口
-Chrome 90+ 对 CORS 请求禁止携带 Cookie 或 Chrome 80-89 强制 same-site Cookie 的策略导致 <br />
+如果是 APIAuto 本身调用的后端接口，则一般是 Chrome 90+ 对 CORS 请求禁止携带 Cookie  <br />
+或 Chrome 80-89 强制 same-site Cookie 的策略导致，打开以下链接查看解决方法 <br />
 https://github.com/TommyLemon/APIAuto/issues/9
+
+如果是其它接口，则一般是以上原因或者被接口不支持 CORS 跨域，可以改为支持， <br />
+或者在 APIAuto 右上角设置开启托管服务器代理，通过后端代理访问接口， <br />
+注意默认是官网的托管服务器 http://apijson.cn:9090 ，仅支持公网， <br />
+如果是贵公司内网，请按以上 [部署方法](https://github.com/TommyLemon/APIAuto#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95) 文档来部署 APIJSON 后端到内网，并修改托管服务器地址。
+
+百度、搜狗、抖音公网接口调用演示
+https://github.com/TommyLemon/APIAuto/issues/16
 
 #### 2.没有生成文档
 右上角设置项与数据库实际配置不一致 等  <br />

@@ -302,9 +302,9 @@ Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
                                     查看父项列表
                                 </a>
                             </a>
-                            <a v-show="(currentRemoteItem || {}).Document != null" class="hint--top @cli-tool" data-hint="添加" style="font-size:xx-large; margin-bottom: 2px; color: black;"
+                            <a class="hint--top @cli-tool" data-hint="添加" style="font-size:xx-large; margin-bottom: 2px; color: black;"
                                href="javascript:void(0)" @click="if(isRandomListShow || isRandomSubListShow) { randomTestTitle = null; isRandomListShow = false; isRandomSubListShow = false; } else { showExport(true, true, true) }"> + </a>
-                            <a v-show="false" href="javascript:void(0)" style="font-size: small;" class="hint--top"  data-hint="上传/共享"  @click="showExport(true, true)">
+                            <a v-show="false" href="javascript:void(0)" style="font-size: small;" class="hint--top"  data-hint="上传/分享"  @click="showExport(true, true)">
                                 <svg class="icon">
                                     <use xlink:href="svg/icon.svg#share"></use>
                                 </svg>
@@ -511,7 +511,7 @@ My-Header: 'Secret' + Math.random()  // 示例，代码执行结果作为实际�
                         </svg>
                     </a>
 
-                    <a href="javascript:void(0)" class="hint--top"  data-hint="上传/共享"   @click="showExport(true, true)">
+                    <a href="javascript:void(0)" class="hint--top"  data-hint="上传/分享"   @click="showExport(true, true)">
                         <svg class="icon">
                             <use xlink:href="svg/icon.svg#share"></use>
                         </svg>
@@ -597,12 +597,16 @@ My-Header: 'Secret' + Math.random()  // 示例，代码执行结果作为实际�
 
     <!--弹出下载文本框-->
     <div class="save-box" v-show="isExportShow">
+        <div id="divSaveBoxCheck" v-show="isExportCheckShow && ! isEditResponse" style="position: absolute; width: 120px; height: 30px; padding: 0px; margin: 0px; left: -45px; top: 6px; display: inline-block">
+            <input type="checkbox" style="position: relative; width: 18px; top: 1px; " id="cbSaveBoxCheck" value="first_checkbox"><label id="lblSaveBox" for="cbSaveBoxCheck" style="top: 0px; right: -36px">{{ exTxt.label || '发布简单接口'}}</label>
+        </div>
+
         <svg class="icon close-icon" @click="showExport(false, isExportRemote)">
             <use xlink:href="svg/icon.svg#close"></use>
         </svg>
 
         <input type="text" placeholder="请输入名称" v-model="exTxt.name" />
-        <button @click="exportTxt()">{{isExportRemote ? '上传' : '下载'}}</button>
+        <div style="display: inline-block; margin-top: 6px; padding-bottom: 0px"><button @click="exportTxt(0)">{{isExportRemote ? '上传' : '下载'}}</button><button v-show="isExportRemote && (isExportRandom != true || isEditResponse != true)" style="margin-left: 6px" @click="exportTxt(1)">{{isExportRandom ? '发布简单接口' : '分享'}}</button></div>
     </div>
 
     <!--弹出设置文本框-->
@@ -871,36 +875,6 @@ My-Header: 'Secret' + Math.random()  // 示例，代码执行结果作为实际�
 
   //vURLComment跟随vUrl滚动，避免JSON重叠"露馅"
   $(vUrl).on('scroll', onURLScrollChanged);
-
-
-  function markdownToHTML(md, isRequest) {
-    if (editormd == null) {
-      return;
-    }
-
-    if (isRequest) {
-      vRequestMarkdown.innerHTML = '';
-    }
-    else {
-      vMarkdown.innerHTML = '';
-    }
-    editormd.markdownToHTML(isRequest ? 'vRequestMarkdown' : "vMarkdown", {
-      markdown        : md ,//+ "\r\n" + $("#append-test").text(),
-      //htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
-      htmlDecode      : "style,script,iframe",  // you can filter tags decode
-      //toc             : false,
-      tocm            : true,    // Using [TOCM]
-      //tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
-      //gfm             : false,
-      tocDropdown     : true,
-      // markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
-      taskList        : true,
-      tex             : true,  // 默认不解析
-      flowChart       : true,  // 默认不解析
-      sequenceDiagram : true,  // 默认不解析
-    });
-  }
-
 
 </script>
 <script src="md/lib/jquery.min.js"></script>
