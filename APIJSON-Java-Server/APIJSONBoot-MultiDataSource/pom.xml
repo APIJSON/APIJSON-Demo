@@ -53,7 +53,7 @@
 
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-		<!-- <dependency>
+		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
 			<version>5.1.0</version>
@@ -67,7 +67,12 @@
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-column</artifactId>
 			<version>1.2.2</version>
-		</dependency> -->
+		</dependency>
+		<dependency>
+		    <groupId>com.github.APIJSON</groupId>
+		    <artifactId>apijson-router</artifactId>
+		    <version>1.0.0</version>
+		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
 		<!-- 需要用的数据库 JDBC 驱动 -->

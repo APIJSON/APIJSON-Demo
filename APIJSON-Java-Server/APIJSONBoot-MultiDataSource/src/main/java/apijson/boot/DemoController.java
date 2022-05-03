@@ -101,7 +101,7 @@ import apijson.router.APIJSONRouterController;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONRouterController<Long> {  // APIJSONController<Long> {  // 
+public class DemoController extends APIJSONRouterController<Long> {  // APIJSONController<Long> {
 	private static final String TAG = "DemoController";
 
 	// 可以更方便地通过日志排查错误
@@ -110,8 +110,21 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 		return httpServletRequest.getRequestURL().toString();
 	}
 
-	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+	/**增删改查统一的类 RESTful API 入口，牺牲一些路由解析性能来提升一点开发效率
+	 * @param method
+	 * @param tag
+	 * @param params
+	 * @param request
+	 * @param session
+	 * @return
+	 */
+	@PostMapping("router/{method}/{tag}")
+	@Override
+	public String router(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.router(method, tag, params, request, session);
+	}
+	
+	// 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
 	 * @param method
@@ -125,13 +138,6 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 	@Override
 	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
 		return super.crud(method, request, session);
-	}
-
-	//  增删改查统一的类 RESTful API 入口，牺牲一些路由解析性能来提升一点开发效率
-	@PostMapping("router/{method}/{tag}")
-	@Override
-	public String router(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
-		return super.router(method, tag, params, request, session);
 	}
 
 	/**获取
@@ -218,8 +224,9 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 		return super.delete(request, session);
 	}
 
+	// 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
+	// 以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
 
 
 	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
@@ -318,7 +325,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 		return super.deleteByTag(tag, params, request, session);
 	}
 
-	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true..  >>>>>>>>>>>>>>>>>>>>>>>>>
+	// 以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true..  >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
