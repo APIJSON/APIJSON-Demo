@@ -72,6 +72,23 @@ import unitauto.jar.UnitAutoApp;
 public class DemoApplication implements ApplicationContextAware, WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 	private static final String TAG = "DemoApplication";
 
+	public static void main(String[] args) throws Exception {
+		SpringApplication.run(DemoApplication.class, args);
+
+		// FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
+		// 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
+		unitauto.Log.DEBUG = Log.DEBUG = true;
+		APIJSONParser.IS_PRINT_BIG_LOG = true;
+		APIJSONApplication.init();
+	}
+
+	// SpringBoot 2.x 自定义端口方式
+	@Override
+	public void customize(ConfigurableServletWebServerFactory server) {
+		server.setPort(8080);
+	}
+	
+	
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -81,7 +98,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 
 		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
+		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 
 			@Override
 			public Parser<Long> createParser() {
@@ -242,21 +259,6 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	}
 
 
-	public static void main(String[] args) throws Exception {
-		SpringApplication.run(DemoApplication.class, args);
-
-		// FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
-		// 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-		unitauto.Log.DEBUG = Log.DEBUG = true;
-		APIJSONParser.IS_PRINT_BIG_LOG = true;
-		APIJSONApplication.init();
-	}
-
-	// SpringBoot 2.x 自定义端口方式
-	@Override
-	public void customize(ConfigurableServletWebServerFactory server) {
-		server.setPort(8080);
-	}
 
 	// 全局 ApplicationContext 实例，方便 getBean 拿到 Spring/SpringBoot 注入的类实例
 	private static ApplicationContext APPLICATION_CONTEXT;

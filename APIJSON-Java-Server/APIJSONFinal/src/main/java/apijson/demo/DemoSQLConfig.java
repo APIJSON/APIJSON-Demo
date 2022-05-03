@@ -19,14 +19,18 @@ import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 
+import java.util.List;
+
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
+import apijson.orm.Join;
+import apijson.orm.Join.On;
 
 
-/**SQL 配置，这里不配置数据库账号密码等信息，改为使用 DemoDataSourceConfig 来配置
+/**SQL配置
  * TiDB 用法和 MySQL 一致
  * 具体见详细的说明文档 C.开发说明 C-1-1.修改数据库链接  
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
@@ -56,10 +60,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
 		//主键名映射
-		SIMPLE_CALLBACK = new SimpleCallback() {
+		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
 
 			@Override
-			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String table) {
+			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
@@ -78,7 +82,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 			//取消注释来实现数据库自增 id
 			//			@Override
-			//			public Object newId(RequestMethod method, String database, String schema, String datasource, String table) {
+			//			public Long newId(RequestMethod method, String database, String schema, String datasource, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 
@@ -98,6 +102,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("substring_index(substring_index(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
 		RAW_MAP.put("to_days(now())-to_days(`date`)<=7","");  // 给 @having 使用
+		RAW_MAP.put("sexShowStr","CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
 
 	}
 
@@ -238,7 +243,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//	public String getKey(String key) {
 	//		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
 	//	}
-	
+
 	// 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库
 	//	public Object getValue(@NotNull Object value) {
 	//		if (isOracle() && RequestMethod.isQueryMethod(getMethod()) == false && value instanceof String) {
@@ -258,5 +263,19 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		}
 	//		return super.getValue(value);
 	//	}
+	
+	
+	@Override
+	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
+		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
+	}
+	@Override
+	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
+	}
+	@Override
+	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
+	}
 
 }

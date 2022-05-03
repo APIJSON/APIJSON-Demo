@@ -101,7 +101,7 @@ import apijson.orm.exception.OutOfRangeException;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONController {
+public class DemoController extends APIJSONController<Long> {
 	private static final String TAG = "DemoController";
 
 	// 可以更方便地通过日志排查错误
@@ -109,8 +109,23 @@ public class DemoController extends APIJSONController {
 	public String getRequestURL() {
 		return httpServletRequest.getRequestURL().toString();
 	}
+
 	
-	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	// 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
+	 * @param method
+	 * @param tag
+	 * @param params
+	 * @param request
+	 * @param session
+	 * @return
+	 */
+	@PostMapping(value = "crud/{method}")  // 直接 {method} 或 apijson/{method} 会和内置网页的路由有冲突
+	@Override
+	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
+		return super.crud(method, request, session);
+	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -196,8 +211,23 @@ public class DemoController extends APIJSONController {
 		return super.delete(request, session);
 	}
 
+	// 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
+	// 以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
+
+	/**增删改查统一接口，这个一个接口可替代 7 个万能通用接口，牺牲一些路由解析性能来提升一点开发效率
+	 * @param method
+	 * @param tag
+	 * @param params
+	 * @param request
+	 * @param session
+	 * @return
+	 */
+	@PostMapping("crud/{method}/{tag}")  // 直接 {method}/{tag} 或 apijson/{method}/{tag} 会和内置网页的路由有冲突
+	@Override
+	public String crudByTag(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.crudByTag(method, tag, params, request, session);
+	}
 
 	/**获取
 	 * @param request 只用String，避免encode后未decode
@@ -283,7 +313,7 @@ public class DemoController extends APIJSONController {
 		return super.deleteByTag(tag, params, request, session);
 	}
 
-	//以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true..  >>>>>>>>>>>>>>>>>>>>>>>>>
+	// 以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true..  >>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 
@@ -1231,6 +1261,7 @@ public class DemoController extends APIJSONController {
 			map.remove("$_type");
 			map.remove("$_except_headers");
 			map.remove("$_delegate_url");
+			map.remove("$_delegate_id");
 
 			Set<Entry<String, String[]>> set = map == null ? null : map.entrySet();
 

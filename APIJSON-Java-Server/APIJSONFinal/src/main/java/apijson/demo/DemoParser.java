@@ -22,22 +22,22 @@ import apijson.framework.APIJSONParser;
  * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
-public class DemoParser extends APIJSONParser {
+public class DemoParser extends APIJSONParser<Long> {
 
-	public DemoParser() {
-		super();
-	}
-	public DemoParser(RequestMethod method) {
-		super(method);
-	}
-	public DemoParser(RequestMethod method, boolean needVerify) {
-		super(method, needVerify);
-	}
+    public DemoParser() {
+        super();
+    }
+    public DemoParser(RequestMethod method) {
+        super(method);
+    }
+    public DemoParser(RequestMethod method, boolean needVerify) {
+        super(method, needVerify);
+    }
 
-	//	可重写来设置最大查询数量
-	//	@Override
-	//	public int getMaxQueryCount() {
-	//		return 50;
-	//	}
+    //	可重写来设置最大查询数量
+    //	@Override
+    //	public int getMaxQueryCount() {
+    //		return 50;
+    //	}
 
 }

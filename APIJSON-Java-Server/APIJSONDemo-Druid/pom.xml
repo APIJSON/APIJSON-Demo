@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-druid</artifactId>
-	<version>5.0.0</version>
+	<version>5.1.0</version>
 	<packaging>jar</packaging>
 
 	<name>APIJSONDemo-Druid</name>
@@ -22,7 +22,7 @@
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>LATEST</version>
+			<version>5.1.0</version>
 		</dependency>
 		
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -83,6 +83,15 @@
 	</build>
 
 	<repositories>
+	    <!-- APIJSON 必须用到的托管平台 -->
+		<repository>
+			<id>jitpack.io</id>
+			<url>https://jitpack.io</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		
 		<repository>
 			<id>spring-snapshots</id>
 			<url>https://repo.spring.io/snapshot</url>
@@ -93,10 +102,6 @@
 		<repository>
 			<id>spring-milestones</id>
 			<url>https://repo.spring.io/milestone</url>
-		</repository>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
 		</repository>
 	</repositories>
 

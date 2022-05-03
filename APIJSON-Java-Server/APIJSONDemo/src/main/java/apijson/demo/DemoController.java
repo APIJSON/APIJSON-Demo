@@ -46,30 +46,37 @@ import apijson.orm.Parser;
  */
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONController {
+public class DemoController extends APIJSONController<Long> {
 
 	@Override
 	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
 		return super.newParser(session, method).setNeedVerify(false);  // TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
 	}
-	
-	@PostMapping(value = "get")
+
+	/**增删改查统一接口，这个一个接口可替代 7 个万能通用接口，牺牲一些路由解析性能来提升一点开发效率
+	 * @param method
+	 * @param request
+	 * @param session
+	 * @return
+	 */
+	@PostMapping(value = "{method}")  // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method} 或 Controller 注解 @RequestMapping("crud")
 	@Override
-	public String get(@RequestBody String request, HttpSession session) {
-		return super.get(request, session);
+	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
+		return super.crud(method, request, session);
 	}
-	
 
-	//	@PostMapping(value = "{method}")  // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 apijson/{method} 或 Controller 注解 @RequestMapping("apijson")
-	//	@Override
-	//	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
-	//		return super.crud(method, request, session);
-	//	}
-
-	@PostMapping("get/{tag}")
+	/**增删改查统一接口，这个一个接口可替代 7 个万能通用接口，牺牲一些路由解析性能来提升一点开发效率
+	 * @param method
+	 * @param tag
+	 * @param params
+	 * @param request
+	 * @param session
+	 * @return
+	 */
+	@PostMapping("{method}/{tag}")  // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method}/{tag} 或 Controller 注解 @RequestMapping("crud")
 	@Override
-	public String getByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
-		return super.getByTag(tag, params, request, session);
+	public String crudByTag(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+		return super.crudByTag(method, tag, params, request, session);
 	}
 
 	/**获取

@@ -228,12 +228,13 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
 	// 以上接口对应的简版接口，格式为 {method}/{tag}?format=true&@explain=true.. <<<<<<<<<<<<<<<<<<<<<<<<<
 
-
-	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
-	 * @param request 只用String，避免encode后未decode
+	/**增删改查统一接口，这个一个接口可替代 7 个万能通用接口，牺牲一些路由解析性能来提升一点开发效率
+	 * @param method
+	 * @param tag
+	 * @param params
+	 * @param request
 	 * @param session
 	 * @return
-	 * @see {@link RequestMethod#DELETE}
 	 */
 	@PostMapping("crud/{method}/{tag}")  // 直接 {method}/{tag} 或 apijson/{method}/{tag} 会和内置网页的路由有冲突
 	@Override

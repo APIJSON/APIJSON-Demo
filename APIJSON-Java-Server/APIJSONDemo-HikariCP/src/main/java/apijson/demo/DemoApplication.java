@@ -32,7 +32,6 @@ import apijson.Log;
 import apijson.framework.APIJSONApplication;
 import apijson.framework.APIJSONCreator;
 import apijson.orm.SQLConfig;
-import apijson.orm.SQLExecutor;
 
 
 /**Demo SpringBoot Application 主应用程序启动类  
@@ -63,14 +62,10 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	
 	static {
 		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
+		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 			@Override
 			public SQLConfig createSQLConfig() {
 				return new DemoSQLConfig();
-			}
-			@Override
-			public SQLExecutor createSQLExecutor() {
-				return new DemoSQLExecutor();
 			}
 		};
 		

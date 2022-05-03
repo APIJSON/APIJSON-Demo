@@ -17,6 +17,7 @@ package apijson.demo;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -30,6 +31,7 @@ import apijson.StringUtil;
 import apijson.framework.APIJSONFunctionParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.JSONRequest;
+import apijson.orm.Visitor;
 
 
 /**可远程调用的函数类，用于自定义业务逻辑处理
@@ -45,6 +47,26 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	public DemoFunctionParser(RequestMethod method, String tag, int version, JSONObject request, HttpSession session) {
 		super(method, tag, version, request, session);
 	}
+	
+	public Visitor<Long> getCurrentUser(@NotNull JSONObject current) {
+		return DemoVerifier.getVisitor(getSession());
+	}
+	
+	public Long getCurrentUserId(@NotNull JSONObject current) {
+		return DemoVerifier.getVisitorId(getSession());
+	}
+	
+	public List<Long> getCurrentUserIdAsList(@NotNull JSONObject current) {
+		List<Long> list = new ArrayList<>(1);
+		list.add(DemoVerifier.getVisitorId(getSession()));
+		return list;
+	}
+	
+	public List<Long> getCurrentContactIdList(@NotNull JSONObject current) {
+		Visitor<Long> user = getCurrentUser(current);
+		return user == null ? null : user.getContactIdList();
+	}
+	
 
 	/**
 	 * @param current
@@ -52,24 +74,26 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyIdList(@NotNull JSONObject current, @NotNull String idList) throws Exception {
+	public void verifyIdList(@NotNull JSONObject current, @NotNull String idList) throws Exception {
 		Object obj = current.get(idList);
 		if (obj == null) {
-			return null;
+			return;
 		}
 		
 		if (obj instanceof Collection == false) {
-			throw new IllegalArgumentException(idList + " 不符合 Array 类型! 结构必须是 [] ！");
+			throw new IllegalArgumentException(idList + " 不符合 Array 数组类型! 结构必须是 [] ！");
 		}
-		JSONArray array = (JSONArray) obj;
-		if (array != null) {
-			for (int i = 0; i < array.size(); i++) {
-				if (array.get(i) instanceof Long == false && array.get(i) instanceof Integer == false) {
-					throw new IllegalArgumentException(idList + " 内字符 " + array.getString(i) + " 不符合 Long 类型!");
+		
+		Collection<?> collection = (Collection<?>) obj;
+		if (collection != null) {
+			int i = -1;
+			for (Object item : collection) {
+				i ++;
+				if (item instanceof Long == false && item instanceof Integer == false) {
+					throw new IllegalArgumentException(idList + "/" + i + ": " + item + " 不符合 Long 数字类型!");
 				}
 			}
 		}
-		return null;
 	}
 
 
@@ -79,24 +103,26 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyURLList(@NotNull JSONObject current, @NotNull String urlList) throws Exception {
+	public void verifyURLList(@NotNull JSONObject current, @NotNull String urlList) throws Exception {
 		Object obj = current.get(urlList);
 		if (obj == null) {
-			return null;
+			return;
 		}
 		
 		if (obj instanceof Collection == false) {
-			throw new IllegalArgumentException(urlList + " 不符合 Array 类型! 结构必须是 [] ！");
+			throw new IllegalArgumentException(urlList + " 不符合 Array 数组类型! 结构必须是 [] ！");
 		}
-		JSONArray array = (JSONArray) obj;
-		if (array != null) {
-			for (int i = 0; i < array.size(); i++) {
-				if (StringUtil.isUrl(array.getString(i)) == false) {
-					throw new IllegalArgumentException(urlList + " 内字符 " + array.getString(i) + " 不符合 URL 格式!");
+		
+		Collection<?> collection = (Collection<?>) obj;
+		if (collection != null) {
+			int i = -1;
+			for (Object item : collection) {
+				i ++;
+				if (item instanceof String == false || StringUtil.isUrl((String) item) == false) {
+					throw new IllegalArgumentException(urlList + "/" + i + ": " + item + " 不符合 URL 字符串格式!");
 				}
 			}
 		}
-		return null;
 	}
 
 
@@ -214,13 +240,11 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
 		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
 		String role = current.getString(JSONRequest.KEY_ROLE);
-		if (AbstractVerifier.OWNER.equals(role) && userId != DemoVerifier.getVisitorId(getSession())) {
+		if (AbstractVerifier.OWNER.equals(role) && userId != (Long) DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
 		return null;
 	}
-
-
 
 
 }

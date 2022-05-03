@@ -62,7 +62,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	
 	static {
 		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator() {
+		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 			@Override
 			public SQLConfig createSQLConfig() {
 				return new DemoSQLConfig();

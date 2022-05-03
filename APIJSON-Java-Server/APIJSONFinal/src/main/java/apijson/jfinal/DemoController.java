@@ -89,25 +89,26 @@ public class DemoController extends Controller {
 	private static final String TAG = "DemoController";
 
 	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
-		Parser<Long> parser = APIJSONController.APIJSON_CREATOR.createParser();
+		@SuppressWarnings("unchecked")
+		Parser<Long> parser = (Parser<Long>) APIJSONController.APIJSON_CREATOR.createParser();
 		parser.setMethod(method);
 		if (parser instanceof APIJSONParser) {
-			((APIJSONParser) parser).setSession(session);
+			((APIJSONParser<Long>) parser).setSession(session);
 		}
-		//		// 取消注释可以更方便地通过日志排查错误
-		//		if (parser instanceof AbstractParser) {
-		//			((AbstractParser<?>) parser).setRequestURL(getRequest().getRequestURL().toString());
-		//		}
+		// 可以更方便地通过日志排查错误
+		if (parser instanceof AbstractParser) {
+			((AbstractParser<Long>) parser).setRequestURL(getRequest().getRequestURL().toString());
+		}
 		return parser;
 	}
-	
+
 	/**处理万能通用接口
 	 * @param method
 	 * @see https://github.com/Tencent/APIJSON/blob/master/Document.md#3.1
 	 */
 	public void parseAndResponse(RequestMethod method) {
 		String tag = getPara();
-		
+
 		if (StringUtil.isEmpty(tag, true) == false) {
 			try {
 				tag = URLDecoder.decode(tag, "UTF-8");
@@ -115,19 +116,19 @@ public class DemoController extends Controller {
 				e.printStackTrace();
 			}
 		}
-		
+
 		if (StringUtil.isEmpty(tag, true)) {
 			// /get， /gets， /head， /heads， /post， /put， /delete 等万能通用接口 
 			renderJson(newParser(getSession(), method).parse(getRawData()));
 			return;
 		}
-		
+
 		// /get/User， /gets/Moment[]， /put/Comment:[]  等简版接口，APIJSON 4.8.0+ 可用，对不兼容的低版本需要注释以下代码
 		JSONObject req = AbstractParser.wrapRequest(method, tag, JSON.parseObject(getRawData()), false);
 		if (req == null) {
 			req = new JSONObject(true);
 		}
-		
+
 		Map<String, String[]> paraMap = getParaMap();
 		Set<Entry<String, String[]>> set = paraMap == null ? null : paraMap.entrySet();
 		if (set != null) {  // 最外层的全局参数
@@ -137,11 +138,11 @@ public class DemoController extends Controller {
 				if (StringUtil.isEmpty(tag, false)) {
 					continue;
 				}
-				
+
 				req.put(entry.getKey(), value);
 			}
 		}
-		
+
 		renderJson(newParser(getSession(), method).parse(req));
 	}
 
@@ -210,8 +211,8 @@ public class DemoController extends Controller {
 		parseAndResponse(DELETE);
 	}
 
-	
-	
+
+
 	//通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
@@ -275,8 +276,8 @@ public class DemoController extends Controller {
 			phone = requestObject.getString(PHONE);
 			verify = requestObject.getString(VERIFY);
 		} catch (Exception e) {
-			 renderJson(DemoParser.extendErrorResult(requestObject, e));
-			 return;
+			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			return;
 		}
 
 		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));

@@ -57,7 +57,9 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	}
 	
 	public List<Long> getCurrentUserIdAsList(@NotNull JSONObject current) {
-		return Arrays.asList(DemoVerifier.getVisitorId(getSession()));
+		List<Long> list = new ArrayList<>(1);
+		list.add(DemoVerifier.getVisitorId(getSession()));
+		return list;
 	}
 	
 	public List<Long> getCurrentContactIdList(@NotNull JSONObject current) {
@@ -235,17 +237,14 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 * @throws Exception
 	 */
-	@Override
 	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
 		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
 		String role = current.getString(JSONRequest.KEY_ROLE);
-		if (AbstractVerifier.OWNER.equals(role) && userId != DemoVerifier.getVisitorId(getSession())) {
+		if (AbstractVerifier.OWNER.equals(role) && userId != (Long) DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
 		return null;
 	}
-
-
 
 
 }
