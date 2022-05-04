@@ -62,9 +62,9 @@ import unitauto.MethodUtil.JSONCallback;
 import unitauto.jar.UnitAutoApp;
 
 
-/**Demo SpringBoot Application 主应用程序启动类  
- * 右键这个类 > Run As > Java Application  
- * 具体见 SpringBoot 文档  
+/**Demo SpringBoot Application 主应用程序启动类
+ * 右键这个类 > Run As > Java Application
+ * 具体见 SpringBoot 文档
  * https://www.springcloud.cc/spring-boot.html#using-boot-locating-the-main-class
  * @author Lemon
  */
@@ -90,8 +90,8 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	public void customize(ConfigurableServletWebServerFactory server) {
 		server.setPort(8080);
 	}
-	
-	
+
+
 	static {
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -177,7 +177,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 				if (value instanceof ApplicationContext
 						|| value instanceof Context
 						|| value instanceof org.apache.catalina.Context
-						|| value instanceof ch.qos.logback.core.Context
+						// SpringBoot 2.6.7 已移除  || value instanceof ch.qos.logback.core.Context
 						) {
 					value = value.toString();
 				}
@@ -193,20 +193,20 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 								if (value instanceof ApplicationContext
 										|| value instanceof Context
 										|| value instanceof org.apache.catalina.Context
-										|| value instanceof ch.qos.logback.core.Context
+										// SpringBoot 2.6.7 已移除  || value instanceof ch.qos.logback.core.Context
 										) {
 									return false;
 								}
 
 								// 防止通过 UnitAuto 远程执行 getDBPassword 等方法来查到敏感信息，但如果直接调用 public String getDBUri 这里没法拦截，仍然会返回敏感信息
 								//	if (object instanceof SQLConfig) {
-								//		// 这个类部分方法不序列化返回					
+								//		// 这个类部分方法不序列化返回
 								//		if ("dBUri".equalsIgnoreCase(name) || "dBPassword".equalsIgnoreCase(name) || "dBAccount".equalsIgnoreCase(name)) {
 								//			return false;
 								//		}
 								//		return false;  // 这个类所有方法都不序列化返回
 								//	}
-								
+
 								// 所有类中的方法只要包含关键词就不序列化返回
 								String n = StringUtil.toLowerCase(name);
 								if (n.contains("database") || n.contains("schema") || n.contains("dburi") || n.contains("password") || n.contains("account")) {
@@ -239,7 +239,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		//			e.printStackTrace();
 		//			Log.e(TAG, "加载 SQLServer 驱动失败，请检查 pom.xml 中 net.sourceforge.jtds 版本是否存在以及可用 ！！！");
 		//		}
-		//		
+		//
 		//		try { //加载驱动程序
 		//			Log.d(TAG, "尝试加载 Oracle 驱动 <<<<<<<<<<<<<<<<<<<<< ");
 		//			Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -249,7 +249,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		//			e.printStackTrace();
 		//			Log.e(TAG, "加载 Oracle 驱动失败，请检查 pom.xml 中 com.oracle.jdbc 版本是否存在以及可用 ！！！");
 		//		}
-		//		
+		//
 		//		try { //加载驱动程序
 		//			Log.d(TAG, "尝试加载 DB2 驱动 <<<<<<<<<<<<<<<<<<<<< ");
 		//			Class.forName("com.ibm.db2.jcc.DB2Driver");
@@ -270,7 +270,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 	}
 	@Override
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		APPLICATION_CONTEXT = applicationContext;		
+		APPLICATION_CONTEXT = applicationContext;
 	}
 
 
@@ -282,11 +282,11 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
 				registry.addMapping("/**")
-				.allowedOriginPatterns("*")  
+				.allowedOriginPatterns("*")
 				.allowedMethods("*")
 				.allowCredentials(true)
 				.exposedHeaders(DemoController.APIJSON_DELEGATE_ID)  // Cookie 和 Set-Cookie 怎么设置都没用 ,Cookie,Set-Cookie")   // .exposedHeaders("*")
-				.maxAge(3600);  
+				.maxAge(3600);
 			}
 		};
 	}
