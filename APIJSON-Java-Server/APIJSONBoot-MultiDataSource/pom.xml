@@ -5,7 +5,7 @@
 
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot-multi-datasource</artifactId>
-	<version>5.1.0</version>
+	<version>5.1.1</version>
 	<!-- <packaging>jar</packaging> -->
 
 	<name>APIJSONBoot-MultiDataSource</name>
@@ -18,6 +18,13 @@
 	</properties>
 
 	<dependencies>
+    <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
 		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -32,7 +39,7 @@
 			<version>4.0.1</version>
 		</dependency>
 
-		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一
 			<<<<<<<<< -->
  		<dependency>
 			<groupId>com.github.TommyLemon</groupId>
@@ -47,13 +54,13 @@
 		<dependency>
 			<groupId>io.github.classgraph</groupId>
 			<artifactId>classgraph</artifactId>
-			<version>4.8.87</version>
+			<version>4.8.146</version>
 		</dependency>
 		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 >>>>>>>>> -->
 
 
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-		<dependency>
+		<!-- <dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
 			<version>5.1.0</version>
@@ -61,7 +68,7 @@
 		 <dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>5.1.0</version>
+			<version>5.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
@@ -71,20 +78,20 @@
 		<dependency>
 		    <groupId>com.github.APIJSON</groupId>
 		    <artifactId>apijson-router</artifactId>
-		    <version>1.0.0</version>
-		</dependency>
+		    <version>1.0.1</version>
+		</dependency> -->
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.27</version>
+			<version>8.0.29</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.18</version>
+			<version>42.3.4</version>
 		</dependency>
 		<dependency>
 			<groupId>net.sourceforge.jtds</groupId>
@@ -99,23 +106,23 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-			<version>2.4.2</version>
+			<version>2.6.7</version>
 		</dependency>
 
 		<!-- 需要用的 HikariCP 数据库连接池库，3.1.0 以上 -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
-			<version>3.1.0</version>
+			<version>5.0.1</version>
 		</dependency>
 
 		<!-- 需要用的 Druid 数据库连接池库，1.0.29 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid</artifactId>
-			<version>1.0.29</version>
+			<version>1.2.9</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<build>

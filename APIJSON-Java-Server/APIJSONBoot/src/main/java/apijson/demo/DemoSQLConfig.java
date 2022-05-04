@@ -96,6 +96,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			////				super.onMissingKey4Combine(name, request, combine, item, key);
 			//			}
 		};
+		
+	    // PostgreSQL 表结构相关 SQL 函数，用于 APIAuto 查询和展示文档
+	    SQL_FUNCTION_MAP.put("obj_description", "");
+	    SQL_FUNCTION_MAP.put("col_description", "");
 
 		// 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`

@@ -1,20 +1,30 @@
-CREATE TABLE sys."Verify"
+create table "Verify"
 (
-    id bigint PRIMARY KEY NOT NULL,
-    type integer NOT NULL,
-    phone varchar(11) NOT NULL,
-    verify varchar(32) NOT NULL,
-    date timestamp(6) DEFAULT CURRENT_TIMESTAMP NOT NULL
+    id     bigint                                 not null
+        primary key,
+    type   integer                                not null,
+    phone  varchar(11)                            not null,
+    verify varchar(32)                            not null,
+    date   timestamp(6) default CURRENT_TIMESTAMP not null
 );
-COMMENT ON COLUMN sys."Verify".id IS '唯一标识';
-COMMENT ON COLUMN sys."Verify".type IS '类型：
+
+comment on column "Verify".id is '唯一标识';
+
+comment on column "Verify".type is '类型：
 0-登录
 1-注册
 2-修改登录密码
 3-修改支付密码';
-COMMENT ON COLUMN sys."Verify".phone IS '手机号';
-COMMENT ON COLUMN sys."Verify".verify IS '验证码';
-COMMENT ON COLUMN sys."Verify".date IS '创建时间';
+
+comment on column "Verify".phone is '手机号';
+
+comment on column "Verify".verify is '验证码';
+
+comment on column "Verify".date is '创建时间';
+
+alter table "Verify"
+    owner to postgres;
+
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1527950171719, 1, '13000084444', '10375', '2018-06-02 14:36:11.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528250810515, 1, '15122820115', '2586', '2018-06-06 02:06:50.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1528254139866, 1, '15225556855', '8912', '2018-06-06 03:02:19.000000');
@@ -104,3 +114,4 @@ INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742060130, 
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742124507, 6, '13000082001', '4901', '2019-01-29 06:08:44.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742151361, 10, '13000082001', '8513', '2019-01-29 06:09:11.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1549548031095, 4, '13000082001', '1234', '2019-09-14 22:00:31.115000');
+INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1651662453722, 0, '13000082001', '8542', '2022-05-04 19:07:33.735815');

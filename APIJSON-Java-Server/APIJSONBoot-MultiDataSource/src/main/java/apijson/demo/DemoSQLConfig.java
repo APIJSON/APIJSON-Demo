@@ -37,7 +37,7 @@ import apijson.orm.Join.On;
 
 /**SQL配置
  * TiDB 用法和 MySQL 一致
- * 具体见详细的说明文档 C.开发说明 C-1-1.修改数据库链接  
+ * 具体见详细的说明文档 C.开发说明 C-1-1.修改数据库链接
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
@@ -52,7 +52,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
-		DEFAULT_SCHEMA = "sys";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
+		DEFAULT_SCHEMA = "sys";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
 		//表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
 		//这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init
@@ -97,7 +97,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			}
 		};
 
-		// 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
+    // PostgreSQL 表结构相关 SQL 函数，用于 APIAuto 查询和展示文档
+    SQL_FUNCTION_MAP.put("obj_description", "");
+    SQL_FUNCTION_MAP.put("col_description", "");
+
+    // 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`
 		RAW_MAP.put("to.momentId", "`to`.`momentId`");  // 最终以 `to`.`userId` 拼接 SQL，相比以上写法可以让前端写起来更简单
 		RAW_MAP.put("(`Comment`.`userId`=`to`.`userId`)", "");  // 已经是一个条件表达式了，用 () 包裹是为了避免 JSON 中的 key 拼接在前面导致 SQL 出错
@@ -106,9 +110,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("substring_index(substring_index(content,',',1),',',-1)", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("substring_index(substring_index(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
-		RAW_MAP.put("to_days(now())-to_days(`date`)<=7","");  // 给 @having 使用
-		RAW_MAP.put("sexShowStr","CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
-
+		RAW_MAP.put("to_days(now())-to_days(`date`)<=7", "");  // 给 @having 使用
+		RAW_MAP.put("sexShowStr", "CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
 
 		// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
 
@@ -286,7 +289,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//					preparedValueList.add(value);
 	//				}
 	//				return "to_date(" + (isPrepared() ? "?" : getSQLValue(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
-	//			} 
+	//			}
 	//			catch (Throwable e) {
 	//				if (Log.DEBUG) {
 	//					e.printStackTrace();
@@ -295,8 +298,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		}
 	//		return super.getValue(value);
 	//	}
-	
-	
+
+
 	@Override
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
 		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);

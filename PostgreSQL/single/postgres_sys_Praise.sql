@@ -1,14 +1,40 @@
-CREATE TABLE sys."Praise"
+create table "Praise"
 (
-    id bigint PRIMARY KEY NOT NULL,
-    "momentId" bigint NOT NULL,
-    "userId" bigint NOT NULL,
-    date timestamp(6)
+    id         bigint not null
+        primary key,
+    "momentId" bigint not null,
+    "userId"   bigint not null,
+    date       timestamp(6) default CURRENT_TIMESTAMP
 );
-COMMENT ON COLUMN sys."Praise".id IS '动态id';
-COMMENT ON COLUMN sys."Praise"."momentId" IS '唯一标识';
-COMMENT ON COLUMN sys."Praise"."userId" IS '用户id';
-COMMENT ON COLUMN sys."Praise".date IS '点赞时间';
+
+comment on table "Praise" is '如果对Moment写安全要求高，可以将Moment内praiserUserIdList分离到Praise表中，作为userIdList。
+权限注解也改下：
+@MethodAccess(
+		PUT = {OWNER, ADMIN}
+		)
+class Moment {
+       …
+}
+
+@MethodAccess(
+		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}
+		)
+ class Praise {
+       …
+ }
+';
+
+comment on column "Praise".id is '动态id';
+
+comment on column "Praise"."momentId" is '唯一标识';
+
+comment on column "Praise"."userId" is '用户id';
+
+comment on column "Praise".date is '点赞时间';
+
+alter table "Praise"
+    owner to postgres;
+
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (1, 12, 82001, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (2, 15, 82002, '2017-11-19 13:02:30.000000');
 INSERT INTO sys."Praise" (id, "momentId", "userId", date) VALUES (3, 32, 82003, '2017-11-19 13:02:30.000000');

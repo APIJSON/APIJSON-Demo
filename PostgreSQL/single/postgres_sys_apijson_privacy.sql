@@ -1,19 +1,35 @@
-CREATE TABLE sys.apijson_privacy
+create table apijson_privacy
 (
-    id bigint PRIMARY KEY NOT NULL,
-    certified smallint NOT NULL,
-    phone varchar(64) NOT NULL,
-    balance numeric(10,2) NOT NULL,
-    _password varchar(20) NOT NULL,
-    "_payPassword" varchar(32) NOT NULL
+    id             bigint         not null
+        primary key,
+    certified      smallint       not null,
+    phone          varchar(64)    not null,
+    balance        numeric(10, 2) not null,
+    _password      varchar(20)    not null,
+    "_payPassword" varchar(32)    not null
 );
-COMMENT ON COLUMN sys.apijson_privacy.id IS '唯一标识';
-COMMENT ON COLUMN sys.apijson_privacy.certified IS '已认证';
-COMMENT ON COLUMN sys.apijson_privacy.phone IS '手机号，仅支持 11 位数的。不支持 +86 这种国家地区开头的。如果要支持就改为 VARCHAR(14)';
-COMMENT ON COLUMN sys.apijson_privacy.balance IS '余额';
-COMMENT ON COLUMN sys.apijson_privacy._password IS '登录密码';
-COMMENT ON COLUMN sys.apijson_privacy."_payPassword" IS '支付密码';
-CREATE INDEX "phone_UNIQUE" ON sys.apijson_privacy (phone);
+
+comment on table apijson_privacy is '用户隐私信息表。
+对安全要求高，不想泄漏真实名称。对外名称为 Privacy';
+
+comment on column apijson_privacy.id is '唯一标识';
+
+comment on column apijson_privacy.certified is '已认证';
+
+comment on column apijson_privacy.phone is '手机号，仅支持 11 位数的。不支持 +86 这种国家地区开头的。如果要支持就改为 VARCHAR(14)';
+
+comment on column apijson_privacy.balance is '余额';
+
+comment on column apijson_privacy._password is '登录密码';
+
+comment on column apijson_privacy."_payPassword" is '支付密码';
+
+alter table apijson_privacy
+    owner to postgres;
+
+create index "phone_UNIQUE"
+    on apijson_privacy (phone);
+
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (38710, 1, '13000038710', 33376.00, 'apijson', '123456');
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (70793, 0, '13000070793', 56000.00, 'apijson', '123456');
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82002, 1, '13000082002', 6817.23, '123456', '123456');
@@ -154,4 +170,4 @@ INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_pay
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065271307, 0, '13111182002', 0.00, '6733', '123456');
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065319823, 0, '13111182003', 0.00, '6733', '123456');
 INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065621308, 0, '13111182008', 0.00, '6733', '123456');
-INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82001, 1, '13000082001', 98729.15, '123456', '123456');
+INSERT INTO sys.apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82001, 1, '13000082001', 98332.45, '123456', '123456');

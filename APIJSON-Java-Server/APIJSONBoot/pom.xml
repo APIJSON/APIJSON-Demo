@@ -18,6 +18,13 @@
 	</properties>
 
 	<dependencies>
+	    <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
+	    <dependency>
+	      <groupId>javax.activation</groupId>
+	      <artifactId>activation</artifactId>
+	      <version>1.1.1</version>
+	    </dependency>
+    
 		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
