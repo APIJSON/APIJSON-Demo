@@ -1,6 +1,6 @@
 # APIJSON-Demo
-腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 各种语言(Java, Swift, JavaScript, Python 等)、各种框架(SpringBoot, JFinal 等)的使用示例项目。<br />
-Demo projects for Tencent [APIJSON](https://github.com/Tencent/APIJSON) with different programming languages and different frameworks.
+腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 各种语言(Java, Swift, JavaScript, Python 等)、各种框架(SpringBoot, JFinal 等)的使用示例项目、上手文档、测试数据 SQL 文件 等。<br />
+Demo projects with document and SQL files for Tencent [APIJSON](https://github.com/Tencent/APIJSON) with different programming languages and different frameworks.
 
 
 ### 快速上手
