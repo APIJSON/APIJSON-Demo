@@ -76,7 +76,7 @@
 	</build>
 
 	<repositories>
-	    <!-- APIJSON 必须用到的托管平台 -->
+		<!-- APIJSON 必须用到的托管平台 -->
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>
