@@ -5,8 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>5.1.0</version>
-	<packaging>jar</packaging>
+	<version>5.1.5</version>
 
 	<name>APIJSONDemo</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -18,11 +17,17 @@
 	</properties>
 
 	<dependencies>
+    <dependency>
+      <groupId>javax.activation</groupId>
+      <artifactId>activation</artifactId>
+      <version>1.1.1</version>
+    </dependency>
+
 		<!-- 需要的 APIJSON 相关依赖 -->
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>5.1.0</version>
+			<version>5.1.5</version>
 		</dependency>
 		
 		<!-- 需要用的数据库 JDBC 驱动 -->

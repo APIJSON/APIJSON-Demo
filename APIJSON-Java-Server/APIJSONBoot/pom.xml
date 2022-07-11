@@ -5,7 +5,7 @@
 
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot</artifactId>
-	<version>5.1.0</version>
+	<version>5.1.5</version>
 	<!-- <packaging>jar</packaging> -->
 
 	<name>APIJSONBoot</name>
@@ -24,12 +24,12 @@
 	      <artifactId>activation</artifactId>
 	      <version>1.1.1</version>
 	    </dependency>
-    
+
 		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.79</version>
+			<version>1.2.83</version>
 		</dependency>
 
 		<!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
@@ -62,17 +62,17 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>5.1.0</version>
+			<version>5.1.5</version>
 		</dependency>
 		 <dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>5.1.0</version>
+			<version>5.1.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-column</artifactId>
-			<version>1.2.2</version>
+			<version>1.2.4</version>
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
