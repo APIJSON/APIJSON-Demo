@@ -4,7 +4,7 @@
 	<groupId>apijson.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>5.1.0</version>
+	<version>5.1.5</version>
 	<name>Demo project for APIJSON Server based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
@@ -12,6 +12,8 @@
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>
       <version>1.1.1</version>
+    </dependency>
+
 		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -30,7 +32,7 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>5.1.0</version>
+			<version>5.1.5</version>
 		</dependency>
 		 <dependency>
 			<groupId>com.github.APIJSON</groupId>
