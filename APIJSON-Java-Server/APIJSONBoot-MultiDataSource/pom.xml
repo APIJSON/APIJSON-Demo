@@ -29,7 +29,7 @@
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>fastjson</artifactId>
-			<version>1.2.79</version>
+			<version>1.2.83</version>
 		</dependency>
 
 		<!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
@@ -123,7 +123,7 @@
 			<version>1.2.9</version>
 		</dependency>
 
-	</dependencies>
+  </dependencies>
 
 	<build>
 		<plugins>
