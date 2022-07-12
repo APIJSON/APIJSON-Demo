@@ -6,7 +6,7 @@
 	<groupId>apijson.boot</groupId>
 	<artifactId>apijson-boot-multi-datasource</artifactId>
 	<version>5.1.5</version>
-	<!-- <packaging>jar</packaging> -->
+	<packaging>jar</packaging>
 
 	<name>APIJSONBoot-MultiDataSource</name>
 	<description>Demo project for APIJSON Server based on SpringBoot</description>
@@ -18,12 +18,12 @@
 	</properties>
 
 	<dependencies>
-    <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
-    <dependency>
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-      <version>1.1.1</version>
-    </dependency>
+		<!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
+		<dependency>
+			<groupId>javax.activation</groupId>
+			<artifactId>activation</artifactId>
+			<version>1.1.1</version>
+		</dependency>
 
 		<!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
 		<dependency>
@@ -39,8 +39,7 @@
 			<version>4.0.1</version>
 		</dependency>
 
-		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一
-			<<<<<<<<< -->
+		<!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 <<<<<<<<< -->
  		<dependency>
 			<groupId>com.github.TommyLemon</groupId>
 			<artifactId>unitauto-java</artifactId>
@@ -64,12 +63,11 @@
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
 			<version>5.1.5</version>
-      <scope>compile</scope>
 		</dependency>
-		 <dependency>
+		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-       <version>5.1.5</version>
+			<version>5.1.5</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
@@ -131,6 +129,13 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+				          <execution>
+				          	<goals>
+				          	<goal>repackage</goal>
+				          	</goals>
+				          </execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
