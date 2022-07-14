@@ -1,26 +1,23 @@
 create table "Access"
 (
-    id     bigint                                                                               not null
-        constraint access_pk
-            primary key,
-    debug  smallint default 0                                                                   not null,
-    name   varchar(50)                                                                          not null,
+    id     integer                                                                                 not null
+        primary key,
+    debug  integer     default 0                                                                   not null,
+    name   varchar(50) default '实际表名，例如 apijson_user'::character varying                           not null,
     alias  text,
-    get    text     default '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text not null,
-    head   text     default '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text not null,
-    gets   text     default '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text            not null,
-    heads  text     default '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text            not null,
-    post   text     default '["OWNER", "ADMIN"]'::text                                          not null,
-    put    text     default '["OWNER", "ADMIN"]'::text                                          not null,
-    delete text     default '["OWNER", "ADMIN"]'::text                                          not null,
-    date   text     default CURRENT_TIMESTAMP                                                   not null
+    get    text        default '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text not null,
+    head   text        default '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text not null,
+    gets   text        default '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text            not null,
+    heads  text        default '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]'::text            not null,
+    post   text        default '["OWNER", "ADMIN"]'::text                                          not null,
+    put    text        default '["OWNER", "ADMIN"]'::text                                          not null,
+    delete text        default '["OWNER", "ADMIN"]'::text                                          not null,
+    date   text        default CURRENT_TIMESTAMP                                                   not null
 );
 
 comment on column "Access".id is '唯一标识';
 
 comment on column "Access".debug is '是否为调试表，只允许在开发环境使用，测试和线上环境禁用';
-
-comment on column "Access".name is '实际表名，例如 apijson_user';
 
 comment on column "Access".alias is '外部调用的表别名，例如 User';
 
@@ -49,18 +46,20 @@ create unique index access_alias_uindex
     on "Access" (alias);
 
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (1, 1, 'Access', '', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2019-07-21 12:21:36');
+INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (2, 1, 'Table', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
+INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (3, 1, 'Column', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (4, 1, 'Function', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:15');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (5, 1, 'Request', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (6, 1, 'Response', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:15');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (7, 1, 'Document', null, '["LOGIN", "ADMIN"]', '["LOGIN", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["LOGIN", "ADMIN"]', '["OWNER", "ADMIN"]', '2018-11-28 16:38:15');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (8, 1, 'TestRecord', null, '["LOGIN", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '2018-11-28 16:38:15');
+INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (9, 0, 'Test', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:15');
+INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (10, 1, 'PgAttribute', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
+INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (11, 1, 'PgClass', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (12, 0, 'Login', null, '[]', '[]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[ "ADMIN"]', '[ "ADMIN"]', '["ADMIN"]', '2018-11-28 16:29:48');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (13, 0, 'Verify', null, '[]', '[]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[ "ADMIN"]', '["ADMIN"]', '2018-11-28 16:29:48');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (14, 0, 'apijson_user', 'User', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN","LOGIN","OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["ADMIN"]', '2018-11-28 16:28:53');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (15, 0, 'apijson_privacy', 'Privacy', '[]', '[]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["UNKNOWN","LOGIN","OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["ADMIN"]', '2018-11-28 16:29:48');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (16, 0, 'Moment', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '2018-11-28 16:29:19');
 INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (17, 0, 'Comment', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '2018-11-28 16:29:19');
-INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (10, 1, 'pg_attribute', 'PgAttribute', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
-INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (2, 1, 'tables', 'Table', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
-INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (3, 1, 'columns', 'Column', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
-INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (11, 1, 'pg_class', 'PgClass', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '[]', '[]', '[]', '2018-11-28 16:38:14');
+INSERT INTO sys."Access" (id, debug, name, alias, get, head, gets, heads, post, put, delete, date) VALUES (18, 0, 'ViewTable', null, '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["UNKNOWN", "LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["LOGIN", "CONTACT", "CIRCLE", "OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '["OWNER", "ADMIN"]', '2022-07-14 18:06:10.144056+00');

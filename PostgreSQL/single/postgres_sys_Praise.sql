@@ -4,25 +4,8 @@ create table "Praise"
         primary key,
     "momentId" bigint not null,
     "userId"   bigint not null,
-    date       timestamp(6) default CURRENT_TIMESTAMP
+    date       timestamp(6)
 );
-
-comment on table "Praise" is '如果对Moment写安全要求高，可以将Moment内praiserUserIdList分离到Praise表中，作为userIdList。
-权限注解也改下：
-@MethodAccess(
-		PUT = {OWNER, ADMIN}
-		)
-class Moment {
-       …
-}
-
-@MethodAccess(
-		PUT = {LOGIN, CONTACT, CIRCLE, OWNER, ADMIN}
-		)
- class Praise {
-       …
- }
-';
 
 comment on column "Praise".id is '动态id';
 

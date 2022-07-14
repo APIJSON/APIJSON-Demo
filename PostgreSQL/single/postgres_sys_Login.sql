@@ -1,13 +1,11 @@
 create table "Login"
 (
-    id       bigint                                 not null
+    id       bigint       not null
         primary key,
-    "userId" bigint                                 not null,
-    type     smallint                               not null,
-    date     timestamp(6) default CURRENT_TIMESTAMP not null
+    "userId" bigint       not null,
+    type     smallint     not null,
+    date     timestamp(6) not null
 );
-
-comment on table "Login" is '@deprecated，登录信息存session';
 
 comment on column "Login".id is '唯一标识';
 
