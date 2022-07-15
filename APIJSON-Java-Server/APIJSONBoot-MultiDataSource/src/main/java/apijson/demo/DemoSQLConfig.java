@@ -97,10 +97,6 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			}
 		};
 
-    // PostgreSQL 表结构相关 SQL 函数，用于 APIAuto 查询和展示文档
-    SQL_FUNCTION_MAP.put("obj_description", "");
-    SQL_FUNCTION_MAP.put("col_description", "");
-
     // 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`
 		RAW_MAP.put("to.momentId", "`to`.`momentId`");  // 最终以 `to`.`userId` 拼接 SQL，相比以上写法可以让前端写起来更简单
@@ -161,6 +157,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "11.5"; //TODO 改成你自己的
 		}
+		if (isTDengine()) {
+			return "2.6.0.8"; //TODO 改成你自己的
+		}
 		return null;
 	}
 
@@ -184,6 +183,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
+		if (isTDengine()) {
+			//   return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
+			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
+		}
 		return null;
 	}
 
@@ -205,6 +208,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "db2admin"; //TODO 改成你自己的
 		}
+		if (isTDengine()) {
+			return "root"; //TODO 改成你自己的
+		}
 		return null;
 	}
 
@@ -225,6 +231,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		if (isDb2()) {
 			return "123"; //TODO 改成你自己的
+		}
+		if (isTDengine()) {
+			return "taosdata"; //TODO 改成你自己的
 		}
 		return null;
 	}
