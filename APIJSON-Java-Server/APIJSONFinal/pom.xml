@@ -4,10 +4,11 @@
 	<groupId>apijson.jfinal</groupId>
 	<artifactId>apijson-final</artifactId>
 	<packaging>jar</packaging>
-	<version>5.1.5</version>
+	<version>5.2.0</version>
 	<name>Demo project for APIJSON Server based on JFinal</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
+    <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
     <dependency>
       <groupId>javax.activation</groupId>
       <artifactId>activation</artifactId>
@@ -32,12 +33,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>5.1.5</version>
+			<version>5.2.0</version>
 		</dependency>
 		 <dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>5.1.5</version>
+			<version>5.2.0</version>
 		</dependency>
 		<!-- 可使用 libs 目录的 apijson-orm.jar 和 apijson-framework.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
@@ -45,12 +46,12 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.27</version>
+			<version>8.0.29</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.2.18</version>
+			<version>42.3.4</version>
 		</dependency>
 		<!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
 
@@ -65,14 +66,14 @@
 			<artifactId>jfinal</artifactId>
 			<version>4.9.06</version>
 		</dependency>
-		
+
 		<!-- CORS 跨域 -->
 		<dependency>
 			<groupId>com.thetransactioncompany</groupId>
 			<artifactId>cors-filter</artifactId>
 			<version>2.5</version>
 		</dependency>
-		
+
 	</dependencies>
 
 	<repositories>
@@ -106,8 +107,8 @@
 				</configuration>
 			</plugin>
 
-			<!-- 当项目的 web 资源在 src/main/webapp 下时，需要使用 maven-resources-plugin 将 web 
-				资源复制到 jar 包中去，注意打包的时候需要配置 engine： me.setBaseTemplatePath("webapp"); me.setToClassPathSourceFactory(); 
+			<!-- 当项目的 web 资源在 src/main/webapp 下时，需要使用 maven-resources-plugin 将 web
+				资源复制到 jar 包中去，注意打包的时候需要配置 engine： me.setBaseTemplatePath("webapp"); me.setToClassPathSourceFactory();
 				如果 web 资源本身就放在 src/main/resources/webapp 之下，则不需要此插件 -->
 			<plugin>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -154,8 +155,8 @@
 									<mainClass>apijson.jfinal.DemoAppConfig</mainClass>
 								</transformer>
 
-								<!-- 下面的配置支持排除指定文件打包到 jar 之中，可以用于排除需要修改的配置文件以便于在外部的 config 目录下的 同名配置文件生效，建议使用 
-									Prop.appendIfExists(xxx_pro.txt) 在外部放一个非同名配置来覆盖开发环境的配置 则可以不用使用下面的配置，文档参考: 
+								<!-- 下面的配置支持排除指定文件打包到 jar 之中，可以用于排除需要修改的配置文件以便于在外部的 config 目录下的 同名配置文件生效，建议使用
+									Prop.appendIfExists(xxx_pro.txt) 在外部放一个非同名配置来覆盖开发环境的配置 则可以不用使用下面的配置，文档参考:
 									http://maven.apache.org/plugins/maven-shade-plugin/examples/resource-transformers.html#DontIncludeResourceTransformer -->
 								<transformer
 									implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">

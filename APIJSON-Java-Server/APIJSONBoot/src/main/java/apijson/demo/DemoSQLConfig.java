@@ -37,7 +37,7 @@ import apijson.orm.Join.On;
 
 /**SQL配置
  * TiDB 用法和 MySQL 一致
- * 具体见详细的说明文档 C.开发说明 C-1-1.修改数据库链接  
+ * 具体见详细的说明文档 C.开发说明 C-1-1.修改数据库链接
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
@@ -52,19 +52,19 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
-		DEFAULT_SCHEMA = "sys";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
+		DEFAULT_SCHEMA = "sys";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
-		//表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
-		//这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init
-		//(间接调用 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置)，所以不需要。
-		//但如果 Access 这张表的对外表名与数据库实际表名不一致，仍然需要这里注册。例如
+		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
+		// 这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init
+		// (间接调用 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置)，所以不需要。
+		// 但如果 Access 这张表的对外表名与数据库实际表名不一致，仍然需要这里注册。例如
 		//		TABLE_KEY_MAP.put(Access.class.getSimpleName(), "access");
 
-		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+		// 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 		//		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
-		//主键名映射
+		// 主键名映射
 		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
 
 			@Override
@@ -85,7 +85,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
-			//取消注释来实现数据库自增 id
+			// 取消注释来实现数据库自增 id
 			//			@Override
 			//			public Long newId(RequestMethod method, String database, String schema, String datasource, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
@@ -96,10 +96,6 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			////				super.onMissingKey4Combine(name, request, combine, item, key);
 			//			}
 		};
-		
-	    // PostgreSQL 表结构相关 SQL 函数，用于 APIAuto 查询和展示文档
-	    SQL_FUNCTION_MAP.put("obj_description", "");
-	    SQL_FUNCTION_MAP.put("col_description", "");
 
 		// 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`
@@ -110,9 +106,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("substring_index(substring_index(content,',',1),',',-1)", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("substring_index(substring_index(content,'.',1),'.',-1) AS subContent", "");  // APIAuto 不支持 '，可以用 Postman 测
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
-		RAW_MAP.put("to_days(now())-to_days(`date`)<=7","");  // 给 @having 使用
-		RAW_MAP.put("sexShowStr","CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
-
+		RAW_MAP.put("to_days(now())-to_days(`date`)<=7", "");  // 给 @having 使用
+		RAW_MAP.put("sexShowStr", "CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
 
 		// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
 
@@ -162,6 +157,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "11.5"; //TODO 改成你自己的
 		}
+		if (isTDengine()) {
+			return "2.6.0.8"; //TODO 改成你自己的
+		}
 		return null;
 	}
 
@@ -185,6 +183,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
+		if (isTDengine()) {
+			//      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
+			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
+		}
 		return null;
 	}
 
@@ -205,6 +207,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		}
 		if (isDb2()) {
 			return "db2admin"; //TODO 改成你自己的
+		}
+		if (isTDengine()) {
+			return "root"; //TODO 改成你自己的
 		}
 		return null;
 	}
@@ -227,10 +232,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "123"; //TODO 改成你自己的
 		}
+		if (isTDengine()) {
+			return "taosdata"; //TODO 改成你自己的
+		}
 		return null;
 	}
 
-	//取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的
+	// 取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的
 	//	@Override
 	//	public String getConfigDatabase() {
 	//		return DATABASE_POSTGRESQL;
@@ -240,14 +248,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		return "apijson";
 	//	}
 
-	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
+	// 取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
 	//	@Override
 	//	public String getDatabase() {
 	//		String db = super.getDatabase();
 	//		return db == null ? DATABASE_POSTGRESQL : db;
 	//	}
 
-	//如果确定只用一种数据库，可以重写方法，这种数据库直接 return true，其它数据库直接 return false，来减少判断，提高性能
+	// 如果确定只用一种数据库，可以重写方法，这种数据库直接 return true，其它数据库直接 return false，来减少判断，提高性能
 	//	@Override
 	//	public boolean isMySQL() {
 	//		return true;
@@ -290,7 +298,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//					preparedValueList.add(value);
 	//				}
 	//				return "to_date(" + (isPrepared() ? "?" : getSQLValue(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
-	//			} 
+	//			}
 	//			catch (Throwable e) {
 	//				if (Log.DEBUG) {
 	//					e.printStackTrace();
@@ -299,8 +307,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		}
 	//		return super.getValue(value);
 	//	}
-	
-	
+
+
 	@Override
 	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
 		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);

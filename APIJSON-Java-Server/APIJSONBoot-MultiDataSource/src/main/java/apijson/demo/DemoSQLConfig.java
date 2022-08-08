@@ -97,7 +97,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//			}
 		};
 
-    // 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
+		// 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`
 		RAW_MAP.put("to.momentId", "`to`.`momentId`");  // 最终以 `to`.`userId` 拼接 SQL，相比以上写法可以让前端写起来更简单
 		RAW_MAP.put("(`Comment`.`userId`=`to`.`userId`)", "");  // 已经是一个条件表达式了，用 () 包裹是为了避免 JSON 中的 key 拼接在前面导致 SQL 出错
@@ -169,7 +169,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isMySQL()) {
 			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
-			return "jdbc:mysql://apijson.cn:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) {
 			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
@@ -184,8 +184,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
 		if (isTDengine()) {
-      //      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
-      return "jdbc:TAOS-RS://apijson.cn:6041"; //TODO 改成你自己的
+			//      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
+			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
 		return null;
 	}

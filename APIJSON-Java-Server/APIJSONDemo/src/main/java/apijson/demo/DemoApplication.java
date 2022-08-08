@@ -14,15 +14,12 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import org.springframework.beans.BeansException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
 import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerFactory;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -34,9 +31,9 @@ import apijson.framework.APIJSONCreator;
 import apijson.orm.SQLConfig;
 
 
-/**Demo SpringBoot Application 主应用程序启动类  
- * 右键这个类 > Run As > Java Application  
- * 具体见 SpringBoot 文档  
+/**Demo SpringBoot Application 主应用程序启动类
+ * 右键这个类 > Run As > Java Application
+ * 具体见 SpringBoot 文档
  * https://www.springcloud.cc/spring-boot.html#using-boot-locating-the-main-class
  * @author Lemon
  */
@@ -44,22 +41,36 @@ import apijson.orm.SQLConfig;
 @SpringBootApplication
 @EnableAutoConfiguration
 @EnableConfigurationProperties
-public class DemoApplication implements ApplicationContextAware, WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
-	
+public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
+
 	public static void main(String[] args) throws Exception {
 		SpringApplication.run(DemoApplication.class, args);
 
 		Log.DEBUG = true;
 		APIJSONApplication.init(false);  // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
 	}
-	
-	// SpringBoot 2.x 自定义端口方式  
+
+	// SpringBoot 2.x 自定义端口方式
 	@Override
 	public void customize(ConfigurableServletWebServerFactory server) {
 		server.setPort(8080);
 	}
-	
-	
+
+  // 支持 APIAuto 中 JavaScript 代码跨域请求
+  @Bean
+  public WebMvcConfigurer corsConfigurer() {
+    return new WebMvcConfigurer() {
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+          .allowedOriginPatterns("*")
+          .allowedMethods("*")
+          .allowCredentials(true)
+          .maxAge(3600);
+      }
+    };
+  }
+
 	static {
 		// 使用本项目的自定义处理类
 		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
@@ -68,7 +79,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 				return new DemoSQLConfig();
 			}
 		};
-		
+
 		// 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
 		//		try { //加载驱动程序
 		//			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
@@ -79,7 +90,7 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		//			e.printStackTrace();
 		//			Log.e(TAG, "加载 SQLServer 驱动失败，请检查 pom.xml 中 net.sourceforge.jtds 版本是否存在以及可用 ！！！");
 		//		}
-		//		
+		//
 		//		try { //加载驱动程序
 		//			Log.d(TAG, "尝试加载 Oracle 驱动 <<<<<<<<<<<<<<<<<<<<< ");
 		//			Class.forName("oracle.jdbc.driver.OracleDriver");
@@ -91,35 +102,5 @@ public class DemoApplication implements ApplicationContextAware, WebServerFactor
 		//		}
 
 	}
-	
-	// 全局 ApplicationContext 实例，方便 getBean 拿到 Spring/SpringBoot 注入的类实例
-	private static ApplicationContext APPLICATION_CONTEXT;
-	public static ApplicationContext getApplicationContext() {
-		return APPLICATION_CONTEXT;
-	}
-	@Override
-	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-		APPLICATION_CONTEXT = applicationContext;		
-	}
-
-
-	
-	// 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-	@Bean
-	public WebMvcConfigurer corsConfigurer() {
-		return new WebMvcConfigurer() {
-			@Override
-			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**")
-				.allowedOriginPatterns("*")  
-				.allowedMethods("*")
-				.allowCredentials(true)
-				.maxAge(3600);  
-			}
-		};
-	}
-
-	// 支持 APIAuto 中 JavaScript 代码跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }

@@ -47,9 +47,9 @@ import apijson.orm.SQLConfig;
 import apijson.orm.Verifier;
 
 
-/**Demo JFinal Config 主应用程序启动类  
+/**Demo JFinal Config 主应用程序启动类
  * 右键这个类 > Run As > Java Application
- * 具体见 JFinal 文档  
+ * 具体见 JFinal 文档
  * https://jfinal.com/doc/2-1
  * @author Lemon
  */
@@ -62,8 +62,38 @@ public class DemoAppConfig extends JFinalConfig {
 		APIJSONApplication.init();
 	}
 
-	
 	static {
+    // 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
+    //		try { //加载驱动程序
+    //			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+    //			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
+    //			Log.d(TAG, "成功加载 SQLServer 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+    //		}
+    //		catch (ClassNotFoundException e) {
+    //			e.printStackTrace();
+    //			Log.e(TAG, "加载 SQLServer 驱动失败，请检查 pom.xml 中 net.sourceforge.jtds 版本是否存在以及可用 ！！！");
+    //		}
+    //
+    //		try { //加载驱动程序
+    //			Log.d(TAG, "尝试加载 Oracle 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+    //			Class.forName("oracle.jdbc.driver.OracleDriver");
+    //			Log.d(TAG, "成功加载 Oracle 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+    //		}
+    //		catch (ClassNotFoundException e) {
+    //			e.printStackTrace();
+    //			Log.e(TAG, "加载 Oracle 驱动失败，请检查 pom.xml 中 com.oracle.jdbc 版本是否存在以及可用 ！！！");
+    //		}
+    //
+    //		try { //加载驱动程序
+    //			Log.d(TAG, "尝试加载 DB2 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+    //			Class.forName("com.ibm.db2.jcc.DB2Driver");
+    //			Log.d(TAG, "成功加载 DB2 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+    //		}
+    //		catch (ClassNotFoundException e) {
+    //			e.printStackTrace();
+    //			Log.e(TAG, "加载 DB2 驱动失败，请检查 pom.xml 中 com.ibm.db2 版本是否存在以及可用 ！！！");
+    //		}
+
 		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 		Map<String, Pattern> COMPILE_MAP = AbstractVerifier.COMPILE_MAP;
@@ -96,38 +126,6 @@ public class DemoAppConfig extends JFinalConfig {
 		};
 
 		// APIJSON 配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-
-		// 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
-		//		try { //加载驱动程序
-		//			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-		//			Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-		//			Log.d(TAG, "成功加载 SQLServer 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-		//		}
-		//		catch (ClassNotFoundException e) {
-		//			e.printStackTrace();
-		//			Log.e(TAG, "加载 SQLServer 驱动失败，请检查 pom.xml 中 net.sourceforge.jtds 版本是否存在以及可用 ！！！");
-		//		}
-		//		
-		//		try { //加载驱动程序
-		//			Log.d(TAG, "尝试加载 Oracle 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-		//			Class.forName("oracle.jdbc.driver.OracleDriver");
-		//			Log.d(TAG, "成功加载 Oracle 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-		//		}
-		//		catch (ClassNotFoundException e) {
-		//			e.printStackTrace();
-		//			Log.e(TAG, "加载 Oracle 驱动失败，请检查 pom.xml 中 com.oracle.jdbc 版本是否存在以及可用 ！！！");
-		//		}
-		//		
-		//		try { //加载驱动程序
-		//			Log.d(TAG, "尝试加载 DB2 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-		//			Class.forName("com.ibm.db2.jcc.DB2Driver");
-		//			Log.d(TAG, "成功加载 DB2 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-		//		}
-		//		catch (ClassNotFoundException e) {
-		//			e.printStackTrace();
-		//			Log.e(TAG, "加载 DB2 驱动失败，请检查 pom.xml 中 com.ibm.db2 版本是否存在以及可用 ！！！");
-		//		}
 
 	}
 
