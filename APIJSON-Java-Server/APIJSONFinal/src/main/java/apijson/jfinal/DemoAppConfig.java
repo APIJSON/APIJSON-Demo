@@ -14,12 +14,6 @@ limitations under the License.*/
 
 package apijson.jfinal;
 
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 import com.jfinal.config.Constants;
@@ -31,6 +25,12 @@ import com.jfinal.config.Routes;
 import com.jfinal.core.Controller;
 import com.jfinal.server.undertow.UndertowServer;
 import com.jfinal.template.Engine;
+
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import apijson.Log;
 import apijson.StringUtil;
@@ -47,22 +47,24 @@ import apijson.orm.SQLConfig;
 import apijson.orm.Verifier;
 
 
-/**Demo JFinal Config 主应用程序启动类
+/**
+ * Demo JFinal Config 主应用程序启动类
  * 右键这个类 > Run As > Java Application
  * 具体见 JFinal 文档
  * https://jfinal.com/doc/2-1
+ *
  * @author Lemon
  */
 public class DemoAppConfig extends JFinalConfig {
 
-	public static void main(String[] args) throws Exception {
-		UndertowServer.start(DemoAppConfig.class);   // src/main/resources/undertow.txt 中配置 undertow.port 优先于 UndertowServer.start 传参 int port
+  public static void main(String[] args) throws Exception {
+    UndertowServer.start(DemoAppConfig.class);   // src/main/resources/undertow.txt 中配置 undertow.port 优先于 UndertowServer.start 传参 int port
 
-		Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-		APIJSONApplication.init();
-	}
+    Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
+    APIJSONApplication.init();
+  }
 
-	static {
+  static {
     // 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
     //		try { //加载驱动程序
     //			Log.d(TAG, "尝试加载 SQLServer 驱动 <<<<<<<<<<<<<<<<<<<<< ");
@@ -94,90 +96,94 @@ public class DemoAppConfig extends JFinalConfig {
     //			Log.e(TAG, "加载 DB2 驱动失败，请检查 pom.xml 中 com.ibm.db2 版本是否存在以及可用 ！！！");
     //		}
 
-		// APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    // APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-		Map<String, Pattern> COMPILE_MAP = AbstractVerifier.COMPILE_MAP;
-		COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
-		COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
-		COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
+    Map<String, Pattern> COMPILE_MAP = AbstractVerifier.COMPILE_MAP;
+    COMPILE_MAP.put("PHONE", StringUtil.PATTERN_PHONE);
+    COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
+    COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 
-		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
+    // 使用本项目的自定义处理类
+    APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 
-			@Override
-			public Parser<Long> createParser() {
-				return new DemoParser();
-			}
-			@Override
-			public FunctionParser createFunctionParser() {
-				return new DemoFunctionParser();
-			}
+      @Override
+      public Parser<Long> createParser() {
+        return new DemoParser();
+      }
 
-			@Override
-			public Verifier<Long> createVerifier() {
-				return new DemoVerifier();
-			}
+      @Override
+      public FunctionParser createFunctionParser() {
+        return new DemoFunctionParser();
+      }
 
-			@Override
-			public SQLConfig createSQLConfig() {
-				return new DemoSQLConfig();
-			}
+      @Override
+      public Verifier<Long> createVerifier() {
+        return new DemoVerifier();
+      }
 
-		};
+      @Override
+      public SQLConfig createSQLConfig() {
+        return new DemoSQLConfig();
+      }
 
-		// APIJSON 配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+    };
 
-	}
+    // APIJSON 配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+  }
 
+  // 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-	// 支持 APIAuto 中 JavaScript 代码跨域请求 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+  public void configRoute(Routes me) {
+    me.add("/", DemoController.class);
+  }
 
-	public void configRoute(Routes me) {
-		me.add("/", DemoController.class);
-	}
+  public void configEngine(Engine me) {
+    me.setBaseTemplatePath("webapp").setToClassPathSourceFactory();
+  }
 
-	public void configEngine(Engine me) {
-		me.setBaseTemplatePath("webapp").setToClassPathSourceFactory();
-	}
+  public void configConstant(Constants me) {
+  }
 
-	public void configConstant(Constants me) {}
-	public void configPlugin(Plugins me) {}
-	public void configHandler(Handlers me) {}
+  public void configPlugin(Plugins me) {
+  }
 
-	public void configInterceptor(Interceptors me) {
-		me.add(new Interceptor() {
+  public void configHandler(Handlers me) {
+  }
 
-			@Override
-			public void intercept(Invocation inv) {
-				Controller controller = inv.getController();
-				HttpServletRequest request = controller == null ? null : controller.getRequest();
-				if (request == null) {
-					return;
-				}
+  public void configInterceptor(Interceptors me) {
+    me.add(new Interceptor() {
 
-				String origin = request.getHeader("origin");
-				String corsHeaders = request.getHeader("access-control-request-headers");
-				String corsMethod = request.getHeader("access-control-request-method");
+      @Override
+      public void intercept(Invocation inv) {
+        Controller controller = inv.getController();
+        HttpServletRequest request = controller == null ? null : controller.getRequest();
+        if (request == null) {
+          return;
+        }
 
-				HttpServletResponse response = controller.getResponse();
-				response.setHeader("Access-Control-Allow-Origin", StringUtil.isEmpty(origin, true) ? "*" : origin);
-				response.setHeader("Access-Control-Allow-Credentials", "true");
-				response.setHeader("Access-Control-Allow-Headers", StringUtil.isEmpty(corsHeaders, true) ? "*" : corsHeaders);
-				response.setHeader("Access-Control-Allow-Methods", StringUtil.isEmpty(corsMethod, true) ? "*" : corsMethod);
-				response.setHeader("Access-Control-Max-Age", "86400");
+        String origin = request.getHeader("origin");
+        String corsHeaders = request.getHeader("access-control-request-headers");
+        String corsMethod = request.getHeader("access-control-request-method");
 
-				if("OPTIONS".equals(request.getMethod().toUpperCase())){
-					controller.renderJson("{}");
-					return;
-				}
+        HttpServletResponse response = controller.getResponse();
+        response.setHeader("Access-Control-Allow-Origin", StringUtil.isEmpty(origin, true) ? "*" : origin);
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Headers", StringUtil.isEmpty(corsHeaders, true) ? "*" : corsHeaders);
+        response.setHeader("Access-Control-Allow-Methods", StringUtil.isEmpty(corsMethod, true) ? "*" : corsMethod);
+        response.setHeader("Access-Control-Max-Age", "86400");
 
-				inv.invoke();
-			}
-		});
+        if ("OPTIONS".equals(request.getMethod().toUpperCase())) {
+          controller.renderJson("{}");
+          return;
+        }
 
-	}
+        inv.invoke();
+      }
+    });
 
-	// 支持 APIAuto 中 JavaScript 代码跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  }
+
+  // 支持 APIAuto 中 JavaScript 代码跨域请求 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 }
