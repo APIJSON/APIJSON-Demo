@@ -697,7 +697,7 @@
       host: '',
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
-      server: 'http://localhost:8080', // 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
+      server: 'http://localhost:8080',  // 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
       // thirdParty: 'RAP /repository/joined /repository/get',
@@ -1898,7 +1898,7 @@
               format: false,
               'Document': isEditResponse ? null : {
                 'id': did == null ? undefined : did,
-                'testAccountId': currentAccountId,
+//                'testAccountId': currentAccountId,
                 'name': extName,
                 'type': App.type,
                 'url': '/' + method, // 'url': isReleaseRESTful ? ('/' + methodInfo.method + '/' + methodInfo.tag) : ('/' + method),
@@ -1912,7 +1912,7 @@
                 'documentId': isEditResponse ? did : undefined,
                 'randomId': 0,
                 'host': baseUrl,
-                'testAccountId': currentAccountId,
+//                'testAccountId': currentAccountId,
                 'response': JSON.stringify(isEditResponse ? inputObj : currentResponse),
                 'standard': isML || isEditResponse ? JSON.stringify(isEditResponse ? commentObj : stddObj) : undefined,
                 // 没必要，直接都在请求中说明，查看也方便 'detail': (isEditResponse ? App.getExtraComment() : null) || ((App.currentRemoteItem || {}).TestRecord || {}).detail,
@@ -2991,11 +2991,11 @@
               'TestRecord': {
                 'documentId@': '/Document/id',
                 'userId': this.User.id,
-                'testAccountId': this.getCurrentAccountId(),
+//                'testAccountId': this.getCurrentAccountId(),
                 'randomId': 0,
                 '@order': 'date-',
-                '@column': 'id,userId,documentId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
-                'len{}': this.isMLEnabled ? 'length(standard)>2' : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
+                '@column': 'id,userId,documentId,testAccountId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
+                '@having': this.isMLEnabled ? 'length(standard)>2' : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
               }
             },
             '@role': 'LOGIN'
@@ -3055,7 +3055,7 @@
               },
               'TestRecord': {
                 'randomId@': '/Random/id',
-                'testAccountId': this.getCurrentAccountId(),
+//                'testAccountId': this.getCurrentAccountId(),
                 'host': this.getBaseUrl(),
                 '@order': 'date-'
               },
@@ -3070,7 +3070,7 @@
                 },
                 'TestRecord': {
                   'randomId@': '/Random/id',
-                  'testAccountId': this.getCurrentAccountId(),
+//                  'testAccountId': this.getCurrentAccountId(),
                   'host': this.getBaseUrl(),
                   '@order': 'date-'
                 }
@@ -5879,7 +5879,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       removeDebugInfo: function (obj) {
         if (obj != null) {
           delete obj["trace"]
-          delete obj["debug:info|help"]
           // 保留 delete obj["sql:generate|cache|execute|maxExecute"]
           // 保留 delete obj["depth:count|max"]
           delete obj["time:start|duration|end"]
@@ -5888,6 +5887,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           // 保留 delete obj["trace:throw"]
           delete obj["trace:stack"]
           delete obj["stack"]
+          delete obj["debug:info|help"]
         }
         return obj
       },
@@ -6259,7 +6259,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'host': this.getBaseUrl(),
             '@order': 'date-',
             '@column': 'id,userId,testAccountId,documentId,randomId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
-            'len{}': this.isMLEnabled ? 'length(standard)>2' : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
+            '@having': this.isMLEnabled ? 'length(standard)>2' : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
           }
         }, {}, function (url, res, err) {
           App.onResponse(url, res, err)

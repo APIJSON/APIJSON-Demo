@@ -54,17 +54,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
 		DEFAULT_SCHEMA = "sys";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
-		//表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
-		//这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init
-		//(间接调用 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置)，所以不需要。
-		//但如果 Access 这张表的对外表名与数据库实际表名不一致，仍然需要这里注册。例如
+		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
+		// 这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init
+		// (间接调用 DemoVerifier.init 方法读取数据库 Access 表来替代手动输入配置)，所以不需要。
+		// 但如果 Access 这张表的对外表名与数据库实际表名不一致，仍然需要这里注册。例如
 		//		TABLE_KEY_MAP.put(Access.class.getSimpleName(), "access");
 
-		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+		// 表名映射，隐藏真实表名，对安全要求很高的表可以这么做
 		//		TABLE_KEY_MAP.put(User.class.getSimpleName(), "apijson_user");
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
-		//主键名映射
+		// 主键名映射
 		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
 
 			@Override
@@ -85,7 +85,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
-			//取消注释来实现数据库自增 id
+			// 取消注释来实现数据库自增 id
 			//			@Override
 			//			public Long newId(RequestMethod method, String database, String schema, String datasource, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
@@ -169,7 +169,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isMySQL()) {
 			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
-			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+			return "jdbc:mysql://apijson.cn:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) {
 			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
@@ -184,8 +184,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
 		if (isTDengine()) {
-			//   return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
-			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
+      //      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
+      return "jdbc:TAOS-RS://apijson.cn:6041"; //TODO 改成你自己的
 		}
 		return null;
 	}
@@ -238,7 +238,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return null;
 	}
 
-	//取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的
+	// 取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的
 	//	@Override
 	//	public String getConfigDatabase() {
 	//		return DATABASE_POSTGRESQL;
@@ -248,14 +248,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//		return "apijson";
 	//	}
 
-	//取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
+	// 取消注释后，默认的数据库类型会由 MySQL 改为 PostgreSQL
 	//	@Override
 	//	public String getDatabase() {
 	//		String db = super.getDatabase();
 	//		return db == null ? DATABASE_POSTGRESQL : db;
 	//	}
 
-	//如果确定只用一种数据库，可以重写方法，这种数据库直接 return true，其它数据库直接 return false，来减少判断，提高性能
+	// 如果确定只用一种数据库，可以重写方法，这种数据库直接 return true，其它数据库直接 return false，来减少判断，提高性能
 	//	@Override
 	//	public boolean isMySQL() {
 	//		return true;
