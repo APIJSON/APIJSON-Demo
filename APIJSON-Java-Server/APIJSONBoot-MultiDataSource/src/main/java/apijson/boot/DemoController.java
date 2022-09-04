@@ -14,6 +14,67 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.fasterxml.jackson.databind.util.LRUMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
+
+import java.net.URLDecoder;
+import java.rmi.ServerException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Random;
+import java.util.Set;
+import java.util.concurrent.TimeoutException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import apijson.JSON;
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.demo.DemoFunctionParser;
+import apijson.demo.DemoParser;
+import apijson.demo.DemoSQLConfig;
+import apijson.demo.DemoSQLExecutor;
+import apijson.demo.DemoVerifier;
+import apijson.demo.model.Privacy;
+import apijson.demo.model.User;
+import apijson.demo.model.Verify;
+import apijson.framework.BaseModel;
+import apijson.orm.JSONRequest;
+import apijson.orm.exception.ConditionErrorException;
+import apijson.orm.exception.ConflictException;
+import apijson.orm.exception.NotExistException;
+import apijson.orm.exception.OutOfRangeException;
+import apijson.router.APIJSONRouterController;
+
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.GETS;
@@ -32,65 +93,11 @@ import static apijson.framework.APIJSONConstant.VERSION;
 import static org.springframework.http.HttpHeaders.COOKIE;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
-import java.net.URLDecoder;
-import java.rmi.ServerException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.TimeoutException;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.client.RestTemplate;
-
-import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.databind.util.LRUMap;
-
-import apijson.JSON;
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.RequestMethod;
-import apijson.StringUtil;
-import apijson.demo.DemoFunctionParser;
-import apijson.demo.DemoParser;
-import apijson.demo.DemoVerifier;
-import apijson.demo.model.Privacy;
-import apijson.demo.model.User;
-import apijson.demo.model.Verify;
-import apijson.framework.BaseModel;
-import apijson.orm.JSONRequest;
-import apijson.orm.exception.ConditionErrorException;
-import apijson.orm.exception.ConflictException;
-import apijson.orm.exception.NotExistException;
-import apijson.orm.exception.OutOfRangeException;
-import apijson.router.APIJSONRouterController;
-
 
 /**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理
  * 具体见 SpringBoot 文档
  * https://www.springcloud.cc/spring-boot.html#boot-features-spring-mvc
- * 以及 APIJSON 通用文档 3.设计规范 3.1 操作方法  
+ * 以及 APIJSON 通用文档 3.设计规范 3.1 操作方法
  * https://github.com/Tencent/APIJSON/blob/master/Document.md#3.1
  * <br > 建议全通过HTTP POST来请求:
  * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
@@ -123,7 +130,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 	public String router(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
 		return super.router(method, tag, params, request, session);
 	}
-	
+
 	// 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
@@ -713,7 +720,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 			return privacyResponse;
 		}
 
-		//校验凭证 
+		//校验凭证
 		if (isPassword) {//password密码登录
 			response = new JSONResponse(
 					new DemoParser(HEADS, false).parseResponse(
@@ -853,7 +860,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 			requestObject.put(JSONRequest.KEY_TAG, REGISTER);
 		}
 		requestObject.put(JSONRequest.KEY_FORMAT, true);
-		response = new JSONResponse( 
+		response = new JSONResponse(
 				new DemoParser(POST).setNeedVerifyLogin(false).parseResponse(requestObject)
 				);
 
@@ -982,7 +989,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 			} else {
 				privacy.setPayPassword(oldPassword);
 			}
-			JSONResponse response = new JSONResponse( 
+			JSONResponse response = new JSONResponse(
 					new DemoParser(HEAD, false).parseResponse(
 							new JSONRequest(privacy).setFormat(true)
 							)
@@ -1169,11 +1176,11 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 	@SuppressWarnings("unchecked")
 	@RequestMapping(value = "delegate")
 	public String delegate(
-			@RequestParam("$_delegate_url") String url, 
+			@RequestParam("$_delegate_url") String url,
 			@RequestParam(value = "$_type", required = false) String type,
 			@RequestParam(value = "$_except_headers", required = false) String exceptHeaders,
-			@RequestParam(value = "$_delegate_id", required = false) String sessionId, 
-			@RequestBody(required = false) String body, 
+			@RequestParam(value = "$_delegate_id", required = false) String sessionId,
+			@RequestBody(required = false) String body,
 			HttpMethod method, HttpSession session
 			) {
 
@@ -1210,7 +1217,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 		if (names != null) {
 			headers = new HttpHeaders();
 			//Arrays.asList(null) 抛异常，可以排除不存在的头来替代  exceptHeaders == null //空字符串表示不排除任何头
-			List<String> exceptHeaderList = StringUtil.isEmpty(exceptHeaders, true) 
+			List<String> exceptHeaderList = StringUtil.isEmpty(exceptHeaders, true)
 					? EXCEPT_HEADER_LIST : Arrays.asList(StringUtil.split(exceptHeaders));
 
 
@@ -1221,7 +1228,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 			while (names.hasMoreElements()) {
 				name = names.nextElement();
 				if (name != null && exceptHeaderList.contains(name.toLowerCase()) == false) {
-					//APIAuto 是一定精准发送 Set-Cookie 名称过来的，预留其它命名可实现覆盖原 Cookie Header 等更多可能 
+					//APIAuto 是一定精准发送 Set-Cookie 名称过来的，预留其它命名可实现覆盖原 Cookie Header 等更多可能
 					if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
 						setCookie = Arrays.asList(httpServletRequest.getHeader(name));  // JSON.parseArray(request.getHeader(name), String.class);
 					}
@@ -1316,6 +1323,96 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
 		return entity.getBody();
 	}
+
+  /**执行 SQL 语句，支持 SQLAuto，注意仅仅不要开放给后端组外的任何人，更不要暴露到公司外的公网！
+   * @param request 只用String，避免encode后未decode
+   * @return
+   * @see
+   * <pre>
+  {
+    "sql": "SELECT * FROM sys.Access LIMIT ${limit}",  // SQL 语句，可以带占位符
+    "arg": {
+       "limit": 5
+    }
+  }
+   * </pre>
+   */
+  @PostMapping("execute")
+  public String execute(@RequestBody String request, HttpSession session) {
+    try {
+      if (Log.DEBUG == false) {
+        return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /execute ！")).toJSONString();
+      }
+
+      DemoVerifier.verifyLogin(session);
+
+      long startTime = System.currentTimeMillis();
+
+      JSONObject req = JSON.parseObject(request);
+      String uri = req.getString("uri");
+      String sql = req.getString("sql");
+      List<Object> valueList = req.getJSONArray("arg");
+
+      DemoSQLExecutor executor = new DemoSQLExecutor();
+      DemoSQLConfig config = new DemoSQLConfig();
+
+      if (StringUtil.isNotEmpty(uri)) {
+        config.setDBUri(uri);
+      }
+      config.setPrepared(true);
+      config.setPreparedValueList(valueList);
+
+      Statement statement = executor.getStatement(config, sql);
+      if (statement instanceof PreparedStatement) {
+        ((PreparedStatement) statement).execute();
+      } else {
+        statement.execute(sql);
+      }
+
+      ResultSet rs = statement.getResultSet();
+      ResultSetMetaData rsmd = rs.getMetaData();
+      int length = rsmd.getColumnCount();
+
+      JSONArray arr = new JSONArray();
+
+      long cursorDuration = 0;
+      long rsDuration = 0;
+
+      long cursorStartTime = System.currentTimeMillis();
+      while (rs.next()) {
+        cursorDuration += System.currentTimeMillis() - cursorStartTime;
+
+        JSONObject obj = new JSONObject(true);
+        for (int i = 1; i <= length; i++) {
+          long sqlStartTime = System.currentTimeMillis();
+          String label = rsmd.getColumnLabel(i);
+          Object value = rs.getObject(i);
+          rsDuration += System.currentTimeMillis() - sqlStartTime;
+
+          obj.put(label, value);
+        }
+
+        arr.add(obj);
+      }
+
+      JSONObject result = DemoParser.newSuccessResult();
+      result.put("count", statement.getUpdateCount());
+      result.put("list", arr);
+
+      long endTime = System.currentTimeMillis();
+      long duration = endTime - startTime;
+
+      long sqlDuration = cursorDuration + rsDuration;
+      long parseDuration = duration - sqlDuration;
+
+      result.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + sqlDuration);
+
+      return result.toJSONString();
+    } catch (Exception e) {
+      return DemoParser.newErrorResult(e).toJSONString();
+    }
+
+  }
 
 
 	/**Swagger 文档 Demo，供 APIAuto 测试导入 Swagger 文档到数据库用

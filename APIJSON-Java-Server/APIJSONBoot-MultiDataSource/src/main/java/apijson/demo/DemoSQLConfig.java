@@ -163,9 +163,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return null;
 	}
 
+  private String dbUri;
+  public void setDBUri(String dbUri) {
+    this.dbUri = dbUri;
+  }
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBUri() {
+    if (StringUtil.isNotEmpty(dbUri)) {
+      return dbUri;
+    }
+
 		if (isMySQL()) {
 			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
@@ -321,5 +329,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
 		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
 	}
+
+
 
 }
