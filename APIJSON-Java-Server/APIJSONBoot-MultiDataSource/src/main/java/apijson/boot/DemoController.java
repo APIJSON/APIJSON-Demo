@@ -647,7 +647,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 		}
 	 * </pre>
 	 */
-	@PostMapping(LOGIN)
+	@PostMapping(LOGIN)  //TODO 改 SQLConfig 里的 dbAccount, dbPassword，直接用数据库鉴权
 	public JSONObject login(@RequestBody String request, HttpSession session) {
 		JSONObject requestObject = null;
 		boolean isPassword;
@@ -1324,6 +1324,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 		return entity.getBody();
 	}
 
+  public static boolean EXECUTE_STRICTLY = true;
   /**执行 SQL 语句，支持 SQLAuto，注意仅仅不要开放给后端组外的任何人，更不要暴露到公司外的公网！
    * @param request 只用String，避免encode后未decode
    * @return
@@ -1350,8 +1351,9 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
       JSONObject req = JSON.parseObject(request);
       String uri = req.getString("uri");
-      String sql = req.getString("sql");
-      List<Object> valueList = req.getJSONArray("arg");
+      String sql = StringUtil.getTrimedString(req.getString("sql"));
+      JSONArray arg = req.getJSONArray("arg");
+      List<Object> valueList = arg;
 
       DemoSQLExecutor executor = new DemoSQLExecutor();
       DemoSQLConfig config = new DemoSQLConfig();
@@ -1364,9 +1366,27 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
       Statement statement = executor.getStatement(config, sql);
       if (statement instanceof PreparedStatement) {
-        ((PreparedStatement) statement).execute();
+        if (EXECUTE_STRICTLY) {
+          if (sql.startsWith("SELECT ")) {
+            ((PreparedStatement) statement).executeQuery();
+          } else {
+            ((PreparedStatement) statement).executeUpdate();
+          }
+        }
+        else {
+          ((PreparedStatement) statement).execute();
+        }
       } else {
-        statement.execute(sql);
+        if (EXECUTE_STRICTLY) {
+          if (sql.startsWith("SELECT ")) {
+            statement.executeQuery(sql);
+          } else {
+            statement.executeUpdate(sql);
+          }
+        }
+        else {
+          statement.execute(sql);
+        }
       }
 
       ResultSet rs = statement.getResultSet();
@@ -1396,6 +1416,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       }
 
       JSONObject result = DemoParser.newSuccessResult();
+      result.put("sql", sql);
+      result.put("arg", arg);
       result.put("count", statement.getUpdateCount());
       result.put("list", arr);
 
