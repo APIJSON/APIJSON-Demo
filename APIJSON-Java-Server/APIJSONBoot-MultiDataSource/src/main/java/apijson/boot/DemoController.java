@@ -1364,13 +1364,18 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       config.setPrepared(true);
       config.setPreparedValueList(valueList);
 
+      String sqlPrefix = EXECUTE_STRICTLY ? sql.substring(0, 7).toUpperCase() : "";
+      boolean isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+
+      long executeStartTime = System.currentTimeMillis();
+
       Statement statement = executor.getStatement(config, sql);
       if (statement instanceof PreparedStatement) {
         if (EXECUTE_STRICTLY) {
-          if (sql.startsWith("SELECT ")) {
-            ((PreparedStatement) statement).executeQuery();
-          } else {
+          if (isWrite) {
             ((PreparedStatement) statement).executeUpdate();
+          } else {
+            ((PreparedStatement) statement).executeQuery();
           }
         }
         else {
@@ -1378,16 +1383,18 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         }
       } else {
         if (EXECUTE_STRICTLY) {
-          if (sql.startsWith("SELECT ")) {
-            statement.executeQuery(sql);
-          } else {
+          if (isWrite) {
             statement.executeUpdate(sql);
+          } else {
+            statement.executeQuery(sql);
           }
         }
         else {
           statement.execute(sql);
         }
       }
+
+      long executeDuration = System.currentTimeMillis() - executeStartTime;
 
       ResultSet rs = statement.getResultSet();
       ResultSetMetaData rsmd = rs.getMetaData();
@@ -1424,14 +1431,17 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       long endTime = System.currentTimeMillis();
       long duration = endTime - startTime;
 
-      long sqlDuration = cursorDuration + rsDuration;
+      long sqlDuration = executeDuration + cursorDuration + rsDuration;
       long parseDuration = duration - sqlDuration;
 
       result.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + sqlDuration);
 
       return result.toJSONString();
     } catch (Exception e) {
-      return DemoParser.newErrorResult(e).toJSONString();
+      JSONObject result = DemoParser.newErrorResult(e);
+      result.put("throw", e.getClass().getName());
+      result.put("trace:stack", e.getStackTrace());
+      return result.toJSONString();
     }
 
   }
