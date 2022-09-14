@@ -1467,7 +1467,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         @Override
         public Object process(Object o, String key, Object val) {
           if (val instanceof ValueWrapper) {
-            return ((ValueWrapper) val).getValue();
+            return process(o, key, ((ValueWrapper) val).getValue());
           }
 
           if (val instanceof Value) {
@@ -1485,8 +1485,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
               JSONArray arr = new JSONArray();
               for (int i = 0; i < tags.size(); i++) {
                 arr.add(process(o, String.valueOf(i), tags.get(i)));
-                obj.put("tags", arr);
               }
+              obj.put("tags", arr);
             }
 
             return obj;
@@ -1500,15 +1500,15 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             Map<byte[], Value> props = ((Tag) val).getProps();
 
             if (props != null) {
-              JSONObject props0bj = new JSONObject(true);
+              JSONObject propsObj = new JSONObject(true);
               props.forEach(new BiConsumer<byte[], Value>() {
                 @Override
                 public void accept(byte[] bytes, Value value) {
                   String k = new String(bytes);
-                  props0bj.put(k, process(props0bj, k, value));
+                  propsObj.put(k, process(propsObj, k, value));
                 }
               });
-              obj.put("props", props0bj);
+              obj.put("props", propsObj);
             }
 
             return obj;
@@ -1522,15 +1522,15 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             Map<byte[], Value> props = ((Edge) val).getProps();
 
             if (props != null) {
-              JSONObject props0bj = new JSONObject(true);
+              JSONObject propsObj = new JSONObject(true);
               props.forEach(new BiConsumer<byte[], Value>() {
                 @Override
                 public void accept(byte[] bytes, Value value) {
                   String k = new String(bytes);
-                  props0bj.put(k, process(props0bj, k, value));
+                  propsObj.put(k, process(propsObj, k, value));
                 }
               });
-              obj.put("props", props0bj);
+              obj.put("props", propsObj);
             }
 
             return obj;
