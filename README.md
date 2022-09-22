@@ -22,6 +22,9 @@ Demo projects with document and SQL files for Tencent [APIJSON](https://github.c
 测试及自动生成代码工具<br />
 [APIJSONTest.apk](http://files.cnblogs.com/files/tommylemon/APIJSONTest.apk)
 
+<br />
+有问题可以去 Tencent/APIJSON 提 issue <br />
+https://github.com/Tencent/APIJSON/issues/36
 
 ### 贡献者
 2 个腾讯工程师、1 个平安科技工程师 等，感谢大家的贡献~ <br />
