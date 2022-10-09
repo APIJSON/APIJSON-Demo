@@ -5,7 +5,7 @@
 
   <groupId>apijson.boot</groupId>
   <artifactId>apijson-boot-multi-datasource</artifactId>
-  <version>5.2.0</version>
+  <version>5.3.0</version>
   <packaging>jar</packaging>
 
   <name>APIJSONBoot-MultiDataSource</name>
@@ -62,7 +62,7 @@
     <dependency>
       <groupId>com.github.Tencent</groupId>
       <artifactId>APIJSON</artifactId>
-      <version>5.2.0</version>
+      <version>5.3.0</version>
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
@@ -116,16 +116,20 @@
       <version>1.3.1</version>
     </dependency>
     <dependency>
+      <groupId>com.dameng</groupId>
+      <artifactId>Dm7JdbcDriver15</artifactId>
+      <version>7.6.0.165</version>
+    </dependency>
+    <dependency>
       <groupId>com.taosdata.jdbc</groupId>
       <artifactId>taos-jdbcdriver</artifactId>
       <version>2.0.38</version>
     </dependency>
-
-<!--    <dependency>-->
-<!--      <groupId>org.nebula-contrib</groupId>-->
-<!--      <artifactId>nebula-jdbc</artifactId>-->
-<!--      <version>3.0.0</version>-->
-<!--    </dependency>-->
+    <dependency>
+      <groupId>org.nebula-contrib</groupId>
+      <artifactId>nebula-jdbc</artifactId>
+      <version>3.0.0</version>
+    </dependency>
     <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
     <!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
 

@@ -144,6 +144,16 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
     //			e.printStackTrace();
     //			Log.e(TAG, "加载 DB2 驱动失败，请检查 pom.xml 中 com.ibm.db2 版本是否存在以及可用 ！！！");
     //		}
+    		try { //加载驱动程序
+    			Log.d(TAG, "尝试加载 Dameng 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+    			Class.forName("dm.jdbc.driver.DmDriver");
+    			Log.d(TAG, "成功加载 Dameng 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+    		}
+    		catch (ClassNotFoundException e) {
+    			e.printStackTrace();
+    			Log.e(TAG, "加载 Dameng 驱动失败，请检查 pom.xml 中 com.dameng 版本是否存在以及可用 ！！！");
+    		}
+
 //    try { //加载驱动程序
 //      Log.d(TAG, "尝试加载 TDengine 驱动 <<<<<<<<<<<<<<<<<<<<< ");
 //      Class.forName("com.taosdata.jdbc.TSDBDriver");
