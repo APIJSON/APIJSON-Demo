@@ -157,6 +157,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "11.5"; //TODO 改成你自己的
 		}
+		if (isDameng()) {
+			return "8.1.2.141"; //TODO 改成你自己的
+		}
 		if (isTDengine()) {
 			return "2.6.0.8"; //TODO 改成你自己的
 		}
@@ -191,11 +194,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
+		if (isDameng()) {
+			return "jdbc:dm://localhost:5236"; //TODO 改成你自己的
+		}
 		if (isTDengine()) {
 			//      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
-		return null;
+		return "";
 	}
 
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
@@ -216,10 +222,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "db2admin"; //TODO 改成你自己的
 		}
+		if (isDameng()) {
+			return "SYSDBA";
+		}
 		if (isTDengine()) {
 			return "root"; //TODO 改成你自己的
 		}
-		return null;
+		return "";
 	}
 
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
@@ -240,10 +249,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "123"; //TODO 改成你自己的
 		}
+		if (isDameng()) {
+			return "SYSDBA";
+		}
 		if (isTDengine()) {
 			return "taosdata"; //TODO 改成你自己的
 		}
-		return null;
+		return "";
 	}
 
 	// 取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的

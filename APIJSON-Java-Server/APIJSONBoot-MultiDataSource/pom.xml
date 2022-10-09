@@ -68,16 +68,34 @@
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-framework</artifactId>
       <version>5.2.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.Tencent</groupId>
+          <artifactId>APIJSON</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-column</artifactId>
       <version>1.2.5</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.Tencent</groupId>
+          <artifactId>APIJSON</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-router</artifactId>
       <version>1.0.6</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.Tencent</groupId>
+          <artifactId>APIJSON</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
@@ -103,11 +121,11 @@
       <version>2.0.38</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.nebula-contrib</groupId>
-      <artifactId>nebula-jdbc</artifactId>
-      <version>3.0.0</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>org.nebula-contrib</groupId>-->
+<!--      <artifactId>nebula-jdbc</artifactId>-->
+<!--      <version>3.0.0</version>-->
+<!--    </dependency>-->
     <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
     <!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
 
@@ -120,11 +138,11 @@
     </dependency>
 
     <!-- 需要用的 HikariCP 数据库连接池库，3.1.0 以上 -->
-    <dependency>
-      <groupId>com.zaxxer</groupId>
-      <artifactId>HikariCP</artifactId>
-      <version>5.0.1</version>
-    </dependency>
+<!--    <dependency>-->
+<!--      <groupId>com.zaxxer</groupId>-->
+<!--      <artifactId>HikariCP</artifactId>-->
+<!--      <version>5.0.1</version>-->
+<!--    </dependency>-->
 
     <!-- 需要用的 Druid 数据库连接池库，1.0.29 以上 -->
     <dependency>
