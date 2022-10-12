@@ -166,16 +166,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return null;
 	}
 
-  private String dbUri;
-  public void setDBUri(String dbUri) {
-    this.dbUri = dbUri;
-  }
+	private String dbUri;
+	public DemoSQLConfig setDBUri(String dbUri) {
+		this.dbUri = dbUri;
+		return this;
+	}
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBUri() {
-    if (StringUtil.isNotEmpty(dbUri)) {
-      return dbUri;
-    }
+		if (StringUtil.isNotEmpty(dbUri)) {
+			return dbUri;
+		}
 
 		if (isMySQL()) {
 			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
@@ -204,9 +205,18 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return "";
 	}
 
+	private String dbAccount;
+	public DemoSQLConfig setDBAccount(String dbAccount) {
+		this.dbAccount = dbAccount;
+		return this;
+	}
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBAccount() {
+		if (StringUtil.isNotEmpty(dbAccount)) {
+			return dbAccount;
+		}
+
 		if (isMySQL()) {
 			return "root";  //TODO 改成你自己的
 		}
@@ -231,9 +241,18 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return "";
 	}
 
+	private String dbPassword;
+	public DemoSQLConfig setDBPassword(String dbPassword) {
+		this.dbPassword = dbPassword;
+		return this;
+	}
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDBPassword() {
+		if (StringUtil.isNotEmpty(dbPassword)) {
+			return dbPassword;
+		}
+
 		if (isMySQL()) {
 			return "apijson";  //TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
 		}

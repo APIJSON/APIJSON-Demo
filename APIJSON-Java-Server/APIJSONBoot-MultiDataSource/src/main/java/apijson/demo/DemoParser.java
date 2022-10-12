@@ -16,9 +16,16 @@ package apijson.demo;
 
 import com.alibaba.fastjson.JSONObject;
 
+import javax.servlet.http.HttpSession;
+
 import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.boot.DemoController;
+import apijson.demo.model.Privacy;
+import apijson.demo.model.User;
 import apijson.framework.APIJSONObjectParser;
 import apijson.framework.APIJSONParser;
+import apijson.framework.APIJSONVerifier;
 import apijson.orm.SQLConfig;
 
 
@@ -51,4 +58,40 @@ public class DemoParser extends APIJSONParser<Long> {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
                 , isSubquery, isTable, isArrayMainTable).setMethod(getMethod()).setParser(this);
     }
+
+    // 实现应用层与数据库共用账号密码，可用于多租户、SQLAuto 等 <<<<<<<<<<<<<<<<
+    private boolean asDBAccount;
+    private String dbAccount;
+    private String dbPassword;
+    @Override
+    public APIJSONParser<Long> setSession(HttpSession session) {
+        Boolean asDBAccount = (Boolean) session.getAttribute(DemoController.AS_DB_ACCOUNT);
+        this.asDBAccount = asDBAccount != null && asDBAccount;
+        if (this.asDBAccount) {
+          //User user = (User) session.getAttribute(DemoController.USER_);
+          //this.dbAccount = user.getName();
+          Privacy privacy = (Privacy) session.getAttribute(DemoController.PRIVACY_);
+          this.dbAccount = privacy.getPhone();
+          this.dbPassword = privacy.get__password();
+        }
+
+        return super.setSession(session);
+    }
+
+    @Override
+    public JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception {
+        if (asDBAccount && config instanceof DemoSQLConfig) {
+          DemoSQLConfig cfg = (DemoSQLConfig) config;
+          if (StringUtil.isEmpty(cfg.getDBAccount())) {
+            cfg.setDBAccount(dbAccount);
+          }
+          if (StringUtil.isEmpty(cfg.getDBPassword())) {
+            cfg.setDBPassword(dbPassword);
+          }
+        }
+        return super.executeSQL(config, isSubquery);
+    }
+
+    // 实现应用层与数据库共用账号密码，可用于多租户、SQLAuto 等 >>>>>>>>>>>>>>>
+
 }

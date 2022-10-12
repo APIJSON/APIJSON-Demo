@@ -75,6 +75,7 @@ import apijson.JSONResponse;
 import apijson.Log;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.demo.CompareUtil;
 import apijson.demo.DemoFunctionParser;
 import apijson.demo.DemoParser;
 import apijson.demo.DemoSQLConfig;
@@ -89,6 +90,7 @@ import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.NotExistException;
 import apijson.orm.exception.OutOfRangeException;
+import apijson.orm.model.TestRecord;
 import apijson.router.APIJSONRouterController;
 
 import static apijson.RequestMethod.DELETE;
@@ -104,6 +106,7 @@ import static apijson.framework.APIJSONConstant.FORMAT;
 import static apijson.framework.APIJSONConstant.FUNCTION_;
 import static apijson.framework.APIJSONConstant.ID;
 import static apijson.framework.APIJSONConstant.REQUEST_;
+import static apijson.framework.APIJSONConstant.TEST_RECORD_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 import static apijson.framework.APIJSONConstant.VERSION;
 import static org.springframework.http.HttpHeaders.COOKIE;
@@ -643,6 +646,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
 
   public static final String LOGIN = "login";
+  public static final String AS_DB_ACCOUNT = "asDBAccount";
   public static final String REMEMBER = "remember";
   public static final String DEFAULTS = "defaults";
 
@@ -653,12 +657,12 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
    * @return
    * @see
    * <pre>
-  {
-  "type": 0,  //登录方式，非必须  0-密码 1-验证码
-  "phone": "13000082001",
-  "password": "1234567",
-  "version": 1 //全局版本号，非必须
-  }
+    {
+      "type": 0,  //登录方式，非必须  0-密码 1-验证码
+      "phone": "13000082001",
+      "password": "1234567",
+      "version": 1 //全局版本号，非必须
+    }
    * </pre>
    */
   @PostMapping(LOGIN)  //TODO 改 SQLConfig 里的 dbAccount, dbPassword，直接用数据库鉴权
@@ -670,6 +674,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     int version;
     Boolean format;
     boolean remember;
+    Boolean asDBAccount;
     JSONObject defaults;
     try {
       requestObject = DemoParser.parseRequest(request);
@@ -695,6 +700,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       version = requestObject.getIntValue(VERSION);
       format = requestObject.getBoolean(FORMAT);
       remember = requestObject.getBooleanValue(REMEMBER);
+      asDBAccount = requestObject.getBoolean(AS_DB_ACCOUNT);
       defaults = requestObject.getJSONObject(DEFAULTS); //默认加到每个请求最外层的字段
       requestObject.remove(VERSION);
       requestObject.remove(FORMAT);
@@ -703,7 +709,6 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     } catch (Exception e) {
       return DemoParser.extendErrorResult(requestObject, e);
     }
-
 
 
     //手机号是否已注册
@@ -735,7 +740,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     }
 
     //校验凭证
-    if (isPassword) {//password密码登录
+    if (isPassword) { //password 密码登录
       response = new JSONResponse(
         new DemoParser(HEADS, false).parseResponse(
           new JSONRequest(new Privacy(userId).setPassword(password))
@@ -774,6 +779,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     session.setAttribute(USER_, user); //用户
     session.setAttribute(PRIVACY_, privacy); //用户隐私信息
     session.setAttribute(REMEMBER, remember); //是否记住登录
+    session.setAttribute(AS_DB_ACCOUNT, asDBAccount); //是否作为数据库账号密码
     session.setMaxInactiveInterval(60*60*24*(remember ? 7 : 1)); //设置session过期时间
 
     response.put(REMEMBER, remember);
@@ -790,7 +796,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
   public JSONObject logout(HttpSession session) {
     SESSION_MAP.remove(session.getId());
 
-    long userId;
+    Long userId;
     try {
       userId = DemoVerifier.getVisitorId(session);//必须在session.invalidate();前！
       Log.d(TAG, "logout  userId = " + userId + "; session.getId() = " + (session == null ? null : session.getId()));
@@ -1366,6 +1372,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       JSONObject req = JSON.parseObject(request);
       String database = req.getString("database");
       String uri = req.getString("uri");
+      String account = req.getString("account");
+      String password = req.getString("password");
       String sql = StringUtil.getTrimedString(req.getString("sql"));
       JSONArray arg = req.getJSONArray("arg");
       List<Object> valueList = arg;
@@ -1373,10 +1381,10 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       DemoSQLExecutor executor = new DemoSQLExecutor();
       DemoSQLConfig config = new DemoSQLConfig();
 
-      if (StringUtil.isNotEmpty(uri)) {
-        config.setDBUri(uri);
-      }
       config.setDatabase(database); // "NEBULA"); //
+      config.setDBUri(uri);
+      config.setDBAccount(account);
+      config.setDBPassword(password);
       config.setPrepared(true);
       config.setPreparedValueList(valueList);
 
@@ -1417,8 +1425,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       long executeDuration = System.currentTimeMillis() - executeStartTime;
 
       ResultSet rs = statement.getResultSet();
-      ResultSetMetaData rsmd = rs.getMetaData();
-      int length = rsmd.getColumnCount();
+      ResultSetMetaData rsmd = rs == null ? null : rs.getMetaData();
+      int length = rsmd == null ? 0 : rsmd.getColumnCount();
 
       JSONArray arr = new JSONArray();
 
@@ -1426,7 +1434,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
       long rsDuration = 0;
 
       long cursorStartTime = System.currentTimeMillis();
-      while (rs.next()) {
+      while (rs != null && rs.next()) {
         cursorDuration += System.currentTimeMillis() - cursorStartTime;
 
         JSONObject obj = new JSONObject(true);
