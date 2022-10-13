@@ -142,11 +142,11 @@
     </dependency>
 
     <!-- 需要用的 HikariCP 数据库连接池库，3.1.0 以上 -->
-<!--    <dependency>-->
-<!--      <groupId>com.zaxxer</groupId>-->
-<!--      <artifactId>HikariCP</artifactId>-->
-<!--      <version>5.0.1</version>-->
-<!--    </dependency>-->
+    <dependency>
+      <groupId>com.zaxxer</groupId>
+      <artifactId>HikariCP</artifactId>
+      <version>5.0.1</version>
+    </dependency>
 
     <!-- 需要用的 Druid 数据库连接池库，1.0.29 以上 -->
     <dependency>

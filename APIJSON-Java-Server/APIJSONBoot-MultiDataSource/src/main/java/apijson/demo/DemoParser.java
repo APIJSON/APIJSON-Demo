@@ -16,6 +16,9 @@ package apijson.demo;
 
 import com.alibaba.fastjson.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.http.HttpSession;
 
 import apijson.RequestMethod;
@@ -35,6 +38,11 @@ import apijson.orm.SQLConfig;
  */
 public class DemoParser extends APIJSONParser<Long> {
 
+    public static final Map<Long, HttpSession> KEY_MAP;
+    static {
+      KEY_MAP = new HashMap<>();
+    }
+
     public DemoParser() {
         super();
     }
@@ -45,12 +53,26 @@ public class DemoParser extends APIJSONParser<Long> {
         super(method, needVerify);
     }
 
+    private int maxQueryCount = MAX_QUERY_COUNT;
     //	可重写来设置最大查询数量
-    //	@Override
-    //	public int getMaxQueryCount() {
-    //		return 50;
-    //	}
+    @Override
+    public int getMaxQueryCount() {
+      return maxQueryCount;
+    }
 
+    @Override
+    public JSONObject parseResponse(JSONObject request) {
+        try {  // 内部使用，可通过这种方式来突破限制，获得更大的自由度
+          HttpSession session = KEY_MAP.get(request.getLong("key"));
+          //DemoVerifier.verifyLogin(session);
+          if (session != null) {
+            request.remove("key");
+            maxQueryCount = 1000;
+          }
+        } catch (Exception e) {}
+
+        return super.parseResponse(request);
+    }
 
     @Override
     public APIJSONObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig

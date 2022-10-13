@@ -48,6 +48,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import java.io.IOException;
 import java.net.URLDecoder;
 import java.rmi.ServerException;
 import java.sql.PreparedStatement;
@@ -75,7 +76,6 @@ import apijson.JSONResponse;
 import apijson.Log;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.demo.CompareUtil;
 import apijson.demo.DemoFunctionParser;
 import apijson.demo.DemoParser;
 import apijson.demo.DemoSQLConfig;
@@ -2028,6 +2028,20 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
   @PostMapping("method/invoke")
   public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
     super.invokeMethod(request, servletRequest);
+  }
+
+
+  @GetMapping("/api/test/start")
+  public String startApiTest(HttpServletResponse response, HttpSession session) throws Exception {
+    //response.sendRedirect("http://localhost:3000/test/start");
+    long id = 100000 + Math.round(899999*Math.random());
+    DemoParser.KEY_MAP.put(id, session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
+    return delegate("http://localhost:3000/test/start?key=" + id, null, null, null, null, HttpMethod.GET, session);
+  }
+  @GetMapping("/api/test/status")
+  public String getApiTestStatus(HttpServletResponse response, HttpSession session) throws Exception {
+    //response.sendRedirect("http://localhost:3000/test/status");
+    return delegate("http://localhost:3000/test/status", null, null, null, null, HttpMethod.GET, session);
   }
 
   // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
