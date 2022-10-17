@@ -88,8 +88,8 @@ APIJSONFinal: 右键 DemoAppConfig > Run DemoAppConfig.main
 
 <h5>1)打开项目</h5>
 顶部菜单 File > Import > Maven > Existing Maven Projects > Next > Browse <br />
-> 选择刚才解压路径下的APIJSON-Demo-Master/APIJSON-Java-Server/APIJSONBoot <br />
-> 勾选 /pom.xml ... apijson-demo > Finish
+> 选择刚才解压路径下的 APIJSON-Demo-Master/APIJSON-Java-Server 里面的 APIJSONDemo(简单Demo) 或 APIJSONBoot(实际项目) > OK
+> 勾选 /pom.xml ... apijson-demo 或 apijson-boot > Finish
 
 <h5>2)配置依赖库 </h5>
 其中 apijson-orm, apijson-framework 默认使用 Maven 远程依赖仓库，等待自动下载完成， <br />
