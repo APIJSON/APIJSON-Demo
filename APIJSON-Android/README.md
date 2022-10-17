@@ -1,3 +1,6 @@
+[English](https://github.com/APIJSON/APIJSON-Demo/edit/master/APIJSON-Android/README-English.md)
+<br />
+
 # APIJSON前端上手 - Android 
 
 ### 1.下载后解压APIJSON-Demo工程<h3/>
