@@ -161,7 +161,7 @@ If it shows:
 Then it's a success.<br />
 
 If it shows '404 Not Found', please close the firewall of your machine.<br />
-Goolge other quetions if they appear.
+Google other quetions if they appear.
 
 <br />
 
