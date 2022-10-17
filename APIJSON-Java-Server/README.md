@@ -1,3 +1,5 @@
+[English](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/README-English.md)
+
 # APIJSON后端上手 - Java
 ### JDBC Demo：
 [APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) 为 APIJSON + SpringBoot 的最简单的初级使用 Demo，通过 DemoSQLConfig 代码配置数据库；<br />
