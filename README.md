@@ -39,7 +39,8 @@ Simple demo App for testing APIJSON<br />
 Complex production App like Twitter tweets<br />
 [APIJSONApp.apk](http://files.cnblogs.com/files/tommylemon/APIJSONApp.apk)
 
-<br />
+<br /><br />
+
 有问题可以去 Tencent/APIJSON 提 issue <br />
 If you have any question, please create a issue on Tencent/APIJSON<br />
 https://github.com/Tencent/APIJSON/issues
