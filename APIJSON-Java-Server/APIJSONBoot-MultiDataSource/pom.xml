@@ -67,35 +67,35 @@
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-framework</artifactId>
-      <version>5.2.0</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.github.Tencent</groupId>
-          <artifactId>APIJSON</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>5.3.0</version>
+<!--      <exclusions>-->
+<!--        <exclusion>-->
+<!--          <groupId>com.github.Tencent</groupId>-->
+<!--          <artifactId>APIJSON</artifactId>-->
+<!--        </exclusion>-->
+<!--      </exclusions>-->
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-column</artifactId>
-      <version>1.2.5</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.github.Tencent</groupId>
-          <artifactId>APIJSON</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>1.2.7</version>
+<!--      <exclusions>-->
+<!--        <exclusion>-->
+<!--          <groupId>com.github.Tencent</groupId>-->
+<!--          <artifactId>APIJSON</artifactId>-->
+<!--        </exclusion>-->
+<!--      </exclusions>-->
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-router</artifactId>
-      <version>1.0.6</version>
-      <exclusions>
-        <exclusion>
-          <groupId>com.github.Tencent</groupId>
-          <artifactId>APIJSON</artifactId>
-        </exclusion>
-      </exclusions>
+      <version>1.0.8</version>
+<!--      <exclusions>-->
+<!--        <exclusion>-->
+<!--          <groupId>com.github.Tencent</groupId>-->
+<!--          <artifactId>APIJSON</artifactId>-->
+<!--        </exclusion>-->
+<!--      </exclusions>-->
     </dependency>
     <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 

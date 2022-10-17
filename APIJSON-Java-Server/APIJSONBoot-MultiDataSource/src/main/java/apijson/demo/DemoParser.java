@@ -38,7 +38,7 @@ import apijson.orm.SQLConfig;
  */
 public class DemoParser extends APIJSONParser<Long> {
 
-    public static final Map<Long, HttpSession> KEY_MAP;
+    public static final Map<String, HttpSession> KEY_MAP;
     static {
       KEY_MAP = new HashMap<>();
     }
@@ -63,7 +63,7 @@ public class DemoParser extends APIJSONParser<Long> {
     @Override
     public JSONObject parseResponse(JSONObject request) {
         try {  // 内部使用，可通过这种方式来突破限制，获得更大的自由度
-          HttpSession session = KEY_MAP.get(request.getLong("key"));
+          HttpSession session = KEY_MAP.get(request.getString("key"));
           //DemoVerifier.verifyLogin(session);
           if (session != null) {
             request.remove("key");
