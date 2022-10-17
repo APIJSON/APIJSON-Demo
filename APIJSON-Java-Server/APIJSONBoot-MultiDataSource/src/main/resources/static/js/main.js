@@ -6742,6 +6742,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
       autoTest: function(callback, delayTime, isTest, rawReq, setting) {
         this.autoTestCallback = callback
+        this.currentAccountIndex = -1
 
         if (delayTime == null) {
           delayTime = 0

@@ -66,8 +66,8 @@ const app = new Koa();
 app.use(async ctx => {
   console.log(ctx)
 
-  if (ctx.path == '/start' || (isLoading != true && ctx.path == '/')) {
-    if (isLoading && ctx.path == '/start') {
+  if (ctx.path == '/test/start' || (isLoading != true && ctx.path == '/test')) {
+    if (isLoading && ctx.path == '/test/start') {
       ctx.body = 'Already started auto testing in node, please wait for minutes...';
       ctx.status = 200
       return
@@ -101,10 +101,10 @@ app.use(async ctx => {
     ctx.body = 'Auto testing in node...';
 
     // setTimeout(function () {  // 延迟无效
-    ctx.redirect('/status');
+    ctx.redirect('/test/status');
     // }, 1000)
   }
-  else if (ctx.path == '/status' || (isLoading && ctx.path == '/')) {
+  else if (ctx.path == '/test/status' || (isLoading && ctx.path == '/test')) {
     update();
     if (isLoading) {
       // ctx.response.header['refresh'] = "1";
