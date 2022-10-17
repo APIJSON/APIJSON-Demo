@@ -1,3 +1,14 @@
+### JDBC Demo:
+APIJSONDemo is a simple demo for testing with APIJSON + SpringBoot, configure database in DemoSQLConfig; <br />
+APIJSONBoot is a complex demo for production with APIJSON + SpringBoot, configure database in DemoSQLConfig; <br />
+APIJSONFinal is a complex demo for production with APIJSON + SpringBoot, configure database in DemoSQLConfig. <br />
+
+### Connection Pool Demo:
+APIJSONDemo-Druid is a simple demo for testing with APIJSON + SpringBoot + Druid, configure database in application.yml； <br />
+APIJSONDemo-HikariCP is a simple demo for testing with APIJSON + SpringBoot + HikariCP, configure database in application.yml； <br />
+APIJSONBoot-MultiDataSource is a complex demo for production with multi data sources, configure database in application.yml, <br />
+and the APIAuto source code is in src/main/resources/static, you can test APIs after open http://localhost:8080 with a browser.
+
 ## <h2 id="2">2.Server-side deployment<h2/>
 		
 You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. For both, first download the project and save it to a path.
