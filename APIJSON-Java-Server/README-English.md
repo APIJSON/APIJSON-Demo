@@ -146,3 +146,29 @@ Click *Run* in the bottom.
 <br /><br />	
 	
 **Note**: After running, you should see APIJSON test logs and in the last, it would show ‘APIJSON已启动’. If it shows ‘address already in use’, that means port 8080 has been used . You need tochange the port. See [how to change ports for a Spring Boot Application.](https://stackoverflow.com/questions/21083170/how-to-configure-port-for-a-spring-boot-application)
+
+<br />	
+	
+### 2.5.Test connection<br />
+Open [http://localhost:8080/get/{}](http://localhost:8080/get/{}) with a browser<br />
+If it shows:
+```json
+{
+  "code": 200,
+  "msg": "success"
+}
+```
+Then it's a success.<br />
+
+If it shows '404 Not Found', please close the firewall of your machine.<br />
+Goolge other quetions if they appear.
+
+<br />
+
+
+### 2.6.Test APIs<br />
+Use [APIAuto](http://apijson.cn/api), Postman or another HTTP API test tool, the request form is HTTP POST JSON, see more on the Document <br />
+https://github.com/Tencent/APIJSON/blob/master/Document-English.md
+
+<br />
+
