@@ -5,7 +5,7 @@ Make sure you have either [Android Studio](https://developer.android.com/studio)
 My config:  Windows 7 + JDK 1.7.0_71 + ADT Bundle 20140702 + Android Studio 2.2 and OSX EI Capitan + (JDK 1.7.0_71 + ADT Bundle 20140702) + (JDK 1.8.0_91 + Android Studio 2.1.2). All the systems and software are 64 bit.<br />
 
 #### 1.Importing
-Open an existing Android Studio project > Select the path of APIJSON-Master/APIJSON-Android/APIJSONApp(or APIJSONTest） > OK
+Open an existing Android Studio project > Select the path of APIJSON-Demo-master/APIJSON-Android/APIJSONApp(or APIJSONTest） > OK
 
 #### 2.Running
 Run > Run app
