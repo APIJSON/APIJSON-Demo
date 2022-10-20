@@ -9,6 +9,8 @@ create table "Moment"
     "pictureList"      jsonb  not null
 );
 
+comment on table "Moment" is '动态';
+
 comment on column "Moment".id is '唯一标识';
 
 comment on column "Moment"."userId" is '用户id';
@@ -214,7 +216,6 @@ INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureL
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127698292, 82002, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127567029, 82002, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127568512, 82002, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
-INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (15, 70793, '2017-02-08 08:06:11.000000', 'APIJSON is a JSON Transmission Structure Protocol…', '[82002, 70793, 38710, 93793, 82001]', '["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000", "http://common.cnblogs.com/images/icon_weibo_24.png"]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127572138, 82003, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127720271, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127699686, 82002, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
@@ -225,5 +226,16 @@ INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureL
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1601127728639, 82003, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1612038997550, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1612039185041, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
-INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (235, 38710, '2017-02-08 08:06:11.000000', 'APIJSON,let interfaces and documents go to hell !', '[82001]', '["http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg", "http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000"]');
 INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1612039188935, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666291251828, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666289475963, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666289476308, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666289803269, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666291199308, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666289802937, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666291059722, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666291058890, 82001, null, 'APIJSON,let interfaces and documents go to hell !', '[]', '[]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666291199776, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (15, 70793, '2017-02-08 08:06:11.000000', 'APIJSON is a JSON Transmission Structure Protocol…', '[82002, 70793, 38710, 93793]', '["http://static.oschina.net/uploads/user/1218/2437072_100.jpg?t=1461076033000", "http://common.cnblogs.com/images/icon_weibo_24.png"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (235, 38710, '2017-02-08 08:06:11.000000', 'APIJSON,let interfaces and documents go to hell !', '[82001]', '["http://static.oschina.net/uploads/img/201604/22172508_mpwj.jpg", "http://static.oschina.net/uploads/user/1332/2664107_50.jpg?t=1457405500000"]');
+INSERT INTO "Moment" (id, "userId", date, content, "praiseUserIdList", "pictureList") VALUES (1666291252183, 82001, null, '测试新增动态', '[]', '["http://static.oschina.net/uploads/user/48/96331_50.jpg"]');

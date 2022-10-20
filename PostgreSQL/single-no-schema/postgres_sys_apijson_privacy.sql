@@ -9,6 +9,8 @@ create table apijson_privacy
     "_payPassword" varchar(32)    not null
 );
 
+comment on table apijson_privacy is '用户隐私信息表。\n对安全要求高，不想泄漏真实名称。对外名称为 Privacy';
+
 comment on column apijson_privacy.id is '唯一标识';
 
 comment on column apijson_privacy.certified is '已认证';
@@ -167,4 +169,4 @@ INSERT INTO apijson_privacy (id, certified, phone, balance, _password, "_payPass
 INSERT INTO apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065271307, 0, '13111182002', 0.00, '6733', '123456');
 INSERT INTO apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065319823, 0, '13111182003', 0.00, '6733', '123456');
 INSERT INTO apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (1566065621308, 0, '13111182008', 0.00, '6733', '123456');
-INSERT INTO apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82001, 1, '13000082001', 98729.15, '123456', '123456');
+INSERT INTO apijson_privacy (id, certified, phone, balance, _password, "_payPassword") VALUES (82001, 1, '13000082001', 98729.90, '123456', '123456');

@@ -5990,7 +5990,7 @@ var CodeUtil = {
 
         if (JSONObject.isTableKey(objName)) {
           var c = CodeUtil.getCommentFromDoc(tableList, objName, null, method, database, language, isReq != true || isRestful, isReq, pathKeys, isRestful, value, null, null, null, isWarning);
-          if (c.startsWith(' ! ')) {
+          if (c != null && c.startsWith(' ! ')) {
             return c;
           }
           return StringUtil.isEmpty(c) ? ' ! 表 ' + objName + ' 不存在！' : (isWarning ? '' : CodeUtil.getComment(

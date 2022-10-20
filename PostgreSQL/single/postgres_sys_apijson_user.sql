@@ -11,6 +11,8 @@ create table apijson_user
     date            timestamp(6)
 );
 
+comment on table apijson_user is '用户公开信息表。对安全要求高，不想泄漏真实名称。对外名称为 User';
+
 comment on column apijson_user.id is '唯一标识';
 
 comment on column apijson_user.sex is '性别：
@@ -172,4 +174,4 @@ INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictur
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1538504264944, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-10-02 18:17:44.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1521374327542, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-03-18 11:58:47.000000');
 INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (1518218350585, 0, 'APIJSONUser', null, 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', null, null, '2018-02-09 23:19:10.000000');
-INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82001, 1, '测试账号', 'Dev', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82012, 82003, 93794, 82006, 38710, 82004]', '["http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');
+INSERT INTO sys.apijson_user (id, sex, name, tag, head, "contactIdList", "pictureList", date) VALUES (82001, 1, '测试账号', 'Dev', 'https://raw.githubusercontent.com/TommyLemon/StaticResources/master/APIJSON_Logo.png', '[82012, 82003, 93794, 82006, 38710, 82004, 93793]', '["http://common.cnblogs.com/images/icon_weibo_24.png"]', '2017-02-01 11:21:50.000000');

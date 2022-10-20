@@ -113,4 +113,4 @@ INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742004597, 
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742060130, 1, '13000082001', '8387', '2019-01-29 06:07:40.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742124507, 6, '13000082001', '4901', '2019-01-29 06:08:44.000000');
 INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1548742151361, 10, '13000082001', '8513', '2019-01-29 06:09:11.000000');
-INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1657823206426, 0, '13000082001', '8246', '2022-07-15 02:26:46.433704');
+INSERT INTO sys."Verify" (id, type, phone, verify, date) VALUES (1666291252371, 0, '13000082001', '9465', '2022-10-21 02:40:52.383267');

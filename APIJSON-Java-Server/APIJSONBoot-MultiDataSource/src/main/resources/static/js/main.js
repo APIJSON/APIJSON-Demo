@@ -3094,7 +3094,7 @@
                 'randomId': 0,
                 '@order': 'date-',
                 '@column': 'id,userId,documentId,testAccountId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
-                '@having': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
+                'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
               }
             },
             '@role': IS_NODE ? null : 'LOGIN'
@@ -4693,7 +4693,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           return false;
         }
         doc = d;
-        vOutput.value += (
+        vOutput.value = (this.isTestCaseShow ? '' : output) + (
           '\n\n\n## 文档 \n\n 通用文档见 [APIJSON通用文档](https://github.com/Tencent/APIJSON/blob/master/Document.md#3.2) \n### 数据字典\n自动查数据库表和字段属性来生成 \n\n' + d
           + '<h3 align="center">关于</h3>'
           + '<p align="center">APIAuto-机器学习 HTTP 接口工具'
@@ -4907,12 +4907,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               // item.Table.table_name = table.table_name
               // item.Table.table_comment = table_comment
 
-              doc += '### ' + (i + 1) + '. ' + CodeUtil.getModelName(table.table_name) + '\n#### 说明: \n'
+              doc += '### ' + (i + 1) + '. ' + CodeUtil.getModelName(table.table_name) + '\n'
                 + App.toMD(table_comment);
 
 
               //Column[]
-              doc += '\n\n#### 字段: \n 名称  |  类型  |  最大长度  |  详细说明' +
+              doc += '\n\n 名称  |  类型  |  最大长度  |  详细说明' +
                 ' \n --------  |  ------------  |  ------------  |  ------------ ';
 
               columnList = item['[]'];
@@ -6665,7 +6665,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'host': this.getBaseUrl(),
             '@order': 'date-',
             '@column': 'id,userId,testAccountId,documentId,randomId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
-            '@having': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
+            'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
           }
         }, {}, function (url, res, err) {
           App.onResponse(url, res, err)

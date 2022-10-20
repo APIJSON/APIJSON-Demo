@@ -9,6 +9,8 @@ create table "Comment"
     content    varchar(1000)    not null
 );
 
+comment on table "Comment" is '评论';
+
 comment on column "Comment".id is '唯一标识';
 
 comment on column "Comment"."toId" is '被回复的id';
@@ -553,3 +555,8 @@ INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALU
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1601132118675, 0, 82001, 15, null, '测试新增评论');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1612038997561, 0, 82001, 15, null, '测试新增评论');
 INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1612039188938, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1666289476337, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1666289803266, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1666291059727, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1666291199887, 0, 82001, 15, null, '测试新增评论');
+INSERT INTO sys."Comment" (id, "toId", "userId", "momentId", date, content) VALUES (1666291252192, 0, 82001, 15, null, '测试新增评论');

@@ -6,7 +6,7 @@ create table "Function"
     arguments   varchar(100),
     demo        text         not null,
     detail      varchar(1000),
-    date        timestamp(6) not null,
+    "date"        timestamp(6) not null,
     back        varchar(45),
     requestlist varchar(45),
     "userId"    bigint      default 0,
