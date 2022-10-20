@@ -1358,11 +1358,11 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
   }
    * </pre>
    */
-  @PostMapping("execute")
+  @PostMapping("sql/execute")
   public String execute(@RequestBody String request, HttpSession session) {
     try {
       if (Log.DEBUG == false) {
-        return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /execute ！")).toJSONString();
+        return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /sql/execute ！")).toJSONString();
       }
 
       DemoVerifier.verifyLogin(session);
@@ -2035,39 +2035,39 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
   // 为 APIAuto, UnitAuto, SQLAuto 提供的后台 Headless 无 UI 测试转发接口  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-  @GetMapping("/api/test/start")
+  @GetMapping("api/test/start")
   public String startApiTest(HttpSession session) {
     //response.sendRedirect("http://localhost:3000/test/start");
     long id = 100000 + Math.round(899999*Math.random());
     DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
     return delegate("http://localhost:3000/test/start?key=" + id, null, null, null, null, HttpMethod.GET, session);
   }
-  @GetMapping("/api/test/status")
+  @GetMapping("api/test/status")
   public String getApiTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
     //response.sendRedirect("http://localhost:3000/test/status");
     DemoParser.KEY_MAP.remove(key);
     return delegate("http://localhost:3000/test/status", null, null, null, null, HttpMethod.GET, session);
   }
 
-  @GetMapping("/unit/test/start")
+  @GetMapping("unit/test/start")
   public String startUnitTest(HttpSession session) {
     long id = 100000 + Math.round(899999*Math.random());
     DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
     return delegate("http://localhost:3001/test/start?key=" + id, null, null, null, null, HttpMethod.GET, session);
   }
-  @GetMapping("/unit/test/status")
+  @GetMapping("unit/test/status")
   public String getUnitTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
     DemoParser.KEY_MAP.remove(key);
     return delegate("http://localhost:3001/test/status", null, null, null, null, HttpMethod.GET, session);
   }
 
-  @GetMapping("/sql/test/start")
+  @GetMapping("sql/test/start")
   public String startSQLTest(HttpSession session) {
     long id = 100000 + Math.round(899999*Math.random());
     DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
     return delegate("http://localhost:3002/test/start?key=" + id, null, null, null, null, HttpMethod.GET, session);
   }
-  @GetMapping("/sql/test/status")
+  @GetMapping("sql/test/status")
   public String getSQLTestStatus(@RequestParam("key") String key, HttpSession session) {
     DemoParser.KEY_MAP.remove(key);
     return delegate("http://localhost:3002/test/status", null, null, null, null, HttpMethod.GET, session);
