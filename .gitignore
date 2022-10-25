@@ -17,3 +17,6 @@ APIJSON-Java-Server/APIJSONBoot-MultiDataSource/.idea
 APIJSON-Java-Server/APIJSONDemo-Druid/.idea
 vcs.xml
 APIJSON-Java-Server/APIJSONDemo-HikariCP/.idea
+APIJSON-Java-Server/APIJSONBigData/.settings
+APIJSON-Java-Server/APIJSONDemo-BigData/.idea
+APIJSON-Java-Server/APIJSONDemo-BigData/target
