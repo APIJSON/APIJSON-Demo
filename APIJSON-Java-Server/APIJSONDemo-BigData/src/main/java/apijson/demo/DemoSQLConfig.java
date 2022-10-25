@@ -28,7 +28,7 @@ import apijson.framework.APIJSONSQLConfig;
 public class DemoSQLConfig extends APIJSONSQLConfig {
 
 	static {
-		DEFAULT_DATABASE = DATABASE_POSTGRESQL;  // TODO 默认数据库类型，改成你自己的
+		DEFAULT_DATABASE = DATABASE_MYSQL;  // TODO 默认数据库类型，改成你自己的
 		DEFAULT_SCHEMA = "sys";  // TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
 
         // 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
@@ -50,8 +50,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
 	public String getDBUri() {
-        // Presto 配置文档  https://prestodb.io/docs/current/installation/jdbc.html
-		return "jdbc:presto://localhost:3306/mysql"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+        if (isElasticsearch()) {
+            return "jdbc:es://http://localhost:9200/?timezone=UTC&page.size=250";
+        }
+        if (isPresto()) { // Presto 配置文档  https://prestodb.io/docs/current/installation/jdbc.html
+            return "jdbc:presto://localhost:8099/mysql?SSL=false";
+        }
+        if (isTrino()) {
+            return "jdbc:trino://localhost:8099/mysql?SSL=false";
+        }
+
+		return "jdbc:mysql://localhost:3306"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 	}
 	
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
@@ -66,13 +75,4 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
 	}
 
-    @Override
-    public boolean isMySQL() {
-        return false;
-    }
-
-    @Override
-    public boolean isPostgreSQL() {
-        return true;
-    }
 }

@@ -38,23 +38,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
     // 适配 PrestoDB 的 JDBC
     @Override
-    public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
-        //if (config.isMySQL() || config.isPostgreSQL() || config.isOracle() || config.isSQLServer()
-        //        || config.isDb2() || config.isDameng() || config.isHive() || config.isClickHouse()) {
-        //    return super.executeQuery(config, sql);
-        //}
-
-        Connection conn = getConnection(config);
-        Statement stt = config.isTDengine() ? conn.createStatement()
-                // fix: ResultSet: Exception: set type is TYPE_FORWARD_ONLY, Result set concurrency must be CONCUR_READ_ONLY
-                : conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY, ResultSet.HOLD_CURSORS_OVER_COMMIT);
-
-        return this.executeQuery(stt, StringUtil.isEmpty(sql) ? config.getSQL(false) : sql);
-    }
-
-    @Override
     public Connection getConnection(SQLConfig config) throws Exception {
-        //return DriverManager.getConnection("jdbc:trino://localhost:3306?user=root&password=apijson&SSL=true");
-        return DriverManager.getConnection("jdbc:presto://localhost:8099/mysql?user=root&SSL=false");
+        if (config.isPresto()) {
+            return DriverManager.getConnection("jdbc:presto://localhost:8099/mysql?user=root&SSL=false");
+        }
+        if (config.isTrino()) {
+            return DriverManager.getConnection("jdbc:trino://localhost:8098/postgres?user=root&SSL=false");
+        }
+        return super.getConnection(config);
     }
 }
