@@ -20,3 +20,5 @@ APIJSON-Java-Server/APIJSONDemo-HikariCP/.idea
 APIJSON-Java-Server/APIJSONBigData/.settings
 APIJSON-Java-Server/APIJSONDemo-BigData/.idea
 APIJSON-Java-Server/APIJSONDemo-BigData/target
+APIJSON-Java-Server/APIJSONDemo-Presto/.idea
+APIJSON-Java-Server/APIJSONDemo-Presto/target

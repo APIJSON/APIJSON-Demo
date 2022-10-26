@@ -29,7 +29,6 @@ import apijson.Log;
 import apijson.framework.APIJSONApplication;
 import apijson.framework.APIJSONCreator;
 import apijson.orm.SQLConfig;
-import apijson.orm.SQLExecutor;
 
 
 /**
@@ -82,11 +81,6 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
             public SQLConfig createSQLConfig() {
                 return new DemoSQLConfig();
             }
-
-            @Override
-            public SQLExecutor createSQLExecutor() {
-                return new DemoSQLExecutor();
-            }
         };
 
         try { //加载驱动程序
@@ -107,37 +101,6 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         //catch (ClassNotFoundException e) {
         //    e.printStackTrace();
         //    Log.e(TAG, "加载 Trino 驱动失败，请检查 pom.xml 中 TrinoDriver 版本是否存在以及可用 ！！！");
-        //}
-
-        //// 需要用到的数据库驱动，如果这里没有可以自己新增
-        //try { //加载驱动程序
-        //    Log.d(TAG, "尝试加载 ClickHouse 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-        //    Class.forName("ru.yandex.clickhouse.ClickHouseDriver");
-        //    Log.d(TAG, "成功加载 ClickHouse 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-        //}
-        //catch (ClassNotFoundException e) {
-        //    e.printStackTrace();
-        //    Log.e(TAG, "加载 ClickHouse 驱动失败，请检查 pom.xml 中 ClickHouseDriver 版本是否存在以及可用 ！！！");
-        //}
-        //
-        //try { //加载驱动程序
-        //    Log.d(TAG, "尝试加载 Hadoop Hive 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-        //    Class.forName("org.apache.hadoop.hive.jdbc.HiveDriver");
-        //    Log.d(TAG, "成功加载 Hadoop Hive 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-        //}
-        //catch (ClassNotFoundException e) {
-        //    e.printStackTrace();
-        //    Log.e(TAG, "加载 Hive 驱动失败，请检查 pom.xml 中 HiveDriver 版本是否存在以及可用 ！！！");
-        //}
-        //
-        //try { //加载驱动程序
-        //    Log.d(TAG, "尝试加载 HBase PhoenixDriver 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-        //    Class.forName("org.apache.phoenix.jdbc.PhoenixDriver");
-        //    Log.d(TAG, "成功加载 PhoenixDriver 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-        //}
-        //catch (ClassNotFoundException e) {
-        //    e.printStackTrace();
-        //    Log.e(TAG, "加载 HBase PhoenixDriver 驱动失败，请检查 pom.xml 中 PhoenixDriver 版本是否存在以及可用 ！！！");
         //}
 
     }

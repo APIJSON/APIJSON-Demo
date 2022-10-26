@@ -5,9 +5,9 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>5.3.0</version>
+	<version>5.4.0</version>
 
-	<name>APIJSONDemo</name>
+	<name>APIJSONDemo-Presto</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
 
 	<properties>
@@ -17,65 +17,43 @@
 	</properties>
 
 	<dependencies>
-    <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
-    <dependency>
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-      <version>1.1.1</version>
-    </dependency>
+        <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
+        <dependency>
+          <groupId>javax.activation</groupId>
+          <artifactId>activation</artifactId>
+          <version>1.1.1</version>
+        </dependency>
 
 		<!-- 需要的 APIJSON 相关依赖 -->
+        <dependency>
+            <groupId>com.github.Tencent</groupId>
+            <artifactId>APIJSON</artifactId>
+            <version>5.4.0</version>
+        </dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
 			<version>5.3.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.github.Tecent</groupId>
+                    <artifactId>APIJSON</artifactId>
+                </exclusion>
+            </exclusions>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
-<!--		<dependency>-->
-<!--			<groupId>mysql</groupId>-->
-<!--			<artifactId>mysql-connector-java</artifactId>-->
-<!--			<version>8.0.29</version>-->
-<!--		</dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>io.trino</groupId>-->
-<!--            <artifactId>trino-jdbc</artifactId>-->
-<!--            <version>400</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.facebook.presto</groupId>
             <artifactId>presto-jdbc</artifactId>
             <version>0.277</version>
         </dependency>
 <!--        <dependency>-->
-<!--            <groupId>com.facebook.presto</groupId>-->
-<!--            <artifactId>presto-mysql</artifactId>-->
-<!--            <version>0.245</version>-->
-<!--            <scope>provided</scope>-->
-<!--            <exclusions>-->
-<!--                <exclusion>-->
-<!--                    <groupId>org.slf4j</groupId>-->
-<!--                    <artifactId>jcl-over-slf4j</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>ch.qos.logback</groupId>-->
-<!--                    <artifactId>logback-classic</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>ch.qos.logback</groupId>-->
-<!--                    <artifactId>logback-classic</artifactId>-->
-<!--                </exclusion>-->
-<!--                <exclusion>-->
-<!--                    <groupId>ch.qos.logback</groupId>-->
-<!--                    <artifactId>logback-examples</artifactId>-->
-<!--                </exclusion>-->
-<!--            </exclusions>-->
+<!--            <groupId>io.trino</groupId>-->
+<!--            <artifactId>trino-jdbc</artifactId>-->
+<!--            <version>400</version>-->
 <!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.facebook.presto</groupId>-->
-<!--            <artifactId>presto-client</artifactId>-->
-<!--            <version>0.245</version>-->
-<!--        </dependency>-->
+
         <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
 
 		<!-- 需要用的 SpringBoot 框架，1.4.0 以上 -->
