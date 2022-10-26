@@ -50,10 +50,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
     @JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
     @Override
     public String getDBUri() {
-        if (isPresto()) { // Presto 配置文档  https://prestodb.io/docs/current/installation/jdbc.html
+        if (isPresto()) { // Presto(PrestoDB) 配置文档  https://prestodb.io/docs/current/installation/jdbc.html#connecting
             return "jdbc:presto://localhost:8099/mysql?SSL=false";
         }
-        if (isTrino()) {
+        if (isTrino()) { // Trino(PrestoSQL) 配置文档  https://trino.io/docs/current/client/jdbc.html#connecting
             return "jdbc:trino://localhost:8099/mysql?SSL=false";
         }
 
