@@ -27,9 +27,9 @@ import apijson.framework.APIJSONSQLConfig;
  */
 public class DemoSQLConfig extends APIJSONSQLConfig {
 
-	static {
-		DEFAULT_DATABASE = DATABASE_PRESTO;  // TODO 默认数据库类型，改成你自己的
-		DEFAULT_SCHEMA = "sys";  // TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle: 
+    static {
+        DEFAULT_DATABASE = DATABASE_PRESTO;  // TODO 默认数据库类型，改成你自己的
+        DEFAULT_SCHEMA = "sys";  // TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle:
 
         // 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
         // 如果用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
@@ -37,19 +37,19 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
         // 但如果 Access 这张表的对外表名与数据库实际表名不一致，仍然需要这里注册。例如
         //		TABLE_KEY_MAP.put(Access.class.getSimpleName(), "access");
 
-		//表名映射，隐藏真实表名，对安全要求很高的表可以这么做
-		TABLE_KEY_MAP.put("User", "apijson_user");
-		TABLE_KEY_MAP.put("Privacy", "apijson_privacy");
-	}
+        //表名映射，隐藏真实表名，对安全要求很高的表可以这么做
+        TABLE_KEY_MAP.put("User", "apijson_user");
+        TABLE_KEY_MAP.put("Privacy", "apijson_privacy");
+    }
 
-	@Override
-	public String getDBVersion() {
-		return "8.0.11";  // TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号  // MYSQL 8 和 7 使用的 JDBC 配置不一样
-	}
-	
-	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
-	@Override
-	public String getDBUri() {
+    @Override
+    public String getDBVersion() {
+        return "8.0.11";  // TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号  // MYSQL 8 和 7 使用的 JDBC 配置不一样
+    }
+
+    @JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
+    @Override
+    public String getDBUri() {
         if (isPresto()) { // Presto 配置文档  https://prestodb.io/docs/current/installation/jdbc.html
             return "jdbc:presto://localhost:8099/mysql?SSL=false";
         }
@@ -57,12 +57,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
             return "jdbc:trino://localhost:8099/mysql?SSL=false";
         }
 
-		return "jdbc:mysql://localhost:3306"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
-	}
-	
-	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
-	@Override
-	public String getDBAccount() {
+        return "jdbc:mysql://localhost:3306"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+    }
+
+    @JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
+    @Override
+    public String getDBAccount() {
         if (isPresto()) {
             return "root";
         }
@@ -70,12 +70,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
             return "root";
         }
 
-		return "root";  // TODO 改成你自己的
-	}
-	
-	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
-	@Override
-	public String getDBPassword() {
+        return "root";  // TODO 改成你自己的
+    }
+
+    @JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
+    @Override
+    public String getDBPassword() {
         if (isPresto()) {
             return null;
         }
@@ -83,7 +83,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
             return null;
         }
 
-		return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
-	}
+        return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
+    }
 
 }
