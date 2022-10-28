@@ -2,18 +2,18 @@
 
 # APIJSON后端上手 - Java
 ### JDBC Demo：
-[APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) 为 APIJSON + SpringBoot 的最简单的初级使用 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
-[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot 的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
-[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal  的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库。 <br />
+[APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) 为 APIJSON + SpringBoot + MySQL + PostgreSQL 的最简单的初级使用 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
+[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot + MySQL + PostgreSQL 的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
+[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal + MySQL + PostgreSQL + SQLServer + TDengine  的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库。 <br />
 
 ### 连接池 Demo
-[APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
-[APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) 为 APIJSON + SpringBoot + HikariCP 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
-[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP 的接近生产环境成品的多数据源 Demo， <br />
+[APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
+[APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) 为 APIJSON + SpringBoot + HikariCP + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
+[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP + PostgreSQL + SQLServer + TDengine + 达梦 的接近生产环境成品的多数据源 Demo， <br />
 通过 application.yml 文件配置数据库，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。 <br />
 
 ### 分库分表 Demo
-[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库。 <br />
+[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere  + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库。 <br />
 
 ### 大数据与 OLAP 的 Demo
 [APIJSONBoot-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-BigData) 为 APIJSON + SpringBoot + Presto + Trino + Elasticsearch 等的接近生产环境成品的 Demo。 <br />
