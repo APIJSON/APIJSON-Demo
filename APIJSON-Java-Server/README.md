@@ -15,6 +15,10 @@
 ### 分库分表 Demo
 [APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库。 <br />
 
+### 大数据与 OLAP 的 Demo
+[APIJSONDemo-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-BigData) 为 APIJSON + SpringBoot + Presto + Trino + Elasticsearch 等的接近生产环境成品的 Demo。 <br />
+
+
 <br />
 
 **其中 APIJSONDemo [关闭了权限校验](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#L52-L54) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
