@@ -16,7 +16,7 @@
 [APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库。 <br />
 
 ### 大数据与 OLAP 的 Demo
-[APIJSONDemo-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-BigData) 为 APIJSON + SpringBoot + Presto + Trino + Elasticsearch 等的接近生产环境成品的 Demo。 <br />
+[APIJSONBoot-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-BigData) 为 APIJSON + SpringBoot + Presto + Trino + Elasticsearch 等的接近生产环境成品的 Demo。 <br />
 
 
 <br />
