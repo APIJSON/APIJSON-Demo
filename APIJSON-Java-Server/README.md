@@ -12,6 +12,9 @@
 [APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP 的接近生产环境成品的多数据源 Demo，<br />
 通过 application.yml 文件配置数据库，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。<br />
 
+### 分库分表 Demo
+[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库；<br />
+
 <br />
 
 **其中 APIJSONDemo [关闭了权限校验](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#L52-L54) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
