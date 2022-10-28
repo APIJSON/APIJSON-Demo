@@ -15,7 +15,7 @@ and the [APIAuto](https://github.com/TommyLemon/APIAuto) source code is in [src/
 [APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) is a simple demo for testing with APIJSON + SpringBoot + ShardingSphere, configure database in application.yml, application-sharding-databases.properties, etc. <br />
 	
 ### BigData & OLAP Demo
-[APIJSONDemo-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-BigData) is a complex demo for production with APIJSON + SpringBoot + Presto + Trino + Elasticsearch.
+[APIJSONBoot-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-BigData) is a complex demo for production with APIJSON + SpringBoot + Presto + Trino + Elasticsearch.
 	
 <br />
 	
