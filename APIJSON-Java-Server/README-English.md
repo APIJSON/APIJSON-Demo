@@ -11,6 +11,9 @@
 [APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) is a complex demo for production with multi data sources, configure database in application.yml, <br />
 and the [APIAuto](https://github.com/TommyLemon/APIAuto) source code is in [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static), you can test APIs after open http://localhost:8080 with a browser. <br />
 
+### Sharding Demo:
+[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) is a simple demo for testing with APIJSON + SpringBoot + ShardingSphere, configure database in application.yml, application-sharding-databases.properties, etc. <br />
+	
 <br />
 	
 **You can use either Eclipse for JavaEE or IntelllJ IDEA Ultimate to make installation. <br />
