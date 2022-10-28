@@ -211,7 +211,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
             return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
         }
         if (isElasticsearch()) {
-            return "ObqNhN8vZEM9qRi3AXErLIC5";  // TODO 改成你自己的
+            return null;  // TODO 改成你自己的
         }
         if (isPresto()) {
             return null;  // TODO 改成你自己的
