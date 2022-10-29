@@ -1,18 +1,18 @@
 ## <h2 id="2">2.Server-side deployment<h2/>
 	
 ### JDBC Demo:
-[APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) is a simple demo for testing with APIJSON + SpringBoot, configure database in DemoSQLConfig; <br />
-[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) is a complex demo for production with APIJSON + SpringBoot, configure database in DemoSQLConfig; <br />
-[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) is a complex demo for production with APIJSON + SpringBoot, configure database in DemoSQLConfig. <br />
+[APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) is a simple demo for testing with APIJSON + SpringBoot + MySQL + PostgreSQL, configure database in DemoSQLConfig; <br />
+[APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) is a complex demo for production with APIJSON + SpringBoot + MySQL + PostgreSQL + SQLServer + TDengine, configure database in DemoSQLConfig; <br />
+[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) is a complex demo for production with APIJSON + SpringBoot + MySQL + PostgreSQL, configure database in DemoSQLConfig. <br />
 
 ### Connection Pool Demo:
-[APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) is a simple demo for testing with APIJSON + SpringBoot + Druid, configure database in application.yml； <br />
-[APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) is a simple demo for testing with APIJSON + SpringBoot + HikariCP, configure database in application.yml； <br />
-[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) is a complex demo for production with multi data sources, configure database in application.yml, <br />
+[APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) is a simple demo for testing with APIJSON + SpringBoot + Druid + MySQL + PostgreSQL, configure database in application.yml； <br />
+[APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) is a simple demo for testing with APIJSON + SpringBoot + HikariCP + MySQL + PostgreSQL, configure database in application.yml； <br />
+[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) is a complex demo for production with APIJSON + SpringBoot + Druid + HikariCP + PostgreSQL + SQLServer + TDengine + Dameng, configure database in application.yml, <br />
 and the [APIAuto](https://github.com/TommyLemon/APIAuto) source code is in [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static), you can test APIs after open http://localhost:8080 with a browser. <br />
 
 ### Sharding Demo:
-[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) is a simple demo for testing with APIJSON + SpringBoot + ShardingSphere, configure database in application.yml, application-sharding-databases.properties, etc. <br />
+[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) is a simple demo for testing with APIJSON + SpringBoot + ShardingSphere + MySQL + PostgreSQL, configure database in application.yml, application-sharding-databases.properties, etc. <br />
 	
 ### BigData & OLAP Demo
 [APIJSONBoot-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-BigData) is a complex demo for production with APIJSON + SpringBoot + Presto + Trino + Elasticsearch.
