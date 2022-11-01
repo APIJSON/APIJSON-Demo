@@ -84,13 +84,16 @@
         </div>
 
         <div class="top-right">
-
-            <a v-show="User.id == null || User.id <= 0" href="https://git.code.tencent.com/Tencent_Open_Source/APIJSON" target="_blank" >
-                <img class="ui inline black image" height="24" src="http://apijson.cn/images/tencent_open_logo.png">
+            <a style="padding: 6px" v-show="User.id == null || User.id <= 0" href="https://git.code.tencent.com/Tencent_Open_Source/APIJSON" target="_blank" >
+              <img class="ui inline black image" height="24" src="http://apijson.cn/images/tencent_open_logo.png">
             </a>
 
-            <a v-show="User.id == null || User.id <= 0" href="https://gitee.com/Tencent/APIJSON" target="_blank">
-                <img class="ui inline black image" height="24" src="https://gitee.com/logo-black.svg?20171024" width="60">
+            <a style="padding: 6px" v-show="User.id == null || User.id <= 0" href="https://gitee.com/Tencent/APIJSON" target="_blank">
+              <img class="ui inline black image" height="24" src="https://gitee.com/logo-black.svg?20171024" width="60">
+            </a>
+
+            <a style="padding-left: 6px" v-show="User.id == null || User.id <= 0" href="https://gitee.com/Tencent/APIJSON" target="_blank">
+              <img style="margin-bottom: -1px" height="18" src="https://gitee.com/Tencent/APIJSON/badge/star.svg?theme=gvp">
             </a>
 
             <a v-show="User.id != null && User.id > 0" href="javascript:void(0)" @click="logout(true)">
@@ -150,6 +153,11 @@
 
             <a v-show="! isLocalShow" class="hint--top save-tool" data-hint="点击切换" href="javascript:void(0)" @click="enableCross(! isCrossEnabled)">{{ crossProcess }}</a>
             <a v-show="! isLocalShow" class="hint--top save-tool" data-hint="点击切换" href="javascript:void(0)" @click="enableML(! isMLEnabled)">{{ testProcess }}</a>
+            <!-- 当前账号 -->
+            <div v-show="isCrossEnabled != true && isCurrentSummaryShow()" style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
+              <!-- 只能写成一行来消除间隙，不能换行、空格 -->
+              <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" @click="onClickSummary('total', false, currentAccountIndex)" >{{ (getCurrentSummary().totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentSummary().summaryType == 'white' ? 'underline': 'none'}" @click="onClickSummary('white', false, currentAccountIndex)" >{{ getCurrentSummary().whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentSummary().summaryType == 'green' ? 'underline': 'none'}" @click="onClickSummary('green', false, currentAccountIndex)" >{{ getCurrentSummary().greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentSummary().summaryType == 'blue' ? 'underline': 'none'}" @click="onClickSummary('blue', false, currentAccountIndex)" >{{ getCurrentSummary().blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentSummary().summaryType == 'orange' ? 'underline': 'none'}" @click="onClickSummary('orange', false, currentAccountIndex)" >{{ getCurrentSummary().orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentSummary().summaryType == 'red' ? 'underline': 'none'}"  @click="onClickSummary('red', false, currentAccountIndex)" >{{ getCurrentSummary().redCount || 0 }}</a>
+            </div>
             <a v-show="! isLocalShow" class="hint--top @cli-tool" data-hint="回归测试" href="javascript:void(0)" @click="onClickTest()">
                 <img class="icon" src="img/refresh.png"/>
             </a>
@@ -295,24 +303,28 @@ Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
                             <input v-show="isRandomListShow != true && isRandomSubListShow != true" id="vTestRandomCount" v-model="testRandomCount" style="margin-left: 10px; min-width: 12px; max-width: 30px; width: auto; text-align: center" type="number" />
                             <a v-show="isRandomListShow != true && isRandomSubListShow != true" style="margin-left: 4px;">次</a>
                             <a style="display: flex;flex-grow: 1;padding-left: 10px;padding-right: 2px;font-size: medium;color: black" >{{ (isRandomListShow || StringUtil.isEmpty(randomTestTitle, true) ? '参数注入 Random Test' : randomTestTitle) + (isRandomListShow || isRandomSubListShow ? ' (' + ((isRandomListShow ? randoms : randomSubs) || []).length + ')' : '') }}
-                                <a style="padding-right: 10px;padding-top: 2px">
-                                    {{ testRandomProcess }}
+                                <a v-show="isRandomListShow != true && (currentRemoteItem || {}).Document != null" style="padding-right: 6px;padding-top: 2px" href="javascript:void(0)" @click="showRandomList(true, (currentRemoteItem || {}).Document)">
+                                    父项列表
                                 </a>
-                                <a v-show="isRandomListShow != true && (currentRemoteItem || {}).Document != null" style="padding-right: 10px;padding-top: 2px" href="javascript:void(0)" @click="showRandomList(true, (currentRemoteItem || {}).Document)">
-                                    查看父项列表
+                                <a style="padding-right: 4px">
+                                  {{ testRandomProcess }}
                                 </a>
+                                <div v-show="isRandomSummaryShow()" style="background: lightgray; padding: 1px; margin-right: 10px; top: 10px;right: 36px;display: inline-block" >
+                                  <!-- 只能写成一行来消除间隙，不能换行、空格 -->
+                                  <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" @click="onClickSummary('total', true)" >{{ (getCurrentRandomSummary().totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentRandomSummary().summaryType == 'white' ? 'underline': 'none'}" @click="onClickSummary('white', true)" >{{ getCurrentRandomSummary().whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentRandomSummary().summaryType == 'green' ? 'underline': 'none'}" @click="onClickSummary('green', true)" >{{ getCurrentRandomSummary().greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentRandomSummary().summaryType == 'blue' ? 'underline': 'none'}" @click="onClickSummary('blue', true)" >{{ getCurrentRandomSummary().blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentRandomSummary().summaryType == 'orange' ? 'underline': 'none'}" @click="onClickSummary('orange', true)" >{{ getCurrentRandomSummary().orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getCurrentRandomSummary().summaryType == 'red' ? 'underline': 'none'}"  @click="onClickSummary('red', true)" >{{ getCurrentRandomSummary().redCount || 0 }}</a>
+                                </div>
                             </a>
-                            <a class="hint--top @cli-tool" data-hint="添加" style="font-size:xx-large; margin-bottom: 2px; color: black;"
+                            <a class="hint--top @cli-tool" style="font-size: small;" data-hint="测试" href="javascript:void(0)" @click="onClickTestRandom()">
+                              <img class="icon" src="img/refresh.png"/>
+                            </a>
+                            <a class="hint--top @cli-tool" data-hint="添加配置" style="font-size:xx-large; margin-bottom: 2px; color: black;"
                                href="javascript:void(0)" @click="if(isRandomListShow || isRandomSubListShow) { randomTestTitle = null; isRandomListShow = false; isRandomSubListShow = false; } else { showExport(true, true, true) }"> + </a>
                             <a v-show="false" href="javascript:void(0)" style="font-size: small;" class="hint--top"  data-hint="上传/分享"  @click="showExport(true, true)">
                                 <svg class="icon">
                                     <use xlink:href="svg/icon.svg#share"></use>
                                 </svg>
                             </a>
-                            <a class="hint--top @cli-tool" style="font-size: small;" data-hint="测试" href="javascript:void(0)" @click="onClickTestRandom()">
-                                <img class="icon" src="img/refresh.png"/>
-                            </a>
-                            <a class="hint--top @cli-tool" data-hint="隐藏" style="float: right;padding: 8px;height: 100%"  href="javascript:void(0)" @click="showConfig(false, 5)">
+                            <a class="hint--top @cli-tool" data-hint="隐藏" style="float: right; padding: 8px; margin-top: 2px; height: 100%"  href="javascript:void(0)" @click="showConfig(false, 5)">
                                 <svg class="icon close-icon"  >
                                     <use xlink:href="svg/icon.svg#close"></use>
                                 </svg>
@@ -360,7 +372,7 @@ Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
                                 <button v-show="((item.Random || {}).count || 0) > 1 && (item.totalCount || 0) <= 0" style="position: absolute;top: 10px;right: 36px;display: inline-block;" @click="handleTest(true, index, item, true)">{{ '查看 ' + ((item.subs || item['[]']) || []).length + ' 个子项' }}</button>
                                 <div v-show="((item.Random || {}).count || 0) > 1 && (item.totalCount || 0) > 0" style="background: lightgray; position: absolute; padding: 1px; top: 10px;right: 36px;display: inline-block" @click="handleTest(true, index, item, true)">
                                     <!-- 只能写成一行来消除间隙，不能换行、空格 -->
-                                    <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item.totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item || {}).greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item || {}).blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item || {}).orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item || {}).redCount || 0 }}</a>
+                                    <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item.totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.redCount || 0 }}</a>
                                 </div>
 
                                 <div v-show="! isRandomEditable && ((item.Random || {}).count || 1) <= 1" style="position: absolute;top: 10px;right: 36px;display: inline-block;">
@@ -494,11 +506,37 @@ My-Header: 'Secret' + Math.random()  // 示例，代码执行结果作为实际�
                 </div>
 
                 <div class="pull-center" >
-                    <ul style="width: 100%; padding-left: 18px;padding-right: 18px;" >
+                    <ul style="width: 100%; padding-left: 2px;padding-right: 2px;" >
                         <li style="width: 100%; display: inline-block;text-align: center;">
+                            <!-- 未登录态 -->
+                            <div v-show="isCrossEnabled && isAllSummaryShow()" style="display: inline-block; border: #DDD 1px solid" :style="{backgroundColor: currentAccountIndex == -1 ? 'transparent' : '#DDD'}">
+                              <button style="outline: none; border: none" :style="{backgroundColor: currentAccountIndex == -1 ? 'transparent' : '#DDD', color: currentAccountIndex == -1 ? 'gray' : 'black'}" @click="onClickAccount(-1, logoutSummary)">未登录态</button>
+                              <br/>
+                              <div style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
+                                <!-- 只能写成一行来消除间隙，不能换行、空格 -->
+                                <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" @click="onClickLogoutSummary('total')" >{{ (getLogoutSummary().totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'white' ? 'underline': 'none'}" @click="onClickLogoutSummary('white')" >{{ getLogoutSummary().whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'green' ? 'underline': 'none'}" @click="onClickLogoutSummary('green')" >{{ getLogoutSummary().greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'blue' ? 'underline': 'none'}" @click="onClickLogoutSummary('blue')" >{{ getLogoutSummary().blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'orange' ? 'underline': 'none'}" @click="onClickLogoutSummary('orange')" >{{ getLogoutSummary().orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'red' ? 'underline': 'none'}"  @click="onClickLogoutSummary('red')" >{{ getLogoutSummary().redCount || 0 }}</a>
+                              </div>
+                            </div>
                             <button style="background-color: #DDD;margin: 0px;outline: none;border: #DDD 1px solid;" href="javascript:void(0)" @click="removeAccountTab()"> - </button>
-                            <button style="outline: none;border: #DDD 1px solid;" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD', color: item.isLoggedIn ? 'red' : 'black'}" v-for="(item, index) in accounts" @click="onClickAccount(index, item)">{{ item.name }}</button>
+                            <!-- 每个账号 -->
+                            <div v-for="(item, index) in accounts" style="display: inline-block; border: #DDD 1px solid" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD'}">
+                              <button style="outline: none; border: none" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD', color: item.isLoggedIn ? 'red' : 'black'}" @click="onClickAccount(index, item)">{{ item.name }}</button>
+                              <br v-show="isCrossEnabled && isAllSummaryShow()" />
+                              <div v-show="isCrossEnabled && isAllSummaryShow()" style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
+                                <!-- 只能写成一行来消除间隙，不能换行、空格 -->
+                                <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" @click="onClickSummary('total', false, index)" >{{ (getSummary(index).totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getSummary(index).summaryType == 'white' ? 'underline': 'none'}" @click="onClickSummary('white', false, index)" >{{ getSummary(index).whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getSummary(index).summaryType == 'green' ? 'underline': 'none'}" @click="onClickSummary('green', false, index)" >{{ getSummary(index).greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getSummary(index).summaryType == 'blue' ? 'underline': 'none'}" @click="onClickSummary('blue', false, index)" >{{ getSummary(index).blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getSummary(index).summaryType == 'orange' ? 'underline': 'none'}" @click="onClickSummary('orange', false, index)" >{{ getSummary(index).orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getSummary(index).summaryType == 'red' ? 'underline': 'none'}"  @click="onClickSummary('red', false, index)" >{{ getSummary(index).redCount || 0 }}</a>
+                              </div>
+                            </div>
                             <button style="background-color: #DDD;margin: 0px;outline: none;border: #DDD 1px solid;" href="javascript:void(0)" @click="addAccountTab()"> + </button>
+                            <!-- 全部账号 -->
+                            <div v-show="isCrossEnabled && isAllSummaryShow()" style="display: inline-block; border: #DDD 1px solid" :style="{backgroundColor: currentAccountIndex == accounts.length ? 'transparent' : '#DDD'}">
+                              <button style="outline: none; border: none" :style="{backgroundColor: currentAccountIndex == accounts.length ? 'transparent' : '#DDD', color: currentAccountIndex == accounts.length ? 'black' : 'black'}" >全部账号</button>
+                              <br />
+                              <div style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
+                                <!-- 只能写成一行来消除间隙，不能换行、空格 -->
+                                <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" >{{ (getAllSummary().totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" >{{ getAllSummary().whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" >{{ getAllSummary().greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" >{{ getAllSummary().blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" >{{ getAllSummary().orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" >{{ getAllSummary().redCount || 0 }}</a>
+                              </div>
+                            </div>
                         </li>
                     </ul>
 

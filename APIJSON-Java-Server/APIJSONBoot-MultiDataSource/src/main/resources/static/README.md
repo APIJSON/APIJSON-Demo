@@ -20,7 +20,8 @@
 在常用功能上远超 Postman, Swagger, YApi, Rap 等其它各种 开源、商业 的 API 文档/测试 工具。<br />
 支持 HTTP GET/POST API，智能显示和切换；支持一键导入 Swagger, Rap, YApi 的用例和文档。<br />
 不仅适用于 RESTful、类 RESTful、GRPC 的 API，还是腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 官方建议的文档与测试工具。<br />
-腾讯内部用户包括 互动娱乐、技术工程、云与智慧 等，外部用户包含 工商银行某地分行、500强上市公司深圳传音、行业领头羊社保科技 等。
+腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 等， <br />
+外部用户包含 工商银行某地分行、500强上市公司传音、跨境电商龙头 SHEIN、行业领头羊社保科技 等。
 
 <h3 align="center" style="text-align:center;">
 腾讯 AI 测试圈子演讲(部分)
@@ -160,8 +161,8 @@ https://github.com/TommyLemon/APIAuto/issues/12
 管理后台网页改用 http://apijson.cn/api ，托管服务地址改为 http://47.74.39.68:9090  <br />
 https://github.com/TommyLemon/APIAuto/issues/13
 
-更多常见问题 <br />
-https://github.com/TommyLemon/APIAuto
+更多问题及解答 <br />
+https://github.com/TommyLemon/APIAuto/issues
 
 <br />
 
