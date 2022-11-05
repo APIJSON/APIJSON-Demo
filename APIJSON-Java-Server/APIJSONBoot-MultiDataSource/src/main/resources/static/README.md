@@ -2,10 +2,10 @@
   APIAuto
 </h1>
  
-<p align="center">☔ HTTP 接口 机器学习测试 和 智能开发管理 工具</p>
+<p align="center">☔ HTTP 接口 机器学习零代码测试 和 一站式智能开发管理 工具</p>
 
 <p align="center" >
-  <a href="https://github.com/TommyLemon/APIAuto#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95">使用文档</a>
+  <a href="https://github.com/TommyLemon/APIAuto#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B">使用文档</a>
   <a href="https://space.bilibili.com/437134249/search/video?keyword=apiauto">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
 </p>
@@ -110,9 +110,31 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 ### 相关推荐
 [别再生成测试代码了！](https://mp.weixin.qq.com/s/G1GVNhhFbSX5GoyRU6GURg)
 
+### 百度、搜狗、抖音公网接口调用演示<br />
+因为这些接口不支持 CORS 跨域，所以需要开启托管服务代理。<br />
+可以复制 Chrome 等浏览器、Charles 等抓包工具的请求文本，<br />
+粘贴到 APIAuto 的 URL 输入框，会自动填充 URL, JSON, Header 等。<br />
+https://github.com/TommyLemon/APIAuto/issues/16 
+
+#### 百度
+![APIAuto_request_thirdparty_api_baidu](https://user-images.githubusercontent.com/5738175/154853951-558b9ce0-b8a5-4f35-a811-3c3fbee1235a.gif)
+
+#### 搜狗
+![APIAuto_request_sogou_api](https://user-images.githubusercontent.com/5738175/154854769-dbb0da94-ce59-41a9-8e79-f500c61e17b3.gif)
+
+#### 抖音
+![APIAuto_request_douyin_api](https://user-images.githubusercontent.com/5738175/154854538-d21f22cc-d9f1-4f84-ae2f-8e63bfd02f8f.gif)
+
+<br />
+
+**还可以参考视频：APIAuto 测试请求第三方 HTTP API** <br />
+https://www.bilibili.com/video/BV1JZ4y1d7c8
+![image](https://user-images.githubusercontent.com/5738175/160234764-a8e02ca4-1d0e-407b-8ac7-2f85c9f200d6.png)
+
+
 <br/>
 
-### 部署方法
+### 快速上手
 
 本项目是纯静态 SPA 网页，下载源码解压后：<br />
 可以用浏览器打开 index.html，建议用 [Chrome](https://www.google.com/intl/zh-CN/chrome) 或 [Firefox](https://www.mozilla.org/zh-CN/firefox) (Safari、Edge、IE 等可能有兼容问题)，注意此方法不显示 svg 图标。<br />
@@ -131,6 +153,41 @@ https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server
 
 **建议使用已 [内置 APIAuto](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 的 [APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource)，可以避免以下常见问题 1, 3, 4**
 
+### 后台 Headless 无 UI 模式回归测试
+Jenkins、蓝盾 等 CI/CD 等流水线不支持带 UI 测试，所以提供了这个模式， <br />
+通过调用 HTTP API 即可执行用例和查看进度，方便集成到 CI/CD 流水线。
+![image](https://user-images.githubusercontent.com/5738175/199452068-dee4cbcb-ca4c-484a-8953-84b6bd238982.png)
+![image](https://user-images.githubusercontent.com/5738175/199453742-b1e897f5-6950-40e2-8bfc-80b826966c6b.png)
+
+#### 1.配置 Node 环境及 NPM 包管理工具
+https://nodejs.org
+
+#### 2.安装相关依赖
+https://koajs.com
+```sh
+nvm install 7
+npm i koa
+```
+
+#### 3.使用后台 HTTP 服务
+先启动 HTTP 服务
+```sh
+cd js
+node server.js
+```
+如果运行报错 missing package xxx，说明缺少相关依赖，参考步骤 2 来执行
+```sh
+npm i xxx
+```
+然后再启动 HTTP 服务。<br />
+
+启动成功后会有提示，点击链接或者复制到浏览器输入框打开即可。<br /><br />
+如果托管服务是用 [APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 部署的，<br />
+链接 host 后可以加上 /api，例如 http://localhost:3000/api/test/start，<br />
+通过这个接口来放宽前端执行时查询测试用例、参数配置等列表的条数，一次可批量执行更多用例。
+
+<br /><br />
+
 ### 常见问题
 
 **本网页工具基本每个按钮/输入框等 UI 组件都有注释或悬浮文档等形式的操作提示，<br />
@@ -146,9 +203,6 @@ https://github.com/TommyLemon/APIAuto/issues/9
 注意默认是官网的托管服务器 http://apijson.cn:9090 ，仅支持公网， <br />
 如果是贵公司内网，请按以上 [部署方法](https://github.com/TommyLemon/APIAuto#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95) 文档来部署 APIJSON 后端到内网，并修改托管服务器地址。
 
-百度、搜狗、抖音公网接口调用演示
-https://github.com/TommyLemon/APIAuto/issues/16
-
 #### 2.没有生成文档
 右上角设置项与数据库实际配置不一致 等  <br />
 https://github.com/Tencent/APIJSON/issues/85
@@ -157,8 +211,8 @@ https://github.com/Tencent/APIJSON/issues/85
 不能代理接口、不能展示文档、不能对断言结果纠错 等 <br />
 https://github.com/TommyLemon/APIAuto/issues/12
 
-#### 4.apijson.org 访问不了
-管理后台网页改用 http://apijson.cn/api ，托管服务地址改为 http://47.74.39.68:9090  <br />
+#### 4.apijson.cn 访问不了
+托管服务地址改为 http://47.74.39.68:8080  <br />
 https://github.com/TommyLemon/APIAuto/issues/13
 
 更多问题及解答 <br />
@@ -174,30 +228,40 @@ https://github.com/TommyLemon/APIAuto/issues
 ### 技术交流
 ##### 关于作者
 [https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
-<img width="1279" alt="image" src="https://user-images.githubusercontent.com/5738175/189525500-5fe3ba45-c2b3-4df9-9607-c84120111e3c.png">
+<img width="1279" alt="image" src="https://user-images.githubusercontent.com/5738175/199979403-ace8b574-cd64-4582-8c19-b51571945214.png">
 
-##### QQ 群聊
-607020115（群1）<a target="_blank" style="bottom:2px;padding-top:4px" href="https://qm.qq.com/cgi-bin/qm/qr?k=1wnUodOM6ngXnl0rubf06DuAUbOX-u44&jump_from=webapi"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="APIJSON-Fee" title="APIJSON技术群1"  style="bottom:2px;margin-top:4px" /></a>    
-734652054（群2）<a target="_blank" style="bottom:2px;padding-top:4px" href="https://qm.qq.com/cgi-bin/qm/qr?k=rJLwYzITdoQBfiGUOjMrM3eJDyks1tJP&jump_from=webapi"><img border="0" src="http://pub.idqqimg.com/wpa/images/group.png" alt="APIJSON-Free" title="APIJSON技术群2" style="bottom:2px;margin-top:4px" /></a>    
-
-如果有什么问题或建议可以 [提ISSUE](https://github.com/TommyLemon/APIAuto/issues) 或 加群，交流技术，分享经验。<br >
-如果你解决了某些bug，或者新增了一些功能，欢迎 [贡献代码](https://github.com/TommyLemon/APIAuto/pulls)，感激不尽。
+如果有什么问题或建议可以 [提 issue](https://github.com/TommyLemon/APIAuto/issues)，交流技术，分享经验。<br >
+如果你解决了某些 bug，或者新增了一些功能，欢迎 [提 PR 贡献代码](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md)，感激不尽。
+<br />
+<br />
 
 ### 其它项目
 
-[APIJSON](https://github.com/Tencent/APIJSON) 腾讯零代码、全功能、强安全 ORM 库 🏆 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构
+[APIJSON](https://github.com/Tencent/APIJSON) 🚀 腾讯零代码、全功能、强安全 ORM 库 🏆 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构
 
 [UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性和可用性
 
-[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具
+[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具，任意增删改查、任意 SQL 模板变量、一键批量生成参数组合、快速构造大量测试数据
+
+[apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档，提供排版清晰、搜索方便的文档内容展示，包括设计规范、图文教程等
+
+[APIJSONdocs](https://github.com/ruoranw/APIJSONdocs) APIJSON 英文文档，提供排版清晰的文档内容展示，包括详细介绍、设计规范、使用方式等
+
+[apijson.org](https://github.com/APIJSON/apijson.org) APIJSON 官方网站，提供 APIJSON 的 功能简介、登记用户、作者与贡献者、相关链接 等
 
 [APIJSON.NET](https://github.com/liaozb/APIJSON.NET) C# 版 APIJSON ，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite
 
-[apijson-go](https://github.com/j2go/apijson-go) Go 版 APIJSON ，支持单表查询、数组查询、多表一对一关联查询、多表一对多关联查询 等
+[apijson-go](https://github.com/glennliao/apijson-go) Go 版 APIJSON ， 基于Go(>=1.18) + GoFrame2, 支持查询、单表增删改、权限管理等
+  
+[apijson-go](https://gitee.com/tiangao/apijson-go) Go 版 APIJSON ，支持单表查询、数组查询、多表一对一关联查询、多表一对多关联查询 等
 
-[apijson-hyperf](https://github.com/kvnZero/hyperf-APIJSON) PHP 版 APIJSON，基于 Hyperf 支持 MySQL
+[apijson-hyperf](https://github.com/kvnZero/hyperf-APIJSON.git) PHP 版 APIJSON，基于 Hyperf 支持 MySQL
 
-[apijson-node](https://github.com/kevinaskin/apijson-node) Node.ts 版 APIJSON，提供 nestjs 和 typeorm 的 Demo，由字节跳动工程师开发
+[APIJSON-php](https://github.com/xianglong111/APIJSON-php) PHP 版 APIJSON，基于 ThinkPHP，支持 MySQL, PostgreSQL, SQL Server, Oracle 等
+
+[apijson-php](https://github.com/qq547057827/apijson-php) PHP 版 APIJSON，基于 ThinkPHP，支持 MySQL, PostgreSQL, SQL Server, Oracle 等
+
+[apijson-node](https://github.com/kevinaskin/apijson-node) 字节跳动工程师开源的 Node.ts 版 APIJSON，提供 nestjs 和 typeorm 的 Demo 及后台管理
 
 [uliweb-apijson](https://github.com/zhangchunlin/uliweb-apijson) Python 版 APIJSON，支持 MySQL, PostgreSQL, SQL Server, Oracle, SQLite 等
 

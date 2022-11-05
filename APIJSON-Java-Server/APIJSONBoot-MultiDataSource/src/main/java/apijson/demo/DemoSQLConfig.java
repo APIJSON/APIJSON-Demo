@@ -143,7 +143,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	@Override
 	public String getDBVersion() {
 		if (isMySQL()) {
-			return "5.7.22"; //"8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
+			//return "5.7.22"; //
+            return "8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 		}
 		if (isPostgreSQL()) {
 			return "9.6.15"; //TODO 改成你自己的

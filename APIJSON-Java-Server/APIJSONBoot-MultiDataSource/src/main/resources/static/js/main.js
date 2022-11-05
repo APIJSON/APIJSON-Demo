@@ -787,7 +787,7 @@
       host: '',
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
-      server: "http://localhost:8080", // 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
+      server: 'http://localhost:8080',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
       // thirdParty: 'RAP /repository/joined /repository/get',
@@ -945,7 +945,7 @@
         }
 
         vUrlComment.value = isSingle || StringUtil.isEmpty(this.urlComment, true)
-          ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, '  ')
+          ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, ' ')
           + ' - ' + (this.requestVersion > 0 ? 'V' + this.requestVersion : 'V*');
       },
 
@@ -993,8 +993,8 @@
         return index < 0 ? 0 : index + 3 + url.substring(index + 3).indexOf('/')
       },
       //获取操作方法
-      getMethod: function () {
-        var url = new String(vUrl.value).trim()
+      getMethod: function (url) {
+        var url = new String(url == null ? vUrl.value : url).trim()
         var index = this.getBaseUrlLength(url)
         url = index <= 0 ? url : url.substring(index)
         index = url.indexOf("?")
@@ -1002,6 +1002,12 @@
           url = url.substring(0, index)
         }
         return url.startsWith('/') ? url.substring(1) : url
+      },
+      getBranchUrl: function (url) {
+        var url = new String(url == null ? vUrl.value : url).trim()
+        var index = this.getBaseUrlLength(url)
+        url = index <= 0 ? url : url.substring(index)
+        return url.startsWith('/') ? url : '/' + url
       },
       //获取请求的tag
       getTag: function () {
@@ -1047,7 +1053,7 @@
             item = hs[i] || ''
 
             // 解决整体 trim 后第一行  // 被当成正常的 key 路径而不是注释
-            var index = StringUtil.trim(item).startsWith('//') ? 0 : item.lastIndexOf('  //')  // 不加空格会导致 http:// 被截断  ('//')  //这里只支持单行注释，不用 removeComment 那种带多行的去注释方式
+            var index = StringUtil.trim(item).startsWith('//') ? 0 : item.lastIndexOf(' //')  // 不加空格会导致 http:// 被截断  ('//')  //这里只支持单行注释，不用 removeComment 那种带多行的去注释方式
             var item2 = index < 0 ? item : item.substring(0, index)
             item2 = item2.trim()
             if (item2.length <= 0) {
@@ -1082,17 +1088,6 @@
 
       // 分享 APIAuto 特有链接，打开即可还原分享人的 JSON 参数、设置项、搜索关键词、分页数量及页码等配置
       shareLink: function (isRandom) {
-        var jsonStr = null
-        if (this.isTestCaseShow != true) {
-          try {
-            jsonStr = JSON.stringify(encode(JSON.parse(vInput.value)))
-          } catch (e) {  // 可能包含注释
-            log(e)
-            jsonStr = encode(StringUtil.trim(vInput.value))
-          }
-        }
-
-        // URL 太长导致打不开标签
         var settingStr = null
         try {
           settingStr = JSON.stringify({
@@ -1126,26 +1121,51 @@
             randomSearch: StringUtil.isEmpty(this.randomSearch, true) ? undefined : encodeURIComponent(this.randomSearch),
             randomSubSearch: StringUtil.isEmpty(this.randomSubSearch, true) ? undefined : encodeURIComponent(this.randomSubSearch)
           })
-        } catch (e){
+        } catch (e) {
           log(e)
         }
 
-        var headerStr = this.isTestCaseShow || StringUtil.isEmpty(vHeader.value, true) ? null : encodeURIComponent(StringUtil.trim(vHeader.value))
-        var randomStr = this.isTestCaseShow || StringUtil.isEmpty(vRandom.value, true) ? null : encodeURIComponent(StringUtil.trim(vRandom.value))
+        // 实测 561059 长度的 URL 都支持，只是输入框显示长度约为 2000
+        window.open(this.getShareLink(
+          isRandom
+          , null
+          , null
+          , null
+          , this.isTestCaseShow || StringUtil.isEmpty(vHeader.value, true) ? null : encodeURIComponent(StringUtil.trim(vHeader.value))
+          , this.isTestCaseShow || StringUtil.isEmpty(vRandom.value, true) ? null : encodeURIComponent(StringUtil.trim(vRandom.value))
+          , settingStr
+        ))
+      },
+      getShareLink: function (isRandom, json, url, type, header, random, setting) {
+        var jsonStr = json == null ? null : (typeof json == 'string' ? json : JSON.stringify(json))
+        if (this.isTestCaseShow != true && jsonStr == null) { // StringUtil.isEmpty(jsonStr)
+          try {
+            jsonStr = JSON.stringify(encode(JSON.parse(vInput.value)))
+          } catch (e) {  // 可能包含注释
+            log(e)
+            jsonStr = encode(StringUtil.trim(vInput.value))
+          }
+        }
+
+        var headerStr = header
+
+        var randomStr = random
+
+        // URL 太长导致打不开标签
+        var settingStr = setting
 
         var href = window.location.href || 'http://apijson.cn/api'
         var ind = href == null ? -1 : href.indexOf('?')  // url 后带参数只能 encodeURIComponent
 
-        // 实测 561059 长度的 URL 都支持，只是输入框显示长度约为 2000
-        window.open((ind < 0 ? href : href.substring(0, ind))
+        return (ind < 0 ? href : href.substring(0, ind))
           + (this.view != 'code' ? "?send=false" : (isRandom ? "?send=random" : "?send=true"))
-          + "&type=" + StringUtil.trim(this.type)
-          + "&url=" + encodeURIComponent(StringUtil.trim(vUrl.value))
-          + (StringUtil.isEmpty(jsonStr, true) ? '' : "&json=" + jsonStr)
-          + (StringUtil.isEmpty(headerStr, true) ? '' : "&header=" + headerStr)
-          + (StringUtil.isEmpty(randomStr, true) ? '' : "&random=" + randomStr)
-          + (StringUtil.isEmpty(settingStr, true) ? '' : "&setting=" + settingStr)
-        )
+          + "&type=" + StringUtil.trim(type == null ? REQUEST_TYPE_JSON : type)
+          + "&url=" + encodeURIComponent(StringUtil.trim(url == null ? vUrl.value : url))
+          + (jsonStr == null ? '' : "&json=" + jsonStr)
+          + (headerStr == null ? '' : "&header=" + headerStr)
+          + (randomStr == null ? '' : "&random=" + randomStr)
+          + (settingStr == null ? '' : "&setting=" + settingStr)
+
       },
 
       // 显示保存弹窗
@@ -1298,7 +1318,7 @@
               else if (index == 8) {
                 this.isHeaderShow = true
 
-                alert('例如：\nSWAGGER http://apijson.cn:8080/v2/api-docs\nSWAGGER /v2/api-docs  // 省略 Host\nSWAGGER /  // 省略 Host 和 分支 URL\nRAP /repository/joined /repository/get\nYAPI /api/interface/list_menu /api/interface/get')
+                alert('例如：\nSWAGGER http://apijson.cn:8080/v2/api-docs\nSWAGGER /v2/api-docs  // 省略 Host\nSWAGGER /  // 省略 Host 和 分支 URL\nRAP /repository/joined /repository/get\nYAPI /api/interface/list_menu /api/interface/get\nPOSTMAN https://www.postman.com/collections/cd72b75c6a985f7a9737\nPOSTMAN /cd72b75c6a985f7a9737')
 
                 try {
                   this.getThirdPartyApiList(this.thirdParty, function (platform, docUrl, listUrl, itemUrl, url_, res, err) {
@@ -1309,7 +1329,7 @@
                     if (err != null || (code != null && code != 0)) {
                       App.isHeaderShow = true
                       App.isRandomShow = false
-                      alert('请把 YApi/Rap/Swagger 等网站的有效 Cookie 粘贴到请求头 Request Header 输入框后再试！')
+                      alert('请把 YApi/Rap/Swagger/Postman 等网站的有效 Cookie 粘贴到请求头 Request Header 输入框后再试！')
                     }
 
                     App.onResponse(url_, res, err)
@@ -1319,7 +1339,37 @@
                     var apiMap = CodeUtil.thirdPartyApiMap || {}
 
                     if (platform == PLATFORM_POSTMAN) {
-                      alert('尚未开发 ' + PLATFORM_POSTMAN)
+                      var apis = data.item || data.requests
+                      if (apis != null) {
+                        for (var i = 0; i < apis.length; i++) {
+                          var item = apis[i]
+                          var req = item == null ? null : item.request
+                          var urlObj = req.url || {}
+                          var path = urlObj.path
+                          var url = path instanceof Array ? '/' + path.join('/') : (typeof urlObj == 'string' ? urlObj : urlObj.raw)
+                          if (StringUtil.isEmpty(url, true)) {
+                            url = item.url
+                          }
+                          if (url != null && url.startsWith('{{url}}')) {
+                            url = url.substring('{{url}}'.length)
+                          }
+                          url = App.getBranchUrl(url)
+
+                          if (StringUtil.isEmpty(url, true)) {
+                            continue
+                          }
+
+                          var name = item.name
+
+                          apiMap[url] = {
+                            name: name,
+                            request: req,
+                            response: item.response == null || item.response.length <= 0 ? null : item.response[0],
+                            detail: name
+                          }
+                        }
+                      }
+
                       return true
                     }
                     else if (platform == PLATFORM_SWAGGER) {
@@ -2303,7 +2353,8 @@
             this.saveCache('', 'types', this.types)
             break
           case 8:
-            this.getThirdPartyApiList(this.exTxt.name, function (platform, docUrl, listUrl, itemUrl, url_, res, err) {
+            var thirdParty = this.exTxt.name
+            this.getThirdPartyApiList(thirdParty, function (platform, docUrl, listUrl, itemUrl, url_, res, err) {
               var jsonData = (res || {}).data
               var isJSONData = jsonData instanceof Object
               if (isJSONData == false) {  //后面是 URL 才存储；是 JSON 数据则不存储
@@ -2313,10 +2364,7 @@
 
               const header = App.getHeader(vHeader.value)
 
-              if (platform == PLATFORM_POSTMAN) {
-                alert('尚未开发 ' + PLATFORM_POSTMAN)
-              }
-              else if (platform == PLATFORM_SWAGGER) {
+              if (platform == PLATFORM_SWAGGER) {
                 var swaggerCallback = function (url_, res, err) {
                   if (App.isSyncing) {
                     alert('正在同步，请等待完成')
@@ -2359,20 +2407,26 @@
                   App.request(false, REQUEST_TYPE_PARAM, docUrl, {}, header, swaggerCallback)
                 }
               }
-              else if (platform == PLATFORM_RAP || platform == PLATFORM_YAPI) {
+              else if (platform == PLATFORM_RAP || platform == PLATFORM_YAPI || platform == PLATFORM_POSTMAN) {
                 var isRap = platform == PLATFORM_RAP
+                var isPostman = isRap != true && platform == PLATFORM_POSTMAN
 
                 var itemCallback = function (url, res, err) {
                   try {
                     App.onResponse(url, res, err)
                   } catch (e) {}
 
-                  var data = res.data == null ? null : res.data.data
-                  if (isRap) {
-                    var modules = data == null ? null : data.modules
+                  var data = res.data == null ? null : (isPostman ? (res.data.item || res.data.requests)  : res.data.data)
+                  if (isRap || isPostman) {
+                    var modules = data == null ? null : (isRap ? data.modules : data)
                     if (modules != null) {
                       for (var i = 0; i < modules.length; i++) {
                         var it = modules[i] || {}
+                        if (isPostman) {
+                          App.uploadPostmanApi(it)
+                          continue
+                        }
+
                         var interfaces = it.interfaces || []
 
                         for (var j = 0; j < interfaces.length; j++) {
@@ -2387,6 +2441,10 @@
                 }
 
                 if (isJSONData) {
+                  App.uploadTotal = 0 // apis.length || 0
+                  App.uploadDoneCount = 0
+                  App.uploadFailCount = 0
+
                   itemCallback(itemUrl, { data: jsonData }, null)
                 }
                 else {
@@ -2398,7 +2456,7 @@
                     App.isSyncing = true
                     App.onResponse(url_, res, err)
 
-                    var apis = (res.data || {}).data
+                    var apis = res.data == null ? null : (isPostman ? res.data.item : res.data.data)
                     if (apis == null) { // || apis.length <= 0) {
                       App.isSyncing = false
                       alert('没有查到 ' + (isRap ? 'Rap' : 'YApi') + ' 文档！请开启跨域代理，并检查 URL 是否正确！')
@@ -2409,6 +2467,11 @@
                     App.uploadTotal = 0 // apis.length || 0
                     App.uploadDoneCount = 0
                     App.uploadFailCount = 0
+
+                    if (isPostman) {
+                      itemCallback(itemUrl, { data: res.data }, null)
+                      return
+                    }
 
                     for (var url in apis) {
                       var item = apis[url] || {}
@@ -2448,7 +2511,20 @@
           const header = App.getHeader(vHeader.value)
 
           if (platform == PLATFORM_POSTMAN) {
-            alert('尚未开发 ' + PLATFORM_POSTMAN)
+            if (isJSONData) {
+              listCallback(platform, docUrl, listUrl, itemUrl, itemUrl, { data: jsonData }, null)
+            }
+            else {
+              App.request(false, REQUEST_TYPE_PARAM, docUrl, {}, header, function (url_, res, err) {
+                if (listCallback != null && listCallback(platform, docUrl, listUrl, itemUrl, url_, res, err)) {
+                  return
+                }
+
+                if (itemCallback != null) {
+                  itemCallback(platform, docUrl, listUrl, itemUrl, itemUrl, res, err)
+                }
+              })
+            }
           }
           else if (platform == PLATFORM_SWAGGER) {
             if (isJSONData) {
@@ -2486,7 +2562,9 @@
 
                 var apis = (res.data || {}).data
                 if (apis == null) { // || apis.length <= 0) {
-                  alert('没有查到 ' + (isRap ? 'Rap' : 'YApi') + ' 文档！请开启跨域代理，并检查 URL 是否正确！YApi/Rap/Swagger 网站的 Cookie 必须粘贴到请求头 Request Header 输入框！')
+                  alert('没有查到 ' + (isRap ? 'Rap' : 'YApi') + ' 文档！' +
+                    '\n请开启跨域代理，并检查 URL 是否正确！' +
+                    '\nYApi/Rap/Swagger/Postman 网站的 Cookie 必须粘贴到请求头 Request Header 输入框！')
                   return
                 }
 
@@ -2516,9 +2594,7 @@
 
                 }
               })
-
             }
-
           }
           else {
             alert('第三方平台只支持 Postman, Swagger, Rap, YApi ！')
@@ -2543,7 +2619,13 @@
         var listUrl = null
         var itemUrl = null
 
-        if (platform == PLATFORM_SWAGGER) {
+        if (platform == PLATFORM_POSTMAN) {
+          if (docUrl.startsWith('/') || docUrl.indexOf('://') < 0) {
+            docUrl = 'https://www.postman.com' + (docUrl.startsWith('/collections') ? '' : '/collections') + (docUrl.startsWith('/') ? '' : '/') + docUrl
+          }
+          listUrl = docUrl
+        }
+        else if (platform == PLATFORM_SWAGGER) {
           if (docUrl == '/') {
             docUrl += 'v2/api-docs'
           }
@@ -2566,6 +2648,111 @@
         }
 
         callback(platform, jsonData, docUrl, listUrl, itemUrl)
+      },
+
+      /**上传 Postman API
+       * @param docItem
+       * @param callback
+       */
+      uploadPostmanApi: function(docItem) {
+        var api = docItem
+        if (api == null) {
+          log('postApi', 'api == null  >> return')
+          this.exTxt.button = 'All:' + this.uploadTotal + '\nDone:' + this.uploadDoneCount + '\nFail:' + this.uploadFailCount
+          return false
+        }
+
+        this.uploadTotal ++
+
+        var request = api.request || {}
+        var response = api.response || []
+        var body = request.body || {}
+        var json = body.raw || api.rawModeData
+        var options = body.options || {}
+        var language = (options.raw || {}).language
+
+        var type
+        switch ((api.method || request.method) || '') {
+          case 'GET':
+            type = REQUEST_TYPE_PARAM
+            break
+          case 'POST':
+            switch (language || '') {
+              case 'form-data': // FIXME
+                type = REQUEST_TYPE_DATA
+                break
+              case 'form-url-encoded': // FIXME
+                type = REQUEST_TYPE_FORM
+                break
+              // case 'json':  //JSON
+              default:
+                type = REQUEST_TYPE_JSON
+                break
+            }
+            break
+          default:
+            type = REQUEST_TYPE_JSON
+            break
+        }
+
+
+        var urlObj = request.url || {}
+        var path = urlObj.path
+        var url = path instanceof Array ? '/' + path.join('/') : (typeof urlObj == 'string' ? urlObj : urlObj.raw)
+        if (StringUtil.isEmpty(url, true)) {
+          url = api.url
+        }
+        if (url != null && url.startsWith('{{url}}')) {
+          url = url.substring('{{url}}'.length)
+        }
+
+        var parameters = api.queryParams || request.queryParams || (urlObj instanceof Object ? urlObj.query : null)
+        var parameters2 = []
+        if (parameters != null && parameters.length > 0) {
+
+          for (var k = 0; k < parameters.length; k++) {
+            var paraItem = parameters[k] || {}
+            var name = paraItem.key || ''
+            if (StringUtil.isEmpty(name, true)) {
+              continue
+            }
+
+            var val = paraItem.value
+            if (val == '{{' + name + '}}') {
+              val = null
+            }
+
+            //转成和 Swagger 一样的字段及格式
+            paraItem.name = name
+            paraItem.type = paraItem.type == 'Number' ? 'integer' : StringUtil.toLowerCase(paraItem.type)
+            paraItem.default = val
+
+            parameters2.push(paraItem)
+          }
+        }
+
+        var header = ''
+        var headers = request.header || api.headerData || []
+        if (headers != null && headers.length > 0) {
+          for (var k = 0; k < headers.length; k++) {
+            var paraItem = headers[k] || {}
+            var name = paraItem.key || ''
+            if (StringUtil.isEmpty(name, true)) {
+              continue
+            }
+
+            var val = paraItem.value
+            header += (k <= 0 ? '' : '\n') + name + ': ' + (val == null ? '' : val)
+                + (StringUtil.isEmpty(paraItem.description, true) ? '' : '  // ' + paraItem.description)
+          }
+        }
+
+        if (StringUtil.isEmpty(header, true)) {
+          header = api.headers
+        }
+
+        return this.uploadThirdPartyApi(type, api.name || request.name, url, parameters2, json, header
+          , api.description || request.description, null, response == null ? null : response[0])
       },
 
       /**上传 Swagger API
@@ -2601,7 +2788,7 @@
         }
 
         return this.uploadThirdPartyApi(method == 'get' ? REQUEST_TYPE_PARAM : REQUEST_TYPE_JSON
-          , api.summary, url, parameters2, api.headers, api.description)
+          , api.summary, url, parameters2, null, api.headers, api.description)
       },
 
 
@@ -2673,7 +2860,7 @@
           }
         }
 
-        return this.uploadThirdPartyApi(type, api.name, api.url, parameters2, header, api.description)
+        return this.uploadThirdPartyApi(type, api.name, api.url, parameters2, null, header, api.description)
       },
 
       /**上传 YApi
@@ -2704,7 +2891,7 @@
         var typeAndParam = this.parseYApiTypeAndParam(api)
 
         return this.uploadThirdPartyApi(
-          typeAndParam.type, api.title, api.path, typeAndParam.param, header
+          typeAndParam.type, api.title, api.path, typeAndParam.param, null, header
           ,  (StringUtil.trim(api.username) + ': ' + StringUtil.trim(api.title)
           + '\n' + (api.up_time == null ? '' : (typeof api.up_time != 'number' ? api.up_time : new Date(1000*api.up_time).toLocaleString()))
           + '\nhttp://apijson.cn/yapi/project/1/interface/api/' + api._id
@@ -2783,61 +2970,87 @@
         }
       },
 
+      generateValue: function (t, n) {
+        if (t == 'boolean') {
+          return true
+        }
+        if (t == 'integer') {
+          return n == 'pageSize' ? 10 : 1
+        }
+        if (t == 'number') {
+          return n == 'pageSize' ? 10 : 1
+        }
+        if (t == 'string') {  // TODO
+          return ''
+        }
+        if (t == 'object') {
+          return {}
+        }
+        if (t == 'array') {
+          return []
+        }
+        var suffix = n != null && n.length >= 3 ? n.substring(n.length - 3).toLowerCase() : null
+        if (suffix == 'dto') {
+          return {}
+        }
+
+        return null
+      },
+
       //上传第三方平台的 API 至 APIAuto
-      uploadThirdPartyApi: function(type, name, url, parameters, header, description, creator) {
+      uploadThirdPartyApi: function(type, name, url, parameters, json, header, description, creator, rspObj) {
+        if (typeof json == 'string') {
+          json = JSON.parse(json)
+        }
+        var reqObj = json || {}
+
         var req = '{'
 
+        var isJSONEmpty = json == null || Object.keys(json).length <= 0
         if (parameters != null && parameters.length > 0) {
           for (var k = 0; k < parameters.length; k++) {
             var paraItem = parameters[k] || {}
             var n = paraItem.name || ''  //传进来前已过滤，这里只是避免万一为 null 导致后面崩溃
-            var t = paraItem.type || ''
             var val = paraItem.default
+            var t = paraItem.type || typeof val
 
             if (val == undefined) {
-              if (t == 'boolean') {
-                val = 'true'
-              }
-              if (t == 'integer') {
-                val = n == 'pageSize' ? '10' : '1'
-              }
-              else if (t == 'string') {
-                val = '""'
-              }
-              else if (t == 'object') {
-                val = '{}'
-              }
-              else if (t == 'array') {
-                val = '[]'
-              }
-              else {
-                var suffix = n.length >= 3 ? n.substring(n.length - 3).toLowerCase() : null
-                if (suffix == 'dto') {
-                  val = '{}'
-                } else {
-                  val = 'null'
-                }
-              }
+              val = this.generateValue(t, n)
+              reqObj[n] = val
             }
-            else if (typeof val == 'string' && (StringUtil.isEmpty(t, true) || t == 'string')) {
-              val = '"' + val.replace(/"/g, '\\"') + '"'
+
+            reqObj[n] = val
+
+            if (typeof val == 'string' && (StringUtil.isEmpty(t, true) || t == 'string')) {
+              val = isJSONEmpty ? ('"' + val.replace(/"/g, '\\"') + '"') : val
             }
             else if (val instanceof Object) {
               val = JSON.stringify(val, null, '    ')
             }
 
-            req += '\n    "' + n + '": ' + val + (k < parameters.length - 1 ? ',' : '')
-              + '  // ' + (paraItem.required ? '必填。 ' : '') + StringUtil.trim(paraItem.description)
+            if (isJSONEmpty) {
+              req += '\n    "' + n + '": ' + val + (k < parameters.length - 1 ? ',' : '')
+                + '  // ' + (paraItem.required ? '必填。 ' : '') + StringUtil.trim(paraItem.description)
+            } else {
+              url += (k <= 0 && url.indexOf('?') < 0 ? '?' : '&') + n + '=' + (val == null ? '' : val)
+            }
           }
 
         }
 
         req += '\n}'
 
-        if (StringUtil.isEmpty(description, true) == false) {
-          req += '\n\n/**\n\n' + StringUtil.trim(description).replace(/\*\//g, '* /') + '\n\n*/'
+        if (isJSONEmpty != true) {
+          req = JSON.stringify(json, null, '    ')
         }
 
+        var commentObj = JSONResponse.updateStandard({}, reqObj);
+        CodeUtil.parseComment(req, null, url, this.database, this.language, true, commentObj, true)
+
+        name = StringUtil.get(name)
+        if (name.length > 100) {
+          name = name.substring(0, 60) + ' ... ' + name.substring(70, 100)
+        }
 
         var currentAccountId = this.getCurrentAccountId()
         this.request(true, REQUEST_TYPE_JSON, this.server + '/post', {
@@ -2847,15 +3060,17 @@
             'testAccountId': currentAccountId,
             'type': type,
             'name': StringUtil.get(name),
-            'url': url,
-            'request': req,
-            'header': StringUtil.isEmpty(header, true) ? null : StringUtil.trim(header)
+            'url': this.getBranchUrl(url),
+            'request': reqObj == null ? null : JSON.stringify(reqObj, null, '    '),
+            'standard': commentObj == null ? null : JSON.stringify(commentObj, null, '    '),
+            'header': StringUtil.isEmpty(header, true) ? null : StringUtil.trim(header),
+            'detail': StringUtil.trim(description).replace(/\*\//g, '* /')
           },
           'TestRecord': {
             'randomId': 0,
-            'host': this.getBaseUrl(),
+            'host': this.getBaseUrl(url),
             'testAccountId': currentAccountId,
-            'response': ''
+            'response': rspObj == null ? '' : JSON.stringify(rspObj, null, '    '),
           },
           'tag': 'Document'
         }, {}, function (url, res, err) {
@@ -2923,8 +3138,6 @@
         }
         return num;
       },
-
-
 
 
 
@@ -3178,6 +3391,11 @@
           this.showCompare4TestCaseList(show)
 
           //this.onChange(false)
+        } else if (IS_BROWSER) { // 解决一旦错了，就只能清缓存
+          this.testCaseCount = 50
+          this.testCasePage = 0
+          this.saveCache(this.server, 'testCasePage', this.testCasePage)
+          this.saveCache(this.server, 'testCaseCount', this.testCaseCount)
         }
       },
 
@@ -3896,7 +4114,7 @@
               + '                                                                                                       \n';  //解决遮挡
 
             vUrlComment.value = isSingle || StringUtil.isEmpty(this.urlComment, true)
-              ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, '  ')
+              ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, ' ')
               + ' - ' + (this.requestVersion > 0 ? 'V' + this.requestVersion : 'V*');
 
             if (! isSingle) {
@@ -3910,7 +4128,7 @@
               var name = api == null ? null : api.name;
               if (StringUtil.isEmpty(name, true) == false) {
                 this.urlComment = name;
-                vUrlComment.value = vUrl.value + CodeUtil.getComment(this.urlComment, false, '  ')
+                vUrlComment.value = vUrl.value + CodeUtil.getComment(this.urlComment, false, ' ')
               }
             }
 
@@ -3986,7 +4204,7 @@
 
         vInput.value = this.switchQuote(vInput.value);
 
-        this.isTestCaseShow = false
+        this.isTestCaseShow = false;
 
         // // 删除注释 <<<<<<<<<<<<<<<<<<<<<
         //
@@ -3998,6 +4216,13 @@
         // // 删除注释 >>>>>>>>>>>>>>>>>>>>>
 
         this.onChange(false);
+
+        var list = docObj == null ? null : docObj['[]'];
+        if (list != null && list.length > 0) {
+          this.onDocumentListResponse('', {data: docObj}, null, function (d) {
+            App.setDoc(d);
+          });
+        }
       },
 
       /**获取显示的请求类型名称
@@ -4366,7 +4591,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   continue;
                 }
 
-                var ind = l.lastIndexOf('  //');
+                var ind = l.lastIndexOf(' //');
                 l = ind < 0 ? l : StringUtil.trim(l.substring(0, ind));
 
                 ind = l.indexOf(':');
@@ -4535,7 +4760,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     continue;
                   }
 
-                  var ind = l.lastIndexOf('  //');
+                  var ind = l.lastIndexOf(' //');
                   l = ind < 0 ? l : StringUtil.trim(l.substring(0, ind));
 
                   ind = l.indexOf(':');
@@ -4890,11 +5115,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        */
       getDoc: function (callback) {
 
-      	var isTSQL = ['ORACLE', 'DAMENG'].indexOf(this.database) >= 0
-      	var isNotTSQL = ! isTSQL
+        var isTSQL = ['ORACLE', 'DAMENG'].indexOf(this.database) >= 0
+        var isNotTSQL = !isTSQL
 
         var count = this.count || 100  //超过就太卡了
         var page = this.page || 0
+
+        var schemas = StringUtil.isEmpty(this.schema, true) ? null : StringUtil.split(this.schema)
 
         var search = StringUtil.isEmpty(this.search, true) ? null : '%' + StringUtil.trim(this.search) + '%'
         this.request(false, REQUEST_TYPE_JSON, this.getBaseUrl() + '/get', {
@@ -4913,8 +5140,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'Access': {
               '@column': 'name,alias,get,head,gets,heads,post,put,delete',
               '@order': 'date-,name+',
-              'name()': 'getWithDefault(alias,name)',
-              'r0()': 'removeKey(alias)',
               'name$': search,
               'alias$': search,
               '@combine': search == null ? null : 'name$,alias$',
@@ -4924,7 +5149,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'count': count,
             'page': page,
             'Table': isTSQL || this.database == 'SQLSERVER' ? null : {
-              'table_schema': this.schema,
+              'table_schema{}': schemas,
               'table_type': 'BASE TABLE',
               // 'table_name!$': ['\\_%', 'sys\\_%', 'system\\_%'],
               'table_name$': search,
@@ -4932,7 +5157,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               '@combine': search == null || this.database == 'POSTGRESQL' ? null : 'table_name$,table_comment$',
               'table_name{}@': 'sql',
               '@order': 'table_name+', //MySQL 8 SELECT `table_name` 返回的仍然是大写的 TABLE_NAME，需要 AS 一下
-              '@column': this.database == 'POSTGRESQL' ? 'table_name' : 'table_name:table_name,table_comment:table_comment'
+              '@column': (schemas != null && schemas.length == 1 ? '' : 'table_schema:table_schema,') + (this.database == 'POSTGRESQL' ? 'table_name' : 'table_name:table_name,table_comment:table_comment')
             },
             'PgClass': this.database != 'POSTGRESQL' ? null : {
               'relname@': '/Table/table_name',
@@ -4954,26 +5179,27 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               '@column': 'value:table_comment'
             },
             "join": isNotTSQL ? null : {
-            	"&/AllTableComment": {
-            		'table_name$': search,
-              		'table_comment$': search,
-              		'@combine': search == null ? null : 'table_name$,table_comment$',
-            	}
+              "&/AllTableComment": {
+                'table_name$': search,
+                'table_comment$': search,
+                '@combine': search == null ? null : 'table_name$,table_comment$',
+              }
             },
-    		    "AllTable": isNotTSQL ? null : {
-    		        "@order": "TABLE_NAME+",
-    		        "@column": "TABLE_NAME:table_name",
-    		        'TABLE_NAME{}@': 'sql'
-    		    },
-    		    "AllTableComment": isNotTSQL ? null : {
-    		        "TABLE_TYPE": "TABLE",
-    		        "TABLE_NAME@": "/AllTable/TABLE_NAME",
-    		        "@column": "COMMENTS:table_comment"
-    		    },
+            "AllTable": isNotTSQL ? null : {
+              "@order": "TABLE_NAME+",
+              "@column": "TABLE_NAME:table_name",
+              'TABLE_NAME{}@': 'sql'
+            },
+            "AllTableComment": isNotTSQL ? null : {
+              "TABLE_TYPE": "TABLE",
+              "TABLE_NAME@": "/AllTable/TABLE_NAME",
+              "@column": "COMMENTS:table_comment"
+            },
             '[]': {
               'count': 0,
               'Column': isTSQL ? null : {
-                'table_schema': this.schema,
+                'table_schema{}': schemas,
+                'table_schema@': schemas != null && schemas.length == 1 ? null : '[]/Table/table_schema',
                 'table_name@': this.database != 'SQLSERVER' ? '[]/Table/table_name' : "[]/SysTable/table_name",
                 "@order": this.database != 'SQLSERVER' ? null : "table_name+",
                 '@column': this.database == 'POSTGRESQL' || this.database == 'SQLSERVER'  //MySQL 8 SELECT `column_name` 返回的仍然是大写的 COLUMN_NAME，需要 AS 一下
@@ -4999,14 +5225,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 '@column': 'value:column_comment'
               },
               "AllColumn": isNotTSQL ? null : {
-    		        "TABLE_NAME@": "[]/AllTable/table_name",
-    		        "@column": "COLUMN_NAME:column_name,DATA_TYPE:column_type"
-    		      },
-    		      "AllColumnComment": isNotTSQL ? null : {
-    		        "TABLE_NAME@": "[]/AllTable/table_name",
-    		        "COLUMN_NAME@": "/AllColumn/column_name",
-    		        "@column": "COMMENTS:column_comment"
-    		      }
+                "TABLE_NAME@": "[]/AllTable/table_name",
+                "@column": "COLUMN_NAME:column_name,DATA_TYPE:column_type"
+              },
+              "AllColumnComment": isNotTSQL ? null : {
+                "TABLE_NAME@": "[]/AllTable/table_name",
+                "COLUMN_NAME@": "/AllColumn/column_name",
+                "@column": "COMMENTS:column_comment"
+              }
             }
           },
           'Function[]': {
@@ -5014,11 +5240,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'page': page,
             'Function': {
               '@order': 'date-,name+',
-              '@column': 'name,arguments,demo,detail',
+              '@column': 'name,arguments,demo,detail,detail:rawDetail',
               'demo()': 'getFunctionDemo()',
               'detail()': 'getFunctionDetail()',
-              'r0()': 'removeKey(name)',
-              'r1()': 'removeKey(arguments)',
               'name$': search,
               'detail$': search,
               '@combine': search == null ? null : 'name$,detail$',
@@ -5036,35 +5260,98 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
           }
         }, {}, function (url, res, err) {
-          if (err != null || res == null || res.data == null) {
-            log('getDoc  err != null || res == null || res.data == null >> return;');
+          App.onDocumentListResponse(url, res, err, callback)
+        })
+      },
+
+      onDocumentListResponse: function(url, res, err, callback) {
+        if (err != null || res == null || res.data == null) {
+          log('getDoc  err != null || res == null || res.data == null >> return;');
+          if (callback != null) {
             callback('')
-            return;
           }
+          return;
+        }
 
 //        log('getDoc  docRq.responseText = \n' + docRq.responseText);
-          docObj = res.data || {};  //避免后面又调用 onChange ，onChange 又调用 getDoc 导致死循环
+        docObj = res.data || {};  //避免后面又调用 onChange ，onChange 又调用 getDoc 导致死循环
 
-          //转为文档格式
+        var map = {};
+
+        //Access[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        var ad = ''
+        list = docObj == null ? null : docObj['Access[]'];
+        CodeUtil.accessList = list;
+        if (list != null) {
+          if (DEBUG) {
+            log('getDoc  Access[] = \n' + format(JSON.stringify(list)));
+          }
+
+          ad += '\n\n\n\n\n\n\n\n\n### 访问权限\n自动查 Access 表写入的数据来生成\n'
+            + ' \n 表名  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色  |  允许 get<br>的角色  |  允许 head<br>的角色  |  允许 gets<br>的角色  |  允许 heads<br>的角色  |  表名'
+            + ' \n --------  |  ---------  |  ---------  |  ---------  |  ---------  |  ---------  |  ---------  |  --------- | --------  ';
+
+          for (var i = 0; i < list.length; i++) {
+            var item = list[i];
+            if (item == null) {
+              continue;
+            }
+            if (DEBUG) {
+              log('getDoc Access[] for i=' + i + ': item = \n' + format(JSON.stringify(item)));
+            }
+
+            var name = StringUtil.isEmpty(item.alias, true) ? StringUtil.firstCase(item.name, true) : item.alias
+            map[StringUtil.toLowerCase(item.schema) + '.' + StringUtil.toLowerCase(item.name)] = item
+
+            function getShowString(method, lineItemCount) {
+              var roles = item[method] == null ? null : JSON.parse(item[method])
+              var rs = []
+              if (roles != null) {
+                var schemaStr = StringUtil.isEmpty(item.schema) ? 'null' : "'" + item.schema + "'"
+                for (var j = 0; j < roles.length; j++) {
+                  var r = roles[j] || ''
+                  rs.push('<a href="javascript:void(0)" onclick="window.App.onClickAccess(' + i + ',\'' + name + '\',' + schemaStr + ',\'' + method + '\',\'' + r + '\')">' + r + '</a>')
+                }
+              }
+              return JSONResponse.getShowString(rs, lineItemCount)
+            }
+
+            ad += '\n' + (name) //右上角设置指定了 Schema  + '(' + item.schema + ')')
+              + '  |  ' + getShowString('post', 1)
+              + '  |  ' + getShowString('put', 1)
+              + '  |  ' + getShowString('delete', 1)
+              + '  |  ' + getShowString('get', 2)
+              + '  |  ' + getShowString('head', 2)
+              + '  |  ' + getShowString('gets', 2)
+              + '  |  ' + getShowString('heads', 2)
+              + '  |  ' + (name); //右上角设置指定了 Schema  + '(' + item.schema + ')');
+          }
+
+          ad += ' \n 表名  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色   |  允许 get<br>的角色  |  允许 head<br>的角色  |  允许 gets<br>的角色  |  允许 heads<br>的角色 |  表名'
+
+          ad += '\n' //避免没数据时表格显示没有网格
+        }
+        var accessMap = CodeUtil.accessMap = map;
+        //Access[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+        //转为文档格式
           var doc = '';
-          var item;
 
           //[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
           var list = docObj == null ? null : docObj['[]'];
+          map = {};
           CodeUtil.tableList = list;
           if (list != null) {
             if (DEBUG) {
               log('getDoc  [] = \n' + format(JSON.stringify(list)));
             }
 
-            var table;
-            var columnList;
-            var column;
             for (var i = 0; i < list.length; i++) {
-              item = list[i];
+              var item = list[i];
 
               //Table
-              table = item == null ? null : (App.database != 'SQLSERVER' ? item.Table : item.SysTable);
+              var table = item == null ? null : (App.database != 'SQLSERVER' ? item.Table : item.SysTable);
               if (table == null) {
                 continue;
               }
@@ -5081,15 +5368,27 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               // item.Table.table_name = table.table_name
               // item.Table.table_comment = table_comment
 
-              doc += '### ' + (i + 1) + '. ' + CodeUtil.getModelName(table.table_name) + '\n'
-                + App.toMD(table_comment);
+              var schema = table.table_schema
+              var modelName = App.getModelName(i)
+              map[StringUtil.toLowerCase(schema) + '.' + StringUtil.toLowerCase(modelName)] = table
 
+              // TODO 对 isAPIJSON 和 isRESTful 生成不一样的
+              doc += '\n### ' + (i + 1) + '. ' + modelName
+                + (StringUtil.isEmpty(schema, true) ? '' : ': { @schema: ' + schema + ' }')
+                + ' - <a href="javascript:void(0)" onclick="window.App.onClickPost(' + i + ',\'' + modelName + '\')">POST</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickPut(' + i + ',\'' + modelName + '\')">PUT</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickDelete(' + i + ',\'' + modelName + '\')">DELETE</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickGet(' + i + ',\'' + modelName + '\')">GET</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickGets(' + i + ',\'' + modelName + '\')">GETS</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickHead(' + i + ',\'' + modelName + '\')">HEAD</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickHeads(' + i + ',\'' + modelName + '\')">HEADS</a>'
+                + '\n' + App.toMD(table_comment);
 
               //Column[]
               doc += '\n\n 名称  |  类型  |  最大长度  |  详细说明' +
                 ' \n --------  |  ------------  |  ------------  |  ------------ ';
 
-              columnList = item['[]'];
+              var columnList = item['[]'];
               if (columnList == null) {
                 continue;
               }
@@ -5097,19 +5396,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 log('getDoc [] for ' + i + ': columnList = \n' + format(JSON.stringify(columnList)));
               }
 
-              var name;
-              var type;
-              var length;
               for (var j = 0; j < columnList.length; j++) {
-                column = (columnList[j] || {}).Column;
-                name = column == null ? null : column.column_name;
+                var column = (columnList[j] || {}).Column;
+                var name = column == null ? null : column.column_name;
                 if (name == null) {
                   continue;
                 }
 
                 column.column_type = CodeUtil.getColumnType(column, App.database);
-                type = CodeUtil.getType4Language(App.language, column.column_type, false);
-                length = CodeUtil.getMaxLength(column.column_type);
+                var type = CodeUtil.getType4Language(App.language, column.column_type, false);
+                var length = CodeUtil.getMaxLength(column.column_type);
 
                 if (DEBUG) {
                   log('getDoc [] for j=' + j + ': column = \n' + format(JSON.stringify(column)));
@@ -5124,7 +5420,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 var column_comment = (o || {}).column_comment
 
                 // column.column_comment = column_comment
-                doc += '\n' + name + '  |  ' + type.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '  |  ' + length + '  |  ' + App.toMD(column_comment);
+                doc += '\n' + ' <a href="javascript:void(0)" onclick="window.App.onClickColumn(' + i + ",'" + modelName + "'," + j + ",'" + name + "'" + ')">' + name + '</a>'
+                  + '  |  ' + type.replace(/</g, '&lt;').replace(/>/g, '&gt;') + '  |  ' + length + '  |  ' + App.toMD(column_comment);
 
               }
 
@@ -5133,52 +5430,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
 
           }
-
+          CodeUtil.tableMap = map;
           //[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-
-
-          //Access[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-          list = docObj == null ? null : docObj['Access[]'];
-          if (list != null) {
-            if (DEBUG) {
-              log('getDoc  Access[] = \n' + format(JSON.stringify(list)));
-            }
-
-            doc += '\n\n\n\n\n\n\n\n\n### 访问权限\n自动查 Access 表写入的数据来生成\n'
-              + ' \n 表名  |  允许 get<br>的角色  |  允许 head<br>的角色  |  允许 gets<br>的角色  |  允许 heads<br>的角色  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色  |  表名'
-              + ' \n --------  |  ---------  |  ---------  |  ---------  |  ---------  |  ---------  |  ---------  |  --------- | --------  ';
-
-            for (var i = 0; i < list.length; i++) {
-              item = list[i];
-              if (item == null) {
-                continue;
-              }
-              if (DEBUG) {
-                log('getDoc Access[] for i=' + i + ': item = \n' + format(JSON.stringify(item)));
-              }
-
-              doc += '\n' + (item.name) //右上角设置指定了 Schema  + '(' + item.schema + ')')
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.get), 2)
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.head), 2)
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.gets), 2)
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.heads), 2)
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.post), 1)
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.put), 1)
-                + '  |  ' + JSONResponse.getShowString(JSON.parse(item.delete), 1)
-                + '  |  ' + (item.name); //右上角设置指定了 Schema  + '(' + item.schema + ')');
-            }
-
-            doc += ' \n 表名  |  允许 get<br>的角色  |  允许 head<br>的角色  |  允许 gets<br>的角色  |  允许 heads<br>的角色  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色  |  表名'
-
-            doc += '\n' //避免没数据时表格显示没有网格
-          }
-
-          //Access[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
+          doc += ad;
 
           //Function[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
           list = docObj == null ? null : docObj['Function[]'];
+          CodeUtil.functionList = list;
           if (list != null) {
             if (DEBUG) {
               log('getDoc  Function[] = \n' + format(JSON.stringify(list)));
@@ -5189,7 +5448,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               + ' \n --------  |  -------------- ';
 
             for (var i = 0; i < list.length; i++) {
-              item = list[i];
+              var item = list[i];
               if (item == null) {
                 continue;
               }
@@ -5197,28 +5456,36 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 log('getDoc Function[] for i=' + i + ': item = \n' + format(JSON.stringify(item)));
               }
 
-              doc += '\n' + item.detail + '  |  ' + JSON.stringify(item.demo);
+              map[item.name] = item
+
+              var demoStr = JSON.stringify(item.demo)
+
+              // doc += '\n' + item.detail + '  |  ' + ' <a href="javascript:void(0)" onclick="window.App.onClickFunction(' + i + ",'"
+              //   + demoStr.replaceAll("'", "\'") + ')">' + demoStr + '</a>';
+              doc += '\n' + item.detail + '  |  ' + ' <a href="javascript:void(0)" onclick="window.App.onClickFunction(' + i + ')">' + demoStr + '</a>';
             }
 
             doc += '\n' //避免没数据时表格显示没有网格
           }
-
+          CodeUtil.functionMap = map;
           //Function[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
           //Request[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
           list = docObj == null ? null : docObj['Request[]'];
+          map = {};
+          CodeUtil.requestList = list;
           if (list != null) {
             if (DEBUG) {
               log('getDoc  Request[] = \n' + format(JSON.stringify(list)));
             }
 
             doc += '\n\n\n\n\n\n\n\n\n### 非开放请求\n自动查 Request 表写入的数据来生成\n'
-              + ' \n 版本  |  方法  |  数据和结构'
-              + ' \n --------  |  ------------  |  ------------  |  ------------ ';
+              + ' \n 版本  |  方法  |  请求标识  |  数据和结构'
+              + ' \n --------  |  ------------  |  ------------  |  ------------  |  ------------ ';
 
             for (var i = 0; i < list.length; i++) {
-              item = list[i];
+              var item = list[i];
               if (item == null) {
                 continue;
               }
@@ -5226,24 +5493,536 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 log('getDoc Request[] for i=' + i + ': item = \n' + format(JSON.stringify(item)));
               }
 
-              doc += '\n' + item.version + '  |  ' + item.method
-                + '  |  ' + JSON.stringify(App.getStructure(item.structure, item.tag));
+              map[item.version + '.' + item.method + '.' + item.tag] = item
+
+              var jsonStr = JSON.stringify(App.getStructure(false, null, item.structure, item.method, item.tag, item.version))
+
+              doc += '\n' + item.version + '  |  ' + item.method + '  |  ' + item.tag
+                + '  |  ' + ' <a href="javascript:void(0)" onclick="window.App.onClickRequest(' + i + ')">' + jsonStr + '</a>'
             }
 
             doc += '\n注: \n1.GET,HEAD方法不受限，可传任何 数据、结构。\n2.可在最外层传版本version来指定使用的版本，不传或 version <= 0 则使用最新版。\n\n\n\n\n\n\n';
           }
+          CodeUtil.requestMap = map;
 
 
           //Request[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
           App.onChange(false);
 
-
-          callback(doc);
+          if (callback != null) {
+            callback(doc);
+          }
 
 //      log('getDoc  callback(doc); = \n' + doc);
-        });
+      },
 
+      getTableKey(database) {
+        database = database || this.database
+        return this.database == 'SQLSERVER' ? 'SysTable' : (['ORALCE', 'DAMENG'].indexOf(database) >= 0 ? 'AllTable' : 'Table')
+      },
+      getColumnKey(database) {
+        database = database || this.database
+        return this.database == 'SQLSERVER' ? 'SysColumn' : (['ORALCE', 'DAMENG'].indexOf(database) >= 0 ? 'AllColumn' : 'Column')
+      },
+      getTableObj(tableIndex) {
+        var list = docObj == null ? null : docObj['[]']
+        var item = list == null ? null : list[tableIndex]
+        return item == null ? null : item[this.getTableKey()];
+      },
+      getColumnList(tableIndex) {
+        var list = docObj == null ? null : docObj['[]']
+        var item = list == null ? null : list[tableIndex]
+        return item == null ? null : item['[]']
+      },
+      getColumnListWithModelName(modelName, schemaName) {
+        var list = docObj == null ? null : docObj['[]']
+        if (list != null) {
+          for (var i = 0; i < list.length; i++) {
+            var table = this.getTableObj(i)
+            if (table != null && this.getModelName(i) == modelName
+              && (schemaName == null || table.table_schema == schemaName)) {
+              return list[i]['[]']
+            }
+          }
+        }
+        return null
+      },
+      getTableByName(tableName, schemaName) {
+        var list = docObj == null ? null : docObj['[]']
+        if (list != null) {
+          for (var i = 0; i < list.length; i++) {
+            var table = this.getTableObj(i)
+            if (table != null && table.table_name == tableName
+              && (schemaName == null || table.table_schema == schemaName)) {
+              return table
+            }
+          }
+        }
+
+        return null
+      },
+      getTableByModelName(modelName, schemaName) {
+        var list = docObj == null ? null : docObj['[]']
+        if (list != null) {
+          for (var i = 0; i < list.length; i++) {
+            var table = this.getTableObj(i)
+            if (table != null && this.getModelName(i) == modelName
+              && (schemaName == null || table.table_schema == schemaName)) {
+              return table
+            }
+          }
+        }
+        return null
+      },
+      getColumnTypeWithModelName(columnName, modelName, schemaName) {
+        var columnList = this.getColumnListWithModelName(modelName, schemaName)
+        if (columnList != null) {
+          for (var j = 0; j < columnList.length; j++) {
+            var column = this.getColumnObj(columnList, j)
+            if (column != null && column.column_name == columnName) {
+              return column
+            }
+          }
+        }
+        return null
+      },
+      getColumnObj(columnList, columnIndex) {
+        return columnList == null ? null : (columnList[columnIndex] || {})[this.getColumnKey()];
+      },
+      getAccessObj(index) {
+        var list = docObj == null ? null : docObj['Access[]']
+        return list == null ? null : list[index];
+      },
+      getFunctionObj(index) {
+        var list = docObj == null ? null : docObj['Function[]']
+        return list == null ? null : list[index];
+      },
+      getFunctionByName(functionName) {
+        var list = docObj == null ? null : docObj['Function[]']
+        if (list != null) {
+          for (var i = 0; i < list.length; i++) {
+            var fun = this.getFunctionObj(i)
+            if (fun != null && fun.name == functionName) {
+              return fun
+            }
+          }
+        }
+        return null
+      },
+      getRequestObj(index) {
+        var list = docObj == null ? null : docObj['Request[]']
+        return list == null ? null : list[index];
+      },
+      getRequestBy(method, tag, version) {
+        var list = docObj == null ? null : docObj['Request[]']
+        if (list != null) {
+          for (var i = 0; i < list.length; i++) {
+            var req = this.getRequestObj(i)
+            if (req != null && req.method == method && req.tag == tag && (
+              version == null || req.version == version)) {
+              return req
+            }
+          }
+        }
+        return null
+      },
+      getSchemaName(tableIndex) {
+        var table = this.getTableObj(tableIndex)
+        var sch = table == null ? null : table.table_shema
+        if (StringUtil.isNotEmpty(sch)) {
+          return sch
+        }
+
+        var schemas = StringUtil.isEmpty(this.schema, true) ? null : StringUtil.split(this.schema)
+        return schemas == null || schemas.length != 1 ? null : this.schema
+      },
+      getTableName(tableIndex) {
+        var table = this.getTableObj(tableIndex)
+        return table == null ? '' : table.table_name
+      },
+      getColumnName(columnList, columnIndex) {
+        var column = this.getColumnObj(columnList, columnIndex)
+        return column == null ? '' : column.column_name
+      },
+      getModelName(tableIndex) {
+        var table = this.getTableObj(tableIndex)
+        var table_name = table == null ? null : table.table_name
+
+        var accessMap = table_name == null ? null : CodeUtil.accessMap
+        var access = accessMap == null ? null : accessMap[StringUtil.toLowerCase(table.table_schema) + '.' + StringUtil.toLowerCase(table_name)]
+        var alias = access == null ? null : access.alias
+
+        return StringUtil.isEmpty(alias, true) ? StringUtil.firstCase(table_name, true) : alias
+      },
+      getModelNameByTableName(tableName, schemaName) {
+        var table = this.getTableByName(tableName, schemaName)
+        var table_name = table == null ? null : table.table_name
+
+        var accessMap = table_name == null ? null : CodeUtil.accessMap
+        var access = accessMap == null ? null : accessMap[StringUtil.toLowerCase(table.table_schema) + '.' + StringUtil.toLowerCase(table_name)]
+        var alias = access == null ? null : access.alias
+
+        return StringUtil.isEmpty(alias, true) ? StringUtil.firstCase(table_name, true) : alias
+      },
+
+      onClickPost: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickPost(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickPost: function (columnList, modelName, schemaName, role) {
+        if (columnList == null) {
+          columnList = this.getColumnListWithModelName(modelName, schemaName)
+        }
+
+        var tbl = {}
+
+        if (columnList != null && columnList.length > 0) {
+          for (var j = 0; j < columnList.length; j++) {
+            var column = this.getColumnObj(columnList, j)
+            var name = column == null ? null : column.column_name;
+            if (name == null || name.toLowerCase() == "id") {
+              continue;
+            }
+
+            var val = column.column_default
+            if (val == null) {
+              var column_type = CodeUtil.getColumnType(column, this.database);
+              var type = CodeUtil.getType4Language(CodeUtil.LANGUAGE_JAVA_SCRIPT, column_type, false);
+              val = this.generateValue(type, name)
+            }
+
+            tbl[name] = val
+          }
+        }
+
+        if (StringUtil.isNotEmpty(schemaName, true)) {
+          tbl['@schema'] = schemaName
+        }
+        if (StringUtil.isNotEmpty(role, true)) {
+          tbl['@role'] = role
+        }
+
+        var json = isSingle ? tbl : {}
+        if (! isSingle) {
+          json[modelName] = tbl
+          json.tag = modelName
+          json['@explain'] = true
+        }
+
+        var s = JSON.stringify(json, null, '    ')
+        this.showCRUD('/post' + (isSingle ? '/' + modelName : ''), isSingle ? this.switchQuote(s) : s)
+      },
+
+      onClickGet: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickGet(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickGet: function (columnList, modelName, schemaName, role) {
+        if (columnList == null) {
+          columnList = this.getColumnListWithModelName(modelName, schemaName)
+        }
+
+        var idName = 'id'
+        var userIdName = 'userId'
+        var dateName = 'date'
+        var s = ''
+        if (columnList != null && columnList.length > 0) {
+          for (var j = 0; j < columnList.length; j++) {
+            var column = this.getColumnObj(columnList, j)
+            var name = column == null ? null : column.column_name;
+            if (name == null) {
+              continue;
+            }
+
+            var ln = name.replaceAll('_', '').toLowerCase()
+            if (name.toLowerCase() == "id") {
+              idName = name
+            }
+            else if (ln == "userid") {
+              userIdName = name
+            }
+            else if (("date", "time", "createtime", "createat", "createat", "createdat").indexOf(ln) >= 0) {
+              dateName = name
+            }
+
+            s += (j <= 0 ? '' : ',') + name
+          }
+        }
+
+        var arrName = modelName + '[]'
+
+        this.showCRUD('/get' + (isSingle ? '/' + arrName + '?total@=' + arrName + '/total' + '&info@=' + arrName + '/info' : ''),
+          isSingle ? `{
+    '` + modelName + `': {` + (StringUtil.isEmpty(role, true) ? '' : `
+        '@role': '` + role + "',") + (StringUtil.isEmpty(schemaName, true) ? '' : `
+        '@schema': '` + schemaName + "',") + `
+        '@column': '` + s + `',
+        '@order': '` + idName + `-', // '@group': '` + userIdName + `',
+        '` + idName + `>': 10, // '@column': '` + userIdName + `;avg(` + idName + `)',
+        '` + dateName + `{}': '!=null' // '@having': 'avg(` + idName + `)>10'
+    },
+    'count': 10,
+    'page': 0,
+    'query': 2
+}` : `{
+    "` + modelName + `[]": {
+        "` + modelName + `": {` + (StringUtil.isEmpty(role, true) ? '' : `
+            "@role": "` + role + '",') + (StringUtil.isEmpty(schemaName, true) ? '' : `
+            "@schema": "` + schemaName + '",') + `
+            "@column": "` + s + `",
+            "@order": "` + idName + `-", // "@group": "` + userIdName + `",
+            "` + idName + `>": 10, // "@column": "` + userIdName + `;avg(` + idName + `)",
+            "` + dateName + `{}": "!=null" // "@having": "avg(` + idName + `)>10"
+        },
+        "count": 10,
+        "page": 0,
+        "query": 2
+    },
+    "total@": "` + modelName + `[]/total",
+    "info@": "` + modelName + `[]/info",
+    "@explain": true
+}`)
+      },
+
+      onClickPut: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickPut(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickPut: function (columnList, modelName, schemaName, role) {
+        if (columnList == null) {
+          columnList = this.getColumnListWithModelName(modelName, schemaName)
+        }
+
+        var tbl = {
+          "id{}": [
+            1,
+            2,
+            4,
+            12,
+            470,
+            82011,
+            82012
+          ]
+        }
+
+        if (columnList != null && columnList.length > 0) {
+          for (var j = 0; j < columnList.length; j++) {
+            var column = this.getColumnObj(columnList, j)
+            var name = column == null ? null : column.column_name;
+            if (name == null) {
+              continue;
+            }
+
+            var val = column.column_default
+            if (val == null) {
+              var column_type = CodeUtil.getColumnType(column, this.database);
+              var type = CodeUtil.getType4Language(CodeUtil.LANGUAGE_JAVA_SCRIPT, column_type, false);
+              val = this.generateValue(type, name)
+            }
+
+            tbl[name] = val
+          }
+        }
+
+        if (StringUtil.isNotEmpty(schemaName, true)) {
+          tbl['@schema'] = schemaName
+        }
+        if (StringUtil.isNotEmpty(role, true)) {
+          tbl['@role'] = role
+        }
+
+        var json = isSingle ? tbl : {}
+        if (! isSingle) {
+          json[modelName] = tbl
+          json.tag = modelName
+          json['@explain'] = true
+        }
+
+        var s = JSON.stringify(json, null, '    ')
+        this.showCRUD('/put' + (isSingle ? '/' + modelName + '[]' : ''), isSingle ? this.switchQuote(s) : s)
+      },
+
+      onClickDelete: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickDelete(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickDelete: function (columnList, modelName, schemaName, role) {
+        this.handleClickGetsOrDelete(false, columnList, modelName, schemaName, role)
+      },
+      handleClickGetsOrDelete: function (isGets, columnList, modelName, schemaName, role) {
+        if (columnList == null) {
+          columnList = this.getColumnListWithModelName(modelName, schemaName)
+        }
+
+        var isSchemaEmpty = StringUtil.isEmpty(schemaName, true)
+        var isRoleEmpty = StringUtil.isEmpty(role, true)
+
+        this.showCRUD((isGets ? '/gets' : '/delete') + (isSingle ? '/' + modelName : ''),
+          isSingle ? `{
+    'id': 1` + (StringUtil.isEmpty(schemaName, true) ? '' : `,
+    '@schema': '` + schemaName + "'") + (StringUtil.isEmpty(role, true) ? '' : `,
+    '@role': '` + role + "'") + `
+}` : `{
+    "` + modelName + `": {
+        "id": 1` + (StringUtil.isEmpty(schemaName, true) ? '' : `,
+        "@schema": "` + schemaName + '"') + (StringUtil.isEmpty(role, true) ? '' : `,
+        "@role": "` + role + '"') + `
+    },
+    "tag": "` + modelName + `",
+    "@explain": true
+}`)
+      },
+
+      onClickGets: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickGets(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickGets: function (columnList, modelName, schemaName, role) {
+        this.handleClickGetsOrDelete(true, columnList, modelName, schemaName, role)
+      },
+
+      onClickHead: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickHead(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickHead: function (columnList, modelName, schemaName, role) {
+        this.handleClickHeadOrHeads(false, columnList, modelName, schemaName, role)
+      },
+      onClickHeads: function (tableIndex, modelName, schemaName, role) {
+        this.handleClickHeads(this.getColumnList(tableIndex), modelName || this.getModelName(tableIndex), schemaName, role)
+      },
+      handleClickHeads: function (columnList, modelName, schemaName, role) {
+        this.handleClickHeadOrHeads(true, columnList, modelName, schemaName, role)
+      },
+      handleClickHeadOrHeads: function (isHeads, columnList, modelName, schemaName, role) {
+        if (columnList == null) {
+          columnList = this.getColumnListWithModelName(modelName, schemaName)
+        }
+
+        this.showCRUD((isHeads ? '/heads' : '/head') + (isSingle ? '/' + modelName : ''),
+          isSingle ? `{
+    'userId': 82001` + (StringUtil.isEmpty(schemaName, true) ? '' : `,
+    '@schema': '` + schemaName + "'") + (StringUtil.isEmpty(role, true) ? '' : `,
+    '@role': '` + role + "'") + `
+}` : `{
+    "` + modelName + `": {
+        "userId": 82001` + (StringUtil.isEmpty(schemaName, true) ? '' : `,
+        "@schema": "` + schemaName + '"') + (StringUtil.isEmpty(role, true) ? '' : `,
+        "@role": "` + role + '"') + `
+    },
+    "tag": "` + modelName + `",
+    "@explain": true
+}`)
+      },
+
+      onClickColumn: function (tableIndex, modelName, columnIndex, columnName) {
+        modelName = modelName || this.getModelName(tableIndex)
+        if (StringUtil.isEmpty(columnName, true)) {
+          var columnList = this.getColumnList(tableIndex)
+          columnName = columnName || this.getColumnName(columnList, columnIndex)
+        }
+
+        var arrName = modelName + '[]'
+
+        this.showCRUD('/get' + (isSingle ? '/' + arrName + '?total@=' + arrName + '/total' + '&info@=' + arrName + '/info' : ''),
+          isSingle ? `{
+    '` + modelName + `': {
+        '@column': 'DISTINCT ` + columnName + `',
+        '@order': '` + columnName + `+', // '@order': 'id-'
+    },
+    'count': 0,
+    'page': 0,
+    'query': 2
+}` : `{
+    "` + modelName + '-' + columnName + `[]": {
+        "` + modelName + `": {
+            "@column": "DISTINCT ` + columnName + `",
+            "@order": "` + columnName + `+", // "@order": "id-"
+        },
+        "count": 0,
+        "page": 0,
+        "query": 2
+    },
+    "total@": "` + modelName + '-' + columnName + `[]/total",
+    "info@": "` + modelName + '-' + columnName + `[]/info",
+    "@explain": true
+}`)
+      },
+
+      onClickAccess: function (index, model, schema, method, role) {
+        if (StringUtil.isEmpty(model, true) || StringUtil.isEmpty(schema, true) || StringUtil.isEmpty(method, true) || StringUtil.isEmpty(role, true)) {
+          // var access = this.getAccessObj(index)
+          // model = this.getModelNameByTableName()
+        }
+
+        method = StringUtil.toLowerCase(method)
+        switch (method) {
+          case 'get':
+            this.handleClickGet(null, model, schema, role)
+            break
+          case 'gets':
+            this.handleClickGets(null, model, schema, role)
+            break
+          case 'head':
+            this.handleClickHead(null, model, schema, role)
+            break
+          case 'heads':
+            this.handleClickHeads(null, model, schema, role)
+            break
+          case 'post':
+            this.handleClickPost(null, model, schema, role)
+            break
+          case 'put':
+            this.handleClickPut(null, model, schema, role)
+            break
+          case 'delete':
+            this.handleClickDelete(null, model, schema, role)
+            break
+        }
+      },
+
+      onClickFunction: function (index, demo) {
+        if (StringUtil.isEmpty(demo, true)) {
+          var fun = this.getFunctionObj(index)
+          demo = JSON.stringify(fun.demo, null, '    ')  // this.getFunctionDemo(fun)
+        }
+
+        this.showCRUD('/get', isSingle ? this.switchQuote(demo) : demo)
+      },
+
+      onClickRequest: function (index, method, tag, version, jsonStr) {
+        if (StringUtil.isEmpty(method, true) || StringUtil.isEmpty(tag, true) || StringUtil.isEmpty(jsonStr, true)) {
+          var fun = this.getRequestObj(index)
+          method = fun.method || 'get'
+          tag = fun.tag
+          version = fun.version
+          if (StringUtil.isEmpty(jsonStr, true)) {
+            var json = this.getStructure(true, null, fun.structure, method, tag, version, isSingle, true)
+            jsonStr = json == null ? '' : JSON.stringify(json, null, '    ')
+          }
+        }
+
+        vInput.value = ''
+        this.showCRUD(
+          '/' + StringUtil.toLowerCase(method) + (isSingle ? '/' + tag + (version == null ? '' : '?version=' + version) : '')
+          , isSingle ? this.switchQuote(jsonStr) : jsonStr
+        )
+      },
+
+      showCRUD: function (url, json) {
+        if (url == this.getBranchUrl()) {
+          var origin = this.getRequest(vInput.value)
+          if (origin != null && Object.keys(origin).length > 0) {
+            json = this.getRequest(json)
+            if (json == null || Object.keys(json).length <= 0
+              || (json instanceof Array != true && json instanceof Object)) {
+              json = Object.assign(origin, json)
+              json = JSON.stringify(json, null, '    ')
+            }
+          }
+        }
+
+        this.type = REQUEST_TYPE_JSON
+        this.showUrl(false, url)
+        this.urlComment = ''
+        vInput.value = StringUtil.trim(json)
+        this.showTestCase(false, this.isLocalShow)
+        this.onChange(false)
       },
 
       // toDoubleJSON: function (json, defaultValue) {
@@ -5283,105 +6062,232 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        */
       toMD: function (s) {
         if (s == null) {
-          s = '';
-        }
-        else {
-          //无效
-          s = s.replace(/\|/g, '\|');
-          s = s.replace(/\n/g, ' <br /> ');
-          // s = s.replace(/ /g, '&ensp;');
+          return ''
         }
 
+        if (s instanceof Object) {
+          s = JSON.stringify(s)
+        }
+
+        if (typeof s != 'string') {
+          return new String(s)
+        }
+
+        //无效
+        s = s.replace(/\|/g, '\|');
+        s = s.replace(/\n/g, ' <br /> ');
+        // s = s.replace(/ /g, '&ensp;');
         return s;
       },
 
       /**处理请求结构
-       * @param obj
-       * @param tag
-       * @return {*}
        */
-      getStructure: function (obj, tag) {
+      getStructure: function (isDemo, name, obj, method, tag, version, unwrap) {
         if (obj == null) {
           return null;
         }
 
-        log('getStructure  tag = ' + tag + '; obj = \n' + format(JSON.stringify(obj)));
+        if (DEBUG) {
+          log('getStructure  tag = ' + tag + '; version = ' + version + '; isDemo = ' + isDemo + '; obj = \n' + format(obj));
+        }
+
+        method = method == null ? 'GET' : method.trim().toUpperCase()
+
+        var isArrayKey = tag != null && tag.endsWith('[]');
+        var isMultiArrayKey = isArrayKey && tag.endsWith(":[]")
+        var isTableKey = false
+        var tableName = tag
+        if (tag != null) { //补全省略的Table
+          var key = isArrayKey ? tag.substring(0, tag.length - (tag.endsWith(':[]') ? 3 : 2)) : tag;
+          if (this.isTableKey(key)) {
+            isTableKey = true
+            tableName = key
+            // name = key
+          }
+        }
+
+        var newObj = {}
 
         if (obj instanceof Array) {
           for (var i = 0; i < obj.length; i++) {
-            obj[i] = this.getStructure(obj[i]);
+            newObj[i] = this.getStructure(isDemo, i + '', obj[i], method);
           }
         }
         else if (obj instanceof Object) {
-          var v;
-          var nk;
+          var refuseKeys = null
+
           for (var k in obj) {
             if (k == null || k == '' || k == 'INSERT' || k == 'REMOVE' || k == 'REPLACE' || k == 'UPDATE') {
-              delete obj[k];
               continue;
             }
 
-            v = obj[k];
+            var v = obj[k];
             if (v == null) {
-              delete obj[k];
               continue;
             }
 
-            if (k == 'DISALLOW') {
-              nk = '不能传';
-            }
-            else if (k == 'NECESSARY') {
-              nk = '必须传';
-            }
-            else if (k == 'UNIQUE') {
-              nk = '不重复';
-            }
-            else if (k == 'VERIFY') {
-              nk = '满足条件';
-            }
-            else if (k == 'TYPE') {
-              nk = '满足类型';
+            var nk = k;
+
+            if (isDemo) {
+              nk = null
+              if (k == 'REFUSE') {
+                refuseKeys = StringUtil.isEmpty(v, true) ? null : StringUtil.split(v)
+              }
+              else if (k == 'MUST' || k == 'UNIQUE') {
+                var ks = StringUtil.isEmpty(v, true) ? null : StringUtil.split(v)
+                if (ks != null) {
+                  for (var j = 0; j < ks.length; j++) {
+                    var kj = ks[j]
+                    newObj[kj] = this.generateValue(CodeUtil.getType4Language(CodeUtil.LANGUAGE_JAVA_SCRIPT
+                      , CodeUtil.getColumnType(this.getColumnTypeWithModelName(kj, tableName), this.database)), kj)
+                  }
+                }
+              }
+              else if (k == 'VERIFY') { // 后续会用数据字典填空
+                nk = null
+                // for (var kj in v) { // 还得把功能符去掉 {} $ > <= ...
+                //   newObj[kj] = this.generateValue(CodeUtil.getType4Language(CodeUtil.LANGUAGE_JAVA_SCRIPT
+                //     , CodeUtil.getColumnType(this.getColumnTypeWithModelName(kj, tableName), this.database)), kj)
+                // }
+              }
+              else if (k == 'TYPE') {
+                for (var kj in v) {
+                  newObj[kj] = this.generateValue(CodeUtil.getType4Language(CodeUtil.LANGUAGE_JAVA_SCRIPT, v[kj]), kj)
+                }
+              }
+              else {
+                nk = k
+              }
             }
             else {
-              nk = null;
-            }
-
-            if (v instanceof Object) {
-              v = this.getStructure(v);
-            }
-            else if (v === '!') {
-              v = '非必须传的字段';
+              if (k == 'REFUSE') {
+                nk = '不能传';
+              } else if (k == 'MUST') {
+                nk = '必须传';
+              } else if (k == 'UNIQUE') {
+                nk = '不重复';
+              } else if (k == 'VERIFY') {
+                nk = '满足条件';
+              } else if (k == 'TYPE') {
+                nk = '满足类型';
+              } else {
+                nk = k;
+              }
             }
 
             if (nk != null) {
-              obj[nk] = v;
-              delete obj[k];
+              if (v instanceof Object && (v instanceof Array == false)) {
+                v = this.getStructure(isDemo, nk, v, method);
+              }
+              else if (v === '!') {
+                v = '非必须传的字段';
+              }
+
+              if (v != null) {
+                newObj[nk] = v;
+              }
             }
           }
 
-          if (tag != null && obj[tag] == null) { //补全省略的Table
-            var isArrayKey = tag.endsWith(":[]");  //JSONObject.isArrayKey(tag);
-            var key = isArrayKey ? tag.substring(0, tag.length - 3) : tag;
+          var isPutOrDel = method == 'PUT' || method == 'DELETE'
+          var isPostOrPutMulti = isMultiArrayKey && (method == 'POST' || method == 'PUT')
+          var isGetOrGetsMulti = isArrayKey && (method == 'GET' || method == 'GETS')
+          var mustHasKey = tableName + (isPostOrPutMulti || isGetOrGetsMulti ? '[]' : '')
+          var isFulfill = name == null && isTableKey && (isPostOrPutMulti || newObj[mustHasKey] == null)
+          if (isFulfill && (isPostOrPutMulti || ! isArrayKey)) {
+            name = tableName
+          }
 
-            if (this.isTableKey(key)) {
-              if (isArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
-                obj[key + "[]"] = [];
+          if (isDemo && this.isTableKey(name) && (refuseKeys == null || refuseKeys.indexOf('!') < 0)) {
+            var columnList = this.getColumnListWithModelName(name)
+            if (columnList != null) {
+              var s = ''
+              for (var i = 0; i < columnList.length; i++) {
+                var column = this.getColumnObj(columnList, i)
+                var cn = column == null ? null : column.column_name
+
+                if (cn == null || cn.startsWith('_') || (method == 'POST' && cn.toLowerCase() == 'id') || (refuseKeys != null && refuseKeys.indexOf(cn) >= 0)) {
+                  continue
+                }
+
+                if (method == 'GET' || method == 'GETS') {
+                  s += (i <= 0 ? '' : ',') + cn
+                } else {
+                  var nv = this.generateValue(CodeUtil.getType4Language(CodeUtil.LANGUAGE_JAVA_SCRIPT, CodeUtil.getColumnType(column, this.database)), cn)
+                  if (nv != null || newObj[cn] == null) {
+                    newObj[cn] = nv
+                  }
+                }
               }
-              else { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
-                var realObj = {};
-                realObj[tag] = obj;
-                obj = realObj;
+            }
+
+            if (method == 'GET' || method == 'GETS') {
+              newObj['@column'] = s
+            }
+          }
+
+          if (isFulfill) { //补全省略的Table
+            var realObj = {};
+            if (isArrayKey) { //自动为 tag = Comment:[] 的 { ... } 新增键值对 "Comment[]":[] 为 { "Comment[]":[], ... }
+              if (isPostOrPutMulti) {
+                var reqObj = isDemo ? this.getRequestBy(method, tableName) : null
+                var childStruct = reqObj == null ? null : reqObj.structure
+                if (childStruct != null && childStruct[tableName] != null) {
+                  childStruct = childStruct[tableName]
+                }
+
+                newObj = childStruct == null ? newObj : Object.assign(
+                  this.getStructure(isDemo, null, childStruct, reqObj.method, null, null, true), newObj
+                )
+
+                delete newObj[mustHasKey]
+                realObj[mustHasKey] = isDemo ? [newObj, newObj] : [newObj];
               }
+              else if (unwrap || isPutOrDel) {
+                if (isDemo && isPutOrDel && newObj['id{}'] == null) {
+                  newObj['id{}'] = [
+                    1,
+                    2,
+                    4,
+                    12,
+                    470,
+                    82011,
+                    82012
+                  ]
+                }
+                realObj[mustHasKey] = newObj;
+              }
+              else {
+                realObj[mustHasKey] = newObj
+              }
+              newObj = realObj
+            }
+            else if (unwrap != true) { //自动为 tag = Comment 的 { ... } 包一层为 { "Comment": { ... } }
+              if (isPutOrDel) {
+                if (isDemo && newObj.id == null) {
+                  newObj.id = 1
+                }
+              }
+
+              realObj[mustHasKey] = newObj;
+              newObj = realObj;
             }
           }
 
         }
 
-        obj.tag = tag; //补全tag
+        if (tag != null && unwrap != true) {
+          newObj.tag = tag; //补全tag
+        }
+        if (version != null && unwrap != true) {
+          newObj.version = version;
+        }
 
-        log('getStructure  return obj; = \n' + format(JSON.stringify(obj)));
+        if (DEBUG) {
+          log('getStructure  return newObj = \n' + format(newObj));
+        }
 
-        return obj;
+        return newObj;
       },
 
       /**判断key是否为表名，用CodeUtil里的同名函数会在Safari上报undefined
@@ -5768,7 +6674,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           const lineItem = lines[i] || '';
 
           // remove comment   // 解决整体 trim 后第一行  // 被当成正常的 key 路径而不是注释
-          const commentIndex = StringUtil.trim(lineItem).startsWith('//') ? 0 : lineItem.lastIndexOf('  //'); //  -1; // eval 本身支持注释 eval('1 // test') = 1 lineItem.indexOf('  //');
+          const commentIndex = StringUtil.trim(lineItem).startsWith('//') ? 0 : lineItem.lastIndexOf(' //'); //  -1; // eval 本身支持注释 eval('1 // test') = 1 lineItem.indexOf(' //');
           const line = commentIndex < 0 ? lineItem : lineItem.substring(0, commentIndex).trim();
 
           if (line.length <= 0) {
@@ -7493,7 +8399,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                    continue;
                   }
 
-                  var ind = l.lastIndexOf('  //');
+                  var ind = l.lastIndexOf(' //');
                   l = ind < 0 ? l : StringUtil.trim(l.substring(0, ind));
 
                   if (target == vHeader || target == vRandom) {
@@ -7531,26 +8437,32 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
               var newStr = json.substring(0, start);
 
+              var commentSign = '//'
+              var commentSignLen = commentSign.length
+
               for (var i = 0; i < lines.length; i ++) {
                 var l = lines[i] || '';
                 if (i > 0) {
                   newStr += '\n';
                 }
 
-                if (StringUtil.trim(l).startsWith('//')) {
-                  var ind = l.indexOf('//');
-                  var suffix = l.substring(ind + 2);
-                  if (suffix.startsWith('  ')) {
-                    suffix = suffix.substring(2);
-                    selectionEnd -= 2;
+                if (StringUtil.trim(l).startsWith(commentSign)) {
+                  var ind = l.indexOf(commentSign);
+                  var suffix = l.substring(ind + commentSignLen);
+                  if (suffix.startsWith(' ')) {
+                    suffix = suffix.substring(1);
+                    selectionStart -= 1;
+                    selectionEnd -= 1;
                   }
 
                   newStr += StringUtil.get(l.substring(0, ind)) + StringUtil.get(suffix)
-                  selectionEnd -= 2;
+                  selectionStart -= commentSignLen;
+                  selectionEnd -= commentSignLen;
                 }
                 else {
-                  newStr += '//  ' + l;
-                  selectionEnd += 4;
+                  newStr += commentSign + ' ' + l;
+                  selectionStart += commentSignLen + 1;
+                  selectionEnd += commentSignLen + 1;
                 }
               }
 
@@ -7575,6 +8487,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
   if (IS_BROWSER) {
     App = new Vue(App)
+    window.App = App
   }
   else {
     var data = App.data
