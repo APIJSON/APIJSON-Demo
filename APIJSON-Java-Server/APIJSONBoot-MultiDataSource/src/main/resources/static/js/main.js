@@ -1177,6 +1177,8 @@
 
       },
 
+      onClickSelectInput: function (item, index) {
+        isClickSelectInput = true;
         this.selectInput(item, index, true);
       },
       selectInput: function (item, index, isDone) { // , isValue) {
