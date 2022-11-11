@@ -641,6 +641,7 @@
   }
   //这些全局变量不能放在data中，否则会报undefined错误
 
+
   var baseUrl
   var inputted
   var handler
@@ -650,6 +651,11 @@
 
   var isSingle = true
 
+  var currentTarget = vInput;
+  var isInputValue = false;
+  var isClickSelectInput = false;
+  var selectionStart = 0;
+  var selectionEnd = 0;
 
 // APIJSON >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
@@ -665,6 +671,8 @@
       requestVersion: 3,
       requestCount: 1,
       urlComment: '一对多关联查询 Comment.userId = User.id',
+      selectIndex: 0,
+      options: [], // [{name:"id", type: "integer", comment:"主键"}, {name:"name", type: "string", comment:"用户名称"}],
       historys: [],
       history: {name: '请求0'},
       remotes: [],
@@ -714,6 +722,7 @@
       isExportShow: false,
       isExportCheckShow: false,
       isExportRandom: false,
+      isOptionListShow: false,
       isTestCaseShow: false,
       isHeaderShow: false,
       isRandomShow: true,  // 默认展示
@@ -1166,6 +1175,45 @@
           + (randomStr == null ? '' : "&random=" + randomStr)
           + (settingStr == null ? '' : "&setting=" + settingStr)
 
+      },
+
+        this.selectInput(item, index, true);
+      },
+      selectInput: function (item, index, isDone) { // , isValue) {
+        var target = currentTarget = currentTarget || vInput; // currentTarget = target;
+        var isValue = isInputValue; // isInputValue = isValue;
+
+        // 失去焦点后拿不到有效值
+        // var selectionStart = target.selectionStart;
+        // var selectionEnd = target.selectionEnd;
+
+        var text = StringUtil.get(target.value);
+        var before = text.substring(0, selectionStart);
+        var after = text.substring(selectionEnd);
+
+        var name = item == null ? '' : StringUtil.get(item.name);
+        target.value = text = before + name + after
+        if (target == vInput) {
+          inputted = target.value;
+        }
+
+        if (isDone) {
+          this.options = [];
+
+          target.focus();
+          selectionStart = target.selectionStart = selectionEnd + (isClickSelectInput ? (name.length - (isValue ? 4 : 0)) : 0) + (isValue ? (after.startsWith(',') ? 1 : 0) : 3);
+          selectionEnd = target.selectionEnd = selectionStart + (isValue ? 0 : 4)
+          isClickSelectInput = false;
+          // vOption.focusout()
+
+          if (isInputValue != true) {
+            App.showOptions(target, text, before + name + (isSingle ? "'" : '"') + ': ', after.substring(3), true);
+          }
+        } else {
+          target.selectionStart = selectionStart;
+          selectionEnd = target.selectionEnd = selectionStart + name.length;
+          isClickSelectInput = false;
+        }
       },
 
       // 显示保存弹窗
@@ -4175,7 +4223,7 @@
       onChange: function (delay) {
         this.setBaseUrl();
 
-        if (IS_NODE) {
+        if (IS_NODE || document.activeElement == vOption || this.options.length > 0) {
           return;
         }
 
@@ -4804,6 +4852,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        */
       doOnKeyUp: function (event, type, isFilter, item) {
         var keyCode = event.keyCode ? event.keyCode : (event.which ? event.which : event.charCode);
+        if (type == 'option') {
+          if (keyCode == 13) {
+            this.selectInput(item);
+          }
+          return
+        }
 
         var obj = event.srcElement ? event.srcElement : event.target;
         if ($(obj).attr('id') == 'vUrl') {
@@ -5138,7 +5192,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'count': count,
             'page': page,
             'Access': {
-              '@column': 'name,alias,get,head,gets,heads,post,put,delete',
+              '@column': 'name,alias,post,put,delete,get,gets,head,heads',
               '@order': 'date-,name+',
               'name$': search,
               'alias$': search,
@@ -5240,7 +5294,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'page': page,
             'Function': {
               '@order': 'date-,name+',
-              '@column': 'name,arguments,demo,detail,detail:rawDetail',
+              '@column': 'name,arguments,returntype,demo,detail,detail:rawDetail',
               'demo()': 'getFunctionDemo()',
               'detail()': 'getFunctionDetail()',
               'name$': search,
@@ -5288,7 +5342,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
 
           ad += '\n\n\n\n\n\n\n\n\n### 访问权限\n自动查 Access 表写入的数据来生成\n'
-            + ' \n 表名  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色  |  允许 get<br>的角色  |  允许 head<br>的角色  |  允许 gets<br>的角色  |  允许 heads<br>的角色  |  表名'
+            + ' \n 表名  |  允许 POST<br>的角色  |  允许 PUT<br>的角色  |  允许 DELETE<br>的角色  |  允许 GET<br>的角色  |  允许 GETS<br>的角色  |  允许 HEAD<br>的角色  |  允许 HEADS<br>的角色  |  表名'
             + ' \n --------  |  ---------  |  ---------  |  ---------  |  ---------  |  ---------  |  ---------  |  --------- | --------  ';
 
           for (var i = 0; i < list.length; i++) {
@@ -5321,13 +5375,17 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               + '  |  ' + getShowString('put', 1)
               + '  |  ' + getShowString('delete', 1)
               + '  |  ' + getShowString('get', 2)
-              + '  |  ' + getShowString('head', 2)
               + '  |  ' + getShowString('gets', 2)
+              + '  |  ' + getShowString('head', 2)
               + '  |  ' + getShowString('heads', 2)
               + '  |  ' + (name); //右上角设置指定了 Schema  + '(' + item.schema + ')');
+
+            if (i % 5 == 4) {
+              ad += ' \n **表名**  |  **允许 POST**<br>**的角色**  |  **允许 PUT**<br>**的角色**  |  **允许 DELETE**<br>**的角色**   |  **允许 GET**<br>**的角色**  |  **允许 GETS**<br>**的角色**  |  **允许 HEAD**<br>**的角色**  |  **允许 HEADS**<br>**的角色** |  表名'
+            }
           }
 
-          ad += ' \n 表名  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色   |  允许 get<br>的角色  |  允许 head<br>的角色  |  允许 gets<br>的角色  |  允许 heads<br>的角色 |  表名'
+          // ad += ' \n 表名  |  允许 post<br>的角色  |  允许 put<br>的角色  |  允许 delete<br>的角色   |  允许 get<br>的角色  |  允许 gets<br>的角色  |  允许 head<br>的角色  |  允许 heads<br>的角色 |  表名'
 
           ad += '\n' //避免没数据时表格显示没有网格
         }
@@ -5449,20 +5507,23 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             for (var i = 0; i < list.length; i++) {
               var item = list[i];
-              if (item == null) {
+              var name = item == null ? null : item.name;
+              if (StringUtil.isEmpty(name, true)) {
                 continue;
               }
               if (DEBUG) {
                 log('getDoc Function[] for i=' + i + ': item = \n' + format(JSON.stringify(item)));
               }
 
-              map[item.name] = item
+              map[name] = item
 
               var demoStr = JSON.stringify(item.demo)
 
               // doc += '\n' + item.detail + '  |  ' + ' <a href="javascript:void(0)" onclick="window.App.onClickFunction(' + i + ",'"
               //   + demoStr.replaceAll("'", "\'") + ')">' + demoStr + '</a>';
-              doc += '\n' + item.detail + '  |  ' + ' <a href="javascript:void(0)" onclick="window.App.onClickFunction(' + i + ')">' + demoStr + '</a>';
+              doc += '\n' + name + '(' + StringUtil.get(item.arguments) + '): '
+                + CodeUtil.getType4Language(App.language, item.returntype) + ', ' + (item.rawDetail || item.detail)
+                + '  |  ' + ' <a href="javascript:void(0)" onclick="window.App.onClickFunction(' + i + ')">' + demoStr + '</a>';
             }
 
             doc += '\n' //避免没数据时表格显示没有网格
@@ -5904,8 +5965,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         "userId": 82001` + (StringUtil.isEmpty(schemaName, true) ? '' : `,
         "@schema": "` + schemaName + '"') + (StringUtil.isEmpty(role, true) ? '' : `,
         "@role": "` + role + '"') + `
-    },
-    "tag": "` + modelName + `",
+    },` + (isHeads ? `
+    "tag": "` + modelName + `",` : '') + `
     "@explain": true
 }`)
       },
@@ -8164,6 +8225,646 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
 
         })
+      },
+
+      showOptions: function(target, text, before, after, isValue, filter) {
+        currentTarget = target;
+        isInputValue = isValue;
+        selectionStart = target.selectionStart;
+        selectionEnd = target.selectionEnd;
+        App.selectIndex = -1;
+
+        clearTimeout(handler);
+
+        // var posX = 0, posY = 0;
+
+        // var event = window.event;
+        // if (event.pageX || event.pageY) {
+        //   posX = event.pageX;
+        //   posY = event.pageY;
+        // }
+        // else if (event.clientX || event.clientY) {
+        //   posX = event.clientX + document.documentElement.scrollLeft + document.body.scrollLeft;
+        //   posY = event.clientY + document.documentElement.scrollTop + document.body.scrollTop;
+        // }
+        // else if (target.offsetHeight || target.offsetWidth) {
+        //   // posX = target.offsetHeight;
+        //   // posY = target.offsetWidth;
+        // }
+        //
+        // vOption.style.left = posX + 'px';
+        // vOption.style.top = posY + 'px';
+
+
+        var options = App.options;
+        if (options.length > 0 && StringUtil.isNotEmpty(filter, true)) {
+          var newOptions = [];
+          for (var i = 0; i < options.length; i++) {
+            var opt = options[i];
+            var name = opt == null ? null : opt.name;
+            if (name != null && name.indexOf(filter) >= 0) {
+              newOptions.push(opt);
+            }
+          }
+
+          // App.options = [];
+          App.options = newOptions;
+        }
+        else {
+          App.options = [];
+
+          var quote = isSingle ? "'" : '"';
+
+          var table = null;
+          var isArrayKey = false;
+          var isSubqueryKey = false;
+
+          var prev = before;
+          while (prev != null && prev.length > 0) {
+            var lastIndex = prev.lastIndexOf('{');
+            prev = prev.substring(0, lastIndex).trimRight();
+
+            if (prev.endsWith(':')) {
+              prev = prev.substring(0, prev.length - 1).trimRight();
+              var endsWithDoubleQuote = prev.endsWith('"')
+
+              if (endsWithDoubleQuote || prev.endsWith("'")) {
+                prev = prev.substring(0, prev.length - 1);
+                lastIndex = prev.lastIndexOf('\n');
+
+                var lastLine = prev.substring(lastIndex + 1, prev.length);
+                var ind = lastLine.lastIndexOf(endsWithDoubleQuote ? '"' : "'");
+                table = ind < 0 ? null : lastLine.substring(ind + 1, lastLine.length);
+
+                if (App.isTableKey(table)) {
+                  break;
+                }
+                if (table != null && table.endsWith('[]')) {
+                  isArrayKey = true;
+                  break;
+                }
+                if (table != null && table.endsWith('@')) {
+                  isSubqueryKey = true;
+                  break;
+                }
+
+                prev = lastIndex <= 0 ? '' : prev.substring(0, lastIndex);
+              }
+            }
+          }
+
+          if (isValue) {
+            var lastIndex = before.lastIndexOf('\n');
+            var lastLine = before.substring(lastIndex + 1, before.length);
+            lastIndex = lastLine.lastIndexOf(':');
+            lastLine = lastIndex < 0 ? '' : lastLine.substring(0, lastIndex).trim();
+
+            var endsWithDoubleQuote = lastLine.endsWith('"')
+            if (endsWithDoubleQuote || lastLine.endsWith("'")) {
+              lastLine = lastLine.substring(0, lastLine.length - 1);
+            }
+            var ind = lastLine.lastIndexOf(endsWithDoubleQuote ? '"' : "'");
+            var key = ind < 0 ? null : lastLine.substring(ind + 1, lastLine.length);
+
+            var isArrayKey = JSONObject.isArrayKey(key)
+            if (isArrayKey || App.isTableKey(key)) {
+              table = key;
+              if (isArrayKey) {
+                ind = key.indexOf('-');
+                if (ind < 0) {
+                  ind = key.indexOf(':');
+                }
+                table = key.substring(0, ind < 0 ? key.length - 2 : ind);
+              }
+
+              App.options = [{
+                name: "{}",
+                type: CodeUtil.getType4Language(App.language, "object"),
+                comment: (isArrayKey ? '数组 < ' + table + ': ' : '') + StringUtil.trim((App.getTableByModelName(table) || {}).table_comment)
+              }]
+            } else {
+              switch (key) {
+                case '@from@':
+                  App.options = [{
+                    name: "{}",
+                    type: CodeUtil.getType4Language(App.language, "object"),
+                    comment: '数据来源'
+                  }];
+                  break;
+                case '@combine':
+                case '@raw':
+                  var isRaw = key == '@raw';
+
+                  var end = before.lastIndexOf('{');
+                  var start = after.indexOf('}');
+                  var s = (end < 0 ? before : before.substring(end)) + after.substring(0, start + 1);
+                  var json = App.getRequest(s, {});
+
+                  var ks = '';
+                  var first = true;
+                  for (var k in json) {
+                    if (StringUtil.isNotEmpty(k, true) && (isRaw || (k.startsWith('@') != true && key.indexOf('()') < 0))) {
+                      if (isRaw != true) {
+                        if (k.endsWith('@')) {
+                          k = k.substring(0, k.length - 1);
+                        }
+
+                        var lk = k.toLowerCase()
+                        if (lk == 'id' || lk.replaceAll('_', '') == 'userid') {
+                          continue;
+                        }
+                      }
+
+                      App.options.push({
+                        name: quote + k + quote,
+                        type: CodeUtil.getType4Language(App.language, "string"),
+                        comment: isRaw ? '原始SQL片段' : '条件组合'
+                      });
+
+                      ks += (first ? '' : (isRaw ? ',' : ' | ')) + k;
+                      first = false;
+                    }
+                  }
+                  ;
+
+                  if (StringUtil.isNotEmpty(ks, true)) {
+                    App.options.push({
+                      name: quote + ks + quote,
+                      type: CodeUtil.getType4Language(App.language, "string"),
+                      comment: isRaw ? '原始SQL片段' : '条件组合'
+                    });
+                  }
+                  break;
+                case '@schema':
+                  var schemas = StringUtil.split(App.schema);
+                  if (schemas != null) {
+                    for (var i = 0; i < schemas.length; i++) {
+                      var sch = schemas[i];
+                      if (StringUtil.isNotEmpty(sch, true)) {
+                        App.options.push({
+                          name: quote + sch + quote,
+                          type: CodeUtil.getType4Language(App.language, "string"),
+                          comment: '集合空间(数据库名/模式)'
+                        });
+                      }
+                    }
+                  }
+                  break;
+                case '@database':
+                  App.options = [{
+                    name: isSingle ? "'MYSQL'" : '"MYSQL"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'MySQL'
+                  }, {
+                    name: isSingle ? "'POSTGRESQL'" : '"POSTGRESQL"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'PostgreSQL'
+                  }, {
+                    name: isSingle ? "'SQLSERVER'" : '"SQLSERVER"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'SQLServer'
+                  }, {
+                    name: isSingle ? "'ORACLE'" : '"ORACLE"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'Oracle'
+                  }, {
+                    name: isSingle ? "'DB2'" : '"DB2"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'DB2'
+                  }, {
+                    name: isSingle ? "'DAMENG'" : '"DAMENG"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '达梦数据库'
+                  }, {
+                    name: isSingle ? "'CLICKHOUSE'" : '"CLICKHOUSE"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'ClickHouse'
+                  }, {
+                    name: isSingle ? "'SQLITE'" : '"SQLITE"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'SQLite'
+                  }, {
+                    name: isSingle ? "'TDENGINE'" : '"TDENGINE"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: 'TDengine'
+                  }];
+                  break;
+                case '@role':
+                  App.options = [{
+                    name: isSingle ? "'UNKNOWN'" : '"UNKNOWN"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '来访角色: 未登录'
+                  }, {
+                    name: isSingle ? "'LOGIN'" : '"LOGIN"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '来访角色: 已登录'
+                  }, {
+                    name: isSingle ? "'CIRCLE'" : '"CIRCLE"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '来访角色: 圈子成员'
+                  }, {
+                    name: isSingle ? "'CONTACT'" : '"CONTACT"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '来访角色: 联系人'
+                  }, {
+                    name: isSingle ? "'OWNER'" : '"OWNER"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '来访角色: 拥有者'
+                  }, {
+                    name: isSingle ? "'ADMIN'" : '"ADMIN"',
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '来访角色: 管理员'
+                  }];
+                  break;
+                case '@cache':
+                  App.options = [{
+                    name: "0",
+                    type: CodeUtil.getType4Language(App.language, "int"),
+                    comment: '缓存方式: 全部'
+                  }, {
+                    name: "1",
+                    type: CodeUtil.getType4Language(App.language, "int"),
+                    comment: '缓存方式: 磁盘'
+                  }, {
+                    name: "2",
+                    type: CodeUtil.getType4Language(App.language, "int"),
+                    comment: '缓存方式: 内存'
+                  }];
+                  break;
+                case 'count':
+                case 'page':
+                  var isPage = key == 'page';
+                  for (var i = 0; i < 100; i++) {
+                    App.options.push({
+                      name: new String(i), // 直接用数字导致重复生成 JSON
+                      type: CodeUtil.getType4Language(App.language, "int"),
+                      comment: isPage ? '分页页码' : '每页数量'
+                    });
+                  }
+                  break;
+                case 'tag':
+                case 'version':
+                  var isVersion = key == 'version';
+                  var requestList = docObj == null ? null : docObj['Request[]'];
+                  if (requestList != null) {
+                    for (var i = 0; i < requestList.length; i++) {
+                      var item = requestList[i];
+                      if (item == null) {
+                        continue;
+                      }
+
+                      App.options.push({
+                        name: isVersion ? item.version : item.tag,
+                        type: CodeUtil.getType4Language(App.language, "int"),
+                        comment: isVersion ? '请求版本' : '请求标识'
+                      });
+                    }
+                  }
+                  break;
+                case 'query':
+                  App.options = [{
+                    name: "0",
+                    type: CodeUtil.getType4Language(App.language, "int"),
+                    comment: '查询内容: 数据'
+                  }, {
+                    name: "1",
+                    type: CodeUtil.getType4Language(App.language, "int"),
+                    comment: '查询内容: 数量'
+                  }, {
+                    name: "2",
+                    type: CodeUtil.getType4Language(App.language, "int"),
+                    comment: '查询内容: 全部'
+                  }];
+                  break;
+                case 'range':
+                  App.options = [{
+                    name: quote + "ANY" + quote,
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '比较范围: 任意'
+                  }, {
+                    name: quote + "ALL" + quote,
+                    type: CodeUtil.getType4Language(App.language, "string"),
+                    comment: '比较范围: 全部'
+                  }];
+                  break;
+                case 'compat':
+                  App.options = [{
+                    name: "true",
+                    type: CodeUtil.getType4Language(App.language, "boolean"),
+                    comment: '兼容统计: 开启'
+                  }, {
+                    name: "false",
+                    type: CodeUtil.getType4Language(App.language, "boolean"),
+                    comment: '兼容统计: 关闭'
+                  }];
+                  break;
+                case '@explain':
+                  App.options = [{
+                    name: "true",
+                    type: CodeUtil.getType4Language(App.language, "boolean"),
+                    comment: '性能分析: 开启'
+                  }, {
+                    name: "false",
+                    type: CodeUtil.getType4Language(App.language, "boolean"),
+                    comment: '性能分析: 关闭'
+                  }];
+                  break;
+                case '':
+                  App.options = [{
+                    name: "true",
+                    type: CodeUtil.getType4Language(App.language, "boolean"),
+                    comment: '性能分析: 开启'
+                  }, {
+                    name: "false",
+                    type: CodeUtil.getType4Language(App.language, "boolean"),
+                    comment: '性能分析: 关闭'
+                  }];
+                  break;
+                default:
+                  if (key.endsWith('()')) {
+                    if (key.startsWith('@')) {
+                      App.options = [{
+                        name: quote + 'fun(arg0,arg1)' + quote,
+                        type: CodeUtil.getType4Language(App.language, "string"),
+                        comment: '存储过程'
+                      }];
+                    } else {
+                      var functionList = docObj == null ? null : docObj['Function[]'];
+                      if (functionList != null) {
+                        for (var i = 0; i < functionList.length; i++) {
+                          var item = functionList[i];
+                          var name = item == null ? null : item.name;
+                          if (StringUtil.isEmpty(name, true)) {
+                            continue;
+                          }
+
+                          App.options.push({
+                            name: quote + name + '(' + StringUtil.trim(item.arguments) + ')' + quote,
+                            type: CodeUtil.getType4Language(App.language, item.returntype),
+                            comment: item.rawDetail || item.detail
+                          });
+                        }
+                      }
+                    }
+                  }
+                  break;
+              }
+
+              var columnList = App.getColumnListWithModelName(table);
+              if (columnList != null) {
+                var isHaving = key == '@having';
+                var arr = ['max', 'min', 'sum', 'avg', 'length', 'len', 'json_length'];
+
+                var ks = '';
+                var first = true;
+                for (var j = 0; j < columnList.length; j++) {
+                  var column = App.getColumnObj(columnList, j)
+                  var name = column == null ? null : column.column_name;
+                  if (StringUtil.isEmpty(name, true)) {
+                    continue;
+                  }
+
+                  var k = name;
+                  switch (key) {
+                    case '@having':
+                      var which = Math.floor(arr.length * Math.random());
+                      k = arr[which] + '(' + name + ')' + (Math.random() < 0.2 ? '<82010' : (Math.random() < 0.5 ? '>3' : '%2=0'));
+                      break;
+                    case '@order':
+                      k = name + (Math.random() < 0.2 ? '' : (Math.random() < 0.5 ? '-' : '+'));
+                      break;
+                    case '@cast':
+                      var t = column.column_type;
+                      var ind = t == null ? -1 : t.indexOf('(');
+                      k = name + ':' + StringUtil.toUpperCase(ind < 0 ? t : t.substring(0, ind));
+                      break;
+                    // case '@column':
+                    // case '@group':
+                    // case '@json':
+                    // case '@null':
+                    default:
+                      k = name;
+                      break;
+                  }
+
+                  App.options.push({
+                    name: quote + k + quote,
+                    type: CodeUtil.getType4Language(App.language, column.column_type),
+                    comment: column.column_comment
+                  })
+
+                  ks += (first ? '' : (isHaving ? ';' : ',')) + k;
+                  first = false;
+                }
+
+                App.options.push({
+                  name: quote + ks + quote,
+                  type: CodeUtil.getType4Language(App.language, 'string'),
+                  comment: '所有字段组合'
+                })
+              }
+            }
+          } else {
+            App.options = [
+              {
+                name: "@column",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "返回字段"
+              },
+              {name: "@from@", type: CodeUtil.getType4Language(App.language, "object"), comment: "数据来源"},
+              {
+                name: "@group",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "分组方式"
+              },
+              {
+                name: "@having",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "聚合函数"
+              },
+              {
+                name: "@order",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "排序方式"
+              },
+              {
+                name: "@combine",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "条件组合"
+              },
+              {
+                name: "@raw",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "原始SQL片段"
+              },
+              {
+                name: "@json",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "转为JSON"
+              },
+              {
+                name: "@null",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "NULL值字段"
+              },
+              {name: "@cast", type: CodeUtil.getType4Language(App.language, "varchar"), comment: "类型转换"},
+              {
+                name: "@schema",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "集合空间(数据库名/模式)"
+              },
+              {
+                name: "@database",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "数据库类型"
+              },
+              {
+                name: "@datasource",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "跨数据源"
+              },
+              {name: "@role", type: CodeUtil.getType4Language(App.language, "varchar"), comment: "来访角色"},
+              {
+                name: "@cache",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "缓存方式"
+              },
+              {
+                name: "@explain",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "性能分析"
+              },
+              {
+                name: "key-()",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "远程函数: 优先执行"
+              },
+              {
+                name: "key()",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "远程函数"
+              },
+              {
+                name: "key+()",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "远程函数: 延后执行"
+              },
+              {
+                name: "@key-()",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "存储过程: 优先执行"
+              },
+              {
+                name: "@key()",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "存储过程"
+              },
+              {
+                name: "@key+()",
+                type: CodeUtil.getType4Language(App.language, "varchar"),
+                comment: "存储过程: 延后执行"
+              },
+            ];
+
+            if (isArrayKey) {
+              App.options = [
+                {name: "count", type: CodeUtil.getType4Language(App.language, "int"), comment: "每页数量"},
+                {name: "page", type: CodeUtil.getType4Language(App.language, "int"), comment: "分页页码"},
+                {name: "query", type: CodeUtil.getType4Language(App.language, "int"), comment: "查询内容"},
+                {name: "compat", type: CodeUtil.getType4Language(App.language, "boolean"), comment: "兼容统计"},
+                {name: "join", type: CodeUtil.getType4Language(App.language, "varchar"), comment: "联表查询"},
+                {name: "[]", type: CodeUtil.getType4Language(App.language, "array"), comment: "数组对象"},
+              ];
+            } else if (isSubqueryKey) {
+              App.options = [
+                {
+                  name: "from",
+                  type: CodeUtil.getType4Language(App.language, "varchar"),
+                  comment: "主表名称"
+                },
+                {name: "count", type: CodeUtil.getType4Language(App.language, "int"), comment: "每页数量"},
+                {name: "page", type: CodeUtil.getType4Language(App.language, "int"), comment: "分页页码"},
+                {
+                  name: "range",
+                  type: CodeUtil.getType4Language(App.language, "varchar"),
+                  comment: "比较范围"
+                },
+                {
+                  name: "join",
+                  type: CodeUtil.getType4Language(App.language, "varchar"),
+                  comment: "联表查询"
+                },
+              ];
+            } else if (App.isTableKey(table)) {
+              var columnList = App.getColumnListWithModelName(table);
+              if (columnList != null) {
+                for (var j = 0; j < columnList.length; j++) {
+                  var column = App.getColumnObj(columnList, j)
+                  var name = column == null ? null : column.column_name;
+                  if (StringUtil.isEmpty(name, true)) {
+                    continue;
+                  }
+
+                  App.options.push({
+                    name: name,
+                    type: CodeUtil.getType4Language(App.language, column.column_type),
+                    comment: column.column_comment
+                  })
+                }
+
+                var arr = ['{}', '$', '~', '<>', '>', '<', '<=', '>=', '!', '}{', '%', '&$', '|{}', '!~', '+', '-'];
+                for (var j = 0; j < columnList.length; j++) {
+                  var column = App.getColumnObj(columnList, j)
+                  var name = column == null ? null : column.column_name;
+                  if (StringUtil.isEmpty(name, true)) {
+                    continue;
+                  }
+
+                  var which = Math.floor(arr.length * Math.random());
+                  App.options.push({
+                    name: name + arr[which],
+                    type: CodeUtil.getType4Language(App.language, column.column_type),
+                    comment: column.column_comment
+                  })
+                }
+              }
+            } else {
+              App.options.push([
+                {name: "format", type: CodeUtil.getType4Language(App.language, "varchar"), comment: "格式化"},
+                {name: "tag", type: CodeUtil.getType4Language(App.language, "varchar"), comment: "请求标识"},
+                {name: "version", type: CodeUtil.getType4Language(App.language, "varchar"), comment: "请求版本"},
+                {name: "[]", type: CodeUtil.getType4Language(App.language, "array"), comment: "数组对象"},
+              ])
+            }
+
+            if (App.isTableKey(table) != true) {
+              var tableList = docObj['[]']
+              if (tableList != null) {
+                for (var j = 0; j < tableList.length; j++) {
+                  var tableObj = App.getTableObj(j);
+                  var name = tableObj == null ? null : App.getModelNameByTableName(tableObj.table_name);
+                  if (StringUtil.isEmpty(name, true)) {
+                    continue;
+                  }
+
+                  App.options.push({
+                    name: name,
+                    type: CodeUtil.getType4Language(App.language, 'object'),
+                    comment: tableObj.table_comment
+                  })
+                }
+              }
+            }
+
+          }
+        }
+
+        if (App.options.length > 0) {
+          vOption.focus();
+        }
+        else {
+          target.focus();
+        }
       }
     },
     watch: {
@@ -8375,15 +9076,261 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       // 快捷键 CTRL + I 格式化 JSON
       document.addEventListener('keydown', function(event) {
         // alert(event.key) 小写字母 i 而不是 KeyI
-        // if (event.ctrlKey && event.keyCode === 73) { // KeyI 无效  event.key === 'KeyI' && event.target == vInput){
-        if (event.ctrlKey || event.metaKey) {
-          var target = event.target;
+
+        var target = event.target;
+        var keyCode = event.keyCode;
+        var isEnter = keyCode === 13;
+        var isDel = keyCode === 8 || keyCode === 46; // backspace 和 del
+        var isChar = (keyCode >= 48 && keyCode <= 90) || (keyCode >= 106 && keyCode <= 111) || (keyCode >= 186 && keyCode <= 222);
+
+        currentTarget = target;
+
+        if (keyCode === 27) {  // ESC
+          if (document.activeElement == vOption || App.options.length > 0) {
+            App.options = [];
+            target.focus();
+            return;
+          }
+        }
+        else if (keyCode === 40 || keyCode === 38) {  // 方向键 上 和 下
+          if (document.activeElement == vOption || App.options.length > 0) {
+            // currentTarget = target;
+            if (keyCode === 38) {
+              if (App.selectIndex >= 0) {
+                App.selectIndex --
+                App.selectInput(App.selectIndex < 0 ? null : App.options[App.selectIndex], App.selectIndex)
+              }
+            } else if (App.selectIndex < App.options.length) {
+              App.selectIndex ++
+              App.selectInput(App.selectIndex >= App.options.length ? null : App.options[App.selectIndex], App.selectIndex)
+            }
+
+            // var options = document.activeElement == vOption || App.options.length > 0 ? App.options : null; // vOption.options : null;
+            // if (options != null) {
+            //   for (var i = 0; i < options.length; i++) {
+            //     var opt = options[i]
+            //     if (opt != null && (opt.selected || i == App.selectIndex)) {
+            //       if (keyCode === 38) {
+            //         if (i > 0) {
+            //           opt.selected = false
+            //           options[i - 1].selected = true
+            //           App.selectInput(App.options[i - 1], i - 1)
+            //         }
+            //       } else {
+            //         if (i < options.length - 1) {
+            //           opt.selected = false
+            //           options[i + 1].selected = true
+            //           App.selectInput(App.options[i + 1], i + 1)
+            //         }
+            //       }
+            //
+            //       break
+            //     }
+            //   }
+
+            event.preventDefault();
+            return;
+            // }
+          }
+        }
+        else if (isEnter || isDel) { // enter || delete
+          if (document.activeElement == vOption || App.options.length > 0) { // hasFocus is undefined   vOption.hasFocus()) {
+
+            var options = vOption.options || App.options
+            if (options != null && options.length > 0) {
+              if (isDel) {
+                var selectionStart = target.selectionStart;
+                var selectionEnd = target.selectionEnd;
+
+                var text = StringUtil.get(target.value);
+                var before = text.substring(0, selectionStart);
+                var after = text.substring(selectionEnd);
+
+                App.showOptions(target, text, before, after);
+              }
+              else {
+                event.preventDefault();
+
+                for (var i = 0; i < options.length; i++) {
+                  var opt = options[i]
+                  if (opt != null && (opt.selected || i == App.selectIndex)) {
+                    // currentTarget = target;
+                    App.selectInput(App.options[i], i, true);
+                    return;
+                  }
+                }
+
+                App.selectIndex - 1;
+                App.options = [];
+              }
+            }
+
+            return;
+          }
+
+          if (target == vUrl) {
+          }
+          else if (target != vOption) {
+            var selectionStart = target.selectionStart;
+            var selectionEnd = target.selectionEnd;
+
+            var text = StringUtil.get(target.value);
+            var before = text.substring(0, selectionStart);
+            var after = text.substring(selectionEnd);
+
+            var firstIndex = isEnter ? after.indexOf('\n') : -1;
+            var firstLine = firstIndex <= 0 ? '' : after.substring(0, firstIndex);
+            var tfl = firstLine.trimLeft();
+
+            var hasRight = tfl.length > 0;
+            if (isEnter && hasRight != true) {
+              var aft = after.substring(firstIndex + 1);
+              var fi = aft.indexOf('\n');
+              tfl = fi < 0 ? aft : aft.substring(0, fi);
+            }
+
+            // var lastLineStart = isEnter && tfl.length > 0 ? -1 : before.lastIndexOf('\n') + 1;
+            var lastLineStart = before.lastIndexOf('\n') + 1;
+            var lastLine = lastLineStart < 0 ? '' : before.substring(lastLineStart);
+
+            var prefixEnd = 0;
+            for (var i = 0; i < lastLine.length; i++) {
+              if (lastLine.charAt(i).trim().length > 0) {
+                if (isDel) {
+                  prefixEnd = 0;
+                }
+                break;
+              }
+
+              prefixEnd += 1;
+            }
+
+
+            var prefix = prefixEnd <= 0 ? '' : lastLine.substring(0, prefixEnd);
+
+            var isStart = false;
+            var isEnd = false;
+            var hasPadding = false;
+            var hasComma = false;
+            var hasNewKey = null;
+            if (isEnter) {
+              isEnd = tfl.startsWith(']') || tfl.startsWith('}')
+              var tll = lastLine.trimRight();
+              if (isEnd || hasRight || tll.endsWith('[')) {
+                hasNewKey = false;
+              }
+              else if (tll.indexOf('":') > 1 || tll.indexOf("':") > 1) {
+                hasNewKey = true;
+              }
+
+              isStart = tll.endsWith('{') || tll.endsWith('[');
+              hasPadding = hasRight != true && isStart;
+
+              tll = before.trimRight();
+              hasComma = isStart != true && isEnd != true && hasRight != true && tll.endsWith(',') != true;
+              if (hasComma) {
+                for (var i = before.length; i >= 0; i--) {
+                  if (before.charAt(i).trim().length > 0) {
+                    break;
+                  }
+
+                  selectionStart -= 1;
+                }
+
+                before = tll + ',';
+                selectionStart += 1;
+              }
+
+              if (hasNewKey == null) {
+                hasNewKey = tll.endsWith('{');
+              }
+            }
+
+            if (prefix.length > 0) {
+              if (isEnter) {
+                target.value = before + '\n' + prefix + (hasPadding ? '    ' : '')
+                  + (hasNewKey ? (isSingle ? "'': null" : '"": null') + (hasComma || isEnd ? '' : ',') : '')
+                  + (isEnd ? after : (hasRight ? (hasPadding ? tfl.trimLeft() : tfl) : '') + '\n' + after.substring(firstIndex + 1)
+                  );
+
+                target.selectionEnd = target.selectionStart = selectionStart + prefix.length + 1 + (hasComma ? 1 : 0) + (hasNewKey ? 1 : 0) + (hasPadding ? 4 : 0);
+                event.preventDefault();
+
+                if (hasNewKey) {
+                  App.showOptions(target, text, before, after);
+                  if (target == vInput) {
+                    inputted = target.value;
+                  }
+                  return;
+                }
+              }
+              else if (isDel) {
+                target.value = (selectionStart == selectionEnd ? StringUtil.get(before.substring(0, lastLineStart - 1) + ' ') : before) + after;
+                target.selectionEnd = target.selectionStart = selectionStart == selectionEnd ? lastLineStart - 1 : selectionStart;
+                event.preventDefault();
+              }
+
+              if (target == vInput) {
+                inputted = target.value;
+              }
+            }
+          }
+        }
+        else if (keyCode === 9) {  // Tab 加空格
+          try {
+            var selectionStart = target.selectionStart;
+            var selectionEnd = target.selectionEnd;
+
+            var text = StringUtil.get(target.value);
+            var before = text.substring(0, selectionStart);
+            var after = text.substring(selectionEnd);
+
+            var ind = before.lastIndexOf('\n');
+            var start = ind < 0 ? 0 : ind + 1;
+            ind = after.indexOf('\n');
+            var end = ind < 0 ? text.length : selectionEnd + ind - 1;
+
+            var selection = text.substring(start, end);
+            var lines = StringUtil.split(selection, '\n');
+
+            var newStr = text.substring(0, start);
+
+            var prefix = '    ';
+            var prefixLen = prefix.length;
+            for (var i = 0; i < lines.length; i ++) {
+              var l = lines[i] || '';
+              if (i > 0) {
+                newStr += '\n';
+              }
+
+              newStr += prefix + l;
+              if (i <= 0) {
+                selectionStart += prefixLen;
+              }
+              selectionEnd += prefixLen;
+            }
+
+            newStr += text.substring(end);
+
+            target.value = newStr;
+            event.preventDefault();
+            if (target == vInput) {
+              inputted = newStr;
+            }
+
+            target.selectionStart = selectionStart;
+            target.selectionEnd = selectionEnd;
+          } catch (e) {
+            log(e)
+          }
+        }
+        else if ((event.ctrlKey || event.metaKey) && ([68, 73, 191].indexOf(keyCode) >= 0 || (isChar != true && event.shiftKey != true))) {
           var selectionStart = target.selectionStart;
           var selectionEnd = target.selectionEnd;
 
-          // 这里拿不到 clipboardData  if (event.keyCode === 86) {
+          // 这里拿不到 clipboardData  if (keyCode === 86) {
 
-          if (event.keyCode === 73) {  // Ctrl + 'I'  格式化
+          if (keyCode === 73) {  // Ctrl + 'I'  格式化
             try {
               if (target == vInput) {
                 var json = JSON.stringify(JSON5.parse(vInput.value), null, '    ');
@@ -8421,21 +9368,21 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               log(e)
             }
           }
-          else if (event.keyCode === 191) {  // Ctrl + '/' 注释与取消注释
+          else if (keyCode === 191) {  // Ctrl + '/' 注释与取消注释
             try {
-              var json = StringUtil.get(target.value);
-              var before = json.substring(0, selectionStart);
-              var after = json.substring(selectionEnd);
+              var text = StringUtil.get(target.value);
+              var before = text.substring(0, selectionStart);
+              var after = text.substring(selectionEnd);
 
               var ind = before.lastIndexOf('\n');
               var start = ind < 0 ? 0 : ind + 1;
               ind = after.indexOf('\n');
-              var end = ind < 0 ? json.length : selectionEnd + ind - 1;
+              var end = ind < 0 ? text.length : selectionEnd + ind - 1;
 
-              var selection = json.substring(start, end);
+              var selection = text.substring(start, end);
               var lines = StringUtil.split(selection, '\n');
 
-              var newStr = json.substring(0, start);
+              var newStr = text.substring(0, start);
 
               var commentSign = '//'
               var commentSignLen = commentSign.length
@@ -8451,24 +9398,50 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   var suffix = l.substring(ind + commentSignLen);
                   if (suffix.startsWith(' ')) {
                     suffix = suffix.substring(1);
-                    selectionStart -= 1;
+                    if (i <= 0) {
+                      selectionStart -= 1;
+                    }
                     selectionEnd -= 1;
                   }
 
                   newStr += StringUtil.get(l.substring(0, ind)) + StringUtil.get(suffix)
-                  selectionStart -= commentSignLen;
+                  if (i <= 0) {
+                    selectionStart -= commentSignLen;
+                  }
                   selectionEnd -= commentSignLen;
                 }
                 else {
                   newStr += commentSign + ' ' + l;
-                  selectionStart += commentSignLen + 1;
+                  if (i <= 0) {
+                    selectionStart += commentSignLen + 1;
+                  }
                   selectionEnd += commentSignLen + 1;
                 }
               }
 
-              newStr += json.substring(end);
+              newStr += text.substring(end);
 
               target.value = newStr;
+              if (target == vInput) {
+                inputted = newStr;
+              }
+            } catch (e) {
+              log(e)
+            }
+          }
+          else if (keyCode == 68) {  // Ctrl + 'D' 删除行
+            try {
+              var text = StringUtil.get(target.value);
+              var before = text.substring(0, selectionStart);
+              var after = text.substring(selectionEnd);
+
+              var lastIndex = before.lastIndexOf('\n');
+              var firstIndex = after.indexOf('\n');
+
+              target.value = (lastIndex < 0 ? '' : before.substring(0, lastIndex)) + '\n' + after.substring(firstIndex + 1);
+              selectionEnd = selectionStart = lastIndex + 1;
+              event.preventDefault();
+
               if (target == vInput) {
                 inputted = newStr;
               }
@@ -8480,8 +9453,33 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           target.selectionStart = selectionStart;
           target.selectionEnd = selectionEnd;
         }
-      })
+        else if (event.shiftKey || isChar) {
+          if (isChar && App.options.length > 0) {
+            var key = StringUtil.get(event.key);
 
+            var selectionStart = target.selectionStart;
+            var selectionEnd = target.selectionEnd;
+
+            var text = StringUtil.get(target.value);
+            var before = text.substring(0, selectionStart);
+            var after = text.substring(selectionEnd);
+            var selection = text.substring(selectionStart, selectionEnd);
+            text = before + (isInputValue && selection == 'null' ? '' : selection) + key + after;
+
+            target.value = text;
+            target.selectionStart = selectionStart;
+            target.selectionEnd = (isInputValue && selection == 'null' ? selectionStart : selectionEnd) + key.length;
+            event.preventDefault();
+
+            App.showOptions(target, text, before, after, isInputValue, key);
+          }
+
+          return;
+        }
+
+        App.selectIndex = -1;
+        App.options = [];
+      })
     }
   }
 

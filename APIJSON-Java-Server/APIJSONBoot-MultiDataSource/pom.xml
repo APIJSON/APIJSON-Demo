@@ -5,7 +5,7 @@
 
   <groupId>apijson.boot</groupId>
   <artifactId>apijson-boot-multi-datasource</artifactId>
-  <version>5.3.0</version>
+  <version>5.4.0</version>
   <packaging>jar</packaging>
 
   <name>APIJSONBoot-MultiDataSource</name>
@@ -62,40 +62,28 @@
     <dependency>
       <groupId>com.github.Tencent</groupId>
       <artifactId>APIJSON</artifactId>
-      <version>5.3.0</version>
+      <version>5.4.0</version>
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-framework</artifactId>
-      <version>5.3.0</version>
-<!--      <exclusions>-->
-<!--        <exclusion>-->
-<!--          <groupId>com.github.Tencent</groupId>-->
-<!--          <artifactId>APIJSON</artifactId>-->
-<!--        </exclusion>-->
-<!--      </exclusions>-->
+      <version>5.4.0</version>
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-column</artifactId>
-      <version>1.2.7</version>
-<!--      <exclusions>-->
-<!--        <exclusion>-->
-<!--          <groupId>com.github.Tencent</groupId>-->
-<!--          <artifactId>APIJSON</artifactId>-->
-<!--        </exclusion>-->
-<!--      </exclusions>-->
+      <version>1.2.9</version>
     </dependency>
     <dependency>
       <groupId>com.github.APIJSON</groupId>
       <artifactId>apijson-router</artifactId>
-      <version>1.0.8</version>
-<!--      <exclusions>-->
-<!--        <exclusion>-->
-<!--          <groupId>com.github.Tencent</groupId>-->
-<!--          <artifactId>APIJSON</artifactId>-->
-<!--        </exclusion>-->
-<!--      </exclusions>-->
+      <version>1.1.0</version>
+      <exclusions>
+        <exclusion>
+          <groupId>com.github.Tencent</groupId>
+          <artifactId>APIJSON</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
