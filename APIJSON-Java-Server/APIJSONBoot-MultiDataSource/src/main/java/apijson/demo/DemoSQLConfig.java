@@ -158,6 +158,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "11.5"; //TODO 改成你自己的
 		}
+        //if (isSQLite()) {
+        //    return "3.39.3"; //TODO 改成你自己的
+        //}
 		if (isDameng()) {
 			return "8.1.2.141"; //TODO 改成你自己的
 		}
@@ -196,6 +199,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
+        //if (isSQLite()) {
+        //    return "jdbc:sqlite:sample.db"; //TODO 改成你自己的
+        //}
 		if (isDameng()) {
 			return "jdbc:dm://localhost:5236"; //TODO 改成你自己的
 		}
@@ -233,6 +239,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "db2admin"; //TODO 改成你自己的
 		}
+        //if (isSQLite()) {
+        //    return "root"; //TODO 改成你自己的
+        //}
 		if (isDameng()) {
 			return "SYSDBA";
 		}
@@ -269,6 +278,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isDb2()) {
 			return "123"; //TODO 改成你自己的
 		}
+        //if (isSQLite()) {
+        //    return "apijson"; //TODO 改成你自己的
+        //}
 		if (isDameng()) {
 			return "SYSDBA";
 		}
