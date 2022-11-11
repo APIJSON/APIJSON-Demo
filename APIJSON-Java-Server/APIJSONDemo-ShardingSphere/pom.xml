@@ -28,18 +28,12 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>5.3.0</version>
+            <version>5.4.0</version>
         </dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>5.3.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.github.Tecent</groupId>
-                    <artifactId>APIJSON</artifactId>
-                </exclusion>
-            </exclusions>
+			<version>5.4.0</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -47,12 +41,6 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>8.0.29</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.39.3.0</version>
         </dependency>
 
         <!-- 需要用的 HikariCp 数据库连接池库，3.1.0 以上 -->

@@ -28,7 +28,7 @@ import apijson.framework.APIJSONSQLConfig;
 public class DemoSQLConfig extends APIJSONSQLConfig {
 
     static {
-        DEFAULT_DATABASE = DATABASE_PRESTO;  // TODO 默认数据库类型，改成你自己的
+        DEFAULT_DATABASE = DATABASE_CLICKHOUSE;  // TODO 默认数据库类型，改成你自己的
         DEFAULT_SCHEMA = "sys";  // TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle:
 
         // 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；

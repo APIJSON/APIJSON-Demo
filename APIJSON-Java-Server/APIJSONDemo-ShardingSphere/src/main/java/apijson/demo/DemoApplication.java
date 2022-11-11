@@ -97,16 +97,6 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         };
 
         try { //加载驱动程序
-            Log.d(TAG, "尝试加载 SQLite 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-            Class.forName("org.sqlite.SQLiteJDBCLoader");
-            Log.d(TAG, "成功加载 SQLite 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-        }
-        catch (ClassNotFoundException e) {
-            e.printStackTrace();
-            Log.e(TAG, "加载 SQLite 驱动失败，请检查 pom.xml 中 sqlite-jdbc 版本是否存在以及可用 ！！！");
-        }
-
-        try { //加载驱动程序
             Log.d(TAG, "尝试加载 ShardingSphere 驱动 <<<<<<<<<<<<<<<<<<<<< ");
             Class.forName("org.apache.shardingsphere.driver.ShardingSphereDriver");
             Log.d(TAG, "成功加载 ShardingSphere 驱动！>>>>>>>>>>>>>>>>>>>>> ");
