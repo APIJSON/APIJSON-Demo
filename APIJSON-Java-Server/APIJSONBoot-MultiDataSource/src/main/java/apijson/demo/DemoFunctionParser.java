@@ -48,34 +48,34 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		super(method, tag, version, request, session);
 	}
 	
-	public Visitor<Long> getCurrentUser(@NotNull JSONObject current) {
+	public Visitor<Long> getCurrentUser(@NotNull JSONObject curObj) {
 		return DemoVerifier.getVisitor(getSession());
 	}
 	
-	public Long getCurrentUserId(@NotNull JSONObject current) {
+	public Long getCurrentUserId(@NotNull JSONObject curObj) {
 		return DemoVerifier.getVisitorId(getSession());
 	}
 	
-	public List<Long> getCurrentUserIdAsList(@NotNull JSONObject current) {
+	public List<Long> getCurrentUserIdAsList(@NotNull JSONObject curObj) {
 		List<Long> list = new ArrayList<>(1);
 		list.add(DemoVerifier.getVisitorId(getSession()));
 		return list;
 	}
 	
-	public List<Long> getCurrentContactIdList(@NotNull JSONObject current) {
-		Visitor<Long> user = getCurrentUser(current);
+	public List<Long> getCurrentContactIdList(@NotNull JSONObject curObj) {
+		Visitor<Long> user = getCurrentUser(curObj);
 		return user == null ? null : user.getContactIdList();
 	}
 	
 
 	/**
-	 * @param current
+	 * @param curObj
 	 * @param idList
 	 * @return
 	 * @throws Exception
 	 */
-	public void verifyIdList(@NotNull JSONObject current, @NotNull String idList) throws Exception {
-		Object obj = current.get(idList);
+	public void verifyIdList(@NotNull JSONObject curObj, @NotNull String idList) throws Exception {
+		Object obj = curObj.get(idList);
 		if (obj == null) {
 			return;
 		}
@@ -98,13 +98,13 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**
-	 * @param current
+	 * @param curObj
 	 * @param urlList
 	 * @return
 	 * @throws Exception
 	 */
-	public void verifyURLList(@NotNull JSONObject current, @NotNull String urlList) throws Exception {
-		Object obj = current.get(urlList);
+	public void verifyURLList(@NotNull JSONObject curObj, @NotNull String urlList) throws Exception {
+		Object obj = curObj.get(urlList);
 		if (obj == null) {
 			return;
 		}
@@ -127,14 +127,14 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**
-	 * @param current
+	 * @param curObj
 	 * @param momentId
 	 * @return
 	 * @throws Exception
 	 */
-	public int deleteCommentOfMoment(@NotNull JSONObject current, @NotNull String momentId) throws Exception {
-		long mid = current.getLongValue(momentId);
-		if (mid <= 0 || current.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+	public int deleteCommentOfMoment(@NotNull JSONObject curObj, @NotNull String momentId) throws Exception {
+		long mid = curObj.getLongValue(momentId);
+		if (mid <= 0 || curObj.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
 
@@ -155,13 +155,13 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**删除评论的子评论
-	 * @param current
+	 * @param curObj
 	 * @param toId
 	 * @return
 	 */
-	public int deleteChildComment(@NotNull JSONObject current, @NotNull String toId) throws Exception {
-		long tid = current.getLongValue(toId);
-		if (tid <= 0 || current.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+	public int deleteChildComment(@NotNull JSONObject curObj, @NotNull String toId) throws Exception {
+		long tid = curObj.getLongValue(toId);
+		if (tid <= 0 || curObj.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
 
@@ -223,23 +223,23 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
-	 * @param current
+	 * @param curObj
 	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 * @throws Exception
 	 */
-	public JSONArray getIdList(@NotNull JSONObject current) {
+	public JSONArray getIdList(@NotNull JSONObject curObj) {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
 
 
 	/**TODO 仅用来测试 "key-()":"verifyAccess()"
-	 * @param current
+	 * @param curObj
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
-		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
-		String role = current.getString(JSONRequest.KEY_ROLE);
+	public Object verifyAccess(@NotNull JSONObject curObj) throws Exception {
+		long userId = curObj.getLongValue(JSONRequest.KEY_USER_ID);
+		String role = curObj.getString(JSONRequest.KEY_ROLE);
 		if (AbstractVerifier.OWNER.equals(role) && userId != (Long) DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}
