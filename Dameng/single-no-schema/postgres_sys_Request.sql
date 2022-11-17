@@ -5,7 +5,7 @@ create table "Request"
     "method"    varchar(10),
     "tag"       varchar(20) not null,
     "structure" text       not null,
-    "detail"    varchar(10000),
+    "detail"    varchar(8000),
     "date"      timestamp(6)
 );
 
