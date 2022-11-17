@@ -11,7 +11,7 @@ comment on table "Login" is '登录信息';
 
 comment on column "Login"."id" is '唯一标识';
 
-comment on column "Login".userId" is '用户id';
+comment on column "Login"."userId" is '用户id';
 
 comment on column "Login"."type" is '类型
 0-密码登录
