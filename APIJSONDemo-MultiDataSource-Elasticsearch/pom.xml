@@ -33,6 +33,11 @@
 		<commons.codec.version>1.10</commons.codec.version>
 		<commons-collections4.version>4.4</commons-collections4.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
+		<apijson.version>5.5.0</apijson.version>
+		<mysql.version>8.0.31</mysql.version>
+		<spring-context-support.version>5.3.18</spring-context-support.version>
+		<spring-boot-configuration-processor.version>2.6.6</spring-boot-configuration-processor.version>
+		<dynamic-datasource-spring-boot-starter.version>3.5.2</dynamic-datasource-spring-boot-starter.version>
 		<java.version>1.8</java.version>
 	</properties>
 
@@ -48,12 +53,12 @@
 		<dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>5.5.0</version>
+            <version>${apijson.version}</version>
         </dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>5.5.0</version>
+			<version>${apijson.version}</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -68,12 +73,12 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context-support</artifactId>
-			<version>5.3.18</version>
+			<version>${spring-context-support.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-configuration-processor</artifactId>
-			<version>2.6.6</version>
+			<version>${spring-boot-configuration-processor.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -84,7 +89,7 @@
 		<dependency>
 			<groupId>com.baomidou</groupId>
 			<artifactId>dynamic-datasource-spring-boot-starter</artifactId>
-			<version>3.5.2</version>
+			<version>${dynamic-datasource-spring-boot-starter.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.baomidou</groupId>
@@ -110,7 +115,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.31</version>
+			<version>${mysql.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
@@ -136,12 +141,12 @@
 		<dependency>
 			<groupId>org.elasticsearch.plugin</groupId>
 			<artifactId>reindex-client</artifactId>
-			<version>7.17.5</version>
+			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.plugin</groupId>
 			<artifactId>parent-join-client</artifactId>
-			<version>7.17.5</version>
+			<version>${elasticsearch.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
