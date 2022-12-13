@@ -65,7 +65,7 @@ public class ElasticSearchSqlTest {
 
 	public static void main(String[] args) throws Exception {
 		Properties properties = new Properties();
-		properties.put(PROP_URL, "jdbc:elasticsearch://47.108.49.213:9302");
+		properties.put(PROP_URL, "jdbc:elasticsearch://127.0.0.1:9302");
 		properties.put(PROP_CONNECTIONPROPERTIES, "client.transport.ignore_cluster_name=true");
 		DruidDataSource dds = (DruidDataSource) ElasticSearchDruidDataSourceFactory.createDataSource(properties);
 		Connection connection = dds.getConnection();

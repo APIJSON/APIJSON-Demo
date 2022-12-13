@@ -22,27 +22,27 @@ spring:
       datasource:
         master:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://xxx:3306/housekeeping?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://localhost:3306/housekeeping?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
           username: 
           password: 
         155db:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://xxx:3888/housekeeping?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://localhost:3888/housekeeping?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
           username: 
           password: 
         213db:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://xxx:3888/housekeeping?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://localhost:3888/housekeeping?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
           username: 
           password: 
         db1:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://xxx:3306/apijsonMuli1?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://localhost:3306/apijsonMuli1?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
           username: 
           password:
         db2:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://xxx:3306/apijsonMuli2?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
+          url: jdbc:mysql://localhost:3306/apijsonMuli2?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
           username: 
           password:
       filter:
