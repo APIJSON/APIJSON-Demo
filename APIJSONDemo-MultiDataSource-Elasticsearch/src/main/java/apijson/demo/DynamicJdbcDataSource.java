@@ -97,7 +97,7 @@ public class DynamicJdbcDataSource implements ApplicationRunner {
 	public void initElasticDataSource() throws Exception {
 		String datasourceName = "elasticSearch";
 		String urlPrefix = "jdbc:elasticsearch://";
-		String httpAddress = "47.108.49.213:9201,47.108.49.213:9202,47.108.49.213:9203";
+		String httpAddress = "127.0.0.1:9201,192.168.0.1:9203,192.168.0.101:9203";
 		String[] httpAddressArr = httpAddress.split(",");
 		HttpHost[] httpHosts = new HttpHost[httpAddressArr.length];
 		for (int i = 0; i < httpAddressArr.length; i++) {
@@ -107,7 +107,7 @@ public class DynamicJdbcDataSource implements ApplicationRunner {
 			httpHosts[i] = httpHost;
 		}
 
-		String tcpAddress = "47.108.49.213:9301,47.108.49.213:9302,47.108.49.213:9303";
+		String tcpAddress = "127.0.0.1:9201,192.168.0.1:9203,192.168.0.101:9203";
 		String url = urlPrefix + tcpAddress;
 		String[] tcpAddressArr = tcpAddress.split(",");
 		TransportAddress[] transportAddresss = new TransportAddress[tcpAddressArr.length];
