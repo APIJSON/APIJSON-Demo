@@ -46,7 +46,7 @@
   }
   ```
 
-  ![image-20221213105328227](/Users/xy/Library/Application Support/typora-user-images/image-20221213105328227.png)
+  ![image](https://user-images.githubusercontent.com/12228225/207245545-277ba9a6-e87f-42b3-af55-9d6a37384a1e.png)
 
 ## 2、集成elasticsearch-sql
 
@@ -60,7 +60,7 @@
 
 ## 4、elasticsearch-sql不支持RLIKE
 
-![image-20221213141141037](/Users/xy/Library/Application Support/typora-user-images/image-20221213141141037.png)
+![image](https://user-images.githubusercontent.com/12228225/207245701-ea2560a9-2389-4953-a568-9e85adfb15ad.png)
 
 ## 5、apijson支持字段 .keyword
 
@@ -104,7 +104,6 @@ http://localhost:8080/post
 
 ```
 
-![image-20221213105649445](/Users/xy/Library/Application Support/typora-user-images/image-20221213105649445.png)
 
 
 
@@ -112,7 +111,6 @@ elasticsearch查询插入的数据:
 
 GET /es_blog/_doc/5b77b103-0231-42c3-a6cf-a0cb933d3dda
 
-![image-20221213105850231](/Users/xy/Library/Application Support/typora-user-images/image-20221213105850231.png)
 
 ### 批量插入
 
@@ -153,13 +151,10 @@ http://localhost:8080/post
 
 ```
 
-![image-20221213104938108](/Users/xy/Library/Application Support/typora-user-images/image-20221213104938108.png)
-
 elasticsearch查询插入的数据:
 
 GET /es_blog/_search
 
-![image-20221213105443909](/Users/xy/Library/Application Support/typora-user-images/image-20221213105443909.png)
 
 ### id修改
 
@@ -182,11 +177,6 @@ http://localhost:8080/put
 }
 ```
 
-![image-20221213110113376](/Users/xy/Library/Application Support/typora-user-images/image-20221213110113376.png)
-
-
-
-![image-20221213110132755](/Users/xy/Library/Application Support/typora-user-images/image-20221213110132755.png)
 
 ### 非id修改
 
@@ -263,7 +253,6 @@ http://localhost:8080/put
 }
 ```
 
-![image-20221213120359815](/Users/xy/Library/Application Support/typora-user-images/image-20221213120359815.png)
 
 ### 批量修改
 
@@ -333,7 +322,6 @@ http://localhost:8080/delete
 }
 ```
 
-![image-20221213115535006](/Users/xy/Library/Application Support/typora-user-images/image-20221213115535006.png)
 
 ### 批量删除
 
@@ -377,7 +365,6 @@ http://localhost:8080/delete
 
 ```
 
-![image-20221213140810462](/Users/xy/Library/Application Support/typora-user-images/image-20221213140810462.png)
 
 ### 分组查询
 
@@ -394,4 +381,3 @@ http://localhost:8080/delete
 }
 ```
 
-![image-20221213140933538](/Users/xy/Library/Application Support/typora-user-images/image-20221213140933538.png)
