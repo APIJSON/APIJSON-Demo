@@ -1,6 +1,6 @@
 # APIJSONDemo
 
-## 1、支持多数据源
+## 支持多数据源
 
 数据源解析顺序: 
 
@@ -48,21 +48,25 @@
 
   ![image](https://user-images.githubusercontent.com/12228225/207245545-277ba9a6-e87f-42b3-af55-9d6a37384a1e.png)
 
-## 2、集成elasticsearch-sql
+## 集成elasticsearch-sql
 
 换成xpack, 也一样
 
 应用导入: elasticsearch-sql-7.17.5.0.jar
 
-## 3、apijson支持elasticsearch功能点
+## apijson elasticsearch type支持
+
+APIJSONSQLConfig.*TABLE_KEY_MAP*.put("ES_blog", "es_blog/doc");
+
+## apijson支持elasticsearch功能点
 
 新增、修改、删除、查询
 
-## 4、elasticsearch-sql不支持RLIKE
+## elasticsearch-sql不支持RLIKE
 
 ![image](https://user-images.githubusercontent.com/12228225/207245701-ea2560a9-2389-4953-a568-9e85adfb15ad.png)
 
-## 5、apijson支持字段 .keyword
+## apijson支持字段 .keyword
 
 ```
 {
@@ -81,7 +85,7 @@
 
 
 
-## 4、示例
+## 示例
 
 ### 单条插入
 
