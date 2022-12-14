@@ -40,7 +40,6 @@ import lombok.extern.log4j.Log4j2;
  * 1、应用启动添加数据源 
  * 2、页面动态添加数据源(数据库存储数据源信息)
  * 
- * @author xy
  *
  */
 @Data
