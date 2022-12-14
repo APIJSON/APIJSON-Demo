@@ -77,43 +77,11 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		current.put(password, c_password + "_" + System.currentTimeMillis());
 	}
 
-	/***
-	 * 业务表-插入不同表1:n <br/>
-	 * 业务表-批量修改不同表1:n <br/>
-	 * 测试 子表 前置函数调用,修改值是否成果 <br/>
-	 * user_address 表 addr字段
-	 * 
-	 * @param current
-	 * @param password
-	 * @return
-	 * @throws Exception
-	 */
 	public void childFunTest(@NotNull JSONObject current, @NotNull String addr) throws Exception {
 		String c_addr = current.getString(addr);
 		current.put(addr, c_addr + "_" + System.currentTimeMillis());
 	}
 
-	/***
-	 * 没有在外层事物里面
-	 * 
-	 * @throws Exception
-	 */
-//	private void insertTest() throws Exception {
-//		String json = "{\n" + "    \"User\":{\n" + "        \"username\":\"test\",\n"
-//				+ "        \"password\": \"233223\",\n" + "		\"state\": 1\n" + "    },\n" + "    \"tag\": \"User\"\n"
-//				+ "}";
-//		com.alibaba.fastjson.JSONObject requestObject = AbstractParser.parseRequest(json);
-//		JSONResponse response = new JSONResponse(new FormParser(POST, false).parseResponse(requestObject));
-//		log.info(response.toJSONString());
-//	}
-//
-//	private void selectTest() throws Exception {
-//		String json = "{\n" + "    \"User\": {\n" + "        \"id\": \"4732209c-5785-4827-b532-5092f154fd94\"\n"
-//				+ "    },\n" + "    \"tag\": \"User\"\n" + "}";
-//		com.alibaba.fastjson.JSONObject requestObject = AbstractParser.parseRequest(json);
-//		JSONResponse response = new JSONResponse(new FormParser(GET, false).parseResponse(requestObject));
-//		log.info(response.toJSONString());
-//	}
 
 	public void removeKeys(@NotNull JSONObject current, String keys) {
 		String[] ks = StringUtil.split(keys, ";"); // 用分号 ; 分割
