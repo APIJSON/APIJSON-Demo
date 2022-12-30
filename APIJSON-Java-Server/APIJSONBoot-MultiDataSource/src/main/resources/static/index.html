@@ -116,6 +116,7 @@
                   <a style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(StringUtil.isEmpty(host, true), 3)">{{ StringUtil.isEmpty(host, true) ? '隐藏(固定)URL Host: 可用空格隔开' : '显示(编辑)URL Host: \n' + host }}</a>
                   <a style="border-bottom: #DDD 1px solid;width: 100%;display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;" href="javascript:void(0)" @click="showConfig(! isRandomShow, 5)">{{ isRandomShow ? '隐藏(固定)参数注入 Random Test' : '显示(编辑)参数注入 Random Test' }}</a>
                   <a style="border-bottom: #DDD 1px solid;width: 100%;display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;" href="javascript:void(0)" @click="showConfig(! isHeaderShow, 4)">{{ (isHeaderShow ? '隐藏(固定)' : '显示(编辑)') + (isEditResponse ? '响应头 Response Header' : '请求头 Request Header' ) }}</a>
+                  <a style="border-bottom: #DDD 1px solid;width: 100%;display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 1; overflow: hidden;" href="javascript:void(0)" @click="showConfig(! isScriptShow, 13)">{{ (isScriptShow ? '隐藏(固定)' : '显示(编辑)') + '执行脚本 JavaScript' }}</a>
                   <a style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(true, 2)">生成代码(封装,解析) : {{ language || '例如 Java' }}</a>
                   <a style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(true, 0)">数据库类型 Database: {{ database || '例如 MYSQL' }}</a>
                   <a style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(true, 1)">数据库名/模式 Schema: {{ schema || '例如 sys' }}</a>
@@ -261,6 +262,8 @@ for (var i = 0; i < list.length; i ++) {
 ## 快捷键
 Ctrl + I 或 Command + I 格式化 JSON，清除所有注释和无效空格、换行等；
 Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
+Ctrl + D 或 Command + D 删除 选中行；
+Ctrl + S 或 Command + S 保存当前请求；
 
 #### 右上角设置项 > 预览请求输入框，显示对应的预览效果
 */
@@ -286,6 +289,8 @@ Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
 ## 快捷键
 Ctrl + I 或 Command + I 格式化输入框，清除所有注释和无效空格、换行等；
 Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
+Ctrl + D 或 Command + D 删除 选中行；
+Ctrl + S 或 Command + S 保存当前请求；
 
 #### 右上角设置项 > 预览请求输入框，显示对应的预览效果
 */
@@ -441,25 +446,64 @@ User/id: RANDOM_INT(82001, 82020) // 随机整数
 // ## 快捷键
 // Ctrl + I 或 Command + I 格式化文本，清除所有注释和无效空格、换行等；
 // Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
+// Ctrl + D 或 Command + D 删除 选中行；
+// Ctrl + S 或 Command + S 保存当前请求；
                         </textarea>
                     </div>
 
-
-                    <div v-show="isHeaderShow" style="width: 100%; height: 150px; position: relative;" >
-                        <div class="left-bar" style="border-top: #DDD 1px solid; position: relative">
-                            <a style="padding-left: 10px;padding-right: 2px;font-size: medium;color: black" >{{ (isEditResponse ? '响应头 Response Header' : '请求头 Request Header' ) }}<a style="display: flex;flex-grow: 1;padding-right: 10px;padding-top: 2px"> (每行都按 key: value 格式)</a></a>
-                            <a class="hint--top @cli-tool" data-hint="隐藏" style="float: right;padding: 8px;height: 100%"  href="javascript:void(0)" @click="showConfig(false, 4)">
-                                <svg class="icon close-icon"  >
-                                    <use xlink:href="svg/icon.svg#close"></use>
-                                </svg>
-                            </a>
-                        </div>
-                        <textarea id="vHeader" @copy="doOnCopy" @paste="doOnPaste" @keyup="onChange(true)" style="width: 100%;height: 100%;" wrap="off" placeholder="Authorization: Basic YWRtaW46YWRtaW4= // 示例，支持单行注释
+                  <div v-show="isHeaderShow" style="width: 100%; height: 150px; position: relative;" >
+                    <div class="left-bar" style="border-top: #DDD 1px solid; position: relative">
+                      <a style="padding-left: 10px;padding-right: 2px;font-size: medium;color: black" >{{ (isEditResponse ? '响应头 Response Header' : '请求头 Request Header' ) }}<a style="display: flex;flex-grow: 1;padding-right: 10px;padding-top: 2px"> (每行都按 key: value 格式)</a></a>
+                      <a class="hint--top @cli-tool" data-hint="隐藏" style="float: right;padding: 8px;height: 100%"  href="javascript:void(0)" @click="showConfig(false, 4)">
+                        <svg class="icon close-icon"  >
+                          <use xlink:href="svg/icon.svg#close"></use>
+                        </svg>
+                      </a>
+                    </div>
+                    <textarea id="vHeader" @copy="doOnCopy" @paste="doOnPaste" @keyup="onChange(true)" style="width: 100%;height: 100%;" wrap="off" placeholder="Authorization: Basic YWRtaW46YWRtaW4= // 示例，支持单行注释
 My-Header: 'Secret' + Math.random() // 示例，代码执行结果作为实际值，值为 fun(arg0, arg1..) 等包含函数名与括号的格式
 // ## 快捷键
 // Ctrl + I 或 Command + I 格式化文本，清除所有注释和无效空格、换行等；
-// Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；"></textarea>
+// Ctrl + / 或 Command + / 对选中行 新增行注释 或 取消行注释；
+// Ctrl + D 或 Command + D 删除 选中行；
+// Ctrl + S 或 Command + S 保存当前请求；"></textarea>
+                  </div>
+
+                  <div v-show="isScriptShow" style="width: 100%; height: 240px; position: relative;" >
+                    <div class="left-bar" style="border-top: #DDD 1px solid; position: relative">
+                      <a href="javascript:void(0)" @click="changeScriptType('case')" :style="{'color': scriptType == 'case' ? 'red' : 'gray'}" style="padding-left: 10px; font-size: medium">用例</a><a v-show="getCurrentAccountId() != null">|<a v-show="getCurrentAccountId() != null" href="javascript:void(0)" @click="changeScriptType('account')" :style="{'color': scriptType == 'account' ? 'red' : 'gray'}" style="font-size: medium">账号</a></a><a>|</a><a href="javascript:void(0)" @click="changeScriptType('global')" :style="{'color': scriptType == 'global' ? 'red' : 'gray'}" style="font-size: medium">全局</a><a href="javascript:void(0)" @click="changeScriptPriority(true)" :style="{'color': isPreScript ? 'red' : 'gray'}" style="font-size: medium; padding-left: 10px">前置</a><a>|</a><a href="javascript:void(0)" @click="changeScriptPriority(false)" :style="{'color': isPreScript ? 'gray' : 'red'}" style="font-size: medium">后置</a><a style="display: flex;flex-grow: 1;padding-left: 10px;font-size: medium;color: black">执行脚本 JavaScript</a>
+                      <a class="hint--top @cli-tool" style="font-size: small;" data-hint="测试" href="javascript:void(0)" @click="onClickTestScript()">
+                        <img class="icon" src="img/refresh.png"/>
+                      </a>
+                      <a class="hint--top @cli-tool" data-hint="添加脚本" style="font-size:xx-large; margin-bottom: 2px; color: black;"
+                         href="javascript:void(0)" @click="showExport(true, true, false, true)"> + </a>
+                      <a v-show="false" href="javascript:void(0)" style="font-size: small;" class="hint--top"  data-hint="上传/分享"  @click="showExport(true, true)">
+                        <svg class="icon">
+                          <use xlink:href="svg/icon.svg#share"></use>
+                        </svg>
+                      </a>
+                      <a class="hint--top @cli-tool" data-hint="隐藏" style="float: right; padding: 8px; margin-top: 2px; height: 100%"  href="javascript:void(0)" @click="showConfig(false, 13)">
+                        <svg class="icon close-icon"  >
+                          <use xlink:href="svg/icon.svg#close"></use>
+                        </svg>
+                      </a>
                     </div>
+
+                    <!--        v-model  不允许调用方法            -->
+                    <textarea id="vScript" style="width: 100%;height: 100%;" wrap="off"
+                              v-model="scripts[scriptType][scriptBelongId][isPreScript ? 'pre' : 'post'].script"
+                              placeholder="// JavaScript 脚本
+// 逻辑代码 ..
+
+function fun(arg0, arg1, arg2..) {
+  // TODO 获取 token 或 自定义断言 等逻辑
+}
+fun(true, 1, 'a'..);
+
+// .. 逻辑代码
+">
+                        </textarea>
+                  </div>
 
                 </div>
             </div>
@@ -661,7 +705,7 @@ My-Header: 'Secret' + Math.random() // 示例，代码执行结果作为实际�
         </svg>
 
         <input type="text" placeholder="请输入名称" v-model="exTxt.name" />
-        <div style="display: inline-block; margin-top: 6px; padding-bottom: 0px"><button @click="exportTxt(0)">{{isExportRemote ? '上传' : '下载'}}</button><button v-show="isExportRemote && (isExportRandom != true || isEditResponse != true)" style="margin-left: 6px" @click="exportTxt(1)">{{isExportRandom ? '发布简单接口' : '分享'}}</button></div>
+        <div style="display: inline-block; margin-top: 6px; padding-bottom: 0px"><button @click="exportTxt(0)">{{isExportRemote ? '上传' : '下载'}}</button><button v-show="isExportRemote && isExportScript != true && (isExportRandom != true || isEditResponse != true)" style="margin-left: 6px" @click="exportTxt(1)">{{isExportRandom ? '发布简单接口' : '分享'}}</button></div>
     </div>
 
     <!--弹出设置文本框-->
@@ -888,6 +932,7 @@ My-Header: 'Secret' + Math.random() // 示例，代码执行结果作为实际�
   var vWarning = document.getElementById("vWarning");
   var vComment = document.getElementById("vComment");
   var vHeader = document.getElementById("vHeader");
+  var vScript = document.getElementById("vScript");
   var vRandom = document.getElementById("vRandom");
   var vOutput = document.getElementById("vOutput");
 
