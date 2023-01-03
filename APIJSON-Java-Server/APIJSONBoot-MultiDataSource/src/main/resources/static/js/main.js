@@ -858,7 +858,7 @@
       host: '',
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
-      server: 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
+      server: "http://localhost:8080", // 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       // project: 'http://apijson.cn:8080',  // apijson.cn
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
@@ -3992,7 +3992,7 @@
             scripts.global = ss = {}
           }
 
-          var bs = ss['0']
+          var bs = ss['0'] || {}
           if (bs == null) {
             ss['0'] = bs = {}
           }
@@ -4680,6 +4680,7 @@
           }
         }
 
+        this.scriptBelongId = 0 // 解决可能的报错
         this.scriptType = type
         var bid = this.getCurrentScriptBelongId()
 
