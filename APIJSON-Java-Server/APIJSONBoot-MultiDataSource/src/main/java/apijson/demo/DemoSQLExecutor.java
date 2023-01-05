@@ -45,159 +45,163 @@ import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 
 
-/**SQL 执行器，支持连接池及多数据源
+/**
+ * SQL 执行器，支持连接池及多数据源
  * 具体见 https://github.com/Tencent/APIJSON/issues/151
+ *
  * @author Lemon
  */
 public class DemoSQLExecutor extends APIJSONSQLExecutor {
-  public static final String TAG = "DemoSQLExecutor";
+    public static final String TAG = "DemoSQLExecutor";
 
-  // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
-  public static final RedisTemplate<String, String> REDIS_TEMPLATE;
-  static {
-    REDIS_TEMPLATE = new RedisTemplate<>();
-    REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
-    REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
-    REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
-    REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
-//    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONObject>>(List.class));
-    REDIS_TEMPLATE.afterPropertiesSet();
-  }
+    // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
+    public static final RedisTemplate<String, String> REDIS_TEMPLATE;
+    static {
+        REDIS_TEMPLATE = new RedisTemplate<>();
+        REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
+        REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
+        REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+        REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+        //    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONObject>>(List.class));
+        REDIS_TEMPLATE.afterPropertiesSet();
+    }
 
-  //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
-  	@Override
-  	public List<JSONObject> getCache(String sql, SQLConfig config) {
-      List<JSONObject> list = super.getCache(sql, config);
-      if (list == null) {
-        list = JSON.parseArray(REDIS_TEMPLATE.opsForValue().get(sql), JSONObject.class);
-      }
-      return list;
-  	}
-  	@Override
-  	public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig config) {
-  		super.putCache(sql, list, config);
-        if (config != null && config.isMain()) {
-          if (config.isExplain() || RequestMethod.isHeadMethod(config.getMethod(), true)) {
-            REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), 10*60, TimeUnit.SECONDS);
-          } else {
-            String table = config.getTable();
-            REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), USER_.equals(table) || PRIVACY_.equals(table) ? 10*60 : 60, TimeUnit.SECONDS);
-          }
+    //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
+    @Override
+    public List<JSONObject> getCache(String sql, SQLConfig config) {
+        List<JSONObject> list = super.getCache(sql, config);
+        if (list == null) {
+            list = JSON.parseArray(REDIS_TEMPLATE.opsForValue().get(sql), JSONObject.class);
         }
-  	}
-  	@Override
-  	public synchronized void removeCache(String sql, SQLConfig config) {
-  		super.removeCache(sql, config);
+        return list;
+    }
+
+    @Override
+    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig config) {
+        super.putCache(sql, list, config);
+
+        String table = config != null && config.isMain() ? config.getTable() : null;
+        if (table != null && DemoSQLConfig.CONFIG_TABLE_LIST.contains(table) == false) {
+            if (config.isExplain() || RequestMethod.isHeadMethod(config.getMethod(), true)) {
+                REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), 10 * 60, TimeUnit.SECONDS);
+            } else {
+                REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), USER_.equals(table) || PRIVACY_.equals(table) ? 10 * 60 : 60, TimeUnit.SECONDS);
+            }
+        }
+    }
+
+    @Override
+    public synchronized void removeCache(String sql, SQLConfig config) {
+        super.removeCache(sql, config);
         if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
-          REDIS_TEMPLATE.expire(sql, 60, TimeUnit.SECONDS);
+            REDIS_TEMPLATE.expire(sql, 60, TimeUnit.SECONDS);
         } else {
-          REDIS_TEMPLATE.delete(sql);
+            REDIS_TEMPLATE.delete(sql);
         }
-  	}
+    }
 
-  @Override
-  public JSONObject execute(SQLConfig config, boolean unknownType) throws Exception {
-    JSONObject result = super.execute(config, unknownType);
-    RequestMethod method = config.getMethod();
-    if (method == RequestMethod.POST) { // 没必要，直接查就行了
+    @Override
+    public JSONObject execute(SQLConfig config, boolean unknownType) throws Exception {
+        JSONObject result = super.execute(config, unknownType);
+        RequestMethod method = config.getMethod();
+        if (method == RequestMethod.POST) { // 没必要，直接查就行了
 //      Object id = result.get(config.getIdKey());
 //      Object idIn = result.get(config.getIdKey() + "[]");
 //      SQLConfig cacheConfig = APIJSONRouterApplication.DEFAULT_APIJSON_CREATOR.createSQLConfig();
 //      cacheConfig.setMethod(RequestMethod.GET);
 //
-    }
-    else if (method == RequestMethod.PUT || method == RequestMethod.DELETE) { // RequestMethod.isQueryMethod(method) == false) {
-      config.setMethod(RequestMethod.GET);
-      boolean isPrepared = config.isPrepared();
-      removeCache(config.getSQL(false), config);
-      config.setPrepared(isPrepared);
-      config.setMethod(method);
-    }
-    return result;
-  }
-
-  // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-  // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
-  @Override
-  public Connection getConnection(SQLConfig config) throws Exception {
-    if ("NEBULA".equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
-      String uri = config.getDBUri();
-
-      int start = uri.indexOf("://");
-      String prefix = uri.substring(0, start);
-
-      uri = uri.substring(start + "://".length());
-      int end = uri.indexOf("/");
-      String space = uri.substring(end + 1);
-
-      Properties props = new Properties();
-      props.put("url", prefix + "://" + space);
-      props.put("graphSpace", space);
-
-      NebulaDriver driver = new NebulaDriver(uri.substring(0, end));
-      return driver.connect(prefix + "://" + space, props);
-      //    return DriverManager.getConnection("jdbc:nebula://JDBC_TEST_SPACE", "root", "nebula");
+        } else if (method == RequestMethod.PUT || method == RequestMethod.DELETE) { // RequestMethod.isQueryMethod(method) == false) {
+            config.setMethod(RequestMethod.GET);
+            boolean isPrepared = config.isPrepared();
+            removeCache(config.getSQL(false), config);
+            config.setPrepared(isPrepared);
+            config.setMethod(method);
+        }
+        return result;
     }
 
-    String datasource = config.getDatasource();
-    Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
+    // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    String key = datasource + "-" + config.getDatabase();
-    Connection c = connectionMap.get(key);
-    if (datasource != null && (c == null || c.isClosed())) {
-      try {
-        DataSource ds;
-        switch (datasource) {
-          case "HIKARICP":
-            ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
-            // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
-            break;
-          default:
-            Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
-            // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
-            switch (datasource) {
-              case "DRUID-TEST":
-                ds = dsMap.get("druidTestDataSource");
-                break;
-              case "DRUID-ONLINE":
-                ds = dsMap.get("druidOnlineDataSource");
-                break;
-              case "DRUID":
-                ds = dsMap.get("druidDataSource");
-                break;
-              default:
-                ds = null;
-                break;
-            }
-            break;
+    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
+    @Override
+    public Connection getConnection(SQLConfig config) throws Exception {
+        if ("NEBULA".equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
+            String uri = config.getDBUri();
+
+            int start = uri.indexOf("://");
+            String prefix = uri.substring(0, start);
+
+            uri = uri.substring(start + "://".length());
+            int end = uri.indexOf("/");
+            String space = uri.substring(end + 1);
+
+            Properties props = new Properties();
+            props.put("url", prefix + "://" + space);
+            props.put("graphSpace", space);
+
+            NebulaDriver driver = new NebulaDriver(uri.substring(0, end));
+            return driver.connect(prefix + "://" + space, props);
+            //    return DriverManager.getConnection("jdbc:nebula://JDBC_TEST_SPACE", "root", "nebula");
         }
 
-        connectionMap.put(key, ds == null ? null : ds.getConnection());
-      } catch (Exception e) {
-        Log.e(TAG, "getConnection   try { "
-          + "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
-          + "} catch (Exception e) = " + e.getMessage());
-      }
+        String datasource = config.getDatasource();
+        Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
+
+        String key = datasource + "-" + config.getDatabase();
+        Connection c = connectionMap.get(key);
+        if (datasource != null && (c == null || c.isClosed())) {
+            try {
+                DataSource ds;
+                switch (datasource) {
+                    case "HIKARICP":
+                        ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
+                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
+                        break;
+                    default:
+                        Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
+                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
+                        switch (datasource) {
+                            case "DRUID-TEST":
+                                ds = dsMap.get("druidTestDataSource");
+                                break;
+                            case "DRUID-ONLINE":
+                                ds = dsMap.get("druidOnlineDataSource");
+                                break;
+                            case "DRUID":
+                                ds = dsMap.get("druidDataSource");
+                                break;
+                            default:
+                                ds = null;
+                                break;
+                        }
+                        break;
+                }
+
+                connectionMap.put(key, ds == null ? null : ds.getConnection());
+            } catch (Exception e) {
+                Log.e(TAG, "getConnection   try { "
+                        + "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
+                        + "} catch (Exception e) = " + e.getMessage());
+            }
+        }
+
+        // 必须最后执行 super 方法，因为里面还有事务相关处理。
+        // 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
+        return super.getConnection(config);
     }
 
-    // 必须最后执行 super 方法，因为里面还有事务相关处理。
-    // 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
-    return super.getConnection(config);
-  }
+    // 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
+    //	@Override
+    //	protected String getKey(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table,
+    //			int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+    //		return ColumnUtil.compatOutputKey(super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap), config.getTable(), config.getMethod());
+    //	}
 
-  // 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
-  //	@Override
-  //	protected String getKey(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table,
-  //			int columnIndex, Map<String, JSONObject> childMap) throws Exception {
-  //		return ColumnUtil.compatOutputKey(super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap), config.getTable(), config.getMethod());
-  //	}
-
-  // 不需要隐藏字段这个功能时，取消注释来提升性能
-  //	@Override
-  //	protected boolean isHideColumn(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
-  //			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
-  //		return false;
-  //	}
+    // 不需要隐藏字段这个功能时，取消注释来提升性能
+    //	@Override
+    //	protected boolean isHideColumn(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+    //			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
+    //		return false;
+    //	}
 
 }
