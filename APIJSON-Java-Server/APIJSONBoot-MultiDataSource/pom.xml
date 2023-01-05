@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>5.4.0</version>
+    <version>6.0.0</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -19,13 +19,6 @@
     </properties>
 
     <dependencies>
-        <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
-        <dependency>
-            <groupId>javax.activation</groupId>
-            <artifactId>activation</artifactId>
-            <version>1.1.1</version>
-        </dependency>
-
         <!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -60,26 +53,26 @@
 
 
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-        <dependency>
-            <groupId>com.github.Tencent</groupId>
-            <artifactId>APIJSON</artifactId>
-            <version>5.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-framework</artifactId>
-            <version>5.4.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-column</artifactId>
-            <version>1.2.9</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-router</artifactId>
-            <version>1.1.0</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.Tencent</groupId>-->
+<!--            <artifactId>APIJSON</artifactId>-->
+<!--            <version>6.0.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-framework</artifactId>-->
+<!--            <version>6.0.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-column</artifactId>-->
+<!--            <version>1.3.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-router</artifactId>-->
+<!--            <version>1.2.0</version>-->
+<!--        </dependency>-->
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
         <!-- 需要用的数据库 JDBC 驱动 -->

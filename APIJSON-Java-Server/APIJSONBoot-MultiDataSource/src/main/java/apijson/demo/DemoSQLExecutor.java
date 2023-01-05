@@ -18,7 +18,6 @@ import apijson.JSON;
 import apijson.RequestMethod;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.vesoft.nebula.jdbc.impl.NebulaDriver;
 import com.zaxxer.hikari.HikariDataSource;
 
@@ -100,27 +99,8 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
         }
     }
 
-    @Override
-    public JSONObject execute(SQLConfig config, boolean unknownType) throws Exception {
-        JSONObject result = super.execute(config, unknownType);
-        RequestMethod method = config.getMethod();
-        if (method == RequestMethod.POST) { // 没必要，直接查就行了
-//      Object id = result.get(config.getIdKey());
-//      Object idIn = result.get(config.getIdKey() + "[]");
-//      SQLConfig cacheConfig = APIJSONRouterApplication.DEFAULT_APIJSON_CREATOR.createSQLConfig();
-//      cacheConfig.setMethod(RequestMethod.GET);
-//
-        } else if (method == RequestMethod.PUT || method == RequestMethod.DELETE) { // RequestMethod.isQueryMethod(method) == false) {
-            config.setMethod(RequestMethod.GET);
-            boolean isPrepared = config.isPrepared();
-            removeCache(config.getSQL(false), config);
-            config.setPrepared(isPrepared);
-            config.setMethod(method);
-        }
-        return result;
-    }
-
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
