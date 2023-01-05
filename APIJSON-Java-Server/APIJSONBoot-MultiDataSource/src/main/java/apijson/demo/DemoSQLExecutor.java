@@ -14,14 +14,20 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import apijson.JSON;
+import apijson.RequestMethod;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.support.spring.FastJsonRedisSerializer;
 import com.vesoft.nebula.jdbc.impl.NebulaDriver;
 import com.zaxxer.hikari.HikariDataSource;
 
+import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
@@ -29,6 +35,14 @@ import apijson.Log;
 import apijson.boot.DemoApplication;
 import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import static apijson.framework.APIJSONConstant.PRIVACY_;
+import static apijson.framework.APIJSONConstant.USER_;
 
 
 /**SQL 执行器，支持连接池及多数据源
@@ -38,19 +52,71 @@ import apijson.orm.SQLConfig;
 public class DemoSQLExecutor extends APIJSONSQLExecutor {
   public static final String TAG = "DemoSQLExecutor";
 
+  // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
+  public static final RedisTemplate<String, String> REDIS_TEMPLATE;
+  static {
+    REDIS_TEMPLATE = new RedisTemplate<>();
+    REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
+    REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
+    REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+    REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+//    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONObject>>(List.class));
+    REDIS_TEMPLATE.afterPropertiesSet();
+  }
+
   //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
-  //	@Override
-  //	public List<JSONObject> getCache(String sql, int type) {
-  //		return super.getCache(sql, type);
-  //	}
-  //	@Override
-  //	public synchronized void putCache(String sql, List<JSONObject> list, int type) {
-  //		super.putCache(sql, list, type);
-  //	}
-  //	@Override
-  //	public synchronized void removeCache(String sql, int type) {
-  //		super.removeCache(sql, type);
-  //	}
+  	@Override
+  	public List<JSONObject> getCache(String sql, SQLConfig config) {
+      List<JSONObject> list = super.getCache(sql, config);
+      if (list == null) {
+        list = JSON.parseArray(REDIS_TEMPLATE.opsForValue().get(sql), JSONObject.class);
+      }
+      return list;
+  	}
+  	@Override
+  	public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig config) {
+  		super.putCache(sql, list, config);
+        if (config != null && config.isMain()) {
+          if (config.isExplain() || RequestMethod.isHeadMethod(config.getMethod(), true)) {
+            REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), 10*60, TimeUnit.SECONDS);
+          } else {
+            String table = config.getTable();
+            REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), USER_.equals(table) || PRIVACY_.equals(table) ? 10*60 : 60, TimeUnit.SECONDS);
+          }
+        }
+  	}
+  	@Override
+  	public synchronized void removeCache(String sql, SQLConfig config) {
+  		super.removeCache(sql, config);
+        if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
+          REDIS_TEMPLATE.expire(sql, 60, TimeUnit.SECONDS);
+        } else {
+          REDIS_TEMPLATE.delete(sql);
+        }
+  	}
+
+  @Override
+  public JSONObject execute(SQLConfig config, boolean unknownType) throws Exception {
+    JSONObject result = super.execute(config, unknownType);
+    RequestMethod method = config.getMethod();
+    if (method == RequestMethod.POST) { // 没必要，直接查就行了
+//      Object id = result.get(config.getIdKey());
+//      Object idIn = result.get(config.getIdKey() + "[]");
+//      SQLConfig cacheConfig = APIJSONRouterApplication.DEFAULT_APIJSON_CREATOR.createSQLConfig();
+//      cacheConfig.setMethod(RequestMethod.GET);
+//
+    }
+    else if (method == RequestMethod.PUT || method == RequestMethod.DELETE) { // RequestMethod.isQueryMethod(method) == false) {
+      config.setMethod(RequestMethod.GET);
+      boolean isPrepared = config.isPrepared();
+      removeCache(config.getSQL(false), config);
+      config.setPrepared(isPrepared);
+      config.setMethod(method);
+    }
+    return result;
+  }
+
+  // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
   // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
   @Override
