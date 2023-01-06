@@ -39,8 +39,10 @@ apijson发送mq消息：
 }
 
 客户端接收消息：
+
 offset = 47, key = null, value = test-101
 offset = 48, key = null, value = test-100
 offset = 49, key = null, value = test-101
+
 
 用java代码方式，获取具体数据源，调用即可
