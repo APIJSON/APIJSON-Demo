@@ -14,16 +14,16 @@ Request表配置post权限
 ![image](https://user-images.githubusercontent.com/12228225/210956378-be095589-0ced-4317-bb46-6b296538f26e.png)
 
 apijson发送mq消息：
-单条
+单条<br/>
 {
-	"@datasource": "kafka",
+    "@datasource": "kafka",
     "Topic_User":{
         "message":"test-101"
     },
     "tag": "Topic_User",
     "@explain": false
-}
-多条
+}<br/>
+多条<br/>
 {
     "Topic_User[]": [
         {
@@ -40,9 +40,9 @@ apijson发送mq消息：
 
 客户端接收消息：
 
-offset = 47, key = null, value = test-101
-offset = 48, key = null, value = test-100
-offset = 49, key = null, value = test-101
+offset = 47, key = null, value = test-101<br/>
+offset = 48, key = null, value = test-100<br/>
+offset = 49, key = null, value = test-101<br/>
 
 
 用java代码方式，获取具体数据源，调用即可
