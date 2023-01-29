@@ -9,19 +9,31 @@
 ### 连接池 Demo
 [APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
 [APIJSONDemo-HikariCP](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-HikariCP) 为 APIJSON + SpringBoot + HikariCP + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
-[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP + PostgreSQL + SQLServer + TDengine + 达梦 的接近生产环境成品的多数据源 Demo， <br />
+[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP + Redis + PostgreSQL + SQLServer + TDengine + 达梦 的接近生产环境成品的多数据源 Demo， <br />
 通过 application.yml 文件配置数据库，并且把 [APIAuto](https://github.com/TommyLemon/APIAuto) 的源码放到了 [src/main/resources/static](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 目录，可以用浏览器打开本地主页 http://localhost:8080 来调试。 <br />
 
 ### 分库分表 Demo
-[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere  + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库。 <br />
+[APIJSONDemo-ShardingSphere](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-ShardingSphere) 为 APIJSON + SpringBoot + ShardingSphere + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml, application-sharding-databases.properties 等 文件配置数据库。 <br />
 
 ### 大数据与 OLAP 的 Demo
+[APIJSONDemo-Presto](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Presto) 为 APIJSON + SpringBoot + Presto 的最简单的初级使用 Demo； <br />
+[APIJSONDemo-Elasticsearch](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Elasticsearch) 为 APIJSON + SpringBoot + Elasticsearch 的最简单的初级使用 Demo； <br />
+[APIJSONDemo-MultiDataSource-Elasticsearch](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Elasticsearch) 为 APIJSON + SpringBoot + Elasticsearch 的最简单的初级使用 Demo； <br />
 [APIJSONBoot-BigData](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-BigData) 为 APIJSON + SpringBoot + Presto + Trino + Elasticsearch 等的接近生产环境成品的 Demo。 <br />
 
+### 缓存 Demo
+[APIJSONDemo-Redis](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Redis) 为 APIJSON + SpringBoot + MySQL + Redis 的最简单的初级使用 Demo； <br />
+[APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource) 为 APIJSON + SpringBoot + Druid + HikariCP + Redis + PostgreSQL + SQLServer + TDengine + 达梦 的接近生产环境成品的多数据源 Demo。 <br />
+
+### 消息队列 Demo
+[APIJSONDemo-MultiDataSource-Kafka](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-MultiDataSource-Kafka) 为 APIJSON + SpringBoot + MySQL + Kafka 的最简单的初级使用 Demo。 <br />
+
+### 动态脚本 Demo
+[APIJSONDemo-Script](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Script) 为 APIJSON + SpringBoot + MySQL + JavaScript + Lua 的最简单的初级使用 Demo。 <br />
 
 <br />
 
-**其中 APIJSONDemo [关闭了权限校验](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#L52-L54) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
+**其中 APIJSONDemo 系列 [关闭了权限校验](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONDemo/src/main/java/apijson/demo/DemoController.java#L52-L54) ，不需要配置权限即可体验 /get 这个万能查询接口。<br />
 新手建议先从 APIJSONDemo 入手体验，然后再转用 APIJSONBoot/APIJSONFinal。**
 
 Oracle, SQLServer 的 JDBC 驱动用了 GPL 类协议，所以示例项目的 pom.xml 都没有加它们的 Maven 依赖，需要自己加。<br />
