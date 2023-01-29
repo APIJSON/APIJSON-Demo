@@ -41,7 +41,6 @@ import apijson.orm.SQLConfig;
  */
 @Configuration
 @SpringBootApplication
-@EnableAutoConfiguration
 @EnableConfigurationProperties
 public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 

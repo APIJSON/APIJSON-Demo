@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijsondemo-multidatasource-kafka</artifactId>
-	<version>5.4.0</version>
+	<version>6.0.0</version>
 
 	<name>apijsondemo-multidatasource-kafka</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
@@ -32,7 +32,7 @@
 		<commons.codec.version>1.10</commons.codec.version>
 		<commons-collections4.version>4.4</commons-collections4.version>
 		<commons.configuration.version>1.10</commons.configuration.version>
-		<apijson.version>5.4.0</apijson.version>
+		<apijson.version>6.0.0</apijson.version>
 		<mysql.version>8.0.31</mysql.version>
 		<spring-context-support.version>5.3.18</spring-context-support.version>
 		<spring-boot-configuration-processor.version>2.6.6</spring-boot-configuration-processor.version>
@@ -42,13 +42,6 @@
 	</properties>
 
 	<dependencies>
-		<!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
-		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
-			<version>1.1.1</version>
-		</dependency>
-
 		<!-- 需要的 APIJSON 相关依赖 -->
 		<dependency>
             <groupId>com.github.Tencent</groupId>

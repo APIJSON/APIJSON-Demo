@@ -5,7 +5,6 @@
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-script</artifactId>
 	<version>6.0.0</version>
-	<packaging>jar</packaging>
 
 	<name>APIJSONDemo-Druid</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -19,18 +18,17 @@
 	</properties>
 
 	<dependencies>
-    <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
-    <dependency>
-      <groupId>javax.activation</groupId>
-      <artifactId>activation</artifactId>
-      <version>1.1.1</version>
-    </dependency>
 		<!-- 需要的 APIJSON 相关依赖 -->
-		<dependency>
-			<groupId>com.github.APIJSON</groupId>
-			<artifactId>apijson-framework</artifactId>
-			<version>6.0.0</version>
-		</dependency>
+        <dependency>
+            <groupId>com.github.Tencent</groupId>
+            <artifactId>APIJSON</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-framework</artifactId>
+            <version>6.0.0</version>
+        </dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
 		<dependency>

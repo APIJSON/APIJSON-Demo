@@ -45,7 +45,6 @@ import apijson.orm.SQLExecutor;
  */
 @Configuration
 @SpringBootApplication
-@EnableAutoConfiguration
 @EnableConfigurationProperties
 public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 	public static final String TAG = "DemoApplication";

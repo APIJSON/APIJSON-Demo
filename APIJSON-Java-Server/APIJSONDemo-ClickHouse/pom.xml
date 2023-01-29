@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>5.4.0</version>
+	<version>6.0.0</version>
 
 	<name>APIJSONDemo-ClickHouse</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
@@ -17,25 +17,18 @@
 	</properties>
 
 	<dependencies>
-        <!-- JDK 11+ 需要，否则启动报错 NoClassDefFoundError: javax/activation/UnsupportedDataTypeException -->
-        <dependency>
-          <groupId>javax.activation</groupId>
-          <artifactId>activation</artifactId>
-          <version>1.1.1</version>
-        </dependency>
-
 		<!-- 需要的 APIJSON 相关依赖 -->
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>5.4.0</version>
+            <version>6.0.0</version>
         </dependency>
-		<dependency>
-			<groupId>com.github.APIJSON</groupId>
-			<artifactId>apijson-framework</artifactId>
-			<version>5.4.0</version>
-		</dependency>
-
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-framework</artifactId>
+            <version>6.0.0</version>
+        </dependency>
+		
 		<!-- 需要用的数据库 JDBC 驱动 -->
         <dependency>
             <groupId>cc.blynk.clickhouse</groupId>

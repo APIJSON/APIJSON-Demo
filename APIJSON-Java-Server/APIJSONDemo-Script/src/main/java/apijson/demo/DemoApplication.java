@@ -45,7 +45,6 @@ import apijson.orm.script.ScriptExecutor;
  */
 @Configuration
 @SpringBootApplication
-@EnableAutoConfiguration
 @EnableConfigurationProperties
 public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
 
