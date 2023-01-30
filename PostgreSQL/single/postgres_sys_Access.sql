@@ -2,7 +2,7 @@ create table "Access"
 (
     id     integer                                                                                 not null
         primary key,
-    schema varchar(100), default null,
+    schema varchar(100) default null,
     debug  integer     default 0                                                                   not null,
     name   varchar(50) default '实际表名，例如 apijson_user'::character varying                           not null,
     alias  text,
@@ -13,11 +13,34 @@ create table "Access"
     post   text        default '["OWNER", "ADMIN"]'::text                                          not null,
     put    text        default '["OWNER", "ADMIN"]'::text                                          not null,
     delete text        default '["OWNER", "ADMIN"]'::text                                          not null,
-    date   text        default CURRENT_TIMESTAMP                                                   not null
+    date   text        default CURRENT_TIMESTAMP                                                   not null,
+    detail text        default null
 );
 
+comment on column "Access".id is '唯一标识';
+
+comment on column "Access".debug is '是否为调试表，只允许在开发环境使用，测试和线上环境禁用';
+
+comment on column "Access".alias is '外部调用的表别名，例如 User';
+
+comment on column "Access".get is '允许 get 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]
+用 JSON 类型不能设置默认值，反正权限对应的需求是明确的，也不需要自动转 JSONArray。
+TODO: 直接 LOGIN,CONTACT,CIRCLE,OWNER 更简单，反正是开发内部用，不需要复杂查询。';
+
+comment on column "Access".head is '允许 head 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+
+comment on column "Access".gets is '允许 gets 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+
+comment on column "Access".heads is '允许 heads 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+
+comment on column "Access".post is '允许 post 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+
+comment on column "Access".put is '允许 put 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
 
 comment on column "Access".delete is '允许 delete 的角色列表，例如 ["LOGIN", "CONTACT", "CIRCLE", "OWNER"]';
+
+comment on column "Access".date is '创建时间';
+
 
 alter table "Access"
     owner to postgres;

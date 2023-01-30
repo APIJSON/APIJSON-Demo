@@ -17,7 +17,38 @@ create table "Document"
     detail          text
 );
 
-		应该用adminId，只有当登录账户是管理员时才能操作文档。
+
+comment on column "Document".id is '唯一标识';
+
+comment on column "Document"."userId" is '用户id
+        应该用adminId，只有当登录账户是管理员时才能操作文档。
+        需要先建Admin表，新增登录等相关接口。';
+
+comment on column "Document".version is '接口版本号
+        <=0 - 不限制版本，任意版本都可用这个接口
+        >0 - 在这个版本添加的接口';
+
+comment on column "Document".name is '接口名称';
+
+comment on column "Document".url is '请求地址';
+
+comment on column "Document".request is '请求
+        用json格式会导致强制排序，而请求中引用赋值只能引用上面的字段，必须有序。';
+
+comment on column "Document".response is '标准返回结果JSON
+        用json格式会导致强制排序，而请求中引用赋值只能引用上面的字段，必须有序。';
+
+comment on column "Document".header is '请求头 Request Header：         key: value //注释';
+
+comment on column "Document".date is '创建时间';
+
+comment on column "Document".apijson is '从 request 映射为实际的 APIJSON 请求 JSON';
+
+comment on column "Document".type is 'PARAM - GET  url parameters,\nFORM - POST  application/www-x-form-url-encoded,\nJSON - POST  application/json';
+
+comment on column "Document".sqlauto is '用于 SQLAuto 测试的 SQL 语句';
+
+
 alter table "Document"
     owner to postgres;
 
