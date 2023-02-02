@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-script</artifactId>
-	<version>6.0.0</version>
+	<version>6.0.1</version>
 
 	<name>APIJSONDemo-Druid</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -27,7 +27,7 @@
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>6.0.0</version>
+			<version>6.0.1</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
