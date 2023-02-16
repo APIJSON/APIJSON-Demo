@@ -102,6 +102,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 		// 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`
+		RAW_MAP.put("toDate", "");  // "@column": "date;date_format('2020-01-01','%Y-%m-%d'):toDate", "@having": "(date > toDate)", "@raw": "@column,@having"
 		RAW_MAP.put("to.momentId", "`to`.`momentId`");  // 最终以 `to`.`userId` 拼接 SQL，相比以上写法可以让前端写起来更简单
 		RAW_MAP.put("(`Comment`.`userId`=`to`.`userId`)", "");  // 已经是一个条件表达式了，用 () 包裹是为了避免 JSON 中的 key 拼接在前面导致 SQL 出错
 		RAW_MAP.put("sum(if(userId%2=0,1,0))", "");  // 超过单个函数的 SQL 表达式
@@ -344,7 +345,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//	}
 
 	// 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库。5.0.0+ 重写以下方法，4.9.1 及以下改为重写 getValue(String)
-	//	@Override
+	//	@Override // 如果是查询，可以把 if 内 isQueryMethod 的判断去掉或者 boolean 值取反。
 	//	protected Object getValue(String key, String column, Object value) {
 	//		if (isOracle() && RequestMethod.isQueryMethod(getMethod()) == false && value instanceof String) {
 	//			try {
