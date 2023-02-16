@@ -30,7 +30,6 @@ import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Join;
