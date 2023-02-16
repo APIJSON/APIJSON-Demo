@@ -19,11 +19,13 @@ import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 
+import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import apijson.Log;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
@@ -273,25 +275,26 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
     //		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
     //	}
 
-    // 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库
-    //	public Object getValue(@NotNull Object value) {
-    //		if (isOracle() && RequestMethod.isQueryMethod(getMethod()) == false && value instanceof String) {
-    //			try {
-    //				SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    //				parser.parse((String) value);
-    //				if (isPrepared()) {
-    //					preparedValueList.add(value);
-    //				}
-    //				return "to_date(" + (isPrepared() ? "?" : getSQLValue(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
-    //			}
-    //			catch (Throwable e) {
-    //				if (Log.DEBUG) {
-    //					e.printStackTrace();
-    //				}
-    //			}
-    //		}
-    //		return super.getValue(value);
-    //	}
+    // 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库。5.0.0+ 重写以下方法，4.9.1 及以下改为重写 getValue(String)
+    //    	@Override
+    //    	protected Object getValue(String key, String column, Object value) {
+    //    		if (isOracle() && RequestMethod.isQueryMethod(getMethod()) == false && value instanceof String) {
+    //    			try {
+    //    				SimpleDateFormat parser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    //    				parser.parse((String) value);
+    //    				if (isPrepared()) {
+    //    					preparedValueList.add(value);
+    //    				}
+    //    				return "to_date(" + (isPrepared() ? "?" : getSQLValue(value)) + ",'yyyy-mm-dd hh24:mi:ss')";
+    //    			}
+    //    			catch (Throwable e) {
+    //    				if (Log.DEBUG) {
+    //    					e.printStackTrace();
+    //    				}
+    //    			}
+    //    		}
+    //    		return super.getValue(key, column, value);
+    //    	}
 
 
     @Override
