@@ -26,6 +26,9 @@ rediSQL java:<br/>
 https://github.com/RedBeardLab/JRediSQL<br/>
 https://www.youtube.com/watch?v=YRusC-AIq_g
 
+本示例 用 redis cluster rediSQL, 具体redis集群模式, 开发人员自行控制<br/>
+将 libredis_sql.so 导入redis.config<br/>
+--loadmodule /etc/redis/libredis_sql.so<br/>
 rediSQL 创建数据库表命令 <br/>
 ```
 REDISQL.EXEC DB "CREATE TABLE REDIS_TABLE_A(id TEXT, A INT, B TEXT, C TEXT, userId TEXT);"
