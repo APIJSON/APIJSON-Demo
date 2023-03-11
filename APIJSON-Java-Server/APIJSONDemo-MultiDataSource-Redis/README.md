@@ -1,154 +1,46 @@
 # APIJSONDemo
 
-## 支持多数据源-rediSQL
+## 支持多数据源-redis、rediSQL
+redis cluster、sentinel、single模式
 
-redis table 表名规范: REDIS_TABLE_* <br/>
-开发人员可自行控制 <br/>
-JedisBuildData <br/>
-public static final String REDIS_TABLE_KEY = "REDIS_TABLE_"; // rediSql table prefix <br/>
+## 具体使用
+抽空补充到 auto apijson, 方便大家在线测试
 
-Access、Request配置 访问操作权限 <br/>
+## Access表
+```sql
+INSERT INTO `housekeeping`.`access` (`id`, `debug`, `name`, `alias`, `get`, `head`, `gets`, `heads`, `post`, `put`, `delete`, `date`, `detail`, `appId`, `userId`, `deletedKey`, `deletedValue`) VALUES (70, 0, 'REDIS_STRING', NULL, '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '2022-12-23 17:41:40', NULL, NULL, NULL, NULL, NULL);
+INSERT INTO `housekeeping`.`access` (`id`, `debug`, `name`, `alias`, `get`, `head`, `gets`, `heads`, `post`, `put`, `delete`, `date`, `detail`, `appId`, `userId`, `deletedKey`, `deletedValue`) VALUES (72, 0, 'REDIS_KEYS', NULL, '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '2022-12-24 10:19:29', 'redis', '123', '4732209c-5785-4827-b532-5092f154fd94', NULL, NULL);
+INSERT INTO `housekeeping`.`access` (`id`, `debug`, `name`, `alias`, `get`, `head`, `gets`, `heads`, `post`, `put`, `delete`, `date`, `detail`, `appId`, `userId`, `deletedKey`, `deletedValue`) VALUES (73, 0, 'REDIS_LIST', NULL, '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '2022-12-25 12:53:01', 'redis', '123', '4732209c-5785-4827-b532-5092f154fd94', NULL, NULL);
+INSERT INTO `housekeeping`.`access` (`id`, `debug`, `name`, `alias`, `get`, `head`, `gets`, `heads`, `post`, `put`, `delete`, `date`, `detail`, `appId`, `userId`, `deletedKey`, `deletedValue`) VALUES (74, 0, 'REDIS_HASH', NULL, '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '2022-12-25 12:53:17', 'redis', '123', '4732209c-5785-4827-b532-5092f154fd94', NULL, NULL);
+INSERT INTO `housekeeping`.`access` (`id`, `debug`, `name`, `alias`, `get`, `head`, `gets`, `heads`, `post`, `put`, `delete`, `date`, `detail`, `appId`, `userId`, `deletedKey`, `deletedValue`) VALUES (75, 0, 'REDIS_SET', NULL, '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '2022-12-25 12:53:24', 'redis', '123', '4732209c-5785-4827-b532-5092f154fd94', NULL, NULL);
+INSERT INTO `housekeeping`.`access` (`id`, `debug`, `name`, `alias`, `get`, `head`, `gets`, `heads`, `post`, `put`, `delete`, `date`, `detail`, `appId`, `userId`, `deletedKey`, `deletedValue`) VALUES (76, 0, 'REDIS_ZSET', NULL, '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"LOGIN\",\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '[\"OWNER\", \"ADMIN\"]', '2022-12-25 12:53:31', 'redis', '123', '4732209c-5785-4827-b532-5092f154fd94', NULL, NULL);
 
-rediSQL安装使用 <br/>
-https://github.com/RedBeardLab/rediSQL
-
-官方docker安装 <br/>
-docker pull dalongrong/redisql
-docker run -itd --name redisql -p 6399:6379  dalongrong/redisql
-
-rediSQL注意事项 <br/>
-rediSQL免费版有后遥控制,每个小时会发送 redist info 统计信息<br/>
-<img width="1000" alt="image" src="https://user-images.githubusercontent.com/12228225/219613765-e8d4d963-035b-4352-9552-1ce3a14093e4.png">
-
-可以配host ,弄一个nginx 本地代理 解决,或者 项目自己重新打包<br/>
-
-rediSQL java:<br/>
-https://github.com/RedBeardLab/JRediSQL<br/>
-https://www.youtube.com/watch?v=YRusC-AIq_g
-
-本示例 用 redis cluster rediSQL, 具体redis集群模式, 开发人员自行控制<br/>
-将 libredis_sql.so 导入redis.config<br/>
---loadmodule /etc/redis/libredis_sql.so<br/>
-rediSQL 创建数据库表命令 <br/>
-```
-REDISQL.EXEC DB "CREATE TABLE REDIS_TABLE_A(id TEXT, A INT, B TEXT, C TEXT, userId TEXT);"
-
-REDISQL.EXEC DB "INSERT INTO REDIS_TABLE_A(id,A,B,C,userId) VALUES('1', 3, '1c', 'bar','1');"
-
-
-REDISQL.EXEC DB "SELECT * FROM REDIS_TABLE_A;"
-
-REDISQL.EXEC DB "drop table REDIS_TABLE_A;"
 ```
 
-测试用例<br/>
-```
-{
-	"@datasource": "redisCluster",
-    "REDIS_TABLE_A":{
-        "A": 1,
-        "B": "B",
-        "C": "C"
-    },
-    "tag": "REDIS_TABLE_A",
-    "@explain": true,
-    "format": true
-}
-
-{
-    "REDIS_TABLE_A[]": [
-        {
-            "A": 5,
-            "B": "5B",
-            "C": "5C"
-        },
-        {
-            "A": 6,
-            "B": "6B",
-            "C": "6C"
-        },
-        {
-            "A": 7,
-            "B": "7B",
-            "C": "7C"
-        }
-    ],
-    "tag": "REDIS_TABLE_A[]",
-    "@datasource": "redisCluster",
-    "@explain": true,
-    "format": true
-}
-
-{
-    "@datasource": "redisCluster",
-    "REDIS_TABLE_A": {
-        "id": "f2621698-99fa-4698-9fb0-8c7b585da403",
-        "A": 1,
-        "B": "1B"
-    },
-    "tag": "REDIS_TABLE_A",
-    "@explain": true,
-    "format": true
-}
-
-Request 表配置 
-{"REDIS_TABLE_A[]": [{"MUST": "A,B", "REFUSE": "id"}], "INSERT": {"@role": "OWNER,ADMIN","@combine": "A | B"}}
-
-{
-    "@datasource": "redisCluster",
-    "REDIS_TABLE_A": {
-        "A": 1,
-        "B": "1B",
-        "C": "1-1-1C"
-    },
-    "tag": "REDIS_TABLE_A",
-    "@explain": true,
-    "format": true
-}
-
-{
-    "@datasource": "redisCluster",
-    "REDIS_TABLE_A:a": {
-        "@column":"a,b,c",
-        "b$": "7B%"
-    },
-    "@explain": true,
-    "format": true
-}
-
-{
-    "@datasource": "redisCluster",
-    "REDIS_TABLE_A:a[]": {
-        "REDIS_TABLE_A": {
-            "@column":"a,b,c"
-            //"b$": "1%"
-        },
-        "page":0,
-        "count":3,
-        "query": 2
-    },
-    "total@": "/REDIS_TABLE_A:a[]/total",
-    "@explain": true,
-    "format": true
-}
-
-{
-    "@datasource": "redisCluster",
-    "REDIS_TABLE_A": {
-        "id": "f2621698-99fa-4698-9fb0-8c7b585da403"
-    },
-    "tag": "REDIS_TABLE_A",
-    "@explain": true,
-    "format": true
-}
-
-{
-    "@datasource": "redisCluster",
-    "REDIS_TABLE_A:a": {
-        "id{}": ["1","eb3dd7c9-bab6-410c-b70a-cbbc3bd12896", "c83b3cfa-034e-4a9e-b2cf-83520db1ce05"]
-    },
-    "tag": "REDIS_TABLE_A[]",
-    "@explain": true,
-    "format": true
-}
+## Request表
+```sql
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (188, 0, 1, 'POST', 'REDIS_KEYS', '{\"UPDATE\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}, \"REFUSE\": \"id\"}', '新增', '2022-12-24 10:21:00', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (189, 0, 1, 'POST', 'REDIS_KEYS[]', '{\"REDIS_KEYS[]\": [{\"REFUSE\": \"id\"}], \"UPDATE\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}}', '批量新增', '2022-12-24 10:21:00', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (190, 0, 1, 'PUT', 'REDIS_KEYS', '{\"REDIS_KEYS\":{ \"REFUSE\": \"userId\", \"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '修改', '2022-12-24 10:21:00', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (191, 0, 1, 'DELETE', 'REDIS_KEYS', '{\"REDIS_KEYS\":{\"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '批量删除', '2022-12-24 10:21:00', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (192, 0, 1, 'POST', 'REDIS_HASH', '{\"UPDATE\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}, \"REFUSE\": \"id\"}', '新增', '2022-12-25 12:54:53', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (193, 0, 1, 'POST', 'REDIS_HASH[]', '{\"REDIS_HASH[]\": [{\"REFUSE\": \"id\"}], \"UPDATE\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}}', '批量新增', '2022-12-25 12:54:53', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (194, 0, 1, 'PUT', 'REDIS_HASH', '{\"REDIS_HASH\":{ \"REFUSE\": \"userId\", \"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '修改', '2022-12-25 12:54:53', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (195, 0, 1, 'DELETE', 'REDIS_HASH', '{\"REDIS_HASH\":{\"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '批量删除', '2022-12-25 12:54:53', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (196, 0, 1, 'POST', 'REDIS_LIST', '{\"UPDATE\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}, \"REFUSE\": \"id\"}', '新增', '2022-12-25 12:55:15', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (197, 0, 1, 'POST', 'REDIS_LIST[]', '{\"REDIS_LIST[]\": [{\"REFUSE\": \"id\"}], \"UPDATE\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}}', '批量新增', '2022-12-25 12:55:15', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (198, 0, 1, 'PUT', 'REDIS_LIST', '{\"REDIS_LIST\":{ \"REFUSE\": \"userId\", \"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '修改', '2022-12-25 12:55:15', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (199, 0, 1, 'DELETE', 'REDIS_LIST', '{\"REDIS_LIST\":{\"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '批量删除', '2022-12-25 12:55:15', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (200, 0, 1, 'POST', 'REDIS_SET', '{\"UPDATE\": {\"@role\": \"OWNER,ADMIN\"}, \"REFUSE\": \"id\"}', '新增', '2022-12-25 12:55:34', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (201, 0, 1, 'POST', 'REDIS_SET[]', '{\"REDIS_SET[]\": [{\"REFUSE\": \"id\"}], \"UPDATE\": {\"@role\": \"OWNER,ADMIN\"}}', '批量新增', '2022-12-25 12:55:34', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (202, 0, 1, 'PUT', 'REDIS_SET', '{\"REDIS_SET\":{ \"REFUSE\": \"userId\", \"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '修改', '2022-12-25 12:55:34', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (203, 0, 1, 'DELETE', 'REDIS_SET', '{\"REDIS_SET\":{\"INSERT\": {\"@role\": \"OWNER,ADMIN\"}} }', '批量删除', '2022-12-25 12:55:34', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (204, 0, 1, 'POST', 'REDIS_ZSET', '{\"UPDATE\": {\"@role\": \"OWNER,ADMIN\"}, \"REFUSE\": \"id\"}', '新增', '2022-12-25 12:55:51', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (205, 0, 1, 'POST', 'REDIS_ZSET[]', '{\"REDIS_ZSET[]\": [{\"REFUSE\": \"id\"}], \"UPDATE\": {\"@role\": \"OWNER,ADMIN\"}}', '批量新增', '2022-12-25 12:55:51', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (206, 0, 1, 'PUT', 'REDIS_ZSET', '{\"REDIS_ZSET\":{ \"REFUSE\": \"userId\", \"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '修改', '2022-12-25 12:55:51', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (207, 0, 1, 'DELETE', 'REDIS_ZSET', '{\"REDIS_ZSET\":{\"INSERT\": {\"@role\": \"OWNER,ADMIN\"}} }', '批量删除', '2022-12-25 12:55:51', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (208, 0, 1, 'POST', 'REDIS_STRING', '{\"UPDATE\": {\"@role\": \"OWNER,ADMIN\"}, \"REFUSE\": \"id\"}', '新增', '2022-12-25 13:16:23', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (209, 0, 1, 'POST', 'REDIS_STRING[]', '{\"REDIS_STRING[]\": [{\"REFUSE\": \"id\"}], \"UPDATE\": {\"@role\": \"OWNER,ADMIN\"}}', '批量新增', '2022-12-25 13:16:23', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (210, 0, 1, 'PUT', 'REDIS_STRING', '{\"REDIS_STRING\":{ \"REFUSE\": \"userId\", \"INSERT\": {\"@role\": \"OWNER,ADMIN\",\"@combine\": \"key,keys\"}} }', '修改', '2022-12-25 13:16:23', '2332', '4732209c-5785-4827-b532-5092f154fd94');
+INSERT INTO `housekeeping`.`request` (`id`, `debug`, `version`, `method`, `tag`, `structure`, `detail`, `date`, `appId`, `userId`) VALUES (211, 0, 1, 'DELETE', 'REDIS_STRING', '{\"REDIS_STRING\":{\"INSERT\": {\"@role\": \"OWNER,ADMIN\"}} }', '批量删除', '2022-12-25 13:16:23', '2332', '4732209c-5785-4827-b532-5092f154fd94');
 ```
