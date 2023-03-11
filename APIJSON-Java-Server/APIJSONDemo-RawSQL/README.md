@@ -1,5 +1,5 @@
 ## 使用
-https://github.com/Tencent/APIJSON/issues/510#issuecomment-1445774929
+[apijson 支持sql语句模版, 传递参数, 执行sql语句](https://github.com/Tencent/APIJSON/issues/510#issuecomment-1445774929)
 
 ## 数据库配置
 ```sql
