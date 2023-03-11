@@ -12,9 +12,6 @@ import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.jedis.JedisSentinelPool;
 
-/***
- * cluster模式 https://cloud.tencent.com/developer/article/1985822
- */
 @Data
 @Slf4j
 public class RedisDataSource {
@@ -45,7 +42,7 @@ public class RedisDataSource {
 	public void createSingle() {
 		// 创建Jedis配置对象
 		String host = "127.0.0.1";
-		String password = "root";
+		String password = "";
 		Integer port = 6379;
 		JedisPoolConfig config = new JedisPoolConfig();
 		config.setMaxTotal(MAX_TOTAL);
@@ -62,9 +59,9 @@ public class RedisDataSource {
 	}
 	
 	public void createSentinel() {
-		Set<String> sentinels = new HashSet<String>(Arrays.asList("47.108.49.213:26379", "47.108.49.213:26380", "47.108.49.213:26381"));
+		Set<String> sentinels = new HashSet<String>(Arrays.asList("xxx:26379", "xxx:26380", "xxx:26381"));
 		// 创建Jedis配置对象
-		String password = "redis_pwd";
+		String password = "";
 		Integer port = 6379;
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		poolConfig.setMaxTotal(MAX_TOTAL);
@@ -84,12 +81,12 @@ public class RedisDataSource {
 	public void createCluster() {
 		Set<HostAndPort> jedisClusterNode = new HashSet<HostAndPort>();
 		String password = "ztzh@smart666";
-		jedisClusterNode.add(new HostAndPort("47.108.49.213", 6371));
-		jedisClusterNode.add(new HostAndPort("47.108.49.213", 6372));
-		jedisClusterNode.add(new HostAndPort("47.108.49.213", 6373));
-		jedisClusterNode.add(new HostAndPort("47.108.49.213", 6374));
-		jedisClusterNode.add(new HostAndPort("47.108.49.213", 6375));
-		jedisClusterNode.add(new HostAndPort("47.108.49.213", 6376));
+		jedisClusterNode.add(new HostAndPort("xxx", 6371));
+		jedisClusterNode.add(new HostAndPort("xxx", 6372));
+		jedisClusterNode.add(new HostAndPort("xxx", 6373));
+		jedisClusterNode.add(new HostAndPort("xxx", 6374));
+		jedisClusterNode.add(new HostAndPort("xxx", 6375));
+		jedisClusterNode.add(new HostAndPort("xxx", 6376));
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		/*
 		 * 注意： 在高版本的jedis jar包，比如本版本2.9.0，JedisPoolConfig没有setMaxActive和setMaxWait属性了
