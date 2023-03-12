@@ -23,6 +23,15 @@ import apijson.router.APIJSONRouterVerifier;
  */
 public class DemoVerifier extends APIJSONRouterVerifier<Long> {  // APIJSONVerifier<Long> {
 	public static final String TAG = "DemoVerifier";
+	
+	static { 
+		// 可注册 COMPILE_MAP 来简化正则校验，以别名代替表达式
+		COMPILE_MAP.put("PHONE", Pattern.compile("^(13[0-9]|14[01456879]|15[0-35-9]|16[2567]|17[0-8]|18[0-9]|19[0-35-9])\\d{8}$"));
+		COMPILE_MAP.put("QQ", Pattern.compile("[1-9][0-9]{4,}"));
+		COMPILE_MAP.put("EMAIL", Pattern.compile("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"));
+		COMPILE_MAP.put("IDCARD", Pattern.compile("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)"));
+		COMPILE_MAP.put("TEL", Pattern.compile("(^\\(\\d{3,4}-)|\\d{3,4}-\\)?\\d{7,8}$"));
+	}
 
 	// 重写方法来自定义字段名等	
 	//	@Override
