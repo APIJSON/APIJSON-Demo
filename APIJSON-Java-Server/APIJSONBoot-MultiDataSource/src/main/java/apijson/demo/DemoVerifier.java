@@ -16,6 +16,8 @@ package apijson.demo;
 
 import apijson.router.APIJSONRouterVerifier;
 
+import java.util.regex.Pattern;
+
 
 /**安全校验器，校验请求参数、角色与权限等
  * 具体见 https://github.com/Tencent/APIJSON/issues/12
