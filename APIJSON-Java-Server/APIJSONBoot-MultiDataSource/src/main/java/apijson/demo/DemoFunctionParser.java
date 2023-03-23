@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -246,5 +247,11 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		return null;
 	}
 
-
+	// apijson-framework 5.4.0 以下取消注释，兼容 Function 表中 name = getMethodDefinition 的记录（或者删除这条记录，如果使用 UnitAuto，则版本要在 2.7.2 以下）
+	//	public String getMethodDefinition(JSONObject request) throws IllegalArgumentException, ClassNotFoundException, IOException {
+	//		return super.getMethodDefination(request);
+	//	}
+	//	public String getMethodDefinition(JSONObject request, String method, String arguments, String type, String exceptions, String language) throws IllegalArgumentException, ClassNotFoundException, IOException {
+	//		return super.getMethodDefination(request, method, arguments, type, exceptions, language);
+	//	}
 }

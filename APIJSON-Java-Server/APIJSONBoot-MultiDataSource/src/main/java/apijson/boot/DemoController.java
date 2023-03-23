@@ -1371,99 +1371,147 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             long startTime = System.currentTimeMillis();
 
             JSONObject req = JSON.parseObject(request);
+            String sql = req == null ? null : req.getString("sql");
+            if (StringUtil.isEmpty(sql)) {
+                throw new IllegalArgumentException("SQL 不能为空！");
+            }
+
             String database = req.getString("database");
+            String schema = req.getString("schema");
             String uri = req.getString("uri");
             String account = req.getString("account");
             String password = req.getString("password");
-            String sql = req.getString("sql");
             JSONArray arg = req.getJSONArray("args");
             try {
-                String trimmedSQL = sql.trim();
+                if (StringUtil.isEmpty(database, true)) {
+
+                    int start = uri.indexOf("://");
+                    String prefix = uri.substring(0, start);
+                    int mid = prefix.lastIndexOf(":");
+                    if (mid >= 0) {
+                        prefix = prefix.substring(mid + 1);
+                    }
+
+                    if (DemoSQLExecutor.DATABASE_INFLUXDB.equalsIgnoreCase(prefix)) {
+                        database = prefix.toUpperCase();
+
+                        int end = uri.lastIndexOf("/");
+                        if (end >= 0) {
+                            if (StringUtil.isEmpty(schema, true)) {
+                                schema = uri.substring(end + 1);
+                            }
+                            uri = uri.substring(0, end);
+                        }
+
+                        uri = "http" + uri.substring(start);
+
+                        account = "root";
+                        password = "apijson@123";
+                    } else if (DemoSQLExecutor.DATABASE_NEBULA.equalsIgnoreCase(prefix)) {
+                        database = prefix.toUpperCase();
+                    }
+                }
+
+
+                String trimmedSQL = sql == null ? null : sql.trim();
 
                 List<Object> valueList = arg;
 
                 DemoSQLExecutor executor = new DemoSQLExecutor();
                 DemoSQLConfig config = new DemoSQLConfig();
 
-                config.setDatabase(database); // "NEBULA"); //
+                config.setDatabase(database);
+                config.setSchema(schema);
                 config.setDBUri(uri);
                 config.setDBAccount(account);
                 config.setDBPassword(password);
                 config.setPrepared(true);
                 config.setPreparedValueList(valueList);
+                config.setSql(sql);
 
-                String sqlPrefix = trimmedSQL.length() >= 7 ? trimmedSQL.substring(0, 7).toUpperCase() : "";
+                String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
                 boolean isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
 
-                long executeStartTime = System.currentTimeMillis();
+                JSONArray arr = null;
 
-
-                Statement statement = executor.getStatement(config, trimmedSQL);
-                if (statement instanceof PreparedStatement) {
-                    if (EXECUTE_STRICTLY) {
-                        if (isWrite) {
-                            ((PreparedStatement) statement).executeUpdate();
-                        } else {
-                            ((PreparedStatement) statement).executeQuery();
-                        }
-                    }
-                    else {
-                        ((PreparedStatement) statement).execute();
-                    }
-                } else {
-                    if (arg != null && ! arg.isEmpty()) {
-                        throw new UnsupportedOperationException("非预编译模式不允许传参 arg ！");
-                    }
-
-                    if (EXECUTE_STRICTLY) {
-                        if (isWrite) {
-                            statement.executeUpdate(sql);
-                        } else {
-                            statement.executeQuery(sql);
-                        }
-                    }
-                    else {
-                        statement.execute(sql);
-                    }
-                }
-
-                long executeDuration = System.currentTimeMillis() - executeStartTime;
-
-                ResultSet rs = statement.getResultSet();
-                ResultSetMetaData rsmd = rs == null ? null : rs.getMetaData();
-                int length = rsmd == null ? 0 : rsmd.getColumnCount();
-
-                JSONArray arr = new JSONArray();
-
+                long updateCount = 0;
+                long executeDuration = 0;
                 long cursorDuration = 0;
                 long rsDuration = 0;
+                long executeStartTime = System.currentTimeMillis();
 
-                long cursorStartTime = System.currentTimeMillis();
-                while (rs != null && rs.next()) {
-                    cursorDuration += System.currentTimeMillis() - cursorStartTime;
+                if (DemoSQLExecutor.DATABASE_INFLUXDB.equals(database)) {
+                   JSONObject result = executor.execute(config, false);
+                   if (isWrite) {
+                       updateCount = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
+                   } else {
+                       arr = result == null ? null : result.getJSONArray(DemoSQLExecutor.KEY_RAW_LIST);
+                   }
+                } else {
+                    Statement statement = executor.getStatement(config, trimmedSQL);
+                    if (statement instanceof PreparedStatement) {
+                        if (EXECUTE_STRICTLY) {
+                            if (isWrite) {
+                                ((PreparedStatement) statement).executeUpdate();
+                            } else {
+                                ((PreparedStatement) statement).executeQuery();
+                            }
+                        } else {
+                            ((PreparedStatement) statement).execute();
+                        }
+                    } else {
+                        if (arg != null && !arg.isEmpty()) {
+                            throw new UnsupportedOperationException("非预编译模式不允许传参 arg ！");
+                        }
 
-                    JSONObject obj = new JSONObject(true);
-                    for (int i = 1; i <= length; i++) {
-                        long sqlStartTime = System.currentTimeMillis();
-                        String name = rsmd.getColumnName(i);  // rsmd.getColumnLable(i);
-                        Object value = rs.getObject(i);
-                        rsDuration += System.currentTimeMillis() - sqlStartTime;
-
-                        obj.put(name, value);
+                        if (EXECUTE_STRICTLY) {
+                            if (isWrite) {
+                                statement.executeUpdate(sql);
+                            } else {
+                                statement.executeQuery(sql);
+                            }
+                        } else {
+                            statement.execute(sql);
+                        }
                     }
 
-                    arr.add(obj);
+                    executeDuration = System.currentTimeMillis() - executeStartTime;
+
+                    arr = new JSONArray();
+                    ResultSet rs = statement.getResultSet();
+                    ResultSetMetaData rsmd = rs == null ? null : rs.getMetaData();
+                    int length = rsmd == null ? 0 : rsmd.getColumnCount();
+
+
+                    long cursorStartTime = System.currentTimeMillis();
+                    while (rs != null && rs.next()) {
+                        cursorDuration += System.currentTimeMillis() - cursorStartTime;
+
+                        JSONObject obj = new JSONObject(true);
+                        for (int i = 1; i <= length; i++) {
+                            long sqlStartTime = System.currentTimeMillis();
+                            String name = rsmd.getColumnName(i);  // rsmd.getColumnLable(i);
+                            Object value = rs.getObject(i);
+                            rsDuration += System.currentTimeMillis() - sqlStartTime;
+
+                            obj.put(name, value);
+                        }
+
+                        arr.add(obj);
+                    }
+
+                    //        try {
+                    updateCount = statement.getUpdateCount();
+                    //        } catch (Throwable e) {
+                    //          e.printStackTrace();
+                    //        }
                 }
 
                 JSONObject result = DemoParser.newSuccessResult();
                 result.put("sql", sql);
                 result.put("args", arg);
                 if (isWrite) {
-//        try {
-                    result.put("count", statement.getUpdateCount());
-//        } catch (Throwable e) {
-//          e.printStackTrace();
-//        }
+                    result.put("count", updateCount);
                 }
                 result.put("list", arr);
 
@@ -1475,7 +1523,10 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
                 result.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + sqlDuration);
 
-//      return result.toJSONString();
+                if (DemoSQLExecutor.DATABASE_NEBULA.equalsIgnoreCase(database) == false) {
+                    return result.toJSONString();
+                }
+
                 return com.alibaba.fastjson.JSON.toJSONString(result, new ValueFilter() {
                     @Override
                     public Object process(Object o, String key, Object val) {

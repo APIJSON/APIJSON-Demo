@@ -14,8 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.JSON;
-import apijson.RequestMethod;
+import apijson.*;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
 import com.vesoft.nebula.jdbc.impl.NebulaDriver;
@@ -23,6 +22,7 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.Serializable;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -30,10 +30,15 @@ import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
 
-import apijson.Log;
 import apijson.boot.DemoApplication;
 import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
+import org.influxdb.BatchOptions;
+import org.influxdb.InfluxDB;
+import org.influxdb.InfluxDBFactory;
+import org.influxdb.dto.Point;
+import org.influxdb.dto.Query;
+import org.influxdb.dto.QueryResult;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -117,11 +122,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+    public static final String DATABASE_NEBULA = "NEBULA";
+    public static final String DATABASE_INFLUXDB = "INFLUXDB";
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
     public Connection getConnection(SQLConfig config) throws Exception {
-        if ("NEBULA".equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
+        if (DATABASE_NEBULA.equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
             String uri = config.getDBUri();
 
             int start = uri.indexOf("://");
@@ -184,6 +191,62 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
         // 必须最后执行 super 方法，因为里面还有事务相关处理。
         // 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
         return super.getConnection(config);
+    }
+
+
+    @Override
+    public JSONObject execute(SQLConfig config, boolean unknownType) throws Exception {
+        if (DATABASE_INFLUXDB.equals(config.getDatabase())) {
+            InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
+
+            influxDB.setDatabase(config.getSchema());
+
+            String sql = config.getSQL(config.isPrepared());
+            String trimmedSQL = sql == null ? null : sql.trim();
+            String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
+            boolean isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+
+            if (isWrite) {
+                influxDB.enableBatch(
+                        BatchOptions.DEFAULTS
+                                .threadFactory(runnable -> {
+                                    Thread thread = new Thread(runnable);
+                                    thread.setDaemon(true);
+                                    return thread;
+                                })
+                );
+
+                Runtime.getRuntime().addShutdownHook(new Thread(influxDB::close));
+
+                influxDB.write(sql);
+
+                JSONObject result = new JSONObject(true);
+                result.put(JSONResponse.KEY_COUNT, 1); // FIXME
+                return result;
+            }
+
+            QueryResult qr = influxDB.query(new Query(sql));
+
+            String err = qr == null ? null : qr.getError();
+            if (StringUtil.isNotEmpty(qr, true)) {
+                throw new SQLException(err);
+            }
+
+            List<QueryResult.Result> list = qr == null ? null : qr.getResults();
+            if (list == null || list.isEmpty()) {
+                return new JSONObject(true);
+            }
+
+            JSONObject result = JSON.parseObject(list.get(0));
+            if (list.size() > 0) {
+                result.put(KEY_RAW_LIST, list);
+            }
+
+            return result;
+        }
+
+
+        return super.execute(config, unknownType);
     }
 
     // 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column

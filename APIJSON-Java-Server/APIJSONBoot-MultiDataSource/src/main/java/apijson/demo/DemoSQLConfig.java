@@ -294,6 +294,22 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		return "";
 	}
 
+	private String sql;
+	public String getSQL() throws Exception {
+		return getSQL(isPrepared());
+	}
+	@Override
+	public String getSQL(boolean prepared) throws Exception {
+		if (StringUtil.isNotEmpty(sql)) {
+			return sql;
+		}
+		return super.getSQL(prepared);
+	}
+
+	public void setSql(String sql) {
+		this.sql = sql;
+	}
+
 	// 取消注释后，默认的 APIJSON 配置表会由业务表所在 数据库类型 database 和 数据库模式 schema 改为自定义的
 	//	@Override
 	//	public String getConfigDatabase() {
