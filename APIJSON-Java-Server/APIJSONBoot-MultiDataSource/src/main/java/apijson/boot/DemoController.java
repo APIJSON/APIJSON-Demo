@@ -1441,12 +1441,20 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 long executeStartTime = System.currentTimeMillis();
 
                 if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database)) {
-                   JSONObject result = executor.execute(config, false);
-                   if (isWrite) {
-                       updateCount = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
-                   } else {
-                       arr = result == null ? null : result.getJSONArray(DemoSQLExecutor.KEY_RAW_LIST);
-                   }
+                    JSONObject result = executor.execute(config, false);
+                    executeDuration = System.currentTimeMillis() - executeStartTime;
+
+                    if (isWrite) {
+                        updateCount = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
+                    } else {
+                        arr = result == null ? null : result.getJSONArray(DemoSQLExecutor.KEY_RAW_LIST);
+                        if (arr == null) {
+                            arr = new JSONArray();
+                            if (result != null) {
+                                arr.add(result);
+                            }
+                        }
+                    }
                 } else {
                     Statement statement = executor.getStatement(config, trimmedSQL);
                     if (statement instanceof PreparedStatement) {
