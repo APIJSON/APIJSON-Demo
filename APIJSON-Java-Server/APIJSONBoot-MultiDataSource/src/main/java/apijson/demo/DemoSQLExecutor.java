@@ -23,6 +23,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import java.io.Serializable;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -123,7 +124,6 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     public static final String DATABASE_NEBULA = "NEBULA";
-    public static final String DATABASE_INFLUXDB = "INFLUXDB";
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
@@ -195,16 +195,20 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
 
     @Override
-    public JSONObject execute(SQLConfig config, boolean unknownType) throws Exception {
-        if (DATABASE_INFLUXDB.equals(config.getDatabase())) {
+    public JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception {
+        if (DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase())) {
             InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
-
             influxDB.setDatabase(config.getSchema());
 
             String sql = config.getSQL(config.isPrepared());
-            String trimmedSQL = sql == null ? null : sql.trim();
-            String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
-            boolean isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+
+            RequestMethod method = config.getMethod();
+            boolean isWrite = ! RequestMethod.isQueryMethod(method);
+            if (method == null && ! isWrite) {
+                String trimmedSQL = sql == null ? null : sql.trim();
+                String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
+                isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+            }
 
             if (isWrite) {
                 influxDB.enableBatch(
@@ -220,8 +224,30 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
                 influxDB.write(sql);
 
-                JSONObject result = new JSONObject(true);
-                result.put(JSONResponse.KEY_COUNT, 1); // FIXME
+                JSONObject result = DemoParser.newSuccessResult();
+
+                if (method == RequestMethod.POST) {
+                    List<List<Object>> values = config.getValues();
+                    result.put(JSONResponse.KEY_COUNT, values == null ? 0 : values.size());
+                } else {
+                    String idKey = config.getIdKey();
+                    Object id = config.getId();
+                    Object idIn = config.getIdIn();
+                    if (id != null) {
+                        result.put(idKey, id);
+                    }
+                    if (idIn != null) {
+                        result.put(idKey + "[]", idIn);
+                    }
+
+                    if (method == RequestMethod.PUT) {
+                        Map<String, Object> content = config.getContent();
+                        result.put(JSONResponse.KEY_COUNT, content == null ? 0 : content.size());
+                    } else {
+                        result.put(JSONResponse.KEY_COUNT, id == null && idIn instanceof Collection ? ((Collection<?>) idIn).size() : 1); // FIXME 直接 SQLAuto 传 Flux/InfluxQL INSERT 如何取数量？
+                    }
+                }
+
                 return result;
             }
 
@@ -238,7 +264,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
             }
 
             JSONObject result = JSON.parseObject(list.get(0));
-            if (list.size() > 0) {
+            if (list.size() > 1) {
                 result.put(KEY_RAW_LIST, list);
             }
 

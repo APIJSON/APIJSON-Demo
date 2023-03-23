@@ -1392,7 +1392,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         prefix = prefix.substring(mid + 1);
                     }
 
-                    if (DemoSQLExecutor.DATABASE_INFLUXDB.equalsIgnoreCase(prefix)) {
+                    if (DemoSQLConfig.DATABASE_INFLUXDB.equalsIgnoreCase(prefix)) {
                         database = prefix.toUpperCase();
 
                         int end = uri.lastIndexOf("/");
@@ -1405,8 +1405,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
                         uri = "http" + uri.substring(start);
 
-                        account = "root";
-                        password = "apijson@123";
+//                        account = "root";
+//                        password = "apijson@123";
                     } else if (DemoSQLExecutor.DATABASE_NEBULA.equalsIgnoreCase(prefix)) {
                         database = prefix.toUpperCase();
                     }
@@ -1440,7 +1440,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 long rsDuration = 0;
                 long executeStartTime = System.currentTimeMillis();
 
-                if (DemoSQLExecutor.DATABASE_INFLUXDB.equals(database)) {
+                if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database)) {
                    JSONObject result = executor.execute(config, false);
                    if (isWrite) {
                        updateCount = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);

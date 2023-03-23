@@ -213,6 +213,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			//      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
+		if (isInfluxDB()) {
+			return "http://localhost:8086";
+		}
+
 		return "";
 	}
 
@@ -252,6 +256,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isTDengine()) {
 			return "root"; //TODO 改成你自己的
 		}
+		if (isInfluxDB()) {
+			return "root";
+		}
+
 		return "";
 	}
 
@@ -291,6 +299,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		if (isTDengine()) {
 			return "taosdata"; //TODO 改成你自己的
 		}
+		if (isInfluxDB()) {
+			return "apijson@123"; //TODO 改成你自己的
+		}
+
 		return "";
 	}
 
