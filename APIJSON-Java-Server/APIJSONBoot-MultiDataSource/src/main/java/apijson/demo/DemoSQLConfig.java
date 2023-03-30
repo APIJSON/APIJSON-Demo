@@ -260,7 +260,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			return "root";
 		}
 
-		return "";
+		return null;
 	}
 
 	private String dbPassword;
@@ -303,7 +303,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 			return "apijson@123"; //TODO 改成你自己的
 		}
 
-		return "";
+		return null;
 	}
 
 	private String sql;

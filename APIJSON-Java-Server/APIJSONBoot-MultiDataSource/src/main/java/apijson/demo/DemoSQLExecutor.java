@@ -17,10 +17,17 @@ package apijson.demo;
 import apijson.*;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
+import com.datastax.oss.driver.api.core.CqlSession;
+import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+import com.datastax.oss.driver.api.core.cql.ResultSet;
+import com.datastax.oss.driver.api.core.cql.Row;
 import com.vesoft.nebula.jdbc.impl.NebulaDriver;
 import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.Serializable;
+import java.net.URI;
+import java.net.URL;
+import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Collection;
@@ -37,7 +44,6 @@ import apijson.orm.SQLConfig;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Point;
 import org.influxdb.dto.Query;
 import org.influxdb.dto.QueryResult;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
@@ -94,7 +100,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
         super.putCache(sql, list, config);
 
         String table = config != null && config.isMain() ? config.getTable() : null;
-        if (table != null && DemoSQLConfig.CONFIG_TABLE_LIST.contains(table) == false) {
+        if (table != null && ! DemoSQLConfig.CONFIG_TABLE_LIST.contains(table)) {
             try {
                 if (config.isExplain() || RequestMethod.isHeadMethod(config.getMethod(), true)) {
                     REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), 10 * 60, TimeUnit.SECONDS);
@@ -124,6 +130,8 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     public static final String DATABASE_NEBULA = "NEBULA";
+    public static final String DATABASE_SNOWFLAKE = "SNOWFLAKE";
+    public static final String DATABASE_CASSANDRA = "CASSANDRA";
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
@@ -196,81 +204,122 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
     @Override
     public JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception {
-        if (DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase())) {
-            InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
-            influxDB.setDatabase(config.getSchema());
+        if (DATABASE_CASSANDRA.equals(config.getDatabase()) || DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase())) {
 
             String sql = config.getSQL(config.isPrepared());
 
             RequestMethod method = config.getMethod();
-            boolean isWrite = ! RequestMethod.isQueryMethod(method);
-            if (method == null && ! isWrite) {
+            boolean isWrite = !RequestMethod.isQueryMethod(method);
+            if (method == null && !isWrite) {
                 String trimmedSQL = sql == null ? null : sql.trim();
                 String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
                 isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
             }
 
-            if (isWrite) {
-                influxDB.enableBatch(
-                        BatchOptions.DEFAULTS
-                                .threadFactory(runnable -> {
-                                    Thread thread = new Thread(runnable);
-                                    thread.setDaemon(true);
-                                    return thread;
-                                })
-                );
 
-                Runtime.getRuntime().addShutdownHook(new Thread(influxDB::close));
+            if (DATABASE_CASSANDRA.equals(config.getDatabase())) {
+                CqlSession session = CqlSession.builder()
+//                        .withCloudSecureConnectBundle(Paths.get("/path/to/secure-connect-database_name.zip"))
+                        .withCloudSecureConnectBundle(new URL(config.getDBUri()))
+                        .withAuthCredentials(config.getDBAccount(), config.getDBPassword())
+                        .withKeyspace(config.getSchema())
+                        .build();
 
-                influxDB.write(sql);
+                //            if (config.isPrepared()) {
+                //                PreparedStatement stt = session.prepare(sql);
+                //
+                //                List<Object> pl = config.getPreparedValueList();
+                //                if (pl != null) {
+                //                    for (Object o : pl) {
+                //                        stt.bind(pl.toArray());
+                //                    }
+                //                }
+                //                sql = stt.getQuery();
+                //            }
 
-                JSONObject result = DemoParser.newSuccessResult();
+                ResultSet rs = session.execute(sql);
 
-                if (method == RequestMethod.POST) {
-                    List<List<Object>> values = config.getValues();
-                    result.put(JSONResponse.KEY_COUNT, values == null ? 0 : values.size());
-                } else {
-                    String idKey = config.getIdKey();
-                    Object id = config.getId();
-                    Object idIn = config.getIdIn();
-                    if (id != null) {
-                        result.put(idKey, id);
-                    }
-                    if (idIn != null) {
-                        result.put(idKey + "[]", idIn);
-                    }
+                List<Row> list = rs.all();
+                if (list == null || list.isEmpty()) {
+                    return new JSONObject(true);
+                }
 
-                    if (method == RequestMethod.PUT) {
-                        Map<String, Object> content = config.getContent();
-                        result.put(JSONResponse.KEY_COUNT, content == null ? 0 : content.size());
-                    } else {
-                        result.put(JSONResponse.KEY_COUNT, id == null && idIn instanceof Collection ? ((Collection<?>) idIn).size() : 1); // FIXME 直接 SQLAuto 传 Flux/InfluxQL INSERT 如何取数量？
-                    }
+                JSONObject result = JSON.parseObject(list.get(0));
+                if (list.size() > 1) {
+                    result.put(KEY_RAW_LIST, list);
                 }
 
                 return result;
             }
 
-            QueryResult qr = influxDB.query(new Query(sql));
 
-            String err = qr == null ? null : qr.getError();
-            if (StringUtil.isNotEmpty(qr, true)) {
-                throw new SQLException(err);
+            if (DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase())) {
+                InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
+                influxDB.setDatabase(config.getSchema());
+
+
+                if (isWrite) {
+                    influxDB.enableBatch(
+                            BatchOptions.DEFAULTS
+                                    .threadFactory(runnable -> {
+                                        Thread thread = new Thread(runnable);
+                                        thread.setDaemon(true);
+                                        return thread;
+                                    })
+                    );
+
+                    Runtime.getRuntime().addShutdownHook(new Thread(influxDB::close));
+
+                    influxDB.write(sql);
+
+                    JSONObject result = DemoParser.newSuccessResult();
+
+                    if (method == RequestMethod.POST) {
+                        List<List<Object>> values = config.getValues();
+                        result.put(JSONResponse.KEY_COUNT, values == null ? 0 : values.size());
+                    } else {
+                        String idKey = config.getIdKey();
+                        Object id = config.getId();
+                        Object idIn = config.getIdIn();
+                        if (id != null) {
+                            result.put(idKey, id);
+                        }
+                        if (idIn != null) {
+                            result.put(idKey + "[]", idIn);
+                        }
+
+                        if (method == RequestMethod.PUT) {
+                            Map<String, Object> content = config.getContent();
+                            result.put(JSONResponse.KEY_COUNT, content == null ? 0 : content.size());
+                        } else {
+                            result.put(JSONResponse.KEY_COUNT, id == null && idIn instanceof Collection ? ((Collection<?>) idIn).size() : 1); // FIXME 直接 SQLAuto 传 Flux/InfluxQL INSERT 如何取数量？
+                        }
+                    }
+
+                    return result;
+                }
+
+                QueryResult qr = influxDB.query(new Query(sql));
+
+                String err = qr == null ? null : qr.getError();
+                if (StringUtil.isNotEmpty(qr, true)) {
+                    throw new SQLException(err);
+                }
+
+                List<QueryResult.Result> list = qr == null ? null : qr.getResults();
+                if (list == null || list.isEmpty()) {
+                    return new JSONObject(true);
+                }
+
+                JSONObject result = JSON.parseObject(list.get(0));
+                if (list.size() > 1) {
+                    result.put(KEY_RAW_LIST, list);
+                }
+
+                return result;
             }
 
-            List<QueryResult.Result> list = qr == null ? null : qr.getResults();
-            if (list == null || list.isEmpty()) {
-                return new JSONObject(true);
-            }
-
-            JSONObject result = JSON.parseObject(list.get(0));
-            if (list.size() > 1) {
-                result.put(KEY_RAW_LIST, list);
-            }
-
-            return result;
         }
-
 
         return super.execute(config, unknownType);
     }

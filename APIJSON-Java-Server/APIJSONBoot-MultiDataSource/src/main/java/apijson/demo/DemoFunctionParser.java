@@ -22,6 +22,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
+import apijson.orm.script.JavaScriptExecutor;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -41,6 +42,10 @@ import apijson.orm.Visitor;
  */
 public class DemoFunctionParser extends APIJSONFunctionParser {
 	public static final String TAG = "DemoFunctionParser";
+
+	static {
+		SCRIPT_EXECUTOR_MAP.put("js", new JavaScriptExecutor());
+	}
 
 	public DemoFunctionParser() {
 		this(null, null, 0, null, null);

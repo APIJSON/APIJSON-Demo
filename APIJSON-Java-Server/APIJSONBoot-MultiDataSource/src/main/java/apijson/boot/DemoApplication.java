@@ -100,7 +100,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
     // SpringBoot 2.x 自定义端口方式
     @Override
     public void customize(ConfigurableServletWebServerFactory server) {
-        server.setPort(8080);
+        server.setPort(9090);
     }
 
     // 支持 APIAuto 中 JavaScript 代码跨域请求
@@ -169,6 +169,26 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         catch (ClassNotFoundException e) {
             e.printStackTrace();
             Log.e(TAG, "加载 Dameng 驱动失败，请检查 pom.xml 中 com.dameng 版本是否存在以及可用 ！！！");
+        }
+
+        try { //加载驱动程序
+            Log.d(TAG, "尝试加载 Snowflake 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+            Class.forName("net.snowflake.client.jdbc.SnowflakeDriver");
+            Log.d(TAG, "成功加载 Snowflake 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.e(TAG, "加载 Snowflake 驱动失败，请检查 pom.xml 中 net.snowflake 版本是否存在以及可用 ！！！");
+        }
+
+        try { //加载驱动程序
+            Log.d(TAG, "尝试加载 Databricks 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+            Class.forName("com.databricks.client.jdbc.Driver");
+            Log.d(TAG, "成功加载 Databricks 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.e(TAG, "加载 Databricks 驱动失败，请检查 pom.xml 中 com.databricks 版本是否存在以及可用 ！！！");
         }
 
         //    try { //加载驱动程序

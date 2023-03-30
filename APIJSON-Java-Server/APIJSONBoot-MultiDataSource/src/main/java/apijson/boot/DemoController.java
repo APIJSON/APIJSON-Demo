@@ -1373,12 +1373,16 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             JSONObject req = JSON.parseObject(request);
             String sql = req == null ? null : req.getString("sql");
             if (StringUtil.isEmpty(sql)) {
-                throw new IllegalArgumentException("SQL 不能为空！");
+                throw new IllegalArgumentException("sql 不能为空！");
             }
 
             String database = req.getString("database");
-            String schema = req.getString("schema");
             String uri = req.getString("uri");
+            if (StringUtil.isEmpty(database, true) && StringUtil.isEmpty(uri, true)) {
+                throw new NullPointerException("database 和 uri 不能同时为空！至少其中一个要传有效值!");
+            }
+            String schema = req.getString("schema");
+
             String account = req.getString("account");
             String password = req.getString("password");
             JSONArray arg = req.getJSONArray("args");
@@ -1392,7 +1396,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         prefix = prefix.substring(mid + 1);
                     }
 
-                    if (DemoSQLConfig.DATABASE_INFLUXDB.equalsIgnoreCase(prefix)) {
+                    if (DemoSQLConfig.DATABASE_INFLUXDB.equalsIgnoreCase(prefix) || DemoSQLExecutor.DATABASE_CASSANDRA.equalsIgnoreCase(prefix)) {
                         database = prefix.toUpperCase();
 
                         int end = uri.lastIndexOf("/");
@@ -1403,10 +1407,16 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                             uri = uri.substring(0, end);
                         }
 
-                        uri = "http" + uri.substring(start);
+//                        if (DemoSQLConfig.DATABASE_INFLUXDB.equalsIgnoreCase(prefix)) {
+                            uri = "http" + uri.substring(start);
+                            // account = "root";
+                            // password = "apijson@123";
+//                        }
 
-//                        account = "root";
-//                        password = "apijson@123";
+                        if (DemoSQLExecutor.DATABASE_CASSANDRA.equalsIgnoreCase(prefix)) { // unknown protocol: jdbc
+                            account = "test"; // "peter";
+                            password = "test"; // null;
+                        }
                     } else if (DemoSQLExecutor.DATABASE_NEBULA.equalsIgnoreCase(prefix)) {
                         database = prefix.toUpperCase();
                     }
@@ -1440,7 +1450,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 long rsDuration = 0;
                 long executeStartTime = System.currentTimeMillis();
 
-                if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database)) {
+                if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database) || DemoSQLExecutor.DATABASE_CASSANDRA.equals(database)) {
                     JSONObject result = executor.execute(config, false);
                     executeDuration = System.currentTimeMillis() - executeStartTime;
 
