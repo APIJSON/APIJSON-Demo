@@ -21,6 +21,7 @@
         var vComment = {value: ''};
         var vHeader = {value: ''};
         var vRandom = {value: ''};
+        var vScript = {value: ''};
         var vOutput = {value: ''};
 
         var vAccount = {value: ''};
@@ -43,7 +44,7 @@
         var vRandomSubCount = {value: '100'};
         var vRandomSubSearch = {value: ''};
 
-        var Vue = require('vue');
+        var Vue = require('./vue.min'); // 某些版本不兼容 require('vue');
         var StringUtil = require('../apijson/StringUtil');
         var CodeUtil = require('../apijson/CodeUtil');
         var JSONObject = require('../apijson/JSONObject');
@@ -207,26 +208,31 @@
               for (var i = 0; i < val.length; i++) {
                 var cPath = (StringUtil.isEmpty(path, false) ? '' : path + '/') + key;
 
+                var vi = val[i]
+
                 if (JSONObject.isTableKey(firstKey, val, isRestful)) {
                   // var newVal = JSON.parse(JSON.stringify(val[i]))
-
-                  var newVal = {}
-                  for (var k in val[i]) {
-                    newVal[k] = val[i][k] //提升性能
-                    delete val[i][k]
+                  if (vi == null) {
+                    continue
                   }
 
-                  val[i]._$_this_$_ = JSON.stringify({
+                  var newVal = {}
+                  for (var k in vi) {
+                    newVal[k] = vi[k] //提升性能
+                    delete vi[k]
+                  }
+
+                  vi._$_this_$_ = JSON.stringify({
                     path: cPath + '/' + i,
                     table: firstKey
                   })
 
                   for (var k in newVal) {
-                    val[i][k] = newVal[k]
+                    vi[k] = newVal[k]
                   }
                 }
                 else {
-                  this.onRenderJSONItem(val[i], '' + i, cPath);
+                  this.onRenderJSONItem(vi, '' + i, cPath);
                 }
 
                 // this.$children[i]._$_this_$_ = key
@@ -263,7 +269,11 @@
 
 
         } catch (e) {
-          alert('onRenderJSONItem  try { ... } catch (e) {\n' + e.message)
+          if (DEBUG) {
+            alert('onRenderJSONItem  try { ... } catch (e) {\n' + e.message)
+          } else {
+            console.log(e)
+          }
         }
 
         return true
@@ -367,8 +377,8 @@
                 valString = valString.substring(0, i + 1)
                 // alert('valString = ' + valString)
                 var _$_this_$_ = JSON.parse(valString) || {}
-                path = _$_this_$_.path
-                table = _$_this_$_.table
+                path = _$_this_$_ == null ? '' : _$_this_$_.path
+                table = _$_this_$_ == null ? '' : _$_this_$_.table
               }
             }
 
@@ -452,6 +462,39 @@
 
 // APIJSON <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+  var ERR_MSG = `出现了一些问题，可以按照以下步骤解决：
+1.检查网络连接是否畅通，可用浏览器打开右侧地址： https://www.baidu.com/s?wd=%22APIJSON%22
+2.检查 URL 是否为一个可用的 域名/IPV4 地址，可用浏览器打开试试：正常返回结果 或 非 GET 请求返回 Whitelabel Error Page，一般都没问题
+3.开启或关闭 右上方 设置>托管服务器代理，然后再试：如果开启后才通应该是 CORS 跨域问题；关闭后才通应该是用外网服务代理来访问内网导致，可退出登录后修改退关服务器地址为内网的 APIJSON 代理服务地址
+4.Disable 关闭 VPN 等 电脑/手机/平板 上的网络代理软件 App 客户端，或者切换代理服务器地址，然后再试
+5.按 Fn+F12 或 右键网页>Inspect 检查 查看 Network 接口调用信息和 Console 控制台日志
+6.查看请求目标服务器上的日志，优先找异常报错内容
+7.改用 Postman 等其它 HTTP API 接口工具测试同一个接口
+8.再试一次
+
+# 问题与解答大全(可截屏后 New issue 上报问题等待解答)：
+https://github.com/TommyLemon/APIAuto/issues
+
+如果是请求 APIJSON 后端服务，则使用以下链接：
+https://github.com/Tencent/APIJSON/issues
+
+There may be something wrong, you can follow by the steps:
+1. Check whether the network connection is available, you can open the address with a browser: https://www.google.com/search?q=%22APIJSON%22
+2. Check whether the URL is an available domain name/IPV4 address, try opening it with a browser: if return the result normally or return a Whitelabel Error Page for a non-GET request, generally the URL is available
+3. Turn it on or off at the top right, Settings>Server Proxy, and try again: If it is enabled, it should be a CORS cross-domain problem; and if it is turned off, it should be caused by using an external network service proxy to access the intranet, You can log out and modify the logout server address to the APIJSON proxy service address of the intranet
+4. Disable the network proxy software App client on the computer/phone/tablet such as VPN, or switch the proxy server address, and then try again
+5. Press Fn+F12 or right-click the webpage>Inspect to view the Network interface call information and Console console log
+6. Check the log on the request target server, and give priority to find the abnormal error content
+7. Use other HTTP API tools such as Postman to test the same interface
+8. Try again
+
+# Questions and answers (you can report the problem after taking a screenshot and wait for the answer):
+https://github.com/TommyLemon/APIAuto/issues
+
+If you are requesting an APIJSON backend service, use the following link:
+https://github.com/Tencent/APIJSON/issues
+`;
+
 
   function getRequestFromURL(url_, tryParse) {
     var url = url_ || window.location.search;
@@ -483,6 +526,7 @@
           v = JSON.parse(v)
         }
         catch (e) {
+          console.log(e)
         }
       }
 
@@ -494,7 +538,7 @@
 
 
   function markdownToHTML(md, isRequest) {
-    if (editormd == null) {
+    if (typeof editormd == 'undefined' || editormd == null) {
       return;
     }
 
@@ -647,6 +691,7 @@
   var baseUrl
   var inputted
   var handler
+  var errHandler
   var docObj
   var doc
   var output
@@ -723,7 +768,7 @@
       error: {},
       requestVersion: 3,
       requestCount: 1,
-      urlComment: '一对多关联查询 Comment.userId = User.id',
+      urlComment: '一对多关联查询。可粘贴浏览器/抓包工具/接口工具 的 Network/Header/Content 等请求信息，自动填充到界面，格式为 key: value',
       selectIndex: 0,
       options: [], // [{name:"id", type: "integer", comment:"主键"}, {name:"name", type: "string", comment:"用户名称"}],
       historys: [],
@@ -759,6 +804,7 @@
           'password': '123456'
         }
       ],
+      otherEnvCookieMap: {},
       allSummary: {},
       currentAccountIndex: 0,
       currentDocIndex: -1,
@@ -828,6 +874,7 @@
       isCrossEnabled: false,
       isMLEnabled: false,
       isDelegateEnabled: false,
+      isEnvCompareEnabled: false,
       isPreviewEnabled: false,
       isEncodeEnabled: true,
       isEditResponse: false,
@@ -1047,8 +1094,8 @@
         return url.replace(/ /g, '')
       },
       //获取基地址
-      getBaseUrl: function () {
-        var url = new String(vUrl.value).trim()
+      getBaseUrl: function (url_) {
+        var url = new String(url_ || vUrl.value).trim()
         var length = this.getBaseUrlLength(url)
         url = length <= 0 ? '' : url.substring(0, length)
         return url == '' ? URL_BASE : url
@@ -1062,7 +1109,14 @@
         }
 
         index = url.indexOf('://')
-        return index < 0 ? 0 : index + 3 + url.substring(index + 3).indexOf('/')
+        if (index < 0) {
+          return 0
+        }
+
+        var rest = url.substring(index + 3)
+        var ind = rest.indexOf('/')
+
+        return ind < 0 ? url.length : index + 3 + ind
       },
       //获取操作方法
       getMethod: function (url) {
@@ -1101,8 +1155,8 @@
           return jsonlint.parse(s);
         }
         catch (e) {
-          log('main.getRequest', 'try { return jsonlint.parse(s); \n } catch (e2) {\n' + e.message)
-          log('main.getRequest', 'return jsonlint.parse(this.removeComment(s));')
+          log('main.getRequest', 'try { return jsonlint.parse(s); \n } catch (e) {\n' + e.message)
+          log('main.getRequest', 'return JSON5.parse(s);')
           return JSON5.parse(s);  // jsonlint.parse(this.removeComment(s));
         }
       },
@@ -1423,8 +1477,9 @@
             case 6:
             case 7:
             case 8:
-              this.exTxt.name = index == 0 ? this.database : (index == 1 ? this.schema : (index == 2
-                ? this.language : (index == 6 ? this.server : (index == 8 ? this.thirdParty : (this.types || []).join()))))
+            case 15:
+              this.exTxt.name = index == 0 ? this.database : (index == 1 ? this.schema : (index == 2 ? this.language
+                  : (index == 6 ? this.server : (index == 8 ? this.thirdParty : (index == 15 ? this.otherEnv : (this.types || []).join())))))
               this.isConfigShow = true
 
               if (index == 0) {
@@ -1564,6 +1619,12 @@
               this.isDelegateEnabled = show
               this.saveCache('', 'isDelegateEnabled', show)
               break
+            case 14:
+              this.isEnvCompareEnabled = show
+              this.saveCache('', 'isEnvCompareEnabled', show)
+
+              // this.enableML(false)
+              break
             case 10:
               this.isPreviewEnabled = show
               this.saveCache('', 'isPreviewEnabled', show)
@@ -1622,6 +1683,11 @@
           this.isPreviewEnabled = show
           this.saveCache('', 'isPreviewEnabled', show)
           // vRequestMarkdown.innerHTML = ''
+        }
+        else if (index == 14) {
+          this.isEnvCompareEnabled = show
+          this.saveCache('', 'isEnvCompareEnabled', show)
+          this.enableML(this.isMLEnabled)
         }
         else if (index == 12) {
           this.isEncodeEnabled = show
@@ -1723,6 +1789,7 @@
         }
         var val = {
           name: this.history.name,
+          detail: this.history.name,
           type: this.type,
           url: '/' + this.getMethod(),
           request: inputted,
@@ -1800,11 +1867,14 @@
         this.isEditResponse = false
 
         item = item || {}
+        var doc = item
+        var docId = doc.id || 0
+
         var scripts = item.scripts
         if (isRemote) {
           var orginItem = item
-          var doc = item.Document || {}
-          var docId = doc.id || 0
+          doc = item.Document || {}
+          docId = doc.id || 0
 
           var pre = Object.assign({
             'script': ''
@@ -1877,7 +1947,12 @@
           item.scripts = scripts
 
           item = doc
+          this.scripts.case[docId] = scripts
         }
+        else {
+          this.scripts = scripts
+        }
+
         // localforage.getItem(item.key || '', function (err, value) {
           var branch = new String(item.url || '/get')
           if (branch.startsWith('/') == false) {
@@ -1894,7 +1969,6 @@
           vHeader.value = StringUtil.get(item.header)
           vRandom.value = StringUtil.get(item.random)
           this.changeScriptType(this.scriptType)
-          this.scripts.case[docId] = scripts
 
           this.onChange(false)
 
@@ -2138,7 +2212,6 @@
             return
           }
 
-
           if (isExportRandom && btnIndex <= 0 && did == null) {
             alert('请先共享测试用例！')
             return
@@ -2150,6 +2223,8 @@
 
           const after = isSingle ? this.switchQuote(inputted) : inputted;  // this.toDoubleJSON(inputted);
           const inputObj = this.getRequest(after, {});
+
+          const rawInputStr = JSON.stringify(inputObj)
 
           var commentObj = null;
           if (isExportRandom != true) {
@@ -2170,10 +2245,11 @@
             inputObj.code = code_
           }
 
+          var rawRspStr = JSON.stringify(currentResponse || {})
           const code = currentResponse.code;
           const thrw = currentResponse.throw;
-          delete currentResponse.code; //code必须一致
-          delete currentResponse.throw; //throw必须一致
+          delete currentResponse.code; // currentResponse.code = null; //code必须一致
+          delete currentResponse.throw; // currentResponse.throw = null; // throw必须一致
 
           const isML = this.isMLEnabled;
           const stddObj = isML ? JSONResponse.updateStandard({}, currentResponse) : {};
@@ -2289,7 +2365,7 @@
                 config: config
               },
               'TestRecord': {
-                'response': JSON.stringify(currentResponse),
+                'response': rawRspStr,
                 'standard': isML ? JSON.stringify(stddObj) : null
               },
               'tag': 'Random'
@@ -2312,7 +2388,7 @@
                 'randomId': 0,
                 'host': baseUrl,
 //                'testAccountId': currentAccountId,
-                'response': JSON.stringify(isEditResponse ? inputObj : currentResponse),
+                'response': isEditResponse ? rawInputStr : rawRspStr,
                 'standard': isML || isEditResponse ? JSON.stringify(isEditResponse ? commentObj : stddObj) : undefined,
                 // 没必要，直接都在请求中说明，查看也方便 'detail': (isEditResponse ? App.getExtraComment() : null) || ((App.currentRemoteItem || {}).TestRecord || {}).detail,
               },
@@ -2503,10 +2579,10 @@
             if (isId) {
               config += prefix + 'ORDER_IN(undefined, null, ' + value + ')'
               if (value >= 1000000000) { //PHP 等语言默认精确到秒 1000000000000) {
-                config += '\n  // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_INT(' + Math.round(0.9 * value) + ', ' + Math.round(1.1 * value) + ')'
+                config += '\n // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_INT(' + Math.round(0.9 * value) + ', ' + Math.round(1.1 * value) + ')'
               }
               else {
-                config += '\n  // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_INT(1, ' + (10 * value) + ')'
+                config += '\n // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_INT(1, ' + (10 * value) + ')'
               }
             }
             else {
@@ -2532,16 +2608,16 @@
                 var hasDot = String(value).indexOf('.') >= 0
 
                 if (value < 0) {
-                  config += '\n  // 可替代上面的 ' + prefix.substring(1) + (hasDot ? 'RANDOM_NUM' : 'RANDOM_INT') + '(' + (100 * value) + ', 0)'
+                  config += '\n // 可替代上面的 ' + prefix.substring(1) + (hasDot ? 'RANDOM_NUM' : 'RANDOM_INT') + '(' + (100 * value) + ', 0)'
                 }
-                else if (value > 0 && value < 1) {  // 0-1 比例
-                  config += '\n  // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_NUM(0, 1)'
+                else if (value > 0 && value < 1) { // 0-1 比例
+                  config += '\n // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_NUM(0, 1)'
                 }
-                else if (value >= 0 && value <= 100) {  // 10% 百分比
-                  config += '\n  // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_INT(0, 100)'
+                else if (value >= 0 && value <= 100) { // 10% 百分比
+                  config += '\n // 可替代上面的 ' + prefix.substring(1) + 'RANDOM_INT(0, 100)'
                 }
                 else {
-                  config += '\n  // 可替代上面的 ' + prefix.substring(1) + (hasDot != true && value < 10 ? 'ORDER_INT(0, 9)' : ((hasDot ? 'RANDOM_NUM' : 'RANDOM_INT') + '(0, ' + 100 * value + ')'))
+                  config += '\n // 可替代上面的 ' + prefix.substring(1) + (hasDot != true && value < 10 ? 'ORDER_INT(0, 9)' : ((hasDot ? 'RANDOM_NUM' : 'RANDOM_INT') + '(0, ' + 100 * value + ')'))
                 }
               }
             }
@@ -2603,6 +2679,10 @@
           case 7:
             this.types = StringUtil.split(this.exTxt.name)
             this.saveCache('', 'types', this.types)
+            break
+          case 15:
+            this.otherEnv = StringUtil.get(this.exTxt.name)
+            this.saveCache('', 'otherEnv', this.otherEnv)
             break
           case 8:
             var thirdParty = this.exTxt.name
@@ -2995,7 +3075,7 @@
 
             var val = paraItem.value
             header += (k <= 0 ? '' : '\n') + name + ': ' + (val == null ? '' : val)
-                + (StringUtil.isEmpty(paraItem.description, true) ? '' : '  // ' + paraItem.description)
+                + (StringUtil.isEmpty(paraItem.description, true) ? '' : ' // ' + paraItem.description)
           }
         }
 
@@ -3222,7 +3302,7 @@
         }
       },
 
-      generateValue: function (t, n) {
+      generateValue: function (t, n, isSQL) {
         if (t == 'boolean') {
           return true
         }
@@ -3282,7 +3362,7 @@
 
             if (isJSONEmpty) {
               req += '\n    "' + n + '": ' + val + (k < parameters.length - 1 ? ',' : '')
-                + '  // ' + (paraItem.required ? '必填。 ' : '') + StringUtil.trim(paraItem.description)
+                + ' // ' + (paraItem.required ? '必填。 ' : '') + StringUtil.trim(paraItem.description)
             } else {
               url += (k <= 0 && url.indexOf('?') < 0 ? '?' : '&') + n + '=' + (val == null ? '' : val)
             }
@@ -3467,11 +3547,13 @@
                   }
                 }
                 else {
+                  var headers = res.headers || {}
+
                   item.id = user.id
                   item.name = user.name
                   item.remember = data.remember
                   item.isLoggedIn = true
-                  item.cookie = res.cookie || (res.headers || {}).cookie
+                  item.cookie = res.cookie || headers.cookie || headers.Cookie || headers['set-cookie'] || headers['Set-Cookie']
 
                   App.accounts[App.currentAccountIndex] = item
                   App.saveCache(App.getBaseUrl(), 'currentAccountIndex', App.currentAccountIndex)
@@ -3700,8 +3782,8 @@
               continue
             }
 
-            var count = isRandom && obj != null && obj.Random != null ? obj.Random.count : null
-            if (count != null && count > 1) {
+            var count = isRandom && obj.Random != null ? obj.Random.count : (isRandom ? null : obj.totalCount)
+            if (count != null && count > (isRandom ? 1 : 0)) {
               var sum = obj[color + 'Count']
               if (sum != null && sum > 0) {
                 list.push(obj)
@@ -3744,9 +3826,9 @@
 
           var tests = (this.tests[String(accountIndex)] || {})[docId]
           if (tests != null && JSONObject.isEmpty(tests) != true) {
-            if (! isSub) {
-              this.resetCount(this.currentRemoteItem, true, accountIndex)
-            }
+            // if (! isSub) {
+            //   this.resetCount(this.currentRemoteItem, true, isSub, accountIndex)
+            // }
 
             for (var i = 0; i < randomCount; i++) {
               var item = randoms[i]
@@ -3755,7 +3837,7 @@
                 continue
               }
 
-              this.resetCount(item, true, accountIndex)
+              this.resetCount(item, true, isSub, accountIndex)
 
               var subCount = r.count || 0
               if (subCount == 1) {
@@ -3793,13 +3875,27 @@
           this.showDoc()
         }
 
-        this.randoms = (this.currentRemoteItem || {}).randoms || []
+        var randoms = []
+        if (this.randomPage == 0 && ! isSub) {
+          randoms = (this.currentRemoteItem || {}).randoms || []
+        }
+        else if (this.randomSubPage == 0 && isSub) {
+          randoms = (this.currentRandomItem || {}).subs || []
+        }
+
+        if (isSub) {
+          this.randomSubs = randoms
+        }
+        else {
+          this.randoms = randoms
+        }
+
         this.getCurrentRandomSummary().summaryType = 'total' // this.onClickSummary('total', true)
         if (! this.isRandomSummaryShow()) {
           this.showCompare4RandomList(show, isSub)
         }
 
-        if (show && this.isRandomShow && this.randoms.length <= 0 && item != null && item.id != null) {
+        if (show && this.isRandomShow && randoms.length <= 0 && item != null && item.id != null) {
           this.isRandomListShow = false
 
           var subSearch = StringUtil.isEmpty(this.randomSubSearch, true)
@@ -4096,6 +4192,7 @@
       login: function (isAdminOperation, callback) {
         this.isLoginShow = false
         this.isEditResponse = false
+        var schemas = StringUtil.isEmpty(this.schema, true) ? null : StringUtil.split(this.schema)
 
         const req = {
           type: 0, // 登录方式，非必须 0-密码 1-验证码
@@ -4109,7 +4206,7 @@
             key: IS_NODE ? this.key : undefined  // 突破常规查询数量限制
           } : {
             '@database': StringUtil.isEmpty(this.database, true) ? undefined : this.database,
-            '@schema': StringUtil.isEmpty(this.schema, true) ? undefined : this.schema
+            '@schema': schemas == null || schemas.length != 1 ? undefined : this.schema
           }
         }
 
@@ -4151,12 +4248,35 @@
             this.onChange(false)
           }
           this.send(isAdminOperation, function (url, res, err) {
-            if (callback) {
-              callback(url, res, err)
+            if (App.isEnvCompareEnabled != true) {
+              if (callback) {
+                callback(url, res, err)
+                return
+              }
+
+              App.onLoginResponse(isAdminOperation, req, url, res, err)
               return
             }
 
-            App.onLoginResponse(isAdminOperation, req, url, res, err)
+            App.request(isAdminOperation, REQUEST_TYPE_JSON, App.getBaseUrl(App.otherEnv) + '/login'
+                , req, App.getHeader(vHeader.value), function (url_, res_, err_) {
+                  var data = res_.data
+                  var user = JSONResponse.isSuccess(data) ? data.user : null
+                  if (user != null) {
+                    var headers = res.headers || {}
+                    App.otherEnvCookieMap[req.phone] = res.cookie || headers.cookie || headers.Cookie || headers['set-cookie'] || headers['Set-Cookie']
+                    App.saveCache(App.otherEnv, 'otherEnvCookieMap', App.otherEnvCookieMap)
+                  }
+
+                  if (callback) {
+                    callback(url, res, err)
+                    return
+                  }
+
+                  App.onResponse(url_, res_, err_);
+                  App.onLoginResponse(isAdminOperation, req, url, res, err)
+            }, App.scripts)
+
           })
         }
       },
@@ -4259,7 +4379,7 @@
             App.account = privacy.phone
             App.loginType = 'login'
           }
-        })
+        }, this.scripts)
       },
 
       /**重置密码
@@ -4291,7 +4411,7 @@
             App.account = privacy.phone
             App.loginType = 'login'
           }
-        })
+        }, this.scripts)
       },
 
       /**退出
@@ -4310,7 +4430,8 @@
 
         // alert('logout  isAdminOperation = ' + isAdminOperation + '; url = ' + url)
         if (isAdminOperation) {
-          this.request(isAdminOperation, REQUEST_TYPE_JSON, this.server + '/logout', req, this.getHeader(vHeader.value), function (url, res, err) {
+          this.request(isAdminOperation, REQUEST_TYPE_JSON, this.server + '/logout'
+              , req, this.getHeader(vHeader.value), function (url, res, err) {
             if (callback) {
               callback(url, res, err)
               return
@@ -4330,7 +4451,23 @@
           this.type = REQUEST_TYPE_JSON
           this.showTestCase(false, this.isLocalShow)
           this.onChange(false)
-          this.send(isAdminOperation, callback)
+          this.send(isAdminOperation, function (url, res, err) {
+            if (App.isEnvCompareEnabled != true) {
+              if (callback) {
+                callback(url, res, err)
+              }
+              return
+            }
+
+            App.request(isAdminOperation, REQUEST_TYPE_JSON, App.getBaseUrl(App.otherEnv) + '/logout'
+                , req, App.getHeader(vHeader.value), function (url_, res_, err_) {
+              if (callback) {
+                callback(url, res, err)
+                return
+              }
+            })
+
+          }, this.scripts)
         }
       },
 
@@ -4357,7 +4494,7 @@
           if (verify != null) { //FIXME isEmpty校验时居然在verify=null! StringUtil.isEmpty(verify, true) == false) {
             vVerify.value = verify
           }
-        })
+        }, this.scripts)
       },
 
       clearUser: function () {
@@ -4818,6 +4955,11 @@
         var url = this.getUrl()
 
         vOutput.value = "requesting... \nURL = " + url
+
+        errHandler = function () {
+          vOutput.value = "requesting... \nURL = " + url + "\n\n可能" + ERR_MSG
+        }
+        setTimeout(errHandler, 5000)
         this.view = 'output';
 
         var caseScript = (caseScript_ != null ? caseScript_ : ((this.scripts || {}).case || {})[this.getCurrentDocumentId() || 0]) || {}
@@ -4848,6 +4990,8 @@
       request: function (isAdminOperation, type, url, req, header, callback, caseScript_, accountScript_, globalScript_, ignorePreScript) {
         this.isLoading = true
 
+        const isEnvCompare = this.isEnvCompareEnabled
+
         const scripts = (isAdminOperation || caseScript_ == null ? null : this.scripts) || {}
         const globalScript = (isAdminOperation ? null : (globalScript_ != null ? globalScript_ : (scripts.global || {})[0])) || {}
         const accountScript = (isAdminOperation ? null : (accountScript_ != null ? accountScript_ : (scripts.account || {})[this.getCurrentAccountId() || 0])) || {}
@@ -4856,13 +5000,25 @@
         var evalPostScript = function () {}
 
         var sendRequest = function (isAdminOperation, type, url, req, header, callback) {
+          var hs = ""
+          if (isDelegate && header != null) {
+            for (var k in header) {
+                var v = k == null ? null : header[k]
+                if (k == null || k.toLowerCase() == 'apijson-delegate-id') {
+                    continue
+                }
+                hs += '\n' + k + ': ' + (v instanceof Object ? JSON.stringify(v) : v)
+            }
+          }
+
           // axios.defaults.withcredentials = true
           axios({
             method: (type == REQUEST_TYPE_PARAM ? 'get' : 'post'),
-            url: (isDelegate
-                ? (
+            url: (isDelegate ? (
                   App.server + '/delegate?' + (type == REQUEST_TYPE_GRPC ? '$_type=GRPC&' : '')
-                  + (StringUtil.isEmpty(App.delegateId, true) ? '' : '$_delegate_id=' + App.delegateId + '&') + '$_delegate_url=' + encodeURIComponent(url)
+                  + (StringUtil.isEmpty(App.delegateId, true) ? '' : '$_delegate_id=' + App.delegateId + '&')
+                  + '$_delegate_url=' + encodeURIComponent(url)
+                  + (StringUtil.isEmpty(hs, true) ? '' : '&$_headers=' + encodeURIComponent(hs.trim()))
                 ) : (
                   App.isEncodeEnabled ? encodeURI(url) : url
                 )
@@ -4874,6 +5030,7 @@
             // crossDomain: true
           })
             .then(function (res) {
+              clearTimeout(errHandler)
               var postEvalResult = evalPostScript(url, res, null)
               if (postEvalResult == BREAK_ALL) {
                 return
@@ -4885,9 +5042,19 @@
               if (isDelegate) {
                 var hs = res.headers || {}
                 var delegateId = hs['Apijson-Delegate-Id'] || hs['apijson-delegate-id']
-                if (delegateId != null && delegateId != App.delegateId) {
-                  App.delegateId = delegateId
-                  App.saveCache(App.server, 'delegateId', delegateId)
+
+                if (delegateId != null) {
+                  if (isEnvCompare) {
+                    if (delegateId != App.otherEnvDelegateId) {
+                      App.otherEnvDelegateId = delegateId
+                      App.saveCache(App.server, 'otherEnvDelegateId', delegateId)
+                    }
+                  } else {
+                    if (delegateId != App.delegateId) {
+                      App.delegateId = delegateId
+                      App.saveCache(App.server, 'delegateId', delegateId)
+                    }
+                  }
                 }
               }
 
@@ -4895,7 +5062,9 @@
               // if ((res.config || {}).method == 'options') {
               //   return
               // }
-              log('send >> success:\n' + JSON.stringify(res.data, null, '    '))
+              if (DEBUG) {
+                log('send >> success:\n' + JSON.stringify(res.data, null, '    '))
+              }
 
               //未登录，清空缓存
               if (res.data != null && res.data.code == 407) {
@@ -5094,32 +5263,34 @@
             header['Set-Cookie'] = header.Cookie
             delete header.Cookie
           }
-          else {
+          else if (IS_BROWSER) {
             document.cookie = header.Cookie
           }
         } else if (IS_NODE) {
           var curUser = isAdminOperation ? this.User : this.getCurrentAccount()
-          if (curUser != null && curUser.cookie != null) {
+          if (curUser != null && curUser[isEnvCompare ? 'phone' : 'cookie'] != null) {
             if (header == null) {
               header = {}
             }
 
             // Node 环境内通过 headers 设置 Cookie 无效
-            header.Cookie = curUser.cookie
-            document.cookie = header.Cookie
+            header.Cookie = isEnvCompare ? this.otherEnvCookieMap[curUser.phone] : curUser.cookie
           }
         }
 
-        if (isDelegate && this.delegateId != null && (header == null || header['Apijson-Delegate-Id'] == null)) {
+        var delegateId = isEnvCompare ? this.otherEnvDelegateId : this.delegateId
+        if (isDelegate && delegateId != null && (header == null || header['Apijson-Delegate-Id'] == null)) {
           if (header == null) {
             header = {};
           }
-          header['Apijson-Delegate-Id'] = this.delegateId
+          header['Apijson-Delegate-Id'] = delegateId
         }
 
 
         if (IS_NODE) {
-          log('req = ' + JSON.stringify(req, null, '  '))
+          if (DEBUG) {
+            log('req = ' + JSON.stringify(req, null, '  '))
+          }
           // 低版本 node 报错 cannot find module 'node:url' ，高版本报错 TypeError: axiosCookieJarSupport is not a function
           //   const axiosCookieJarSupport = require('axios-cookiejar-support').default;
           //   const tough = require('tough-cookie');
@@ -5163,7 +5334,7 @@
             // vOutput.value = "Response:\nurl = " + url + "\nerror = " + err.message;
             this.view = 'error';
             this.error = {
-              msg: "Response:\nurl = " + url + "\nerror = " + err.message
+              msg: "Response:\nurl = " + url + "\nerror = " + err.message + '\n\n' + ERR_MSG
             }
           }
         }
@@ -5593,6 +5764,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             this.saveCache(this.server, 'testCasePage', this.testCasePage)
             this.saveCache(this.server, 'testCaseCount', this.testCaseCount)
 
+            this.resetTestCount(this.currentAccountIndex)
+
             this.remotes = null
             this.showTestCase(true, false)
             break
@@ -5600,15 +5773,22 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             this.saveCache(this.server, 'randomPage', this.randomPage)
             this.saveCache(this.server, 'randomCount', this.randomCount)
 
+            this.resetTestCount(this.currentAccountIndex, true)
+
+            var cri = this.currentRemoteItem || {}
+            cri.randoms = null
             this.randoms = null
-            this.showRandomList(true, (this.currentRemoteItem || {}).Document, false)
+            this.showRandomList(true, cri.Document, false)
             break
           case 'randomSub':
             this.saveCache(this.server, 'randomSubPage', this.randomSubPage)
             this.saveCache(this.server, 'randomSubCount', this.randomSubCount)
 
+            this.resetTestCount(this.currentAccountIndex, true, true)
+
+            var cri = this.currentRandomItem || {}
             this.randomSubs = null
-            this.showRandomList(true, (this.currentRemoteItem || {}).Random, true)
+            this.showRandomList(true, cri.Random, true)
             break
           default:
             docObj = null
@@ -5722,7 +5902,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             + '\nAPIJSON 官方网站: https://github.com/APIJSON/apijson.cn '
             + '\nAPIJSON -Java版: https://github.com/Tencent/APIJSON '
             + '\nAPIJSON - C# 版: https://github.com/liaozb/APIJSON.NET '
-            + '\nAPIJSON - Go 版: https://github.com/j2go/apijson-go '
+            + '\nAPIJSON - Go 版: https://github.com/glennliao/apijson-go '
             + '\nAPIJSON - PHP版: https://github.com/kvnZero/hyperf-APIJSON '
             + '\nAPIJSON -Node版: https://github.com/kevinaskin/apijson-node '
             + '\nAPIJSON -Python: https://github.com/zhangchunlin/uliweb-apijson '
@@ -5764,8 +5944,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        */
       getDoc: function (callback) {
 
-        var isTSQL = ['ORACLE', 'DAMENG'].indexOf(this.database) >= 0
-        var isNotTSQL = !isTSQL
+      	var isTSQL = ['ORACLE', 'DAMENG'].indexOf(this.database) >= 0
+      	var isNotTSQL = ! isTSQL
 
         var count = this.count || 100  //超过就太卡了
         var page = this.page || 0
@@ -5853,7 +6033,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 "@order": this.database != 'SQLSERVER' ? null : "table_name+",
                 '@column': this.database == 'POSTGRESQL' || this.database == 'SQLSERVER'  //MySQL 8 SELECT `column_name` 返回的仍然是大写的 COLUMN_NAME，需要 AS 一下
                   ? 'column_name;data_type;numeric_precision,numeric_scale,character_maximum_length'
-                  : 'column_name:column_name,column_type:column_type,is_nullable:is_nullable,column_comment:column_comment'
+                  : 'column_name:column_name,column_type:column_type,is_nullable:is_nullable,column_default:column_default,column_comment:column_comment'
               },
               'PgAttribute': this.database != 'POSTGRESQL' ? null : {
                 'attrelid@': '[]/PgClass/oid',
@@ -5929,7 +6109,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         //Access[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         var ad = ''
-        list = docObj == null ? null : docObj['Access[]'];
+        var list = docObj == null ? null : docObj['Access[]'];
         CodeUtil.accessList = list;
         if (list != null) {
           if (DEBUG) {
@@ -5992,7 +6172,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var doc = '';
 
           //[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-          var list = docObj == null ? null : docObj['[]'];
+          list = docObj == null ? null : docObj['[]'];
           map = {};
           CodeUtil.tableList = list;
           if (list != null) {
@@ -6050,7 +6230,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
 
               for (var j = 0; j < columnList.length; j++) {
-                var column = (columnList[j] || {}).Column;
+                var column = (columnList[j] || {})[App.database != 'SQLSERVER' ? 'Column' : 'SysColumn'];
                 var name = column == null ? null : column.column_name;
                 if (name == null) {
                   continue;
@@ -6071,6 +6251,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                       : column
                   );
                 var column_comment = (o || {}).column_comment
+                var column_default = column.column_default
 
                 // column.column_comment = column_comment
                 doc += '\n' + ' <a href="javascript:void(0)" onclick="window.App.onClickColumn(' + i + ",'" + modelName + "'," + j + ",'" + name + "'" + ')">' + name + '</a>'
@@ -6170,28 +6351,28 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             callback(doc);
           }
 
-//      log('getDoc  callback(doc); = \n' + doc);
+//      	  log('getDoc  callback(doc); = \n' + doc);
       },
 
-      getTableKey(database) {
+      getTableKey: function(database) {
         database = database || this.database
         return this.database == 'SQLSERVER' ? 'SysTable' : (['ORALCE', 'DAMENG'].indexOf(database) >= 0 ? 'AllTable' : 'Table')
       },
-      getColumnKey(database) {
+      getColumnKey: function(database) {
         database = database || this.database
         return this.database == 'SQLSERVER' ? 'SysColumn' : (['ORALCE', 'DAMENG'].indexOf(database) >= 0 ? 'AllColumn' : 'Column')
       },
-      getTableObj(tableIndex) {
+      getTableObj: function(tableIndex) {
         var list = docObj == null ? null : docObj['[]']
         var item = list == null ? null : list[tableIndex]
         return item == null ? null : item[this.getTableKey()];
       },
-      getColumnList(tableIndex) {
+      getColumnList: function(tableIndex) {
         var list = docObj == null ? null : docObj['[]']
         var item = list == null ? null : list[tableIndex]
         return item == null ? null : item['[]']
       },
-      getColumnListWithModelName(modelName, schemaName) {
+      getColumnListWithModelName: function(modelName, schemaName) {
         var list = docObj == null ? null : docObj['[]']
         if (list != null) {
           for (var i = 0; i < list.length; i++) {
@@ -6204,7 +6385,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
         return null
       },
-      getTableByName(tableName, schemaName) {
+      getTableByName: function(tableName, schemaName) {
         var list = docObj == null ? null : docObj['[]']
         if (list != null) {
           for (var i = 0; i < list.length; i++) {
@@ -6218,7 +6399,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         return null
       },
-      getTableByModelName(modelName, schemaName) {
+      getTableByModelName: function(modelName, schemaName) {
         var list = docObj == null ? null : docObj['[]']
         if (list != null) {
           for (var i = 0; i < list.length; i++) {
@@ -6231,7 +6412,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
         return null
       },
-      getColumnTypeWithModelName(columnName, modelName, schemaName) {
+      getColumnTypeWithModelName: function(columnName, modelName, schemaName) {
         var columnList = this.getColumnListWithModelName(modelName, schemaName)
         if (columnList != null) {
           for (var j = 0; j < columnList.length; j++) {
@@ -6243,18 +6424,18 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
         return null
       },
-      getColumnObj(columnList, columnIndex) {
+      getColumnObj: function(columnList, columnIndex) {
         return columnList == null ? null : (columnList[columnIndex] || {})[this.getColumnKey()];
       },
-      getAccessObj(index) {
+      getAccessObj: function(index) {
         var list = docObj == null ? null : docObj['Access[]']
         return list == null ? null : list[index];
       },
-      getFunctionObj(index) {
+      getFunctionObj: function(index) {
         var list = docObj == null ? null : docObj['Function[]']
         return list == null ? null : list[index];
       },
-      getFunctionByName(functionName) {
+      getFunctionByName: function(functionName) {
         var list = docObj == null ? null : docObj['Function[]']
         if (list != null) {
           for (var i = 0; i < list.length; i++) {
@@ -6266,11 +6447,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
         return null
       },
-      getRequestObj(index) {
+      getRequestObj: function(index) {
         var list = docObj == null ? null : docObj['Request[]']
         return list == null ? null : list[index];
       },
-      getRequestBy(method, tag, version) {
+      getRequestBy: function(method, tag, version) {
         var list = docObj == null ? null : docObj['Request[]']
         if (list != null) {
           for (var i = 0; i < list.length; i++) {
@@ -6283,7 +6464,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
         return null
       },
-      getSchemaName(tableIndex) {
+      getSchemaName: function(tableIndex) {
         var table = this.getTableObj(tableIndex)
         var sch = table == null ? null : table.table_shema
         if (StringUtil.isNotEmpty(sch)) {
@@ -6293,15 +6474,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var schemas = StringUtil.isEmpty(this.schema, true) ? null : StringUtil.split(this.schema)
         return schemas == null || schemas.length != 1 ? null : this.schema
       },
-      getTableName(tableIndex) {
+      getTableName: function(tableIndex) {
         var table = this.getTableObj(tableIndex)
         return table == null ? '' : table.table_name
       },
-      getColumnName(columnList, columnIndex) {
+      getColumnName: function(columnList, columnIndex) {
         var column = this.getColumnObj(columnList, columnIndex)
         return column == null ? '' : column.column_name
       },
-      getModelName(tableIndex) {
+      getModelName: function(tableIndex) {
         var table = this.getTableObj(tableIndex)
         var table_name = table == null ? null : table.table_name
 
@@ -6311,7 +6492,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         return StringUtil.isEmpty(alias, true) ? StringUtil.firstCase(table_name, true) : alias
       },
-      getModelNameByTableName(tableName, schemaName) {
+      getModelNameByTableName: function(tableName, schemaName) {
         var table = this.getTableByName(tableName, schemaName)
         var table_name = table == null ? null : table.table_name
 
@@ -6987,11 +7168,33 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         this.isMLEnabled = enable
         this.testProcess = enable ? '机器学习:已开启' : '机器学习:已关闭'
         this.saveCache(this.server, 'isMLEnabled', enable)
+        // if (enable) {
+        //   this.isEnvCompareEnabled = false
+        //   this.saveCache(this.server, 'isEnvCompareEnabled', this.isEnvCompareEnabled)
+        // }
+
+        this.resetTestCount(this.currentAccountIndex)
+
         this.remotes = null
         this.showTestCase(true, false)
       },
 
-      onClickTestScript() {
+      resetTestCount: function (accountIndex, isRandom, isSub) {
+        if (isRandom) {
+          this.resetCount(isSub ? this.currentRandomItem : this.currentRemoteItem, isRandom, isSub, accountIndex)
+          return
+        }
+
+        if (accountIndex == -1) {
+          this.logoutSummary = this.resetCount(this.logoutSummary, false, false, accountIndex)
+        }
+        else if (accountIndex >= 0 && accountIndex < (this.accounts || []).length) {
+          var accountItem = this.resetCount(this.getSummary(accountIndex), false, false, accountIndex)
+          this.accounts[accountIndex] = accountItem
+        }
+      },
+
+      onClickTestScript: function () {
         var logger = console.log
         console.log = function(msg) {
           logger(msg)
@@ -7042,9 +7245,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        */
       onClickTestRandom: function (isCross, callback) {
         this.isRandomTest = true
-        this.testRandom(! this.isRandomListShow && ! this.isRandomSubListShow, this.isRandomListShow, this.isRandomSubListShow, null, isCross, callback)
+        this.testRandom(! this.isRandomListShow && ! this.isRandomSubListShow, this.isRandomListShow, this.isRandomSubListShow, null, isCross, true, callback)
       },
-      testRandom: function (show, testList, testSubList, limit, isCross, callback) {
+      testRandom: function (show, testList, testSubList, limit, isCross, isManual, callback) {
         this.isRandomEditable = false
         if (testList != true && testSubList != true) {
           this.testRandomProcess = ''
@@ -7091,8 +7294,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
 
           this.testRandomProcess = '正在测试: ' + 0 + '/' + allCount
-          var summaryItem = this.getCurrentRandomSummary()
-          this.resetCount(summaryItem, true, App.currentAccountIndex)
+          var summaryItem = (testSubList ? this.currentRandomItem : this.currentRemoteItem) || {}
+          if (isManual) {
+            this.resetCount(summaryItem, true, testSubList, this.currentAccountIndex)
+          } else {
+            summaryItem.whiteCount = 0
+            summaryItem.greenCount = 0
+            summaryItem.blueCount = 0
+            summaryItem.orangeCount = 0
+            summaryItem.redCount = 0
+          }
           summaryItem.totalCount = allCount
 
           var json = this.getRequest(vInput.value, {})
@@ -7108,7 +7319,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               App.randomDoneCount ++
               continue
             }
-            this.log('test  random = ' + JSON.stringify(random, null, '  '))
+            if (DEBUG) {
+              this.log('test  random = ' + JSON.stringify(random, null, '  '))
+            }
 
             const index = i
 
@@ -7123,21 +7336,28 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             // }
 
             App[testSubList ? 'currentRandomSubIndex' : 'currentRandomIndex'] = index
-            this.testRandomSingle(show, false, itemAllCount > 1 && ! testSubList, item, this.type, url, json, header, isCross, function (url, res, err) {
-              var data = null
-              if (res instanceof Object) {  // 可能通过 onTestResponse 返回的是 callback(true, 18, null)
-                data = res.data
-                try {
-                  App.onResponse(url, res, err)
-                  App.log('test  App.request >> res.data = ' + (data == null ? 'null' : JSON.stringify(data, null, '  ')))
-                } catch (e) {
-                  App.log('test  App.request >> } catch (e) {\n' + e.message)
+            try {
+              this.testRandomSingle(show, false, itemAllCount > 1 && ! testSubList, item, this.type, url, json, header, isCross, isManual, function (url, res, err) {
+                var data = null
+                if (res instanceof Object) {  // 可能通过 onTestResponse 返回的是 callback(true, 18, null)
+                  data = res.data
+                  try {
+                    App.onResponse(url, res, err)
+                    if (DEBUG) {
+                      App.log('test  App.request >> res.data = ' + (data == null ? 'null' : JSON.stringify(data, null, '  ')))
+                    }
+                  } catch (e) {
+                    App.log('test  App.request >> } catch (e) {\n' + e.message)
+                  }
                 }
-              }
 
-              App.compareResponse(allCount, list, index, item, data, true, App.currentAccountIndex, false, err, null, isCross, callback)
-              return true
-            })
+                App.compareResponse(allCount, list, index, item, data, true, App.currentAccountIndex, false, err, null, isCross, callback)
+                return true
+              })
+            }
+            catch (e) {
+              this.compareResponse(allCount, list, index, item, data, true, this.currentAccountIndex, false, e, null, isCross, callback)
+            }
           }
         }
       },
@@ -7145,7 +7365,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        * @param show
        * @param callback
        */
-      testRandomSingle: function (show, testList, testSubList, item, type, url, json, header, isCross, callback) {
+      testRandomSingle: function (show, testList, testSubList, item, type, url, json, header, isCross, isManual, callback) {
         item = item || {}
 
         // 保证能调用自定义函数等 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -7187,147 +7407,247 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           const which = i;
           var rawConfig = testSubList && i < existCount ? ((subs[i] || {}).Random || {}).config : random.config
-          this.parseRandom(
-            JSON.parse(JSON.stringify(json)), rawConfig, random.id
-            , ! testSubList, testSubList && i >= existCount, testSubList && i >= existCount
-            , function (randomName, constConfig, constJson) {
+          
+          var cb = function (url, res, err) {
+            if (callback != null) {
+              callback(url, res, err, random)
+            }
+            else {
+              App.onResponse(url, res, err)
+            }
+          };
+                  
+          try {
+            this.parseRandom(
+              JSON.parse(JSON.stringify(json)), rawConfig, random.id
+              , ! testSubList, testSubList && i >= existCount, testSubList && i >= existCount
+              , function (randomName, constConfig, constJson) {
 
-              respCount ++;
+                respCount ++;
 
-              if (testSubList) {  //在原来已上传的基础上，生成新的
-                if (which >= existCount) {
-                  //异步导致顺序错乱 subs.push({
-                  subs[which] = {
-                    Random: {
-                      id: -i - 1, //表示未上传
-                      toId: random.id == null ? 1 : random.id,  // 1 为了没选择测试用例时避免用 toId 判断子项错误
-                      userId: random.userId,
-                      documentId: random.documentId,
-                      count: 1,
-                      name: randomName || 'Temp ' + i,
-                      config: constConfig
-                    },
-                    //不再需要，因为子项里前面一部分就是已上传的，而且这样更准确，交互更直观
-                    // TestRecord: {  //解决子项始终没有对比标准
-                    //   id: 0, //不允许子项撤回 tr.id, //表示未上传
-                    //   userId: random.userId,
-                    //   documentId: random.documentId,
-                    //   testAccountId: tr.testAccountId,
-                    //   randomId: -i - 1,
-                    //   response: tr.response,
-                    //   standard: tr.standard,
-                    //   date: tr.date,
-                    //   compare: tr.compare
-                    // }
-                  // })
-                  };
-                }
-              }
-              else {
-                var cb = function (url, res, err) {
-                  if (callback != null) {
-                    callback(url, res, err, random)
+                if (testSubList) {  //在原来已上传的基础上，生成新的
+                  if (which >= existCount) {
+                    //异步导致顺序错乱 subs.push({
+                    subs[which] = {
+                      Random: {
+                        id: -i - 1, //表示未上传
+                        toId: random.id == null ? 1 : random.id,  // 1 为了没选择测试用例时避免用 toId 判断子项错误
+                        userId: random.userId,
+                        documentId: random.documentId,
+                        count: 1,
+                        name: randomName || 'Temp ' + i,
+                        config: constConfig
+                      },
+                      //不再需要，因为子项里前面一部分就是已上传的，而且这样更准确，交互更直观
+                      // TestRecord: {  //解决子项始终没有对比标准
+                      //   id: 0, //不允许子项撤回 tr.id, //表示未上传
+                      //   userId: random.userId,
+                      //   documentId: random.documentId,
+                      //   testAccountId: tr.testAccountId,
+                      //   randomId: -i - 1,
+                      //   response: tr.response,
+                      //   standard: tr.standard,
+                      //   date: tr.date,
+                      //   compare: tr.compare
+                      // }
+                    // })
+                    };
                   }
-                  else {
-                    App.onResponse(url, res, err)
-                  }
-                };
-
-                if (show == true) {
-                  vInput.value = JSON.stringify(constJson, null, '    ');
-                  App.send(false, cb, caseScript, null, null, true);
                 }
                 else {
-                  App.request(false, type, url, constJson, header, cb, caseScript, null, null, true);
+                  if (show == true) {
+                    vInput.value = JSON.stringify(constJson, null, '    ');
+                    App.send(false, cb, caseScript, null, null, true);
+                  }
+                  else {
+                    App.request(false, type, url, constJson, header, cb, caseScript, null, null, true);
+                  }
                 }
-              }
 
-              if (testSubList && respCount >= count) { // && which >= count - 1) {
-                if (App.currentRandomItem == null) {
-                  App.currentRandomItem = {}
+                if (testSubList && respCount >= count) {  // && which >= count - 1) {
+                  if (App.currentRandomItem == null) {
+                    App.currentRandomItem = {}
+                  }
+                  App.randomSubs = App.currentRandomItem.subs = subs
+                  App.getCurrentRandomSummary().summaryType = 'total' // App.onClickSummary('total', true)
+                  if (App.isRandomListShow == true) {
+                    App.resetCount(item, true, false, App.currentAccountIndex)
+                    item.subs = subs
+                  }
+                  if (respCount == count) {
+                    App.testRandom(false, false, true, count, isCross, isManual, callback)
+                  }
                 }
-                App.randomSubs = App.currentRandomItem.subs = subs
-                App.getCurrentRandomSummary().summaryType = 'total' // App.onClickSummary('total', true)
-                if (App.isRandomListShow == true) {
-                  App.resetCount(item, true, App.currentAccountIndex)
-                  item.subs = subs
-                }
-                App.testRandom(false, false, true, count, isCross, callback)
-              }
 
-            },
-            preScript
-          );
+              },
+              preScript
+            );
+          }
+          catch (e) {
+            cb(url, {}, e)
+          }
 
         }  // for
 
-    },
+      },
 
-      resetParentCount: function (item, cri) {
-        cri.totalCount -= item.totalCount
+      resetParentCount: function (item, cri, isRandom, accountIndex) {
+        if (cri == null || item == null) {
+          return
+        }
+
+        if (item.whiteCount == null || item.whiteCount < 0) {
+          item.whiteCount = 0
+        }
+        if (item.greenCount == null || item.greenCount < 0) {
+          item.greenCount = 0
+        }
+        if (item.blueCount == null || item.blueCount < 0) {
+          item.blueCount = 0
+        }
+        if (item.orangeCount == null || item.orangeCount < 0) {
+          item.orangeCount = 0
+        }
+        if (item.redCount == null || item.redCount < 0) {
+          item.redCount = 0
+        }
+
+        if (cri.whiteCount == null) {
+          cri.whiteCount = 0
+        }
+        if (cri.greenCount == null) {
+          cri.greenCount = 0
+        }
+        if (cri.blueCount == null) {
+          cri.blueCount = 0
+        }
+        if (cri.orangeCount == null) {
+          cri.orangeCount = 0
+        }
+        if (cri.redCount == null) {
+          cri.redCount = 0
+        }
+
         cri.whiteCount -= item.whiteCount
         cri.greenCount -= item.greenCount
         cri.blueCount -= item.blueCount
         cri.orangeCount -= item.orangeCount
         cri.redCount -= item.redCount
+        // cri.totalCount -= item.totalCount
 
+        // var isTestCase = isRandom != true && item.Document != null && accountIndex < (this.accounts || []).length
+
+        if (cri.whiteCount < 0) {
+          cri.whiteCount = 0 // isTestCase ? item.whiteCount : 0
+        }
+        if (cri.greenCount < 0) {
+          cri.greenCount = 0 // isTestCase ? item.greenCount : 0
+        }
+        if (cri.blueCount < 0) {
+          cri.blueCount = 0 // isTestCase ? item.blueCount : 0
+        }
+        if (cri.orangeCount < 0) {
+          cri.orangeCount = 0 // isTestCase ? item.orangeCount : 0
+        }
+        if (cri.redCount < 0) {
+          cri.redCount = 0 // isTestCase ? item.redCount : 0
+        }
         // if (cri.totalCount < 0) {
         //   cri.totalCount = 0
         // }
-        if (cri.whiteCount < 0) {
-          cri.whiteCount = 0
-        }
-        if (cri.greenCount < 0) {
-          cri.greenCount = 0
-        }
-        if (cri.blueCount < 0) {
-          cri.blueCount = 0
-        }
-        if (cri.orangeCount < 0) {
-          cri.orangeCount = 0
-        }
-        if (cri.redCount < 0) {
-          cri.redCount = 0
-        }
 
         cri.totalCount = cri.whiteCount + cri.greenCount + cri.blueCount + cri.orangeCount + cri.redCount
       },
-      resetCount: function (item, isRandom, accountIndex) {
+      resetCount: function (item, isRandom, isSub, accountIndex) {
         if (item == null) {
           this.log('resetCount  randomItem == null >> return')
           return item
         }
 
         if (isRandom) {
-          var cri = this.currentRemoteItem // isSub ? this.currentRemoteItem : null
-          // if (cri != null && item != null && item.toId != null && item.toId > 0) {
+          var cri = isSub ? this.currentRandomItem : this.currentRemoteItem
           if (cri != null && (cri != item || cri.id != item.id)) {
-            this.resetParentCount(item, cri)
+            this.resetParentCount(item, cri, isRandom, accountIndex)
+          }
+
+          cri = this.currentRandomItem
+          if (isSub && cri != null && (cri != item || cri.id != item.id)) {
+            this.resetParentCount(item, cri, isRandom, accountIndex)
           }
         }
 
         var accounts = this.accounts
         var num = accounts == null ? 0 : accounts.length
-        if (isRandom && accountIndex != this.currentAccountIndex && accountIndex != num) {
+        if (accountIndex < num) { //  && accountIndex != this.currentAccountIndex) {
           var cs = this.getSummary(accountIndex)
           if (cs != null && (cs != item || cs.id != item.id)) {
-            this.resetParentCount(item, cs)
+            this.resetParentCount(item, cs, false, accountIndex)
           }
         }
 
-        if (isRandom || accountIndex != num) {
+        if (accountIndex < num) {
           var als = this.getAllSummary()
-          if (als != null && (als != item || als.id != item.id)) {
-            this.resetParentCount(item, als)
+          // 不知道为啥总是不对
+          // if (als != null && (als != item || als.id != item.id)) {
+          //   this.resetParentCount(item, als, false, accountIndex)
+          // }
+
+          // 改用以下方式
+          var whiteCount = 0
+          var greenCount = 0
+          var blueCount = 0
+          var orangeCount = 0
+          var redCount = 0
+          // var totalCount = 0
+          for (var i = -1; i < num; i++) {
+            var cs = this.getSummary(i)
+            if (cs == null) {
+              continue
+            }
+
+            if (cs.whiteCount == null || cs.whiteCount < 0) {
+              cs.whiteCount = 0
+            }
+            if (cs.greenCount == null || cs.greenCount < 0) {
+              cs.greenCount = 0
+            }
+            if (cs.blueCount == null || cs.blueCount < 0) {
+              cs.blueCount = 0
+            }
+            if (cs.orangeCount == null || cs.orangeCount < 0) {
+              cs.orangeCount = 0
+            }
+            if (cs.redCount == null || cs.redCount < 0) {
+              cs.redCount = 0
+            }
+            if (cs.totalCount == null || cs.totalCount < 0) {
+              cs.totalCount = cs.whiteCount + cs.greenCount + cs.blueCount + cs.orangeCount + cs.redCount
+            }
+
+            whiteCount += cs.whiteCount
+            greenCount += cs.greenCount
+            blueCount += cs.blueCount
+            orangeCount += cs.orangeCount
+            redCount += cs.redCount
+            // totalCount += cs.totalCount
           }
+
+          als.whiteCount = whiteCount
+          als.greenCount = greenCount
+          als.blueCount = blueCount
+          als.orangeCount = orangeCount
+          als.redCount = redCount
+          als.totalCount = whiteCount + greenCount + blueCount + orangeCount + redCount // totalCount
         }
 
-        item.totalCount = 0
+        // var isTop = isRandom != true && item.Document == null && item.Random == null && accountIndex < (this.accounts || []).length
+
         item.whiteCount = 0
         item.greenCount = 0
         item.blueCount = 0
         item.orangeCount = 0
         item.redCount = 0
+        item.totalCount = 0
         return item
       },
 
@@ -7351,7 +7671,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
 
           this.testRandomSingle(show, false, this.isRandomSubListShow, this.currentRandomItem,
-            this.type, this.getUrl(), this.getRequest(vInput.value, {}), this.getHeader(vHeader.value), false, callback
+            this.type, this.getUrl(), this.getRequest(vInput.value, {}), this.getHeader(vHeader.value), false, false, callback
           )
         }
         catch (e) {
@@ -7743,18 +8063,18 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var total = remotes == null ? 0 : remotes.length
 
         var als = this.getAllSummary()
-        als = this.resetCount(als, false, num)
+        als = this.resetCount(als, false, false, num)
         als.totalCount = isCross ? (num + 1)*total : total
 
         if (isCross) {
           for (var i = -1; i < num; i++) {
             var cs = this.getSummary(i)
-            cs = this.resetCount(cs, false, i)
+            cs = this.resetCount(cs, false, false, i)
             cs.totalCount = total
           }
         } else {
           var cs = this.getSummary(accountIndex)
-          cs = this.resetCount(cs, false, accountIndex)
+          cs = this.resetCount(cs, false, false, accountIndex)
           cs.totalCount = total
         }
 
@@ -7789,6 +8109,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             this.testRandomProcess = ''
             if (accountIndex == accounts.length) {
               this.currentAccountIndex = accounts.length - 1  // -1 导致最后右侧显示空对象
+
               if (callback) {
                 callback('已完成账号交叉测试: 退出登录状态 和 每个账号登录状态')
               } else {
@@ -7886,6 +8207,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           this.autoTestCallback(this.testProcess)
         }
 
+        const isMLEnabled = this.isMLEnabled
+        const standardKey = isMLEnabled != true ? 'response' : 'standard'
+
+        const otherEnv = this.otherEnv;
+        const otherBaseUrl = this.isEnvCompareEnabled && StringUtil.isNotEmpty(otherEnv, true) ? this.getBaseUrl(otherEnv) : null
+        const isEnvCompare = StringUtil.isNotEmpty(otherBaseUrl, true) // 对比自己也行，看看前后两次是否幂等  && otherBaseUrl != baseUrl
+
         for (var i = 0; i < allCount; i++) {
           const item = list[i]
           const document = item == null ? null : item.Document
@@ -7906,30 +8234,70 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
             continue
           }
-          this.log('test  document = ' + JSON.stringify(document, null, '  '))
+
+          if (DEBUG) {
+            this.log('test  document = ' + JSON.stringify(document, null, '  '))
+          }
 
           const index = i
 
-          var header = null
+          var hdr = null
           try {
-            header = this.getHeader(document.header)
+            hdr = this.getHeader(document.header)
           } catch (e) {
             this.log('test  for ' + i + ' >> try { header = this.getHeader(document.header) } catch (e) { \n' + e.message)
           }
+          const header = hdr
 
-          this.request(false, document.type, baseUrl + document.url, this.getRequest(document.request, null, true), header, function (url, res, err) {
+          const caseScript = {
+            pre: item['Script:pre'],
+            post: item['Script:post']
+          }
+
+          const type = document.type
+          const req = this.getRequest(document.request, null, true)
+          const otherEnvUrl = isEnvCompare ? (otherBaseUrl + document.url) : null
+          const curEnvUrl = baseUrl + document.url
+
+          this.request(false, type, isEnvCompare ? otherEnvUrl : curEnvUrl, req, header, function (url, res, err) {
             try {
               App.onResponse(url, res, err)
-              App.log('test  App.request >> res.data = ' + JSON.stringify(res.data, null, '  '))
+              if (DEBUG) {
+                App.log('test  App.request >> res.data = ' + JSON.stringify(res.data, null, '  '))
+              }
             } catch (e) {
               App.log('test  App.request >> } catch (e) {\n' + e.message)
             }
 
-            App.compareResponse(allCount, list, index, item, res.data, isRandom, accountIndex, false, err, null, isCross, callback)
-          }, {
-            pre: item['Script:pre'],
-            post: item['Script:post']
-          })
+            if (isEnvCompare != true) {
+              App.compareResponse(allCount, list, index, item, res.data, isRandom, accountIndex, false, err, null, isCross, callback)
+              return
+            }
+
+            const otherErr = err
+            const rsp = App.removeDebugInfo(res.data)
+            const rspStr = JSON.stringify(rsp)
+            const tr = item.TestRecord || {}
+            if (isMLEnabled) {
+              tr.response = rspStr
+            }
+            tr[standardKey] = isMLEnabled ? JSON.stringify(JSONResponse.updateFullStandard({}, rsp, isMLEnabled)) : rspStr // res.data
+            item.TestRecord = tr
+
+            App.request(false, type, curEnvUrl, req, header, function (url, res, err) {
+              try {
+                App.onResponse(url, res, err)
+                if (DEBUG) {
+                  App.log('test  App.request >> res.data = ' + JSON.stringify(res.data, null, '  '))
+                }
+              } catch (e) {
+                App.log('test  App.request >> } catch (e) {\n' + e.message)
+              }
+
+              App.compareResponse(allCount, list, index, item, res.data, isRandom, accountIndex, false, err || otherErr, null, isCross, callback)
+            }, caseScript)
+
+          }, caseScript)
         }
 
       },
@@ -7975,9 +8343,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
         }
         else {
-          var standardKey = this.isMLEnabled != true ? 'response' : 'standard'
-          var standard = StringUtil.isEmpty(tr[standardKey], true) ? null : JSON.parse(tr[standardKey])
-          tr.compare = JSONResponse.compareResponse(standard, this.removeDebugInfo(response) || {}, '', this.isMLEnabled, null, null, ignoreTrend) || {}
+          var isML = this.isMLEnabled
+          var standardKey = isML ? 'standard' : 'response'
+          var stdd = tr[standardKey]
+          if (isRandom) {
+            stdd = stdd || ((this.currentRemoteItem || {}).TestRecord || {})[standardKey]
+          }
+          
+          var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : JSON.parse(stdd))
+          tr.compare = JSONResponse.compareResponse(standard, this.removeDebugInfo(response) || {}, '', isML, null, null, ignoreTrend) || {}
           tr.compare.duration = it.durationHint
         }
 
@@ -8112,13 +8486,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
       startRandomTest4Doc: function (list, indexes, position, deepAllCount, accountIndex, isCross) {
         const accInd = accountIndex
-        var callback = function (isRandom, allCount) {
+        var callback = function (isRandom, allCount, msg) {
+          log("startRandomTest4Doc  callback isRandom = " + isRandom + "; allCount = " + allCount + "; msg = " + msg)
           if (App.randomDoneCount < App.randomAllCount) {
             return true
           }
 
-          App.randomDoneCount = 0
-          // App.randomAllCount = 0
+          App.randomDoneCount = App.randomAllCount
 
           App.deepDoneCount ++
           const deepDoneCount = App.deepDoneCount
@@ -8184,7 +8558,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               log(e)
             }
 
-            App.onClickTestRandom(isCross, callback)
+            App.testRandom(false, true, false, null, isCross, false, callback)
           })
         } catch (e2) {
           log(e2)
@@ -8259,17 +8633,21 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
 
       updateSummary: function (item, change, key) {
+        if (change == null || key == null) {
+          return item
+        }
+
         if (item == null) {
           item = {}
         }
 
         var count = item[key]
-        if (count == null) {
+        if (count == null || count < 0) {
           count = 0
         }
         count += change
 
-        item[key] = count < 0 ? 0 : count
+        item[key] = count
 
         // 对于 Random 进入子项再退出后有时显示居然不准
         // if (cri.totalCount == null) {
@@ -8296,9 +8674,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (accountIndex == -1) {
           this.logoutSummary = this.updateSummary(this.logoutSummary, change, key)
         }
-          // else if (accountIndex== this.accounts.length) {
-          //   this.allSummary = this.updateSummary(this.allSummary, change, key)
-        // }
         else if (accountIndex >= 0 && accountIndex < this.accounts.length) {
           var accountItem = this.updateSummary(this.getSummary(accountIndex), change, key)
           this.accounts[accountIndex] = accountItem
@@ -8312,16 +8687,18 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (random.count == 1 || (random.id != null && random.id < 0)) {
           var key = item.compareColor + 'Count'
-          // this.updateToSummary(item, change, accountIndex)
+          this.updateToSummary(item, change, accountIndex)
 
           var curRandom = this.isRandomListShow || this.currentRandomItem == null ? null : this.currentRandomItem.Random
           var isTemp = curRandom != null && (curRandom.id == null || curRandom.id < 0)
-          var cri = this.updateSummary(isTemp ? this.currentRandomItem : this.currentRemoteItem)  // this.getCurrentRandomSummary())
+          var cri = this.updateSummary(isTemp ? this.currentRandomItem : this.currentRemoteItem, change, key)  // this.getCurrentRandomSummary())
 
           if (isTemp) {
             this.currentRandomItem = cri
+            this.updateSummary(this.currentRemoteItem, change, key)
           } else {
             this.currentRemoteItem = cri
+            Vue.set(this.testCases, this.currentDocIndex, cri)
           }
 
           var toId = random.toId
@@ -8455,6 +8832,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           isRandom ? (random.id > 0 ? random.id : (random.toId + '' + random.id)) : 0
         ] || {}
 
+        var rawRspStr = JSON.stringify(currentResponse)
+
         const list = isRandom ? (random.toId == null || random.toId <= 0 ? this.randoms : this.randomSubs) : this.testCases
 
         var isBefore = item.showType == 'before'
@@ -8462,7 +8841,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           item.showType = isBefore ? 'after' : 'before'
           Vue.set(list, index, item);
 
-          var res = isBefore ? JSON.stringify(currentResponse) : testRecord.response
+          var res = isBefore ? rawRspStr : testRecord.response
+          if (isRandom && ! isBefore) {
+            res = res || ((this.currentRemoteItem || {}).TestRecord || {}).response
+          }
 
           this.view = 'code'
           this.jsoncon = res || ''
@@ -8511,7 +8893,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 item.TestRecord = null
               }
 
-              App.updateTestRecord(0, list, index, item, currentResponse, isRandom, true, App.currentAccountIndex, isCross)
+              App.updateTestRecord(0, list, index, item, JSON.parse(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
             })
           }
           else { //上传新的校验标准
@@ -8557,62 +8939,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
             }
             else {
-              standard = (StringUtil.isEmpty(testRecord.standard, true) ? null : JSON.parse(testRecord.standard)) || {};
-
-              var code = currentResponse.code;
-              var thrw = currentResponse.throw;
-              var msg = currentResponse.msg;
-
-              var hasCode = standard.code != null;
-              var isCodeChange = standard.code != code;
-              var exceptions = standard.exceptions || [];
-
-              delete currentResponse.code; //code必须一致
-              delete currentResponse.throw; //throw必须一致
-
-              var find = false;
-              if (isCodeChange && hasCode) {  // 走异常分支
-                for (var i = 0; i < exceptions.length; i++) {
-                  var ei = exceptions[i];
-                  if (ei != null && ei.code == code && ei.throw == thrw) {
-                    find = true;
-                    ei.repeat = (ei.repeat || 0) + 1;  // 统计重复出现次数
-                    break;
-                  }
-                }
-
-                if (find) {
-                  delete currentResponse.msg;
-                }
-              }
-
-              stddObj = isML ? (isCodeChange && hasCode ? standard : JSONResponse.updateStandard(standard, currentResponse)) : {};
-
-              currentResponse.code = code;
-              currentResponse.throw = thrw;
-
-              if (isCodeChange) {
-                if (hasCode != true) {  // 走正常分支
-                  stddObj.code = code;
-                  stddObj.throw = thrw;
-                }
-                else {  // 走异常分支
-                  currentResponse.msg = msg;
-
-                  if (find != true) {
-                    exceptions.push({
-                      code: code,
-                      'throw': thrw,
-                      msg: msg
-                    })
-
-                    stddObj.exceptions = exceptions;
-                  }
-                }
-              }
-              else {
-                stddObj.repeat = (stddObj.repeat || 0) + 1;  // 统计重复出现次数
-              }
+              standard = (StringUtil.isEmpty(testRecord.standard, true) ? null : JSON.parse(testRecord.standard)) || {}
+              stddObj = JSONResponse.updateFullStandard(standard, JSON.parse(rawRspStr), isML)
             }
 
             const isNewRandom = isRandom && random.id <= 0
@@ -8642,7 +8970,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 host: this.getBaseUrl(),
                 testAccountId: this.getCurrentAccountId(),
                 compare: JSON.stringify(testRecord.compare || {}),
-                response: JSON.stringify(currentResponse || {}),
+                response: rawRspStr,
                 standard: isML ? JSON.stringify(stddObj) : null
               },
               tag: isNewRandom ? 'Random' : 'TestRecord'
@@ -8686,7 +9014,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     code: 0,
                     msg: '结果正确'
                   }
-                  testRecord.response = JSON.stringify(currentResponse)
+                  testRecord.response = rawRspStr
                   // testRecord.standard = stdd
                 }
 
@@ -8715,7 +9043,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 //   }
                 // }
 
-                App.updateTestRecord(0, list, index, item, currentResponse, isRandom, true, App.currentAccountIndex, isCross)
+                App.updateTestRecord(0, list, index, item, JSON.parse(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
               }
 
             })
@@ -8790,11 +9118,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (hasTestArg && rawReq.send != "false" && rawReq.send != "null") {
           setTimeout(function () {
             if (rawReq.send == 'random') {
-              App.onClickTestRandom(callback)
+              App.onClickTestRandom(App.isCrossEnabled, callback)
             } else if (App.isTestCaseShow) {
               App.onClickTest(callback)
             } else {
-              App.send(false)
+              App.send(false, callback)
             }
 
             var url = vUrl.value || ''
@@ -9829,6 +10157,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (types != null && types.length > 0) {
           this.types = types instanceof Array ? types : StringUtil.split(types)
         }
+        var otherEnv = this.getCache('', 'otherEnv')
+        if (StringUtil.isEmpty(otherEnv, true) == false) {
+          this.otherEnv = otherEnv
+        }
         var server = this.getCache('', 'server')
         if (StringUtil.isEmpty(server, true) == false) {
           this.server = server
@@ -9842,6 +10174,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         this.isDelegateEnabled = this.getCache('', 'isDelegateEnabled', this.isDelegateEnabled)
         this.isEncodeEnabled = this.getCache('', 'isEncodeEnabled', this.isEncodeEnabled)
+        this.isEnvCompareEnabled = this.getCache('', 'isEnvCompareEnabled', this.isEnvCompareEnabled)
         //预览了就不能编辑了，点开看会懵 this.isPreviewEnabled = this.getCache('', 'isPreviewEnabled', this.isPreviewEnabled)
         this.isHeaderShow = this.getCache('', 'isHeaderShow', this.isHeaderShow)
         this.isRandomShow = this.getCache('', 'isRandomShow', this.isRandomShow)
@@ -9861,6 +10194,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           '\nvar accounts = this.getCache(URL_BASE, accounts)' +
           '\n} catch (e) {\n' + e.message)
       }
+      try { //这里是初始化，不能出错
+        var otherEnvCookieMap = this.getCache(App.otherEnv, 'otherEnvCookieMap')
+        if (otherEnvCookieMap != null) {
+          this.otherEnvCookieMap = otherEnvCookieMap
+        }
+      } catch (e) {
+        console.log('created  try { ' +
+            '\nvar accounts = this.getCache(URL_BASE, accounts)' +
+            '\n} catch (e) {\n' + e.message)
+      }
 
       try { //可能URL_BASE是const类型，不允许改，这里是初始化，不能出错
         this.User = this.getCache(this.server, 'User', {})
@@ -9878,6 +10221,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         this.randomSubPage = this.getCache(this.server, 'randomSubPage', this.randomSubPage)
         this.randomSubCount = this.getCache(this.server, 'randomSubCount', this.randomSubCount)
         this.delegateId = this.getCache(this.server, 'delegateId', this.delegateId)
+        this.otherEnvDelegateId = this.getCache(this.server, 'otherEnvDelegateId', this.otherEnvDelegateId)
 
         CodeUtil.thirdPartyApiMap = this.getCache(this.thirdParty, 'thirdPartyApiMap')
       } catch (e) {
@@ -9890,7 +10234,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var accounts = this.accounts
         var num = accounts == null ? 0 : accounts.length
         for (var i = -1; i <= num; i++) {
-          this.resetCount(this.getSummary(i), false, i)
+          this.resetCount(this.getSummary(i), false, false, i)
         }
       } catch (e) {
         console.log('created  try { ' +
@@ -10016,7 +10360,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (keyCode === 27) {  // ESC
           if (document.activeElement == vOption || App.options.length > 0) {
             App.options = [];
-            target.focus();
+            if (target != null) {
+              target.focus();
+            }
             return;
           }
         }
@@ -10098,7 +10444,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           if (target == vUrl) {
           }
-          else if (target != vOption) {
+          else if (target != null && target != vOption) {
             var selectionStart = target.selectionStart;
             var selectionEnd = target.selectionEnd;
 
@@ -10241,7 +10587,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
           }
         }
-        else if (keyCode === 9) {  // Tab 加空格
+        else if (target != null && keyCode === 9) {  // Tab 加空格
           try {
             var selectionStart = target.selectionStart;
             var selectionEnd = target.selectionEnd;
@@ -10297,7 +10643,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           App.showSave(true)
           event.preventDefault()
         }
-        else if ((event.ctrlKey || event.metaKey) && ([68, 73, 191].indexOf(keyCode) >= 0 || (isChar != true && event.shiftKey != true))) {
+        else if (target != null && (event.ctrlKey || event.metaKey) && ([68, 73, 191].indexOf(keyCode) >= 0 || (isChar != true && event.shiftKey != true))) {
           var selectionStart = target.selectionStart;
           var selectionEnd = target.selectionEnd;
 
@@ -10345,7 +10691,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               log(e)
             }
           }
-          else if (keyCode === 191) {  // Ctrl + '/' 注释与取消注释
+          else if (target != null && keyCode === 191) {  // Ctrl + '/' 注释与取消注释
             try {
               var text = StringUtil.get(target.value);
               var before = text.substring(0, selectionStart);
@@ -10410,7 +10756,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               log(e)
             }
           }
-          else if (keyCode == 68) {  // Ctrl + 'D' 删除行
+          else if (target != null && keyCode == 68) {  // Ctrl + 'D' 删除行
             try {
               var text = StringUtil.get(target.value);
               var before = text.substring(0, selectionStart);
@@ -10439,7 +10785,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           target.selectionStart = selectionStart;
           target.selectionEnd = selectionEnd;
         }
-        else if (event.shiftKey || isChar) {
+        else if (target != null && (event.shiftKey || isChar)) {
           if (isChar && App.options.length > 0) {
             var key = StringUtil.get(event.key);
 

@@ -17,6 +17,7 @@ if (typeof window == 'undefined') {
     eval(`
       var StringUtil = require("./StringUtil");
       var JSONObject = require("./JSONObject");
+      var JSON5 = require('json5');
     `)
   } catch (e) {
     console.log(e)
@@ -28,22 +29,41 @@ if (typeof window == 'undefined') {
  */
 var CodeUtil = {
   TAG: 'CodeUtil',
+  APP_NAME: 'APIAuto',
+  DIVIDER: '/',
 
   LANGUAGE_KOTLIN: 'Kotlin',
   LANGUAGE_JAVA: 'Java',
   LANGUAGE_C_SHARP: 'C#',
-
   LANGUAGE_SWIFT: 'Swift',
   LANGUAGE_OBJECTIVE_C: 'Objective-C',
-
   LANGUAGE_GO: 'Go',
   LANGUAGE_C_PLUS_PLUS: 'C++',
-
   LANGUAGE_TYPE_SCRIPT: 'TypeScript',
   LANGUAGE_JAVA_SCRIPT: 'JavaScript',
-
   LANGUAGE_PHP: 'PHP',
   LANGUAGE_PYTHON: 'Python',
+
+  DATABASE_MYSQL: 'MYSQL',
+  DATABASE_POSTGRESQL: 'POSTGRESQL',
+  DATABASE_SQLITE: 'SQLITE',
+  DATABASE_ORACLE: 'ORACLE',
+  DATABASE_SQLSERVER: 'SQLSERVER',
+  DATABASE_DB2: 'DB2',
+  DATABASE_DAMENG: 'DAMENG',
+  DATABASE_KINGBASE: 'KINGBASE',
+  DATABASE_TIDB: 'TIDB',
+  DATABASE_TDENGINE: 'TDENGINE',
+  DATABASE_NEBULA: 'NEBULA',
+  DATABASE_PRESTO: 'PRESTO',
+  DATABASE_TRINO: 'TRINO',
+  DATABASE_INFLUXDB: 'INFLUXDB',
+  DATABASE_CLICKHOUSE: 'CLICKHOUSE',
+  DATABASE_ELASTICSEARCH: 'ELASTICSEARCH',
+  DATABASE_REDIS: 'REDIS',
+  DATABASE_KAFKA: 'KAFKA',
+  DATABASE_MARIADB: 'MARIADB',
+  DATABASE_HIVE: 'HIVE',
 
   type: 'JSON',
   database: 'MYSQL',
@@ -66,13 +86,13 @@ var CodeUtil = {
    */
   parseComment: function (reqStr, tableList, method, database, language, isReq, standardObj, isExtract, isWarning, isAPIJSONRouter) { //怎么都获取不到真正的长度，cols不行，默认20不变，maxLineLength不行，默认undefined不变 , maxLineLength) {
     if (StringUtil.isEmpty(reqStr)) {
-      return '';
+      return;
     }
 
     var reqObj = JSON5.parse(reqStr);
 
     var methodInfo = JSONObject.parseUri(method, isReq) || {};
-    var method = methodInfo.method;
+    method = methodInfo.method;
     var isRestful = methodInfo.isRestful;
     var tag = methodInfo.tag;
     var startName = methodInfo.table;
@@ -95,18 +115,21 @@ var CodeUtil = {
       }
     };
 
+    var cc = isRestful == true ? '//' : ' //'; // 对 APIJSON API 要求严格些，因为本来就有字段注释
+    var ccLen = cc.length;
+
     for (var i = 0; i < lines.length; i ++) {
       var line = lines[i].trim() || '';
 
       //每一种都要提取:左边的key
       var index = line.indexOf(': '); //可能是 ' 或 "，所以不好用 ': , ": 判断
       var key = index < 0 ? (depth <= 1 && startName != null ? startName : '') : line.substring(1, index - 1);
-      var cIndex = line.indexOf('  //');
+      var cIndex = line.lastIndexOf(cc);
 
       var comment = '';
       if (cIndex >= 0) {
         if (isExtract && standardObj != null && (depth != 1 || (key != 'code' && key != 'throw'))) {
-          comment = line.substring(cIndex + '  //'.length).trim();
+          comment = line.substring(cIndex + ccLen).trim();
           // standardObj = CodeUtil.updateStandardPart(standardObj, names, key, value, comment)
         }
 
@@ -695,12 +718,12 @@ var CodeUtil = {
 
       url = url || '';
 
-      var lastIndex = url.lastIndexOf('/');
+      var lastIndex = url.lastIndexOf(CodeUtil.DIVIDER);
       var methodUri = url; // lastIndex < 0 ? url : url.substring(lastIndex);
       var methodName = JSONResponse.getVariableName(lastIndex < 0 ? url : url.substring(lastIndex + 1));
 
       url = url.substring(0, lastIndex);
-      lastIndex = url.lastIndexOf('/');
+      lastIndex = url.lastIndexOf(CodeUtil.DIVIDER);
       var varName = JSONResponse.getVariableName(lastIndex < 0 ? url : url.substring(lastIndex + 1));
       var modelName = StringUtil.firstCase(varName, true);
 
@@ -1042,12 +1065,12 @@ var CodeUtil = {
 
       url = url || '';
 
-      var lastIndex = url.lastIndexOf('/');
+      var lastIndex = url.lastIndexOf(CodeUtil.DIVIDER);
       var methodUri = url; // lastIndex < 0 ? url : url.substring(lastIndex);
       var methodName = JSONResponse.getVariableName(lastIndex < 0 ? url : url.substring(lastIndex + 1));
 
       url = url.substring(0, lastIndex);
-      lastIndex = url.lastIndexOf('/');
+      lastIndex = url.lastIndexOf(CodeUtil.DIVIDER);
       var varName = JSONResponse.getVariableName(lastIndex < 0 ? url : url.substring(lastIndex + 1));
       var modelName = StringUtil.firstCase(varName, true);
 
@@ -3008,7 +3031,7 @@ var CodeUtil = {
       }
     }
 
-    return '? = null' + (isSmart ? '' : '  //' + CodeUtil.initEmptyValue4Type(type, true, isKotlin));
+    return '? = null' + (isSmart ? '' : ' //' + CodeUtil.initEmptyValue4Type(type, true, isKotlin));
   },
 
   getCode4JavaArgValues: function (reqObj, useVar4ComplexValue) {
@@ -3291,12 +3314,12 @@ var CodeUtil = {
 
     url = url || '';
 
-    var lastIndex = url.lastIndexOf('/');
+    var lastIndex = url.lastIndexOf(CodeUtil.DIVIDER);
     var methodUri = lastIndex < 0 ? url : url.substring(lastIndex);
     var methodName = JSONResponse.getVariableName(lastIndex < 0 ? url : url.substring(lastIndex + 1));
 
     url = url.substring(0, lastIndex);
-    lastIndex = url.lastIndexOf('/');
+    lastIndex = url.lastIndexOf(CodeUtil.DIVIDER);
     var varName = JSONResponse.getVariableName(lastIndex < 0 ? url : url.substring(lastIndex + 1));
     var modelName = StringUtil.firstCase(varName, true);
 
@@ -3829,7 +3852,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 JavaBean\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 JavaBean\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 package \n *2.import 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\npackage apijson.demo.server.model;\n\n\n'
@@ -3948,7 +3971,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 C++ Struct\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 C++ Struct\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 namespace \n *2.#include 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */\n'
           + '\n#include <string>'
@@ -4066,7 +4089,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 JavaBean\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 JavaBean\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 package \n *2.import 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\npackage apijson.demo.server.model;\n\n\n'
@@ -4187,7 +4210,7 @@ var CodeUtil = {
 
         doc += '<?php'
           + '\n/**'
-          + '\n *APIAuto 自动生成 PHP 实体类代码\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 PHP 实体类代码\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 namespace \n *2.use 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\n\nnamespace apijson\\demo\\server\\model;\n\n\n'
@@ -4306,7 +4329,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 JavaBean\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 Go struct\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 package \n *2.import 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\npackage model\n\n\n'
@@ -4389,7 +4412,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 C# Bean\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 C# Bean\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 namespace \n *2. using 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */\n'
           + '\nnamespace apijson.demo.server.model'
@@ -4482,7 +4505,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 TypeScript Entity\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 TypeScript Entity\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n */\n\n\n'
           + CodeUtil.getComment(database != 'POSTGRESQL' ? table.table_comment : (item.PgClass || {}).table_comment, true)
           + '\n@MethodAccess'
@@ -4565,7 +4588,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 Python Entity\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 Python Entity\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 package \n *2.import 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\npackage apijson.demo.server.model;\n\n\n'
@@ -4679,7 +4702,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 Swift Struct\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 Swift Struct\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 package \n *2.import 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\npackage apijson.demo.server.model\n\n\n'
@@ -4756,7 +4779,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 JavaScript Entity\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 JavaScript Entity\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n */\n\n\n'
           + CodeUtil.getComment(database != 'POSTGRESQL' ? table.table_comment : (item.PgClass || {}).table_comment, true)
           + '\n@MethodAccess'
@@ -4850,7 +4873,7 @@ var CodeUtil = {
 
 
         doc += '/**'
-          + '\n *APIAuto 自动生成 Kotlin Data Class\n *主页: https://github.com/TommyLemon/APIAuto'
+          + '\n *' + CodeUtil.APP_NAME + ' 自动生成 Kotlin Data Class\n *主页: https://github.com/TommyLemon/' + CodeUtil.APP_NAME
           + '\n *使用方法：\n *1.修改包名 package \n *2.import 需要引入的类，可使用快捷键 Ctrl+Shift+O '
           + '\n */'
           + '\npackage apijson.demo.server.model\n\n\n'
@@ -5878,7 +5901,7 @@ var CodeUtil = {
     OWNER: '拥有者',
     ADMIN: '管理员'
   },
-  DATABASE_KEYS: ['MYSQL', 'POSTGRESQL', 'SQLSERVER', 'ORACLE', 'DB2', 'DAMENG', 'CLICKHOUSE', 'SQLITE', 'TDENGINE'],
+  DATABASE_KEYS: ['MYSQL', 'POSTGRESQL', 'SQLSERVER', 'ORACLE', 'DB2', 'DAMENG', 'KINGBASE', 'MARIADB', 'SQLITE', 'INFLUXDB', 'TDENGINE', 'PRESTO', 'TRINO', 'HIVE', 'TIDB', 'CLICKHOUSE', 'ELASTICSEARCH', 'REDIS'], // , 'KAFKA'],
 
   getComment4Function: function (funCallStr, method, language) {
     if (typeof funCallStr != 'string') {
@@ -6667,6 +6690,44 @@ var CodeUtil = {
       }
       else {
         //功能符 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+        if (columnName.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
+          if (['GET', 'HEAD'].indexOf(method) < 0) {
+            return ' ! 远程函数只能用于 GET,HEAD 请求！！';
+          }
+
+          if (value != null && valuesIsNotString) {
+            return ' ! value必须是String类型！';
+          }
+          if (value != null) {
+            var startIndex = value.indexOf("(");
+            if (startIndex <= 0 || value.endsWith(")") == false) {
+              return ' ! value必须符合 fun(arg0,arg1..) 这种格式！且不要有任何多余的空格！';
+            }
+            var fun = value.substring(0, startIndex);
+            if (StringUtil.isName(fun) != true) {
+              return '! 函数名' + fun + '不合法！value必须符合 fun(arg0,arg1..) 这种格式！且不要有任何多余的空格！';
+            }
+          }
+
+          if (isWarning) {
+            return ' ';
+          }
+
+          var priority = '';
+          if (columnName.endsWith("-()")) {
+            priority = ' < 在解析所在对象前优先执行';
+          }
+          else if (columnName.endsWith("+()")) {
+            priority = ' < 在解析所在对象后滞后执行';
+          }
+          else {
+            priority = '，执行时机在解析所在对象后，解析子对象前，可以在 () 前用 + - 设置优先级，例如 key-() 优先执行';
+          }
+
+          return '远程函数' + (isValueNotEmpty ? '，触发调用后端对应的方法/函数' + priority : '，例如 "isContain(praiseUserIdList,userId)"');
+        }
+
         var hasAt = false;
         if (columnName.endsWith("@")) {//引用，引用对象查询完后处理。fillTarget中暂时不用处理，因为非GET请求都是由给定的id确定，不需要引用
           // 没传 value 进来，不好解析，而且太长导致后面的字段属性被遮住

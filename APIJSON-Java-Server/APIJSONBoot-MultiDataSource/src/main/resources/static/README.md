@@ -5,7 +5,7 @@
 <p align="center">☔ HTTP 接口 机器学习零代码测试 和 一站式智能开发管理 工具</p>
 
 <p align="center" >
-  <a href="https://github.com/TommyLemon/APIAuto#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B">使用文档</a>
+  <a href="https://github.com/TommyLemon/APIAuto#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B">快速上手</a>
   <a href="https://space.bilibili.com/437134249/search/video?keyword=apiauto">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
 </p>
@@ -16,12 +16,14 @@
 
 ---
 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释。<br />
-提供集 文档、测试、Mock、调试、管理 于一体的一站式体验，还有一键 格式化、注释/取消注释 等高效易用的快捷键。<br />
+集 文档、测试、Mock、调试、管理 于一体的一站式体验，还有一键 格式化、注释/取消注释 等高效易用的快捷键。<br />
 在常用功能上远超 Postman, Swagger, YApi, Rap 等其它各种 开源、商业 的 API 文档/测试 工具。<br />
 支持 HTTP GET/POST API，智能显示和切换；支持一键导入 Swagger, Rap, YApi 的用例和文档。<br />
 不仅适用于 RESTful、类 RESTful、GRPC 的 API，还是腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 官方建议的文档与测试工具。<br />
 腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 等， <br />
 外部用户包含 工商银行某地分行、500强上市公司传音、跨境电商龙头 SHEIN、行业领头羊社保科技 等。
+
+![](https://user-images.githubusercontent.com/5738175/145665502-94231804-5ea8-4784-b30d-d5558aad0f8d.jpeg)
 
 <h3 align="center" style="text-align:center;">
 腾讯 AI 测试圈子演讲(部分)
@@ -138,9 +140,9 @@ https://www.bilibili.com/video/BV1JZ4y1d7c8
 
 本项目是纯静态 SPA 网页，下载源码解压后：<br />
 可以用浏览器打开 index.html，建议用 [Chrome](https://www.google.com/intl/zh-CN/chrome) 或 [Firefox](https://www.mozilla.org/zh-CN/firefox) (Safari、Edge、IE 等可能有兼容问题)，注意此方法不显示 svg 图标。<br />
-也可以用 [IntelIJ Webstorm](https://www.jetbrains.com/webstorm/), [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](https://www.eclipse.org/) 等 IDE 来打开。<br />
+也可以用 [IntelliJ Webstorm](https://www.jetbrains.com/webstorm/), [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](https://www.eclipse.org/) 等 IDE 来打开。<br />
 也可以部署到服务器并用 [Nginx](https://www.jianshu.com/p/11fa3a1a6d65) 或 [Node](https://segmentfault.com/a/1190000039744899) 反向代理，或者 [把源码放到 SpringBoot 项目的 resources/static 目录](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)。 <br />
-还可以直接访问官方网站 http://apijson.cn/api <br />
+还可以直接访问官方网站 http://apijson.cn/api 或 http://apijson.cn:8080 <br />
 <br />
 把左侧 URL 输入框内基地址改为你主机的地址(例如 http://localhost:8080 )，<br />
 然后在右上角 设置 下拉菜单内修改 数据库类型Database、数据库模式Schema。<br />
@@ -212,7 +214,7 @@ https://github.com/Tencent/APIJSON/issues/85
 https://github.com/TommyLemon/APIAuto/issues/12
 
 #### 4.apijson.cn 访问不了
-托管服务地址改为 http://47.74.39.68:8080  <br />
+托管服务地址改为 http://47.98.196.224:8080  <br />
 https://github.com/TommyLemon/APIAuto/issues/13
 
 更多问题及解答 <br />
