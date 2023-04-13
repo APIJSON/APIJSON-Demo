@@ -22,11 +22,13 @@ https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONB
 
 [SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具，一键批量生成参数组合、快速构造大量测试数据
 
-如果原本就有一些使用 Python 等语言编写的 接口/单元/数据库 测试用例，<br />
+如果原本就有一些使用 <br />
+C/C++/C#/Go/Groovy/Java/JavaScript/Kotlin/Lua/Objective-C/PHP/Python/Rust/Scala/Swift/TypeScript <br />
+等语言编写的 接口/单元/数据库 测试用例，<br />
 可以在测试代码中调用 /delegate 接口来录制流量，<br />
 生成 APIAuto/UnitAuto/SQLAuto 的对应测试用例：<br />
 ```
-POST /delegate
+{method，HTTP 请求方法，根据实际调用接口来使用对应的 GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS, TRACE} /delegate
 ?$_record={录制类型，方便生成 APIAuto/UnitAuto/SQLAuto 文档，流量回放等：0-不录制；1-API；2-Unit；3-SQL}
 &$_type={请求类型，可填 PARAM, JSON, FORM, DATA, GRPC }
 &$_delegate_id={代理 ID，从本接口返回的 Response Header 中取 Apijson-Delegate-Id，用来关联代理服务保存的 Cookie，解决浏览器不允许传 Cookie 导致登录失效等问题 }
