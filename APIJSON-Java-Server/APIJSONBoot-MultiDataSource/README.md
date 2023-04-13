@@ -11,7 +11,7 @@ https://github.com/xlongwei/light4j/tree/master/apijson#apijson%E8%B4%A6%E6%88%B
 
 ### 代理接口及录制流量
 可使用 /delegate 接口来实现代理，解决 [前端 CORS 跨域问题](https://github.com/TommyLemon/APIAuto/issues/9)。 <br />
-还可以使用这个接口来录制流量，导入到 Document/Method 及 TestRecord 表，<br />
+还可以使用这个接口来录制流量，导入到 Document/Method/Random 及 TestRecord 表，<br />
 https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/java/apijson/boot/DemoController.java#L1188-L1641
 
 然后使用 APIAuto/UnitAuto/SQLAuto 来测试：<br />
