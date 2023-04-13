@@ -28,13 +28,13 @@ C/C++/C#/Go/Groovy/Java/JavaScript/Kotlin/Lua/Objective-C/PHP/Python/Rust/Scala/
 可以在测试代码中调用 /delegate 接口来录制流量，<br />
 生成 APIAuto/UnitAuto/SQLAuto 的对应测试用例：<br />
 ```
-{method，HTTP 请求方法，根据实际调用接口来使用对应的 GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS, TRACE} /delegate
+{HTTP Method 请求方法，根据实际调用接口来使用对应的 GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS, TRACE} /delegate
 ?$_record={录制类型，方便生成 APIAuto/UnitAuto/SQLAuto 文档，流量回放等：0-不录制；1-API；2-Unit；3-SQL}
-&$_type={请求类型，可填 PARAM, JSON, FORM, DATA, GRPC }
-&$_delegate_id={代理 ID，从本接口返回的 Response Header 中取 Apijson-Delegate-Id，用来关联代理服务保存的 Cookie，解决浏览器不允许传 Cookie 导致登录失效等问题 }
-&$_delegate_url={必填，实际被调用 URL，例如 http://apijson.cn:8080/get/User ，建议 encodeUriConponent 转义来避免特 & 等殊字符导致出错 }
-&$_headers={请求头，以换行分隔每个头的键值对，且键值对格式为 key: value ，建议 encodeUriConponent 转义来避免特 & 等殊字符导致出错}
-&$_except_headers={排除请求头，格式和 $_headers 一样，如果 $_headers 未传，则通过 浏览器/接口工具 等发出的请求头 来排除指定请求头 }
+&$_type={请求类型，可填 PARAM, JSON, FORM, DATA, GRPC}
+&$_delegate_id={代理 ID，从本接口返回的 Response Header 中取 Apijson-Delegate-Id，用来关联代理服务保存的 Cookie，解决浏览器不允许传 Cookie 导致登录失效等问题}
+&$_delegate_url={必填，实际被调用 URL，例如 http://apijson.cn:8080/get/User ，建议 encodeURIComponent 转义来避免特 & 等殊字符导致出错}
+&$_headers={请求头，以换行分隔每个头的键值对，且键值对格式为 key: value ，建议 encodeURIComponent 转义来避免特 & 等殊字符导致出错}
+&$_except_headers={排除请求头，格式和 $_headers 一样，如果 $_headers 未传，则通过 浏览器/接口工具 等发出的请求头 来排除指定请求头}
 ```
 例如
 ```
