@@ -1178,7 +1178,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     public static final int REQUEST_RECORD_TYPE_UNIT = 2;
     public static final int REQUEST_RECORD_TYPE_SQL = 3;
 
-    public static Integer REQUEST_RECORD_TYPE = REQUEST_RECORD_TYPE_SQL;
+    public static Integer REQUEST_RECORD_TYPE = - REQUEST_RECORD_TYPE_API;
 
     @Autowired
     HttpServletRequest httpServletRequest;
@@ -1191,7 +1191,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      * @param headerStr 指定请求头
      * @param exceptHeaders 排除请求头
      * @param sessionId HTTP Session ID
-     * @param record 录制类型，方便生成 APIAuto/UnitAuto/SQLAuto 文档，流量回放等：0-不录制；1-API；2-Unit；3-SQL
+     * @param record 录制类型，方便生成 APIAuto/UnitAuto/SQLAuto 文档，流量回放等：0-不录制；1 - 录制 API；2 - 录制 Unit；3 - 录制 SQL；-1 - 回放 API；-2 - 回放 Unit；-3 - 回放 SQL
      * @param body POST Body
      * @param method HTTP Method
      * @param session HTTP Session
@@ -1214,7 +1214,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         }
 
         int recordType = record != null ? record : (REQUEST_RECORD_TYPE != null ? REQUEST_RECORD_TYPE : 0);
-        boolean isSQL = recordType == REQUEST_RECORD_TYPE_SQL;
+        boolean isSQL = Math.abs(recordType) == REQUEST_RECORD_TYPE_SQL;
+        boolean isUnit = Math.abs(recordType) == REQUEST_RECORD_TYPE_UNIT;
 
         String url = rawUrl;
         if ("GRPC".equals(type)) {
@@ -1251,55 +1252,53 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             headers = new HttpHeaders();
 
             String[] lines = StringUtil.split(headerStr.trim(), "\n");
-            for (String line : lines) {
-                line = line.trim();
+            if (lines != null) {
+                for (String line : lines) {
+                    line = line.trim();
 
-                int ind = line.indexOf(":");
-                if (ind < 0 || line.trim().startsWith("//")) {
-                    continue;
-                }
+                    int ind = line.indexOf(":");
+                    if (ind < 0 || line.trim().startsWith("//")) {
+                        continue;
+                    }
 
-                int ind2 = line.lastIndexOf("//");
-                if (ind2 >= 0) {
-                    line = line.substring(0, ind2).trim();
-                }
+                    int ind2 = line.lastIndexOf("//");
+                    if (ind2 >= 0) {
+                        line = line.substring(0, ind2).trim();
+                    }
 
-                if (line.isEmpty()) {
-                    continue;
-                }
+                    if (line.isEmpty()) {
+                        continue;
+                    }
 
-                String name = line.substring(0, ind).trim();
-                String h = line.substring(ind + 1).trim();
+                    String name = line.substring(0, ind).trim();
+                    String h = line.substring(ind + 1).trim();
 
-                if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
-                    setCookie = Arrays.asList(h);  // JSON.parseArray(request.getHeader(name), String.class);
-                }
-                else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
-                    addCookie = Arrays.asList(h);
-                }
-                else if (APIJSON_DELEGATE_ID.toLowerCase().equals(name.toLowerCase())) {
-                    apijsonDelegateId = Arrays.asList(h);
-                }
-                else {
-                    headers.put(name, Arrays.asList(h));
+                    if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
+                        setCookie = Arrays.asList(h);  // JSON.parseArray(request.getHeader(name), String.class);
+                    } else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
+                        addCookie = Arrays.asList(h);
+                    } else if (APIJSON_DELEGATE_ID.toLowerCase().equals(name.toLowerCase())) {
+                        apijsonDelegateId = Arrays.asList(h);
+                    } else {
+                        headers.put(name, Arrays.asList(h));
 
-                    if (recordType > 0) {
-                        if (isSQL) {
-                            hm.put(name, h);
+                        if (recordType != 0) {
+                            if (isSQL) {
+                                hm.put(name, h);
 
-                            try {
-                                com.alibaba.fastjson.JSON.parse(h);
+                                try {
+                                    com.alibaba.fastjson.JSON.parse(h);
+                                } catch (Throwable e) {
+                                    Log.e(TAG, "delegate  try {\n" +
+                                            "                                JSON.parse(h);\n" +
+                                            "                            } catch (Throwable e) = " + e.getMessage());
+                                    hs += "\n" + name + ": " + "\"" + h.replaceAll("\"", "\\\"") + "\"";
+                                    continue;
+                                }
                             }
-                            catch (Throwable e) {
-                                Log.e(TAG, "delegate  try {\n" +
-                                        "                                JSON.parse(h);\n" +
-                                        "                            } catch (Throwable e) = " + e.getMessage());
-                                hs += "\n" + name + ": " + "\"" + h.replaceAll("\"", "\\\"") + "\"";
-                                continue;
-                            }
+
+                            hs += "\n" + name + ": " + h;
                         }
-
-                        hs += "\n" + name + ": " + h;
                     }
                 }
             }
@@ -1325,7 +1324,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                     } else {
                         headers.add(name, h);
 
-                        if (recordType > 0) {
+                        if (recordType != 0) {
                             if (isSQL) {
                                 hm.put(name, h);
 
@@ -1389,7 +1388,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             map.remove("$_delegate_url");
             map.remove("$_delegate_id");
 
-            Set<Entry<String, String[]>> set = map == null ? null : map.entrySet();
+            Set<Entry<String, String[]>> set = map.entrySet();
 
             if (set != null && set.isEmpty() == false) {
 
@@ -1408,28 +1407,32 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         }
         // }
 
-        RestTemplate client = new RestTemplate();
-        // 请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
-        HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
-        // 执行HTTP请求，这里可能抛异常，不要包装，直接让它抛，能够在浏览器 Console/XHR/{i}/Preview
-        // 看到 error: "Internal Server Error" message: "405 null" 之类的包括信息，
-        // 包装后反而容易混淆，并且会因为 JSON 结构不一致导致解析问题
-        ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+        String rspBody = null;
+        if (recordType >= 0) {
+            RestTemplate client = new RestTemplate();
+            // 请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
+            HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
+            // 执行HTTP请求，这里可能抛异常，不要包装，直接让它抛，能够在浏览器 Console/XHR/{i}/Preview
+            // 看到 error: "Internal Server Error" message: "405 null" 之类的包括信息，
+            // 包装后反而容易混淆，并且会因为 JSON 结构不一致导致解析问题
+            ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
 
-        HttpHeaders hhs = entity.getHeaders();
-        if (session != null && hhs != null) {
-            List<String> cookie = hhs.get(SET_COOKIE);
-            if (cookie != null && cookie.isEmpty() == false) {
-                session.setAttribute(COOKIE, cookie);
+            HttpHeaders hhs = entity.getHeaders();
+            if (session != null && hhs != null) {
+                List<String> cookie = hhs.get(SET_COOKIE);
+                if (cookie != null && cookie.isEmpty() == false) {
+                    session.setAttribute(COOKIE, cookie);
+                }
             }
+
+            rspBody = entity.getBody();
+
+            SESSION_MAP.put(session.getId(), session);
+            httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
         }
 
-        SESSION_MAP.put(session.getId(), session);
-        httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
 
-        String rspBody = entity.getBody();
-
-        if (recordType > 0) {
+        if (recordType != 0) {
             try {
                 boolean isBodyEmpty = StringUtil.isEmpty(body, true);
 
@@ -1478,7 +1481,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
                 String s = sql;
                 int i = -1;
-                while (isSQL) {
+                while (isSQL && recordType > 0) {
                     // 这种方法当 ? 在某个作为值的字符串内 ' ? ' 会有误判，
                     // 可以改为 preparedStatement.prepare 后拿到最终 SQL，然后对比不一致的地方，再替换。
                     // 也可以直接使用 preparedStatement 内的 SQL 解析算法。
@@ -1517,11 +1520,13 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 }
 
                 JSONRequest existReq = new JSONRequest();
-                if (recordType == REQUEST_RECORD_TYPE_UNIT) {
+                if (isUnit) {
                     if (req != null) {
                         // Method <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                         apijson.JSONRequest mthd = new apijson.JSONRequest();
-                        mthd.setColumn("id");
+                        if (recordType > 0) {
+                            mthd.setColumn("id");
+                        }
                         mthd.put("language", req.getString("language"));
                         mthd.put(MethodUtil.KEY_UI, req.getInteger(MethodUtil.KEY_UI));
                         mthd.put(MethodUtil.KEY_STATIC, req.getInteger(MethodUtil.KEY_STATIC));
@@ -1540,7 +1545,9 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 else {
                     // Document <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     apijson.JSONRequest document = new apijson.JSONRequest();
-                    document.setColumn("id");
+                    if (recordType > 0) {
+                        document.setColumn("id");
+                    }
                     document.setOrder("id-");
                     document.put("type", reqType);
                     document.put("url", branch);
@@ -1557,8 +1564,10 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 long documentId = existRsp2 == null ? 0 : existRsp2.getId();
 
                 JSONRequest request = new JSONRequest();
+                apijson.JSONRequest testRecord = new apijson.JSONRequest();
+
                 if (documentId <= 0) {
-                    if (recordType == REQUEST_RECORD_TYPE_UNIT) {
+                    if (isUnit) {
                         request.setTag("Method");
                         // Method <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                         apijson.JSONRequest mthd = new apijson.JSONRequest();
@@ -1579,7 +1588,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         request.put("Method", mthd);
                         // Method >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
-                    else {
+                    else if (recordType > 0) {
                         request.setTag("Document");
                         // Document <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                         JSONObject document = new JSONObject(true);
@@ -1606,35 +1615,143 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         request.put("Document", document);
                         // Document >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
+                    else {
+                        throw new NotExistException("documentId <= 0 && recordType <= 0, no recorded response");
+                    }
                 }
                 else {
-                    request.setTag("Random");
                     // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     Map<String, ?> m = isSQL ? null : (isBodyEmpty ? map : JSON.parseObject(body));
                     String config = isSQL ? hs : parseRandomConfig("", m);
 
                     JSONObject random = new JSONObject(true);
-                    random.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                     random.put("count", 1);
                     random.put("documentId", documentId);
-                    random.put("name", "[Record] " + new java.util.Date().toLocaleString());
                     random.put("config", config.trim());
-                    request.put("Random", random);
-                }   // Random >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+                    // Random >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                {   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    JSONObject testRecord = new JSONObject(true);
+                    if (recordType > 0) {
+                        random.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
+                        random.put("name", "[Record] " + new java.util.Date().toLocaleString());
+
+                        request.put("Random", random);
+                        request.setTag("Random");
+                    } else {
+                        //  testRecord.setColumn("id,response,header");
+                        testRecord.put("documentId", documentId);
+
+                        boolean isDefault = false;
+                        String reqStr = existRsp2.getString(isSQL ? "sqlauto" : "request");
+                        if (reqStr != null && reqStr.equals(body)) {
+                            isDefault = true;
+                        }
+                        else {
+                            try {
+                                Object reqObj = JSON.parse(reqStr);
+                                isDefault = Objects.equals(reqObj, req);
+                            }
+                            catch (Throwable e) {
+                                Log.w(TAG, "delegate  try { Object reqObj = JSON.parse(reqStr); ..." +
+                                        " } catch (Throwable e) = " + e.getMessage());
+                            }
+                        }
+
+                        if (isDefault) {
+                            testRecord.put("randomId", 0);
+                        }
+                        else {
+                            long randomId = 0;
+                            try {
+                                apijson.JSONRequest randomReq = new apijson.JSONRequest();
+                                randomReq.put("Random", random);
+
+                                JSONObject rsp = newParser(session, GET).parseResponse(randomReq);
+                                JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("Random");
+                                randomId = rsp2 == null ? 0 : rsp2.getLongValue("id");
+                            }
+                            catch (Throwable e) {
+                                Log.w(TAG, "delegate  try { apijson.JSONRequest randomReq = new apijson.JSONRequest(); ..." +
+                                        " } catch (Throwable e) = " + e.getMessage());
+                            }
+
+                            if (randomId <= 0) {
+                                throw new NotExistException("cannot find Random for documentId=" + documentId + " AND requestBody = " + body);
+                            }
+
+                            testRecord.put("randomId", randomId);
+                        }
+                    }
+                }
+
+                if (recordType < 0) {
+                    testRecord.setOrder("from-,date-");
+                }
+                else {   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     testRecord.put("from", 2); // 0-接口工具，1-CI/CD，2-流量录制
                     testRecord.put("host", host);
                     testRecord.put("response", rspBody); // 用 JSONRequest.put 会转为 JSONObject
-                    request.put("TestRecord", testRecord);
                 }   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                newParser(session, POST).parseResponse(request);
+                request.put("TestRecord", testRecord);
+                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST).parseResponse(request);
+                if (recordType < 0) {
+                    JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("TestRecord");
+                    String response = rsp2 == null ? null : rsp2.getString("response");
+                    if (StringUtil.isNotEmpty(response, true)) {
+                        String header = rsp2.getString("header");
+                        String[] lines = StringUtil.split(StringUtil.getTrimedString(header), "\n");
+
+                        if (lines != null) {
+                            for (String line : lines) {
+                                line = line.trim();
+
+                                int ind = line.indexOf(":");
+                                if (ind < 0 || line.trim().startsWith("//")) {
+                                    continue;
+                                }
+
+                                int ind2 = line.lastIndexOf("//");
+                                if (ind2 >= 0) {
+                                    line = line.substring(0, ind2).trim();
+                                }
+
+                                if (line.isEmpty()) {
+                                    continue;
+                                }
+
+                                String name = line.substring(0, ind).trim();
+                                String h = line.substring(ind + 1).trim();
+
+                                httpServletResponse.setHeader(name, h);
+                            }
+                        }
+
+                        return response;
+                    }
+                }
             }
             catch (Throwable e) {
-                Log.w(TAG, "delegate  try {  ");
+                Log.w(TAG, "delegate  try { boolean isBodyEmpty = StringUtil.isEmpty(body, true); ... } catch (Throwable e) = " + e.getMessage());
             }
+        }
+
+        if (recordType < 0) {
+            RestTemplate client = new RestTemplate();
+            HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
+            ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+
+            HttpHeaders hhs = entity.getHeaders();
+            if (session != null && hhs != null) {
+                List<String> cookie = hhs.get(SET_COOKIE);
+                if (cookie != null && cookie.isEmpty() == false) {
+                    session.setAttribute(COOKIE, cookie);
+                }
+            }
+
+            rspBody = entity.getBody();
+
+            SESSION_MAP.put(session.getId(), session);
+            httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
         }
 
         return rspBody;
