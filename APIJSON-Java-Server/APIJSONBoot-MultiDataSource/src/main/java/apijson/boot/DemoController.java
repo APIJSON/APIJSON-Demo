@@ -1178,7 +1178,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     public static final int REQUEST_RECORD_TYPE_UNIT = 2;
     public static final int REQUEST_RECORD_TYPE_SQL = 3;
 
-    public static Integer REQUEST_RECORD_TYPE = - REQUEST_RECORD_TYPE_API;
+    public static Integer REQUEST_RECORD_TYPE = 0;
 
     @Autowired
     HttpServletRequest httpServletRequest;

@@ -130,8 +130,6 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
     public static final String DATABASE_NEBULA = "NEBULA";
-    public static final String DATABASE_SNOWFLAKE = "SNOWFLAKE";
-    public static final String DATABASE_CASSANDRA = "CASSANDRA";
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
@@ -204,7 +202,8 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
     @Override
     public JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception {
-        if (DATABASE_CASSANDRA.equals(config.getDatabase()) || DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase())) {
+        String db = config.getDatabase();
+        if (DemoSQLConfig.DATABASE_CASSANDRA.equals(db) || DemoSQLConfig.DATABASE_INFLUXDB.equals(db)) {
 
             String sql = config.getSQL(config.isPrepared());
 
@@ -217,7 +216,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
             }
 
 
-            if (DATABASE_CASSANDRA.equals(config.getDatabase())) {
+            if (DemoSQLConfig.DATABASE_CASSANDRA.equals(db)) {
                 CqlSession session = CqlSession.builder()
 //                        .withCloudSecureConnectBundle(Paths.get("/path/to/secure-connect-database_name.zip"))
                         .withCloudSecureConnectBundle(new URL(config.getDBUri()))
@@ -253,7 +252,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
             }
 
 
-            if (DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase())) {
+            if (DemoSQLConfig.DATABASE_INFLUXDB.equals(db)) {
                 InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
                 influxDB.setDatabase(config.getSchema());
 
