@@ -32,7 +32,7 @@ import apijson.demo.client.model.User;
 import apijson.demo.client.util.ActionUtil;
 import apijson.demo.client.util.HttpRequest;
 import apijson.demo.client.util.TestRequestAndResponseJava;
-import apijson.demo.client.util.TestRequestAndResponseKt;
+//import apijson.demo.client.util.TestRequestAndResponseKt;
 import zuo.biao.apijson.JSON;
 import zuo.biao.apijson.JSONResponse;
 import zuo.biao.library.base.BaseBroadcastReceiver;
@@ -109,25 +109,25 @@ public class MainTabActivity extends BaseBottomTabActivity implements OnBottomDr
 			});
 
 
-			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
-				@Override
-				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-					TestRequestAndResponseKt.response(resultJson);
-					if (e != null) {
-						e.printStackTrace();
-					}
-				}
-			});
-
-			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.smartRequest()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
-				@Override
-				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
-					TestRequestAndResponseKt.smartResponse(resultJson);
-					if (e != null) {
-						e.printStackTrace();
-					}
-				}
-			});
+//			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.request()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+//				@Override
+//				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+//					TestRequestAndResponseKt.response(resultJson);
+//					if (e != null) {
+//						e.printStackTrace();
+//					}
+//				}
+//			});
+//
+//			HttpRequest.get(JSON.parseObject(JSON.toJSONString(TestRequestAndResponseKt.smartRequest()), zuo.biao.apijson.JSONObject.class), 0, new OnHttpResponseListener() {
+//				@Override
+//				public void onHttpResponse(int requestCode, String resultJson, Exception e) {
+//					TestRequestAndResponseKt.smartResponse(resultJson);
+//					if (e != null) {
+//						e.printStackTrace();
+//					}
+//				}
+//			});
 //		}
 
 	}
