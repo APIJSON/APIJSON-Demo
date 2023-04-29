@@ -20,20 +20,17 @@ import static apijson.framework.APIJSONConstant.USER_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import apijson.Log;
 import apijson.NotNull;
+import apijson.orm.AbstractSQLConfig;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
-import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Join;
 import apijson.orm.Join.On;
 
@@ -147,8 +144,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	@Override
 	public String getDBVersion() {
 		if (isMySQL()) {
-			//return "5.7.22"; //
-            return "8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
+			return "5.7.22"; //
+//            return "8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 		}
 		if (isPostgreSQL()) {
 			return "9.6.15"; //TODO 改成你自己的

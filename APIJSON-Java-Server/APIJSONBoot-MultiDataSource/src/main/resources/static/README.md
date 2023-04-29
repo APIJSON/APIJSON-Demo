@@ -17,11 +17,11 @@
 ---
 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释。<br />
 集 文档、测试、Mock、调试、管理 于一体的一站式体验，还有一键 格式化、注释/取消注释 等高效易用的快捷键。<br />
-在常用功能上远超 Postman, Swagger, YApi, Rap 等其它各种 开源、商业 的 API 文档/测试 工具。<br />
-支持 HTTP GET/POST API，智能显示和切换；支持一键导入 Swagger, Rap, YApi 的用例和文档。<br />
+在常用功能上远超 Postman, Swagger, YApi 等各种 开源、商业 的 API 文档/测试 工具并能一键导入用例和文档。<br />
+支持 GET, POST, PUT, PATCH, DELETE, HEAD 等各种 HTTP Method 及 Content-Type, URL /{Path}/{Variable}。<br />
 不仅适用于 RESTful、类 RESTful、GRPC 的 API，还是腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 官方建议的文档与测试工具。<br />
 腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 等， <br />
-外部用户包含 工商银行某地分行、500强上市公司传音、跨境电商龙头 SHEIN、行业领头羊社保科技 等。
+外部用户包含 华为、工商银行某地分行、500 强上市公司传音、跨境电商巨头 SHEIN、行业领头羊社保科技 等。
 
 ![](https://user-images.githubusercontent.com/5738175/145665502-94231804-5ea8-4784-b30d-d5558aad0f8d.jpeg)
 
@@ -154,6 +154,31 @@ https://www.bilibili.com/video/BV1JZ4y1d7c8
 https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server
 
 **建议使用已 [内置 APIAuto](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static) 的 [APIJSONBoot-MultiDataSource](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource)，可以避免以下常见问题 1, 3, 4**
+
+<br />
+
+### 新增测试用例
+
+可以使用以下几种方式：
+
+#### 1.从 Postman/Swagger/YApi/Rap 等其它接口工具/平台一键导入
+点右上角登录 > 点右上角设置 > 导入第三方文档(平台 URL) > 如果默认设置不符你的需求，可以在弹窗内修改 > 点上传按钮
+
+#### 2.从浏览器 Network 接口信息界面或 Charles 等抓包工具复制后粘贴到 URL 输入框
+https://github.com/TommyLemon/APIAuto#%E7%99%BE%E5%BA%A6%E6%90%9C%E7%8B%97%E6%8A%96%E9%9F%B3%E5%85%AC%E7%BD%91%E6%8E%A5%E5%8F%A3%E8%B0%83%E7%94%A8%E6%BC%94%E7%A4%BA
+
+#### 3.调用 /delegate 代理接口来录制请求的方法、参数、Header、响应等信息
+https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot-MultiDataSource#%E4%BB%A3%E7%90%86%E6%8E%A5%E5%8F%A3%E5%8F%8A%E5%BD%95%E5%88%B6%E6%B5%81%E9%87%8F
+
+#### 4.打开分享链接来自动填充 URL、参数 JSON、请求头、参数注入配置、设置项 等
+例如：
+http://apijson.cn/api/?send=true&type=JSON&url=http%3A%2F%2Fapijson.cn%3A8080%2Fget&json={%22[]%22:{%22Comment%22:{},%22User%22:{%22id@%22:%22%2FComment%2FuserId%22}}}
+
+#### 5.在界面手动填写 URL、参数 JSON、请求头 等再点击上传/分享按钮
+可点击分享按钮生成分享链接，用浏览器打开即可自动填充。 <br />
+退出登录后可设置 使用的请求类型，全部类型为 PARAM,JSON,FORM,DATA,GRPC 
+
+<br />
 
 ### 后台 Headless 无 UI 模式回归测试
 Jenkins、蓝盾 等 CI/CD 等流水线不支持带 UI 测试，所以提供了这个模式， <br />

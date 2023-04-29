@@ -53,12 +53,28 @@ public class DemoParser extends APIJSONParser<Long> {
         super(method, needVerify);
     }
 
-    private int maxQueryCount = MAX_QUERY_COUNT;
-    //	可重写来设置最大查询数量
-    @Override
-    public int getMaxQueryCount() {
-      return maxQueryCount;
-    }
+    private int maxQueryCount = 2000;
+//    //	可重写来设置最大查询数量
+//    @Override
+//    public int getMaxQueryCount() {
+//      return maxQueryCount;
+//    }
+//
+//    @Override
+//    public int getMaxUpdateCount() {
+//        return 2000;
+//    }
+//
+//    @Override
+//    public int getMaxObjectCount() {
+//        return getMaxUpdateCount();
+//    }
+//
+//    @Override
+//    public int getMaxSQLCount() {
+//        return getMaxUpdateCount();
+//    }
+
 
     @Override
     public JSONObject parseResponse(JSONObject request) {
