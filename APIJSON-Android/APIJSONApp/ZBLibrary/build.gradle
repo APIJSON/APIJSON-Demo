@@ -4,8 +4,8 @@ android {
     compileSdkVersion 29
     buildToolsVersion '29.0.0'
     defaultConfig {
-        minSdkVersion 20
-        targetSdkVersion 22
+        minSdkVersion 26
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
     }
@@ -23,9 +23,9 @@ android {
 dependencies {
     api fileTree(dir: 'libs', include: ['*.jar'])
     testImplementation 'junit:junit:4.12'
-    api files('libs/android-support-v4.jar')
-    api files('libs/okhttp-2.1.0.jar')
-    api files('libs/okio-1.0.0.jar')
-    api files('libs/universal-image-loader-1.9.4.jar')
-    api 'com.github.APIJSON:apijson-orm:3.9.0'  //    compile project(':APIJSONLibrary')
+//    api 'com.android.support:support-v4:27.1.1'
+//    api files('libs/android-support-v4.jar')
+//    api files('libs/universal-image-loader-1.9.4.jar')
+    api 'com.nostra13.universalimageloader:universal-image-loader:1.9.4'
+    api project(':UIAuto')
 }
