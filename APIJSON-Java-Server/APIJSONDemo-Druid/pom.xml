@@ -5,8 +5,8 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-druid</artifactId>
-	<version>6.0.0</version>
 	<packaging>jar</packaging>
+	<version>6.1.0</version>
 
 	<name>APIJSONDemo-Druid</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -22,12 +22,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>6.0.0</version>
+			<version>6.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>6.0.0</version>
+			<version>6.1.0</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -39,7 +39,7 @@
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.3.4</version>
+			<version>42.3.8</version>
 		</dependency>
 		<!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
 
@@ -88,7 +88,7 @@
 	</build>
 
 	<repositories>
-	    <!-- APIJSON 必须用到的托管平台 -->
+		<!-- APIJSON 必须用到的托管平台 -->
 		<repository>
 			<id>jitpack.io</id>
 			<url>https://jitpack.io</url>

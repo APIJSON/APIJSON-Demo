@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>apijson-demo</name>
 	<description>Demo project for Spring Boot</description>
+	<version>6.1.0</version>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -35,7 +35,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.33</version>
+			<version>8.0.29</version>
 		</dependency>
 		<!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
 

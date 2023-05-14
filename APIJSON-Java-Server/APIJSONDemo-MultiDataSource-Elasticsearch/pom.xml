@@ -9,7 +9,7 @@
 	</parent>
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijsondemo-multidatasource-elasticsearch</artifactId>
-	<version>6.0.0</version>
+	<version>6.1.0</version>
 
 	<name>apijsondemo-multidatasource-elasticsearch</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
@@ -44,14 +44,14 @@
 	<dependencies>
 		<!-- 需要的 APIJSON 相关依赖 -->
 		<dependency>
-            <groupId>com.github.Tencent</groupId>
-            <artifactId>APIJSON</artifactId>
-            <version>${apijson.version}</version>
-        </dependency>
+			<groupId>com.github.Tencent</groupId>
+			<artifactId>APIJSON</artifactId>
+			<version>6.1.0</version>
+		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>${apijson.version}</version>
+			<version>6.1.0</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -108,7 +108,7 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>${mysql.version}</version>
+			<version>8.0.29</version>
 		</dependency>
 		<dependency>
 			<groupId>org.elasticsearch.client</groupId>
