@@ -323,13 +323,6 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
         return super.execute(config, unknownType);
     }
 
-    // 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
-    //	@Override
-    //	protected String getKey(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table,
-    //			int columnIndex, Map<String, JSONObject> childMap) throws Exception {
-    //		return ColumnUtil.compatOutputKey(super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap), config.getTable(), config.getMethod());
-    //	}
-
     // 不需要隐藏字段这个功能时，取消注释来提升性能
     //	@Override
     //	protected boolean isHideColumn(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,

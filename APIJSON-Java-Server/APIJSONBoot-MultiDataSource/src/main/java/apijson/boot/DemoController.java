@@ -129,7 +129,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         return httpServletRequest.getRequestURL().toString();
     }
 
-    /**增删改查统一的类 RESTful API 入口，牺牲一些路由解析性能来提升一点开发效率
+    /**增删改查统一的类 RESTful API 入口，牺牲一点路由解析性能来提升一些开发效率
      * @param method
      * @param tag
      * @param params
@@ -145,7 +145,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
     // 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    /**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
+    /**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一点路由解析性能来提升一些开发效率
      * @param method
      * @param request
      * @param session

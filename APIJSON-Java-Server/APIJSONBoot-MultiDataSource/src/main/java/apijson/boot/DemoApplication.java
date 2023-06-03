@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import apijson.framework.APIJSONSQLConfig;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.PropertyFilter;
@@ -92,6 +93,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
         unitauto.Log.DEBUG = Log.DEBUG = true;
         APIJSONParser.IS_PRINT_BIG_LOG = true;
+        // APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
         APIJSONApplication.init();
         APIJSONRouterApplication.init();
         System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");

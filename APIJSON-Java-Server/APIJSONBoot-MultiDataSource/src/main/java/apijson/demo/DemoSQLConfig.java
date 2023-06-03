@@ -109,33 +109,6 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
 		RAW_MAP.put("to_days(now())-to_days(`date`)<=7", "");  // 给 @having 使用
 		RAW_MAP.put("sexShowStr", "CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
-
-		// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
-
-		// 反选字段配置
-		Map<String, List<String>> tableColumnMap = new HashMap<>();
-		tableColumnMap.put("User", Arrays.asList(StringUtil.split("id,sex,name,tag,head,contactIdList,pictureList,date")));
-		// 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputColumn(column, getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
-		tableColumnMap.put("MYSQL-sys-Privacy", Arrays.asList(StringUtil.split("id,certified,phone,balance,_password,_payPassword")));
-		ColumnUtil.VERSIONED_TABLE_COLUMN_MAP.put(null, tableColumnMap);
-
-		// 字段名映射配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		Map<String, Map<String, String>> tableKeyColumnMap = new HashMap<>();
-
-		Map<String, String> userKeyColumnMap = new HashMap<>();
-		userKeyColumnMap.put("gender", "sex");
-		userKeyColumnMap.put("createTime", "date");
-		tableKeyColumnMap.put("User", userKeyColumnMap);
-
-		Map<String, String> privacyKeyColumnMap = new HashMap<>();
-		privacyKeyColumnMap.put("rest", "balance");
-		// 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputKey(super.getKey(key), getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
-		tableKeyColumnMap.put("MYSQL-sys-Privacy", privacyKeyColumnMap);
-
-		ColumnUtil.VERSIONED_KEY_COLUMN_MAP.put(null, tableKeyColumnMap);
-		// 字段名映射配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-		ColumnUtil.init();
 	}
 
 
@@ -359,16 +332,6 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	//	}
 
 
-	// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
-	//	@Override
-	//	public AbstractSQLConfig setColumn(List<String> column) {
-	//		return super.setColumn(ColumnUtil.compatInputColumn(column, getTable(), getMethod()));
-	//	}
-	//	@Override
-	//	public String getKey(String key) {
-	//		return super.getKey(ColumnUtil.compatInputKey(key, getTable(), getMethod()));
-	//	}
-
 	// 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库。5.0.0+ 重写以下方法，4.9.1 及以下改为重写 getValue(String)
 	//	@Override // 如果是查询，可以把 if 内 isQueryMethod 的判断去掉或者 boolean 值取反。
 	//	protected Object getValue(String key, String column, Object value) {
@@ -400,8 +363,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
 	}
 	@Override
-	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
+	protected void onJoinComplexRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, join, table, onList, on);
 	}
 
 
