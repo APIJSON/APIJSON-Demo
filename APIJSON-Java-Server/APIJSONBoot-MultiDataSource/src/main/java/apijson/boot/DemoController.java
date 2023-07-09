@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import apijson.orm.AbstractParser;
+import apijson.orm.exception.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
@@ -44,6 +46,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -57,7 +61,6 @@ import java.sql.Statement;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
-import java.util.function.BiConsumer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -78,10 +81,6 @@ import apijson.demo.model.User;
 import apijson.demo.model.Verify;
 import apijson.framework.BaseModel;
 import apijson.orm.JSONRequest;
-import apijson.orm.exception.ConditionErrorException;
-import apijson.orm.exception.ConflictException;
-import apijson.orm.exception.NotExistException;
-import apijson.orm.exception.OutOfRangeException;
 import apijson.orm.model.TestRecord;
 import apijson.router.APIJSONRouterController;
 import unitauto.MethodUtil;
@@ -1409,23 +1408,43 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
         String rspBody = null;
         if (recordType >= 0) {
-            RestTemplate client = new RestTemplate();
-            // 请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
-            HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
-            // 执行HTTP请求，这里可能抛异常，不要包装，直接让它抛，能够在浏览器 Console/XHR/{i}/Preview
-            // 看到 error: "Internal Server Error" message: "405 null" 之类的包括信息，
-            // 包装后反而容易混淆，并且会因为 JSON 结构不一致导致解析问题
-            ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+            try {
+                RestTemplate client = new RestTemplate();
+                // 请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
+                HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
+                // 执行HTTP请求，这里可能抛异常，不要包装，直接让它抛，能够在浏览器 Console/XHR/{i}/Preview
+                // 看到 error: "Internal Server Error" message: "405 null" 之类的包括信息，
+                // 包装后反而容易混淆，并且会因为 JSON 结构不一致导致解析问题
+                ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
 
-            HttpHeaders hhs = entity.getHeaders();
-            if (session != null && hhs != null) {
-                List<String> cookie = hhs.get(SET_COOKIE);
-                if (cookie != null && cookie.isEmpty() == false) {
-                    session.setAttribute(COOKIE, cookie);
+                HttpHeaders hhs = entity.getHeaders();
+                if (session != null && hhs != null) {
+                    List<String> cookie = hhs.get(SET_COOKIE);
+                    if (cookie != null && cookie.isEmpty() == false) {
+                        session.setAttribute(COOKIE, cookie);
+                    }
+                }
+
+                HttpStatus status = entity.getStatusCode();
+                httpServletResponse.setStatus(status.value(), status.getReasonPhrase());
+                rspBody = entity.getBody();
+            }
+            catch (Throwable e) {
+                try {
+                    if (e instanceof RestClientResponseException) {
+                        RestClientResponseException hce = (RestClientResponseException) e;
+                        String msg = hce.getStatusText();
+                        httpServletResponse.sendError(hce.getRawStatusCode(), StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
+                    } else {
+                        int code = CommonException.getCode(e);
+                        httpServletResponse.sendError(code, e.getMessage());
+                    }
+                }
+                catch (Throwable ex) {
+//                    httpServletResponse.setStatus(500, e.getMessage());
+                    throw e;
                 }
             }
-
-            rspBody = entity.getBody();
 
             SESSION_MAP.put(session.getId(), session);
             httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
@@ -1736,19 +1755,39 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         }
 
         if (recordType < 0) {
-            RestTemplate client = new RestTemplate();
-            HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
-            ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+            try {
+                RestTemplate client = new RestTemplate();
+                HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
+                ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
 
-            HttpHeaders hhs = entity.getHeaders();
-            if (session != null && hhs != null) {
-                List<String> cookie = hhs.get(SET_COOKIE);
-                if (cookie != null && cookie.isEmpty() == false) {
-                    session.setAttribute(COOKIE, cookie);
+                HttpHeaders hhs = entity.getHeaders();
+                if (session != null && hhs != null) {
+                    List<String> cookie = hhs.get(SET_COOKIE);
+                    if (cookie != null && cookie.isEmpty() == false) {
+                        session.setAttribute(COOKIE, cookie);
+                    }
+                }
+
+                HttpStatus status = entity.getStatusCode();
+                httpServletResponse.setStatus(status.value(), status.getReasonPhrase());
+                rspBody = entity.getBody();
+            }
+            catch (Throwable e) {
+                try {
+                    if (e instanceof RestClientResponseException) {
+                        RestClientResponseException hce = (RestClientResponseException) e;
+                        String msg = hce.getStatusText();
+                        httpServletResponse.sendError(hce.getRawStatusCode(), StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
+                    } else {
+                        int code = CommonException.getCode(e);
+                        httpServletResponse.sendError(code, e.getMessage());
+                    }
+                }
+                catch (Throwable ex) {
+//                    httpServletResponse.setStatus(500, e.getMessage());
+                    throw e;
                 }
             }
-
-            rspBody = entity.getBody();
 
             SESSION_MAP.put(session.getId(), session);
             httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
