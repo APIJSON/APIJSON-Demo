@@ -41,7 +41,7 @@ import apijson.orm.Join.On;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	public DemoSQLConfig() {
 		super();
@@ -355,16 +355,16 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 
 
 	@Override
-	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
-		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
+	protected void onGetCrossJoinString(Join join) throws UnsupportedOperationException {
+		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(join);
 	}
 	@Override
-	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
+	protected void onJoinNotRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, join, table, onList, on);
 	}
 	@Override
 	protected void onJoinComplexRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, join, table, onList, on);
+		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, join, table, onList, on);
 	}
 
 

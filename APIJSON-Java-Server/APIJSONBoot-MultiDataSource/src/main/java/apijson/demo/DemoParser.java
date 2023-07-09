@@ -106,8 +106,8 @@ public class DemoParser extends APIJSONParser<Long> {
         Boolean asDBAccount = (Boolean) session.getAttribute(DemoController.AS_DB_ACCOUNT);
         this.asDBAccount = asDBAccount != null && asDBAccount;
         if (this.asDBAccount) {
-          //User user = (User) session.getAttribute(DemoController.USER_);
-          //this.dbAccount = user.getName();
+          // User user = (User) session.getAttribute(DemoController.USER_);
+          // this.dbAccount = user.getName();
           Privacy privacy = (Privacy) session.getAttribute(DemoController.PRIVACY_);
           this.dbAccount = privacy.getPhone();
           this.dbPassword = privacy.get__password();
