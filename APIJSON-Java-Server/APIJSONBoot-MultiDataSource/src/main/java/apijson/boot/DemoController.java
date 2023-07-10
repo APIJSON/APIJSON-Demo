@@ -1408,48 +1408,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
         String rspBody = null;
         if (recordType >= 0) {
-            try {
-                RestTemplate client = new RestTemplate();
-                // 请勿轻易改变此提交方式，大部分的情况下，提交方式都是表单提交
-                HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
-                // 执行HTTP请求，这里可能抛异常，不要包装，直接让它抛，能够在浏览器 Console/XHR/{i}/Preview
-                // 看到 error: "Internal Server Error" message: "405 null" 之类的包括信息，
-                // 包装后反而容易混淆，并且会因为 JSON 结构不一致导致解析问题
-                ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
-
-                HttpHeaders hhs = entity.getHeaders();
-                if (session != null && hhs != null) {
-                    List<String> cookie = hhs.get(SET_COOKIE);
-                    if (cookie != null && cookie.isEmpty() == false) {
-                        session.setAttribute(COOKIE, cookie);
-                    }
-                }
-
-                HttpStatus status = entity.getStatusCode();
-                httpServletResponse.setStatus(status.value(), status.getReasonPhrase());
-                rspBody = entity.getBody();
-            }
-            catch (Throwable e) {
-                try {
-                    if (e instanceof RestClientResponseException) {
-                        RestClientResponseException hce = (RestClientResponseException) e;
-                        String msg = hce.getStatusText();
-                        httpServletResponse.sendError(hce.getRawStatusCode(), StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
-                    } else {
-                        int code = CommonException.getCode(e);
-                        httpServletResponse.sendError(code, e.getMessage());
-                    }
-                }
-                catch (Throwable ex) {
-//                    httpServletResponse.setStatus(500, e.getMessage());
-                    throw e;
-                }
-            }
-
-            SESSION_MAP.put(session.getId(), session);
-            httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
+            rspBody = sendRequest(session, method, url, body, headers);
         }
-
 
         if (recordType != 0) {
             try {
@@ -1755,43 +1715,65 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         }
 
         if (recordType < 0) {
-            try {
-                RestTemplate client = new RestTemplate();
-                HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
-                ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
-
-                HttpHeaders hhs = entity.getHeaders();
-                if (session != null && hhs != null) {
-                    List<String> cookie = hhs.get(SET_COOKIE);
-                    if (cookie != null && cookie.isEmpty() == false) {
-                        session.setAttribute(COOKIE, cookie);
-                    }
-                }
-
-                HttpStatus status = entity.getStatusCode();
-                httpServletResponse.setStatus(status.value(), status.getReasonPhrase());
-                rspBody = entity.getBody();
-            }
-            catch (Throwable e) {
-                try {
-                    if (e instanceof RestClientResponseException) {
-                        RestClientResponseException hce = (RestClientResponseException) e;
-                        String msg = hce.getStatusText();
-                        httpServletResponse.sendError(hce.getRawStatusCode(), StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
-                    } else {
-                        int code = CommonException.getCode(e);
-                        httpServletResponse.sendError(code, e.getMessage());
-                    }
-                }
-                catch (Throwable ex) {
-//                    httpServletResponse.setStatus(500, e.getMessage());
-                    throw e;
-                }
-            }
-
-            SESSION_MAP.put(session.getId(), session);
-            httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
+            rspBody = sendRequest(session, method, url, body, headers);
         }
+
+        return rspBody;
+    }
+
+    protected String sendRequest(HttpSession session, HttpMethod method, String url, String body, HttpHeaders headers) {
+        String rspBody = null;
+        try {
+            RestTemplate client = new RestTemplate();
+            HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
+            ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+
+            HttpHeaders hhs = entity.getHeaders();
+            if (session != null && hhs != null) {
+                List<String> cookie = hhs.get(SET_COOKIE);
+                if (cookie != null && cookie.isEmpty() == false) {
+                    session.setAttribute(COOKIE, cookie);
+                }
+            }
+
+            // FIXME 部分请求头导致 Response Body 未返回前端
+//            Set<Entry<String, List<String>>> set = hhs.entrySet();
+//            for (Entry<String, List<String>> e : set) {
+//                String key = e == null ? null : e.getKey();
+//                if (key != null) {
+//                    List<String> value = e.getValue();
+//                    httpServletResponse.setHeader(key, null);
+//                    for (String v : value) {
+//                        httpServletResponse.addHeader(key, v);
+//                    }
+//                }
+//            }
+
+            HttpStatus status = entity.getStatusCode();
+            httpServletResponse.setStatus(status.value(), status.getReasonPhrase());
+            rspBody = entity.getBody();
+        }
+        catch (Throwable e) {
+            try {
+                if (e instanceof RestClientResponseException) {
+                    RestClientResponseException hce = (RestClientResponseException) e;
+                    String msg = hce.getStatusText();
+                    rspBody = hce.getResponseBodyAsString();
+                    httpServletResponse.setStatus(hce.getRawStatusCode(), StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
+                } else {
+                    int code = CommonException.getCode(e);
+                    httpServletResponse.setStatus(code, e.getMessage());
+                }
+            }
+            catch (Throwable ex) {
+                int code = CommonException.getCode(e);
+                httpServletResponse.setStatus(code, e.getMessage());
+                // throw e;
+            }
+        }
+
+        SESSION_MAP.put(session.getId(), session);
+        httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
 
         return rspBody;
     }
