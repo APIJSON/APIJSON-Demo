@@ -5477,7 +5477,7 @@ https://github.com/Tencent/APIJSON/issues
             }
           }
 
-          if (req != null) { // 支持 URL 里有 Path Variable，例如 http://apijson.cn:8080/{method}/{table}
+          if (req != null && JSONResponse.getType(req) == 'object') { // 支持 URL 里有 Path Variable，例如 http://apijson.cn:8080/{method}/{table}
             var ind = url.indexOf('?')
             var uri = ind < 0 ? url : url.substring(0, ind)
 
@@ -5644,6 +5644,7 @@ https://github.com/Tencent/APIJSON/issues
 //             eval(s)
 
             var isTest = false;
+            var isInject = false;
             var data = res == null ? null : res.data
             var result = eval(code)
             console.log = logger
@@ -7958,10 +7959,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 else {
                   if (show == true) {
                     vInput.value = JSON.stringify(constJson, null, '    ');
-                    App.send(false, cb, caseScript, null, null, true);
+                    App.send(false, cb, caseScript);
                   }
                   else {
-                    App.request(false, method, type, url, constJson, header, cb, caseScript, null, null, true);
+                    App.request(false, method, type, url, constJson, header, cb, caseScript);
                   }
                 }
 
@@ -8543,12 +8544,20 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           }
 
+          var isInject = true;
           var isPre = false; // 避免执行副作用代码 true;
           var isTest = false;
+          var method = null;
+          var type = null;
+          var url = null;
+          var req = null;
+          var header = null;
+//          var callback = null;
+
           var res = {};
           var data = res.data;
           var err = null;
-          invoke(eval(StringUtil.trim(preScript) + '\n(' + toEval + ')'), which, p_k, pathKeys, key, lastKeyInPath);
+          invoke(eval(StringUtil.trim(preScript) + '\n;\n(' + toEval + ')'), which, p_k, pathKeys, key, lastKeyInPath);
 
           // alert('> current = ' + JSON.stringify(current, null, '    '))
         }
