@@ -15,7 +15,9 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.*;
+import apijson.orm.AbstractSQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
@@ -30,10 +32,7 @@ import java.net.URL;
 import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import javax.sql.DataSource;
@@ -202,21 +201,31 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     @Override
     public JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception {
-        String db = config.getDatabase();
-        if (DemoSQLConfig.DATABASE_CASSANDRA.equals(db) || DemoSQLConfig.DATABASE_INFLUXDB.equals(db)) {
+        boolean isCassandra = config.isCassandra();
+        boolean isInfluxDB = config.isInfluxDB();
 
-            String sql = config.getSQL(config.isPrepared());
+        if (isCassandra || isInfluxDB) {
+            String sql = config.getSQL(false); // config.isPrepared());
+            List<JSONObject> cache = getCache(sql, config);
+            int position = config.getPosition();
+            JSONObject result = getCacheItem(cache, position, config);
+            if (result != null) {
+                if (position == 0 && cache != null && cache.size() > 1) {
+                    result.put(KEY_RAW_LIST, cache);
+                }
+                return result;
+            }
 
             RequestMethod method = config.getMethod();
-            boolean isWrite = !RequestMethod.isQueryMethod(method);
-            if (method == null && !isWrite) {
+            boolean isWrite = ! RequestMethod.isQueryMethod(method);
+            if (method == null && ! isWrite) {
                 String trimmedSQL = sql == null ? null : sql.trim();
                 String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
                 isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
             }
 
 
-            if (DemoSQLConfig.DATABASE_CASSANDRA.equals(db)) {
+            if (isCassandra) {
                 CqlSession session = CqlSession.builder()
 //                        .withCloudSecureConnectBundle(Paths.get("/path/to/secure-connect-database_name.zip"))
                         .withCloudSecureConnectBundle(new URL(config.getDBUri()))
@@ -243,7 +252,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                     return new JSONObject(true);
                 }
 
-                JSONObject result = JSON.parseObject(list.get(0));
+                result = JSON.parseObject(list.get(0));
                 if (list.size() > 1) {
                     result.put(KEY_RAW_LIST, list);
                 }
@@ -252,10 +261,9 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
             }
 
 
-            if (DemoSQLConfig.DATABASE_INFLUXDB.equals(db)) {
+            if (isInfluxDB) {
                 InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
                 influxDB.setDatabase(config.getSchema());
-
 
                 if (isWrite) {
                     influxDB.enableBatch(
@@ -271,7 +279,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
                     influxDB.write(sql);
 
-                    JSONObject result = DemoParser.newSuccessResult();
+                    result = DemoParser.newSuccessResult();
 
                     if (method == RequestMethod.POST) {
                         List<List<Object>> values = config.getValues();
@@ -301,7 +309,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                 QueryResult qr = influxDB.query(new Query(sql));
 
                 String err = qr == null ? null : qr.getError();
-                if (StringUtil.isNotEmpty(qr, true)) {
+                if (StringUtil.isNotEmpty(err, true)) {
                     throw new SQLException(err);
                 }
 
@@ -310,10 +318,43 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                     return new JSONObject(true);
                 }
 
-                JSONObject result = JSON.parseObject(list.get(0));
-                if (list.size() > 1) {
-                    result.put(KEY_RAW_LIST, list);
+                List<JSONObject> resultList = new ArrayList<>();
+
+                for (int i = 0; i < list.size(); i++) {
+                    QueryResult.Result qyrt = list.get(i);
+                    List<QueryResult.Series> seriesList = qyrt.getSeries();
+                    if (seriesList == null || seriesList.isEmpty()) {
+                        continue;
+                    }
+
+                    for (int j = 0; j < seriesList.size(); j++) {
+                        QueryResult.Series series = seriesList.get(j);
+                        List<List<Object>> valuesList = series.getValues();
+                        if (valuesList == null || valuesList.isEmpty()) {
+                            continue;
+                        }
+
+                        List<String> columns = series.getColumns();
+                        for (int k = 0; k < valuesList.size(); k++) {
+
+                            List<Object> values = valuesList.get(k);
+                            JSONObject obj = new JSONObject(true);
+                            if (values != null) {
+                                for (int l = 0; l < values.size(); l++) {
+                                    obj.put(columns.get(l), values.get(l));
+                                }
+                            }
+                            resultList.add(obj);
+                        }
+                    }
                 }
+
+                result = resultList.isEmpty() ? new JSONObject() : resultList.get(0);
+                if (resultList.size() > 1) {
+                    result.put(KEY_RAW_LIST, resultList);
+                }
+                
+                putCache(sql, resultList, config);
 
                 return result;
             }

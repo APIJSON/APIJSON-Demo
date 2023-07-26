@@ -190,6 +190,29 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		return "";
 	}
 
+	@Override
+	public String getSQLTable() {
+		String t = super.getSQLTable();
+		return isInfluxDB() ? t.toLowerCase() : t;
+	}
+
+	// TODO 迁移到 APIJSON 主项目 <<<<<<<<<<<<<<<<<<<<
+	@Override
+	public String getSchema() {
+		String sch = super.getSchema();
+		if (StringUtil.isEmpty(sch) && isInfluxDB()) {
+			sch = DEFAULT_SCHEMA;
+		}
+		return sch;
+	}
+
+	@Override
+	public String getSQLSchema() {
+		return isInfluxDB() ? null : super.getSQLSchema();
+	}
+
+	// TODO 迁移到 APIJSON 主项目 >>>>>>>>>>>>>>>>>>>>>>
+
 	private String dbAccount;
 	public DemoSQLConfig setDBAccount(String dbAccount) {
 		this.dbAccount = dbAccount;
