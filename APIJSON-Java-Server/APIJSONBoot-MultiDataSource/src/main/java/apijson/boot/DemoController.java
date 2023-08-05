@@ -1237,6 +1237,49 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
             body = obj.toJSONString();
         }
+        else if ("PARAM".equals(type) || "FORM".equals(type)) {
+            body = null; // 居然把 GET param 和 POST form 的也取到
+        }
+        else if (body != null && "DATA".equals(type)) { // if (StringUtil.isNotEmpty(body, true)) {
+            int index = body.indexOf("%24_type=");
+            if (index < 0) {
+                index = body.indexOf("$_type=");
+            }
+            if (index < 0) {
+                index = body.indexOf("%24_record=");
+            }
+            if (index < 0) {
+                index = body.indexOf("$_record=");
+            }
+            if (index < 0) {
+                index = body.indexOf("%24_delegate_id=");
+            }
+            if (index < 0) {
+                index = body.indexOf("$_delegate_id=");
+            }
+            if (index < 0) {
+                index = body.indexOf("%24_delegate_url=");
+            }
+            if (index < 0) {
+                index = body.indexOf("$_delegate_url=");
+            }
+            if (index < 0) {
+                index = body.indexOf("%24_headers=");
+            }
+            if (index < 0) {
+                index = body.indexOf("$_headers=");
+            }
+            if (index < 0) {
+                index = body.indexOf("%24_except_headers=");
+            }
+            if (index < 0) {
+                index = body.indexOf("$_except_headers=");
+            }
+
+            if (index >= 0) {
+                body = body.substring(0, index);
+            }
+        }
 
         Enumeration<String> names = httpServletRequest.getHeaderNames();
         HttpHeaders headers = null;
@@ -1398,7 +1441,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
                 for (Entry<String, String[]> e : set) {
                     if (e != null) {
-                        url += ((first ? "" : "&") + e.getKey() + "=" + ( e.getValue() == null || e.getValue().length <= 0 ? "" : StringUtil.getString(e.getValue()[0]) ));
+                        String[] vals = e.getValue();
+                        url += ((first ? "" : "&") + e.getKey() + "=" + ( vals == null || vals.length <= 0 ? "" : StringUtil.getString(vals[0]) ));
                         first = false;
                     }
                 }
