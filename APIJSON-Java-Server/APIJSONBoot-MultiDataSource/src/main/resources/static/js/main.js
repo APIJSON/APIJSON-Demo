@@ -1297,7 +1297,7 @@ https://github.com/Tencent/APIJSON/issues
         }
 
         vUrlComment.value = isSingle || StringUtil.isEmpty(this.urlComment, true)
-          ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, ' ')
+          ? '' : CodeUtil.getBlank(StringUtil.length(vUrl.value), 1) + CodeUtil.getComment(this.urlComment, false, ' ')
           + ' - ' + (this.requestVersion > 0 ? 'V' + this.requestVersion : 'V*');
       },
 
@@ -1352,11 +1352,11 @@ https://github.com/Tencent/APIJSON/issues
         return ind < 0 ? url.length : index + 3 + ind
       },
       //获取操作方法
-      getMethod: function (url) {
+      getMethod: function (url, noQuery) {
         var url = new String(url == null ? vUrl.value : url).trim()
         var index = this.getBaseUrlLength(url)
         url = index <= 0 ? url : url.substring(index)
-        index = url.indexOf("?")
+        index = noQuery ? url.indexOf("?") : -1
         if (index >= 0) {
           url = url.substring(0, index)
         }
@@ -2429,7 +2429,7 @@ https://github.com/Tencent/APIJSON/issues
           const isEditResponse = this.isEditResponse
           const isReleaseRESTful = isExportRandom && btnIndex == 1 && ! isEditResponse
 
-          const path = App.getMethod();
+          const path = this.getMethod();
           const methodInfo = isReleaseRESTful ? (JSONObject.parseUri(path, true) || {}) : {};
           if (isReleaseRESTful) {
             var isRestful = methodInfo.isRestful;
@@ -2471,7 +2471,6 @@ https://github.com/Tencent/APIJSON/issues
 
           var commentObj = null;
           if (isExportRandom != true) {
-            var m = this.getMethod();
             var commentStddObj = null
             try {
               commentStddObj = JSON.parse(isEditResponse ? tr.standard : doc.standard);
@@ -2483,7 +2482,7 @@ https://github.com/Tencent/APIJSON/issues
             inputObj.code = null  // delete inputObj.code
 
             commentObj = JSONResponse.updateStandard(commentStddObj, inputObj);
-            CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], m, this.database, this.language, isEditResponse != true, commentObj, true);
+            CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], path, this.database, this.language, isEditResponse != true, commentObj, true);
 
             inputObj.code = code_
           }
@@ -5049,7 +5048,7 @@ https://github.com/Tencent/APIJSON/issues
               + '                                                                                                       \n';  //解决遮挡
 
             vUrlComment.value = isSingle || StringUtil.isEmpty(this.urlComment, true)
-              ? '' : vUrl.value + CodeUtil.getComment(this.urlComment, false, ' ')
+              ? '' : CodeUtil.getBlank(StringUtil.length(vUrl.value), 1) + CodeUtil.getComment(this.urlComment, false, ' ')
               + ' - ' + (this.requestVersion > 0 ? 'V' + this.requestVersion : 'V*');
 
             if (! isSingle) {
@@ -5063,7 +5062,7 @@ https://github.com/Tencent/APIJSON/issues
               var name = api == null ? null : api.name;
               if (StringUtil.isEmpty(name, true) == false) {
                 this.urlComment = name;
-                vUrlComment.value = vUrl.value + CodeUtil.getComment(this.urlComment, false, ' ')
+                vUrlComment.value = CodeUtil.getBlank(StringUtil.length(vUrl.value), 1) + CodeUtil.getComment(this.urlComment, false, ' ')
               }
             }
 
@@ -5478,7 +5477,7 @@ https://github.com/Tencent/APIJSON/issues
           }
 
           if (req != null && JSONResponse.getType(req) == 'object') { // 支持 URL 里有 Path Variable，例如 http://apijson.cn:8080/{method}/{table}
-            var ind = url.indexOf('?')
+            var ind = -1 // 支持 ?id={id} 这种动态参数  url.indexOf('?')
             var uri = ind < 0 ? url : url.substring(0, ind)
 
             var newReq = {}
@@ -5486,7 +5485,7 @@ https://github.com/Tencent/APIJSON/issues
                 var v = k == null ? null : req[k]
                 var kind = uri.indexOf('{' + k + '}')
                 if (kind >= 0) {
-                   uri = uri.replaceAll('{' + k + '}', v)
+                   uri = uri.replaceAll('${' + k + '}', v).replaceAll('{{' + k + '}}', v).replaceAll('{' + k + '}', v)
                    continue
                 }
 
@@ -5501,9 +5500,9 @@ https://github.com/Tencent/APIJSON/issues
           axios({
             method: method != null ? method : (HTTP_METHODS.indexOf(type) >= 0 ? type.toLowerCase() : (type == REQUEST_TYPE_PARAM ? 'get' : 'post')),
             url: (isDelegate ? (
-                  App.server + '/delegate?' + (type == REQUEST_TYPE_GRPC ? '$_type=GRPC&' : '')
-                  + (StringUtil.isEmpty(App.delegateId, true) ? '' : '$_delegate_id=' + App.delegateId + '&')
-                  + '$_delegate_url=' + encodeURIComponent(url)
+                  App.server + '/delegate?$_type=' + (type || REQUEST_TYPE_JSON)
+                  + (StringUtil.isEmpty(App.delegateId, true) ? '' : '&$_delegate_id=' + App.delegateId)
+                  + '&$_delegate_url=' + encodeURIComponent(url)
                   + (StringUtil.isEmpty(hs, true) ? '' : '&$_headers=' + encodeURIComponent(hs.trim()))
                 ) : (
                   App.isEncodeEnabled ? encodeURI(url) : url
@@ -6137,6 +6136,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
 
           if (type == null) {
+// 无效，这时已经换行了           if (event.target == vUrl) {
+//               event.preventDefault();
+//            }
             this.send(false);
             return
           }
@@ -8497,7 +8499,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   randomId, line
                   , (fun == ORDER_INT || args == null ? 0 : args.length)
                   + (fun == ORDER_BAD_BOOL ? BAD_BOOLS.length : (fun == ORDER_BAD_NUM ? BAD_NUMS.length : (fun == ORDER_BAD_STR
-                   ? BAD_STRS.length : (fun == ORDER_BAD_ARR ? BAD_ARRS.length : (fun == ORDER_BAD_OBJ ? BAD_OBJS.length : BADS.length)))))
+                   ? BAD_STRS.length : (fun == ORDER_BAD_ARR ? BAD_ARRS.length : (fun == ORDER_BAD_OBJ ? BAD_OBJS.length : (fun == ORDER_BAD ? BADS.length : 0))))))
                   , step
                 ) + ', ' + value.substring(start + 1);
             }
@@ -10916,6 +10918,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         var keyCode = event.keyCode;
         var isEnter = keyCode === 13;
+        if (isEnter && target == vUrl) {
+          App.send(false);
+          event.preventDefault();
+          return
+        }
+
         var isDel = keyCode === 8 || keyCode === 46; // backspace 和 del
         var isChar = (keyCode >= 48 && keyCode <= 90) || (keyCode >= 106 && keyCode <= 111) || (keyCode >= 186 && keyCode <= 222);
 

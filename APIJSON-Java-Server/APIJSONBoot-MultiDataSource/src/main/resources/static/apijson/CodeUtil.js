@@ -294,7 +294,8 @@ var CodeUtil = {
 
 
   getOperation: function (method, json) {
-        var method = StringUtil.toLowerCase(method)
+        var ind = method == null ? -1 : method.indexOf('?');
+        var method = StringUtil.toLowerCase(ind < 0 ? method : method.substring(0, ind));
         if (method.startsWith('insert') || method.startsWith('post') || method.startsWith('add')
           || method.startsWith('pub') || method.startsWith('write')) {
           return 'INSERT'
@@ -5791,10 +5792,17 @@ var CodeUtil = {
    * @param depth
    * @return {string}
    */
-  getBlank: function(depth) {
+  getBlank: function(depth, unit) {
     var s = '';
+    var one = '    ';
+    if (unit != null && unit > 0 && unit != 4) {
+        one = ''
+        for (var i = 0; i < unit; i ++) {
+            one += ' ';
+        }
+    }
     for (var i = 0; i < depth; i ++) {
-      s += '    ';
+      s += one;
     }
     return s;
   },
@@ -6724,6 +6732,8 @@ var CodeUtil = {
       }
       else {
         //功能符 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+        var ind = method == null ? -1 : method.indexOf('?');
+        method = ind < 0 ? method : method.substring(0, ind);
 
         if (columnName.endsWith("()")) {//方法，查询完后处理，先用一个Map<key,function>保存？
           if (['GET', 'HEAD'].indexOf(method) < 0) {
