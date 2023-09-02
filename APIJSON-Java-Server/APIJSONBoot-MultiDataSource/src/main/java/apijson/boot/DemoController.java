@@ -1069,7 +1069,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         double change;
         try {
             DemoVerifier.verifyLogin(session);
-            requestObject = new DemoParser(PUT).setRequest(DemoParser.parseRequest(request)).parseCorrectRequest();
+            requestObject = new DemoParser(PUT).setTag(PRIVACY_).setRequest(DemoParser.parseRequest(request)).parseCorrectRequest();
 
             privacyObj = requestObject.getJSONObject(PRIVACY_);
             if (privacyObj == null) {
