@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>6.1.0</version>
+	<version>6.2.0</version>
 
 	<name>APIJSONDemo-Elasticsearch</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
@@ -21,12 +21,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>6.1.0</version>
+			<version>6.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>6.1.0</version>
+			<version>6.2.0</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -52,10 +52,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
-					<mainClass>apijson.demo.DemoApplication</mainClass>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>

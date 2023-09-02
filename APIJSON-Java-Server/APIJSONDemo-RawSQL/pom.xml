@@ -5,7 +5,7 @@
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-druid-rawSQL</artifactId>
 	<packaging>jar</packaging>
-	<version>6.1.0</version>
+	<version>6.2.0</version>
 
 	<name>APIJSONDemo-Druid</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -21,17 +21,17 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>6.1.0</version>
+			<version>6.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>6.1.0</version>
+			<version>6.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-router</artifactId>
-			<version>1.6.0</version>
+			<version>1.7.0</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
@@ -68,10 +68,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
-					<mainClass>apijson.demo.DemoApplication</mainClass>
-				</configuration>
+				<version>2.5.13</version>
 				<executions>
 					<execution>
 						<goals>
@@ -83,6 +80,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
@@ -114,3 +112,4 @@
 		</repository>
 	</repositories>
 
+</project>

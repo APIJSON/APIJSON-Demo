@@ -80,13 +80,13 @@ public class RedisDataSource {
 	 */
 	public void createCluster() {
 		Set<HostAndPort> jedisClusterNode = new HashSet<HostAndPort>();
-		String password = "ztzh@smart666";
-		jedisClusterNode.add(new HostAndPort("xxx", 6371));
-		jedisClusterNode.add(new HostAndPort("xxx", 6372));
-		jedisClusterNode.add(new HostAndPort("xxx", 6373));
-		jedisClusterNode.add(new HostAndPort("xxx", 6374));
-		jedisClusterNode.add(new HostAndPort("xxx", 6375));
-		jedisClusterNode.add(new HostAndPort("xxx", 6376));
+		String password = "apijson";
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6371));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6372));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6373));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6374));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6375));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6376));
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		/*
 		 * 注意： 在高版本的jedis jar包，比如本版本2.9.0，JedisPoolConfig没有setMaxActive和setMaxWait属性了

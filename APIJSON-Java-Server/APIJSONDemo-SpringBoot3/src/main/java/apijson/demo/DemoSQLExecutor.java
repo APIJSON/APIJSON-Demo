@@ -23,7 +23,7 @@ import apijson.orm.AbstractSQLExecutor;
  *
  * @author Lemon
  */
-public class DemoSQLExecutor extends AbstractSQLExecutor {
+public class DemoSQLExecutor extends AbstractSQLExecutor<Long> {
     private static final String TAG = "DemoSQLExecutor";
 
     static {

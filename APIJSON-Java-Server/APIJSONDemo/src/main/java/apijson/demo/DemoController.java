@@ -65,6 +65,18 @@ public class DemoController extends APIJSONController<Long> {
 		return super.crud(method, request, session);
 	}
 
+	/**全能增删改查接口，可同时进行 增、删、改、查 多种操作，
+	 * 通过 @method: "POST", @gets: { "Privacy":"Privacy-CIRCLE", "User": { "@role":"LOGIN", "tag":"User" } } 等关键词指定
+	 * @param request
+	 * @param session
+	 * @return
+	 */
+	@PostMapping(value = "crud")  // 直接 {method} 或 apijson/{method} 会和内置网页的路由有冲突
+	// @Override
+	public String crudAll(@RequestBody String request, HttpSession session) {
+		return newParser(session, RequestMethod.CRUD).parse(request);
+	}
+
 	/**增删改查统一接口，这个一个接口可替代 7 个万能通用接口，牺牲一些路由解析性能来提升一点开发效率
 	 * @param method
 	 * @param tag

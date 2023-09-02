@@ -22,9 +22,9 @@ spring:
       datasource:
         master:
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/xxxx?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
-          username: 
-          password: 
+          url: jdbc:mysql://localhost:3306/sys?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true&useSSL=false
+          username: root
+          password: apijson
       filter:
         stat:
           log-slow-sql: true

@@ -30,7 +30,7 @@ import apijson.orm.SQLConfig;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends AbstractSQLConfig {
+public class DemoSQLConfig extends AbstractSQLConfig<Long> {
 
 	public DemoSQLConfig() {
 		super(RequestMethod.GET);
@@ -96,7 +96,8 @@ public class DemoSQLConfig extends AbstractSQLConfig {
 	}
 
 	@Override
-	public void onFakeDelete(Map<String, Object> map) {
+	public Map<String, Object> onFakeDelete(Map map) {
+		return super.onFakeDelete(map);
 	}
 
 	@Override

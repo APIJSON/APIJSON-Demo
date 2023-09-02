@@ -33,7 +33,7 @@ import apijson.orm.SQLConfig;
 /**SQL 执行
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	@Override

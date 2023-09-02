@@ -2,6 +2,7 @@ package apijson.demo;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.HttpHost;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
@@ -146,8 +147,9 @@ public class ESOptions {
 			updateByQuery.setRefresh(true);
 
 			StringBuffer sb = new StringBuffer();
-			for (String column : config.getContent().keySet()) {
-				Object value = config.getContent().get(column);
+			Map<String, Object> content = config.getContent();
+			for (String column : content.keySet()) {
+				Object value = content.get(column);
 				// 最后多一个;不会影响,elasticsearch能正确解析
 				if(StringUtil.isNumer(value.toString())) {
 					sb.append("ctx._source['" + column + "'] = " + value + ";");
@@ -234,11 +236,13 @@ public class ESOptions {
 				indexName = sqlTable;
 			}
 			// 支持批量插入[[],[]]
-			for (int i = 0; i < config.getValues().size(); i++) {
-				List<Object> values = config.getValues().get(i);
+			List<List<Object>> valuess = config.getValues();
+			List<String> column = config.getColumn();
+			for (int i = 0; i < valuess.size(); i++) {
+				List<Object> values = valuess.get(i);
 				XContentBuilder xContentBuilder = XContentFactory.jsonBuilder().startObject();
 				for (int j = 0; j < values.size(); j++) {
-					xContentBuilder.field(config.getColumn().get(j), values.get(j));
+					xContentBuilder.field(column.get(j), values.get(j));
 				}
 				if (values.size() > 0) {
 					xContentBuilder.endObject();

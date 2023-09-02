@@ -61,7 +61,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 		Log.DEBUG = true;
 		// 加载扩展脚本执行器
 		extendScriptExecutor();
-		APIJSONApplication.init(true); // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
+		APIJSONApplication.init(false); // 4.4.0 以上需要这句来保证以上 static 代码块中给 DEFAULT_APIJSON_CREATOR 赋值会生效
 	}
 
 	public static void extendScriptExecutor() {

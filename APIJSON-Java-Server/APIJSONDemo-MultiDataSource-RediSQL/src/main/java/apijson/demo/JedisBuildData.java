@@ -156,11 +156,13 @@ public class JedisBuildData {
 		Map<String, Object> dataMap = new HashMap<>();
 		switch (config.getMethod()) {
 		case POST:
-			for (int i = 0; i < config.getColumn().size(); i++) {
-				String column = config.getColumn().get(i);
-				for (List<Object> list : config.getValues()) {
+			List<String> column = config.getColumn();
+			for (int i = 0; i < column.size(); i++) {
+				String col = column.get(i);
+				List<List<Object>> values = config.getValues();
+				for (List<Object> list : values) {
 					Object data = list.get(i);
-					dataMap.put(column, data);
+					dataMap.put(col, data);
 				}
 			}
 			return dataMap;

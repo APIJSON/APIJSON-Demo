@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>6.1.0</version>
+	<version>6.2.0</version>
 
 	<name>APIJSONDemo-ClickHouse</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
@@ -45,12 +45,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>6.1.0</version>
+			<version>6.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>6.1.0</version>
+			<version>6.2.0</version>
 		</dependency>
 
         <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
@@ -69,10 +69,6 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<configuration>
-					<fork>true</fork>
-					<mainClass>apijson.demo.DemoApplication</mainClass>
-				</configuration>
 				<executions>
 					<execution>
 						<goals>

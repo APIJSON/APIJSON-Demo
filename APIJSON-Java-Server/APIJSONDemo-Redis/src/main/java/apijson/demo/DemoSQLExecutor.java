@@ -40,7 +40,7 @@ import static apijson.framework.APIJSONConstant.USER_;
  *
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     public static final String TAG = "DemoSQLExecutor";
 
     // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<

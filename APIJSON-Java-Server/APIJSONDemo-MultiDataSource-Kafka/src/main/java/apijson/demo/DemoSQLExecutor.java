@@ -32,7 +32,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Lemon
  */
 @Log4j2
-public class DemoSQLExecutor extends APIJSONSQLExecutor {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount,
@@ -61,10 +61,12 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 				// 消息组装、二次处理
 				String jsonColumn = "message";
 				DynamicDataSource DynamicDataSource = apijson.demo.DynamicDataSource.getDetail(config.getDatasource());
-				for (int i = 0; i < config.getColumn().size(); i++) {
-					String column = config.getColumn().get(i);
-					if (StringUtil.equals(column, jsonColumn)) {
-						for (List<Object> list : config.getValues()) {
+				List<String> column = config.getColumn();
+				for (int i = 0; i < column.size(); i++) {
+					String col = column.get(i);
+					if (StringUtil.equals(col, jsonColumn)) {
+						List<List<Object>> values = config.getValues();
+						for (List<Object> list : values) {
 							Object message = list.get(i);
 							return KafkaSimpleProducer.sendMessage(config.getDatasource(), DynamicDataSource.getProps(), config.getTable(), message);
 						}

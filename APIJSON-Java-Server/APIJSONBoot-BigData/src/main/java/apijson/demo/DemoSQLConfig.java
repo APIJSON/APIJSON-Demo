@@ -43,7 +43,7 @@ import apijson.orm.Join.On;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
     public DemoSQLConfig() {
         super();
@@ -119,7 +119,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
         tableColumnMap.put("User", Arrays.asList(StringUtil.split("id,sex,name,tag,head,contactIdList,pictureList,date")));
         // 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputColumn(column, getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
         tableColumnMap.put("MYSQL-sys-Privacy", Arrays.asList(StringUtil.split("id,certified,phone,balance,_password,_payPassword")));
-        ColumnUtil.VERSIONED_TABLE_COLUMN_MAP.put(null, tableColumnMap);
+        ColumnUtil.VERSIONED_TABLE_COLUMN_MAP.put(0, tableColumnMap); // SortedMap 不允许 key = null
 
         // 字段名映射配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
         Map<String, Map<String, String>> tableKeyColumnMap = new HashMap<>();
@@ -134,7 +134,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
         // 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputKey(super.getKey(key), getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
         tableKeyColumnMap.put("MYSQL-sys-Privacy", privacyKeyColumnMap);
 
-        ColumnUtil.VERSIONED_KEY_COLUMN_MAP.put(null, tableKeyColumnMap);
+        ColumnUtil.VERSIONED_KEY_COLUMN_MAP.put(0, tableKeyColumnMap); // SortedMap 不允许 key = null
         // 字段名映射配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
         ColumnUtil.init();
@@ -302,10 +302,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
     protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
         // 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
     }
+
     @Override
-    protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-        // 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
+    protected void onJoinNotRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+        // 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, join, table, onList, on);
     }
+
     @Override
     protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
         // 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);

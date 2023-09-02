@@ -35,7 +35,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Lemon
  */
 @Log4j2
-public class DemoSQLExecutor extends APIJSONSQLExecutor {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount,
