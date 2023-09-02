@@ -144,6 +144,17 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
     // 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+    /**全能增删改查接口，可同时进行 增、删、改、查 多种操作，
+     * 通过 @method: "POST", @gets: { "Privacy":"Privacy-CIRCLE", "User": { "@role":"LOGIN", "tag":"User" } } 等关键词指定
+     * @param request
+     * @param session
+     * @return
+     */
+    @PostMapping(value = "crud")  // 直接 {method} 或 apijson/{method} 会和内置网页的路由有冲突
+    // @Override
+    public String crudAll(@RequestBody String request, HttpSession session) {
+        return newParser(session, RequestMethod.CRUD).parse(request);
+    }
     /**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一点路由解析性能来提升一些开发效率
      * @param method
      * @param request
