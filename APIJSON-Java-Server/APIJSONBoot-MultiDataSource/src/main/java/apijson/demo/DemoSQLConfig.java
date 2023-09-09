@@ -22,8 +22,7 @@ import static apijson.framework.APIJSONConstant.USER_ID;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import apijson.Log;
-import apijson.NotNull;
+import apijson.*;
 import apijson.orm.AbstractSQLConfig;
 import com.alibaba.fastjson.annotation.JSONField;
 
@@ -391,5 +390,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 
+	// 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
+	//	@Override
+	//	public String getSQLKey(String key) {
+	//		return super.getSQLKey(JSONRequest.recoverUnderline(key, false));
+	//	}
 
 }

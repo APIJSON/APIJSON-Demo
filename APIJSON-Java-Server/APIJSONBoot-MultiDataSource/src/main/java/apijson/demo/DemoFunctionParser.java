@@ -37,7 +37,7 @@ import apijson.orm.Visitor;
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends APIJSONFunctionParser {
+public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 	public static final String TAG = "DemoFunctionParser";
 
 	static {
@@ -102,7 +102,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 	@Override
 	public boolean isContain(JSONObject curObj, String array, String value) {
-		List<String> list = apijson.JSON.parseArray(JSON.toJSONString(getArgVal(array)), String.class);
+		List<String> list = apijson.JSON.parseArray(getArgStr(array), String.class);
 		Object val = getArgVal(value);
 		return list != null && list.contains(val == null ? null : String.valueOf(val));
 	}
@@ -143,7 +143,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @throws Exception
 	 */
 	public int deleteCommentOfMoment(@NotNull JSONObject curObj, @NotNull String momentId) throws Exception {
-		Long mid = getArgVal(momentId);
+		Long mid = getArgLong(momentId);
 		if (mid == null || mid <= 0 || curObj.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
@@ -170,7 +170,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @return
 	 */
 	public int deleteChildComment(@NotNull JSONObject curObj, @NotNull String toId) throws Exception {
-		Long tid = getArgVal(toId);
+		Long tid = getArgLong(toId);
 		if (tid == null || tid <= 0 || curObj.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
@@ -194,7 +194,6 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	private JSONArray getChildCommentIdList(long tid) {
-
 		JSONArray arr = new JSONArray();
 
 		JSONRequest request = new JSONRequest();
@@ -248,8 +247,8 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 	 * @throws Exception
 	 */
 	public Object verifyAccess(@NotNull JSONObject curObj) throws Exception {
-		String role = getArgVal(JSONRequest.KEY_ROLE);
-		Long userId = getArgVal(JSONRequest.KEY_USER_ID);
+		String role = getArgStr(JSONRequest.KEY_ROLE);
+		Long userId = getArgLong(JSONRequest.KEY_USER_ID);
 		if (AbstractVerifier.OWNER.equals(role) && ! Objects.equals(userId, DemoVerifier.getVisitorId(getSession()))) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}

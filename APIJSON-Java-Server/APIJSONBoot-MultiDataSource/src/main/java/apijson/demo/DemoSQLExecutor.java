@@ -21,7 +21,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.datastax.oss.driver.api.core.CqlSession;
 import com.datastax.oss.driver.api.core.cql.PreparedStatement;
-import com.datastax.oss.driver.api.core.cql.ResultSet;
+import java.sql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 //import com.vesoft.nebula.jdbc.impl.NebulaDriver;
 import com.zaxxer.hikari.HikariDataSource;
@@ -31,6 +31,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Paths;
 import java.sql.Connection;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -82,7 +83,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
     @Override
-    public List<JSONObject> getCache(String sql, SQLConfig config) {
+    public List<JSONObject> getCache(String sql, SQLConfig<Long> config) {
         List<JSONObject> list = super.getCache(sql, config);
         if (list == null) {
             try {
@@ -95,7 +96,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig config) {
+    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig<Long> config) {
         super.putCache(sql, list, config);
 
         String table = config != null && config.isMain() ? config.getTable() : null;
@@ -113,7 +114,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public synchronized void removeCache(String sql, SQLConfig config) {
+    public synchronized void removeCache(String sql, SQLConfig<Long> config) {
         super.removeCache(sql, config);
         try {
             if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
@@ -130,9 +131,9 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     public static final String DATABASE_NEBULA = "NEBULA";
 
-    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
+    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
-    public Connection getConnection(SQLConfig config) throws Exception {
+    public Connection getConnection(SQLConfig<Long> config) throws Exception {
 //        if (DATABASE_NEBULA.equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
 //            String uri = config.getDBUri();
 //
@@ -200,7 +201,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
 
     @Override
-    public JSONObject execute(@NotNull SQLConfig config, boolean unknownType) throws Exception {
+    public JSONObject execute(@NotNull SQLConfig<Long> config, boolean unknownType) throws Exception {
         boolean isCassandra = config.isCassandra();
         boolean isInfluxDB = config.isInfluxDB();
 
@@ -245,7 +246,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                 //                sql = stt.getQuery();
                 //            }
 
-                ResultSet rs = session.execute(sql);
+                com.datastax.oss.driver.api.core.cql.ResultSet rs = session.execute(sql);
 
                 List<Row> list = rs.all();
                 if (list == null || list.isEmpty()) {
@@ -366,9 +367,16 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     // 不需要隐藏字段这个功能时，取消注释来提升性能
     //	@Override
-    //	protected boolean isHideColumn(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+    //	protected boolean isHideColumn(SQLConfig<Long> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
     //			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
     //		return false;
     //	}
+
+    // 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
+    //    @Override
+    //    protected String getKey(SQLConfig<Long> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+    //        String key = super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
+    //        return JSONResponse.formatUnderline(key, true);
+    //    }
 
 }
