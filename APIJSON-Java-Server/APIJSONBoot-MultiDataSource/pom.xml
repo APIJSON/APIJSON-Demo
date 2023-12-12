@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>6.2.0</version>
+    <version>6.3.0</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -37,12 +37,12 @@
         <dependency>
             <groupId>com.github.TommyLemon</groupId>
             <artifactId>unitauto-java</artifactId>
-            <version>2.9.0</version>
+            <version>3.0.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.TommyLemon</groupId>
             <artifactId>unitauto-jar</artifactId>
-            <version>2.9.0</version>
+            <version>3.0.5</version>
         </dependency>
         <dependency>
             <groupId>io.github.classgraph</groupId>
@@ -56,22 +56,22 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>6.2.0</version>
+            <version>6.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-framework</artifactId>
-            <version>6.2.0</version>
+            <version>6.3.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-column</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-router</artifactId>
-            <version>1.7.0</version>
+            <version>1.8.0</version>
         </dependency>
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
