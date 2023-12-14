@@ -28,7 +28,7 @@ import apijson.orm.SQLConfig;
  * 具体见 https://github.com/Tencent/APIJSON/issues/151
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	//  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
