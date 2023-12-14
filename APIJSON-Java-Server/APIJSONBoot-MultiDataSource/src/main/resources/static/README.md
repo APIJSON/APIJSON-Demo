@@ -6,7 +6,7 @@
 
 <p align="center" >
   <a href="https://github.com/TommyLemon/APIAuto#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B">快速上手</a>
-  <a href="https://space.bilibili.com/437134249/search/video?keyword=apiauto">视频教程</a>
+  <a href="https://search.bilibili.com/all?keyword=APIAuto">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
 </p>
 
@@ -17,10 +17,10 @@
 ---
 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释。<br />
 集 文档、测试、Mock、调试、管理 于一体的一站式体验，还有一键 格式化、注释/取消注释 等高效易用的快捷键。<br />
-在常用功能上远超 Postman, Swagger, YApi 等各种 开源、商业 的 API 文档/测试 工具并能一键导入用例和文档。<br />
+在常用功能上远超 Postman, Swagger, YApi 等各种 开源、商业 的 API 文档/测试 工具，并能一键导入用例和文档。<br />
 支持 GET, POST, PUT, PATCH, DELETE, HEAD 等各种 HTTP Method 及 Content-Type, URL /{Path}/{Variable}。<br />
 不仅适用于 RESTful、类 RESTful、GRPC 的 API，还是腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 官方建议的文档与测试工具。<br />
-腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 等， <br />
+腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 的多个部门及团队， <br />
 外部用户包含 华为、工商银行某地分行、500 强上市公司传音、跨境电商巨头 SHEIN、行业领头羊社保科技 等。
 
 ![](https://user-images.githubusercontent.com/5738175/145665502-94231804-5ea8-4784-b30d-d5558aad0f8d.jpeg)
@@ -106,8 +106,13 @@ https://www.bilibili.com/video/BV1yv411p7Y4
 [QECon 大会-腾讯 Tommy-零代码开发和测试](https://github.com/TommyLemon/StaticResources/tree/master/APIAuto/Share)
 
 ### 视频教程
-[Bilibili](https://space.bilibili.com/437134249/search/video?keyword=apiauto) <br />
-[优酷](https://i.youku.com/i/UNTg1NzI1MjQ4MA==)
+Bilibili：https://search.bilibili.com/all?keyword=APIAuto
+<img width="1020" alt="image" src="https://github.com/TommyLemon/APIAuto/assets/5738175/662603f2-75a2-4480-b329-faebf303a13d">
+
+<br />
+优酷：https://i.youku.com/i/UNTg1NzI1MjQ4MA==
+<img width="1207" alt="image" src="https://github.com/TommyLemon/APIAuto/assets/5738175/11ff5315-23a2-4301-8b67-83fac0b7a369">
+
 
 ### 相关推荐
 [别再生成测试代码了！](https://mp.weixin.qq.com/s/G1GVNhhFbSX5GoyRU6GURg)

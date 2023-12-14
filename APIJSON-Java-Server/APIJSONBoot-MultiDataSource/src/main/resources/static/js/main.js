@@ -1040,8 +1040,8 @@ https://github.com/Tencent/APIJSON/issues
       scriptType: 'case',
       scriptBelongId: 0,
       scripts: newDefaultScript(),
+      loadingCount: 0,
       isPreScript: true,
-      isLoading: false,
       isRandomTest: false,
       isDelayShow: false,
       isSaveShow: false,
@@ -1057,6 +1057,7 @@ https://github.com/Tencent/APIJSON/issues
       isRandomListShow: false,
       isRandomSubListShow: false,
       isRandomEditable: false,
+      isPercentShow: false,
       isLoginShow: false,
       isConfigShow: false,
       isDeleteShow: false,
@@ -1131,7 +1132,7 @@ https://github.com/Tencent/APIJSON/issues
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
       otherEnv: 'http://localhost:8080',  // 其它环境服务地址，用来对比当前的
-      server: 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
+      server: 'http://localhost:8080', // 'http://apijson.cn:9090',  // Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了 'http://apijson.org:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       // project: 'http://apijson.cn:8080',  // apijson.cn
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
@@ -1259,7 +1260,6 @@ https://github.com/Tencent/APIJSON/issues
             } catch (ex) {
               log(ex)
             }
-
             if (isSingle || ret instanceof Array || (ret instanceof Object == false)) {
               this.jsonhtml = ret
             }
@@ -2705,9 +2705,13 @@ https://github.com/Tencent/APIJSON/issues
                   }
 
                   //自动生成随机配置（遍历 JSON，对所有可变值生成配置，排除 @key, key@, key() 等固定值）
+
                   const isGenerate = StringUtil.isEmpty(config, true);
                   var req = isGenerate != true ? null : (isReleaseRESTful ? mapReq : App.getRequest(vInput.value, {}))
                   App.newAndUploadRandomConfig(baseUrl, req, (rpObj.Document || {}).id, config, App.requestCount, function (url, res, err) {
+
+
+
                         if (res.data != null && res.data.Random != null && JSONResponse.isSuccess(res.data.Random)) {
                           alert('已' + (isGenerate ? '自动生成并' : '') + '上传随机配置:\n' + config)
                           App.isRandomListShow = true
@@ -2733,28 +2737,23 @@ https://github.com/Tencent/APIJSON/issues
 
         }
       },
-
       newAndUploadRandomConfig: function(baseUrl, req, documentId, config, count, callback, isReleaseRESTful) {
                   if (documentId == null) {
                      return
                   }
-
                   const isGenerate = StringUtil.isEmpty(config, true);
                   var configs = isGenerate ? [] : [config]
                   if (isGenerate) {
                     var config = StringUtil.trim(this.newRandomConfig(null, '', req, false))
-
                     if (StringUtil.isEmpty(config, true)) {
                       return;
                     }
-
                     configs.push(config)
                     config2 = StringUtil.trim(this.newRandomConfig(null, '', req, true))
                     if (StringUtil.isNotEmpty(config2, true)) {
                       configs.push(config2)
                     }
                   }
-
                   for (var i = 0; i < configs.length; i ++) {
                       const config = configs[i]
                       this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, (isReleaseRESTful ? baseUrl : this.server) + '/post', {
@@ -2771,7 +2770,7 @@ https://github.com/Tencent/APIJSON/issues
                         },
                         tag: 'Random'
                       }, {}, callback)
-                  }
+        }
       },
 
       onClickAddRandom: function () {
@@ -2805,14 +2804,12 @@ https://github.com/Tencent/APIJSON/issues
         if (value instanceof Array) {
           if (isConst) {
                config += prefix + '[]'
-
                for (var i = 0; i < value.length; i ++) {
                   var cfg = this.newRandomConfig(childPath, '' + i, value[i], isRand, isBad, noDeep, isConst)
                   config += '\n' + (StringUtil.isEmpty(cfg, true) ? 'null' : cfg.trim())
                }
                return config
           }
-
           if (isBad && noDeep && StringUtil.isNotEmpty(childPath, true)) {
             return prefix + (isRand ? 'RANDOM_BAD_ARR' : 'ORDER_BAD_ARR' + offset) + '()'
           }
@@ -2895,10 +2892,8 @@ https://github.com/Tencent/APIJSON/issues
         }
         else {
           if (isConst) {
-//            var isStr = typeof value == 'string'
             return prefix + JSON.stringify(value) // 会自动给 String 加 ""
           }
-
           //自定义关键词
           if (key.startsWith('@')) {
             return config
@@ -3182,7 +3177,6 @@ https://github.com/Tencent/APIJSON/issues
             break
         }
       },
-
       resetUploading: function() {
         App.uploadTotal = 0 // apis.length || 0
         App.uploadDoneCount = 0
@@ -3752,7 +3746,6 @@ https://github.com/Tencent/APIJSON/issues
             var did = data.Document == null ? null : data.Document.id
             const isRandom = did != null && did > 0
             var config = isRandom ? StringUtil.trim(App.newRandomConfig(null, '', reqObj, false, null, null, true)) : null
-
             App.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, App.server + '/post', {
               format: false,
               'Document': isRandom ? undefined : {
@@ -3799,7 +3792,6 @@ https://github.com/Tencent/APIJSON/issues
               if (isRandom != true) {
                 App.newAndUploadRandomConfig(baseUrl, reqObj, tblObj.id, null, 5)
               }
-
               App.exTxt.button = 'All:' + App.uploadTotal + '\nDone:' + App.uploadDoneCount + '\nFail:' + App.uploadFailCount
               if (App.uploadDoneCount + App.uploadFailCount >= App.uploadTotal) {
                 alert('导入完成，其中 ' + App.uploadRandomCount + ' 个接口已存在，改为生成和上传了参数注入配置')
@@ -3813,7 +3805,6 @@ https://github.com/Tencent/APIJSON/issues
               }
             })
         }
-
         if (JSONObject.isAPIJSONPath(path)) {
           callback(url, {}, null)
         }
@@ -4168,7 +4159,8 @@ https://github.com/Tencent/APIJSON/issues
         this.onClickSummary(color, false, this.currentAccountIndex)
       },
       onClickSummary: function (color, isRandom, accountIndex) {
-        if (this.currentAccountIndex != accountIndex) {
+        var isCur = this.currentAccountIndex == accountIndex
+        if (! isCur) {
           this.onClickAccount(accountIndex, accountIndex < 0 ? this.logoutSummary : this.accounts[accountIndex])
         }
         // this.currentAccountIndex = accountIndex
@@ -4179,6 +4171,9 @@ https://github.com/Tencent/APIJSON/issues
         var list = []
         if (color == null || color == 'total') {
           list = arr
+          if (isCur) {
+            this.isPercentShow = ! this.isPercentShow;
+          }
         } else if (arr != null) {
           for (var i = 0; i < arr.length; i++) {
             var obj = arr[i]
@@ -5457,7 +5452,7 @@ https://github.com/Tencent/APIJSON/issues
 
       //请求
       request: function (isAdminOperation, method, type, url, req, header, callback, caseScript_, accountScript_, globalScript_, ignorePreScript) {
-        this.isLoading = true
+        this.loadingCount ++
 
         const isEnvCompare = this.isEnvCompareEnabled
 
@@ -5526,7 +5521,7 @@ https://github.com/Tencent/APIJSON/issues
                 return
               }
 
-              App.isLoading = false
+              App.loadingCount --
               res = res || {}
 
               if (isDelegate) {
@@ -5593,7 +5588,7 @@ https://github.com/Tencent/APIJSON/issues
                 return
               }
 
-              App.isLoading = false
+              App.loadingCount --
 
               log('send >> error:\n' + err)
               if (isAdminOperation) {
@@ -5657,7 +5652,8 @@ https://github.com/Tencent/APIJSON/issues
             console.log(e);
             console.log = logger
 
-            App.isLoading = false
+            App.loadingCount --
+
             // TODO if (isPre) {
             App.view = 'error'
             App.error = {
@@ -8558,8 +8554,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var url = null;
           var req = null;
           var header = null;
-//          var callback = null;
-
           var res = {};
           var data = res.data;
           var err = null;
@@ -8914,38 +8908,47 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var status = res == null ? null : res.status
 
         it = it || {}
+        var p = tr.compare.path;
         it.compareType = tr.compare.code;
-        it.hintMessage = tr.compare.path + '  ' + tr.compare.msg;
+        it.compareMessage = (StringUtil.isEmpty(p, true) ? '' : p + '  ') + (tr.compare.msg || '查看结果');
         switch (it.compareType) {
           case JSONResponse.COMPARE_ERROR:
             it.compareColor = 'red'
-            it.compareMessage = (status != null && status != 200 ? status + ' ' : '') + '请求出错！'
+            it.hintMessage = (status != null && status != 200 ? status + ' ' : '') + '请求出错！'
             break;
           case JSONResponse.COMPARE_NO_STANDARD:
             it.compareColor = 'green'
-            it.compareMessage = '确认正确后点击[对的，纠正]'
+            it.hintMessage = '确认正确后点击[对的，纠正]'
             break;
           case JSONResponse.COMPARE_KEY_MORE:
+          case JSONResponse.COMPARE_VALUE_MORE:
+          case JSONResponse.COMPARE_EQUAL_EXCEPTION:
             it.compareColor = 'green'
-            it.compareMessage = '新增字段/新增值 等'
+            it.hintMessage = '新增字段/新增值 等'
             break;
+          case JSONResponse.COMPARE_LENGTH_CHANGE:
           case JSONResponse.COMPARE_VALUE_CHANGE:
             it.compareColor = 'blue'
-            it.compareMessage = '值改变 等'
+            it.hintMessage = '值改变 等'
             break;
+          case JSONResponse.COMPARE_VALUE_EMPTY:
           case JSONResponse.COMPARE_KEY_LESS:
             it.compareColor = 'orange'
-            it.compareMessage = '缺少字段/整数变小数 等'
+            it.hintMessage = '缺少字段/整数变小数 等'
             break;
+          case JSONResponse.COMPARE_FORMAT_CHANGE:
+          case JSONResponse.COMPARE_NUMBER_TYPE_CHANGE:
           case JSONResponse.COMPARE_TYPE_CHANGE:
+          case JSONResponse.COMPARE_CODE_CHANGE:
+          case JSONResponse.COMPARE_THROW_CHANGE:
             var code = response == null ? null : response[JSONResponse.KEY_CODE]
             it.compareColor = 'red'
-            it.compareMessage = (code != null && code != JSONResponse.CODE_SUCCESS
+            it.hintMessage = (code != null && code != JSONResponse.CODE_SUCCESS
              ? code + ' ' : (status != null && status != 200 ? status + ' ' : '')) + '状态码/异常/值类型 改变等'
             break;
           default:
             it.compareColor = 'white'
-            it.compareMessage = '查看结果'
+            it.hintMessage = '结果正确'
             break;
         }
 
@@ -9149,6 +9152,26 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       getCurrentRandomSummary: function () {
         return (this.isRandomSubListShow ? this.currentRandomItem : this.currentRemoteItem) || {}
       },
+      getLogoutSummaryWhiteText: function () {
+        var summary = this.getLogoutSummary()
+        return this.isPercentShow ? Math.round(summary.whiteCount*1000/summary.totalCount)/10 + '%' : '' + summary.whiteCount
+      },
+      getLogoutSummaryGreenText: function () {
+        var summary = this.getLogoutSummary()
+        return this.isPercentShow ? Math.round(summary.greenCount*1000/summary.totalCount)/10 + '%' : '' + summary.greenCount
+      },
+      getLogoutSummaryBlueText: function () {
+        var summary = this.getLogoutSummary()
+        return this.isPercentShow ? Math.round(summary.blueCount*1000/summary.totalCount)/10 + '%' : '' + summary.blueCount
+      },
+      getLogoutSummaryOrangeText: function () {
+        var summary = this.getLogoutSummary()
+        return this.isPercentShow ? Math.round(summary.orangeCount*1000/summary.totalCount)/10 + '%' : '' + summary.orangeCount
+      },
+      getLogoutSummaryRedText: function () {
+        var summary = this.getLogoutSummary()
+        return this.isPercentShow ? Math.round(summary.redCount*1000/summary.totalCount)/10 + '%' : '' + summary.redCount
+      },
 
       isSummaryShow: function (accountIndex) {
         if (accountIndex == -1) {
@@ -9283,6 +9306,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           delete obj["trace"]
           // 保留 delete obj["sql:generate|cache|execute|maxExecute"]
           // 保留 delete obj["depth:count|max"]
+          delete obj["time"]
+          delete obj["timestamp"]
           delete obj["time:start|duration|end"]
           delete obj["time:start|duration|end|parse|sql"]
           // 保留 delete obj["throw"]
@@ -9652,11 +9677,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
 
       //显示详细信息, :data-hint :data, :hint 都报错，只能这样
-      setTestHint: function(index, item, isRandom, isDuration) {
+      setTestHint: function(index, item, isRandom, isDuration, isHandle) {
         item = item || {};
         var toId = isRandom ? ((item.Random || {}).toId || 0) : 0;
-        var h = isDuration ? item.durationHint : item.hintMessage;
-        this.$refs[(isRandom ? (toId <= 0 ? 'testRandomResult' : 'testRandomSubResult') : 'testResult') + (isDuration ? 'Duration' : '') + 'Buttons'][index].setAttribute('data-hint', h || '');
+        var h = isDuration ? item.durationHint : (isHandle ? item.compareMessage : item.hintMessage);
+        this.$refs['test' + (isRandom ? (toId <= 0 ? 'Random' : 'RandomSub') : '') + (isHandle ? 'Handle' : 'Result')
+         + (isDuration ? 'Duration' : '') + 'Buttons'][index].setAttribute('data-hint', h || '');
       },
 
       handleTestArg: function(hasTestArg, rawReq, delayTime, callback) {
@@ -9789,9 +9815,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
 
       toPathValuePairMap: function (json, path, map) {
-
         if (map == null) {
-           map = {}
+          map = {}
         }
         if (json == null) {
           return map
@@ -10799,7 +10824,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           '\n} catch (e) {\n' + e.message)
       }
 
-
       //无效，只能在index里设置 vUrl.value = this.getCache('', 'URL_BASE')
 
       this.listHistory()
@@ -10927,7 +10951,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           event.preventDefault();
           return
         }
-
         var isDel = keyCode === 8 || keyCode === 46; // backspace 和 del
         var isChar = (keyCode >= 48 && keyCode <= 90) || (keyCode >= 106 && keyCode <= 111) || (keyCode >= 186 && keyCode <= 222);
 

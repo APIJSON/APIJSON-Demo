@@ -197,11 +197,11 @@
                                 <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item.totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.redCount || 0 }}</a>
                             </div>
                             <div :style="{ background: item.compareColor }" v-show="item.compareType != null" style="display: inline-block">
-                                <button class="hint--left" ref="testResultButtons" @mouseover="setTestHint(index, item)" v-show="item.compareType != null" @click="handleTest(false, index, item)" style="position: relative;">{{ item.compareMessage + (item.showType == 'before' ? '-前' : '-后') }}</button>
+                                <button class="hint--left" ref="testResultButtons" @mouseover="setTestHint(index, item)" v-show="item.compareType != null" @click="handleTest(false, index, item)" style="position: relative;">{{ StringUtil.limitLength(item.compareMessage, 30, 'middle') + (item.showType == 'before' ? '-前' : '-后') }}</button>
                                 <svg class="icon" style="position: relative;margin-left: 10px" @click="downloadTest(index, item)">
                                     <use xlink:href="svg/icon.svg#export-txt"></use>
                                 </svg>   <!-- 中间 button 仅用来占位，解决上面按钮隐藏后，下载图标纵向没对齐 -->
-                                <button v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testResultDurationButtons" @mouseover="setTestHint(index, item, false, true)" @click="handleTest(true, index, item, false, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
+                                <button class="hint--left" ref="testHandleButtons" @mouseover="setTestHint(index, item, null, null, true)" v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testResultDurationButtons" @mouseover="setTestHint(index, item, false, true)" @click="handleTest(true, index, item, false, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
                             </div>
                         </div>
                         <svg v-show="isLocalShow || (item.Document != null && item.Document.userId == User.id)" class="icon" style="margin-right: 5px; top: 13px" @click="remove(item, index, true)">
@@ -368,11 +368,11 @@ Ctrl + S 或 Command + S 保存当前用例；
                                 <input v-show="isRandomEditable" style="width: 96%" v-model="(item.Random || {}).name" @keyup="doOnKeyUp(event, 'randomSub', false, item)" />
 
                                 <div :style="{ background: item.compareColor }" v-show="! isRandomEditable && item.compareType != null" style="position: absolute;top: 8px;right: 36px;display: inline-block;">
-                                    <button class="hint--left" ref="testRandomSubResultButtons" @mouseover="setTestHint(index, item, true)" v-show="item.compareType != null" @click="handleTest(false, index, item, true)" style="position: relative;">{{ item.compareMessage + (item.showType == 'before' ? '-前' : '-后') }}</button>
+                                    <button class="hint--left" ref="testRandomSubResultButtons" @mouseover="setTestHint(index, item, true)" v-show="item.compareType != null" @click="handleTest(false, index, item, true)" style="position: relative;">{{ StringUtil.limitLength(item.compareMessage, 30, 'middle') + (item.showType == 'before' ? '-前' : '-后') }}</button>
                                     <svg class="icon" style="position: relative;margin-left: 10px" @click="downloadTest(index, item, true)">
                                         <use xlink:href="svg/icon.svg#export-txt"></use>
                                     </svg>   <!-- 中间 button 仅用来占位，解决上面按钮隐藏后，下载图标纵向没对齐 -->
-                                    <button v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item, true)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testRandomSubResultDurationButtons" @mouseover="setTestHint(index, item, true, true)" @click="handleTest(true, index, item, true, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
+                                    <button class="hint--left" ref="testRandomSubHandleButtons" @mouseover="setTestHint(index, item, true, null, true)" v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item, true)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testRandomSubResultDurationButtons" @mouseover="setTestHint(index, item, true, true)" @click="handleTest(true, index, item, true, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
                                 </div>
                                 <svg v-show="item.Random != null && item.Random.userId == User.id" class="icon" style="margin-right: 5px; top: 13px" @click="remove(item, index, true, true)">
                                     <use xlink:href="svg/icon.svg#trash"></use>
@@ -407,11 +407,11 @@ Ctrl + S 或 Command + S 保存当前用例；
 
                                 <div v-show="! isRandomEditable && ((item.Random || {}).count || 1) <= 1" style="position: absolute;top: 10px;right: 36px;display: inline-block;">
                                     <div :style="{ background: item.compareColor }" v-show="item.compareType != null" >
-                                        <button class="hint--left" ref="testRandomResultButtons" @mouseover="setTestHint(index, item, true)" v-show="item.compareType != null" @click="handleTest(false, index, item, true)" style="position: relative;">{{ item.compareMessage + (item.showType == 'before' ? '-前' : '-后') }}</button>
+                                        <button class="hint--left" ref="testRandomResultButtons" @mouseover="setTestHint(index, item, true)" v-show="item.compareType != null" @click="handleTest(false, index, item, true)" style="position: relative;">{{ StringUtil.limitLength(item.compareMessage, 30, 'middle') + (item.showType == 'before' ? '-前' : '-后') }}</button>
                                         <svg class="icon" style="position: relative;margin-left: 10px" @click="downloadTest(index, item, true)">
                                             <use xlink:href="svg/icon.svg#export-txt"></use>
                                         </svg>   <!-- 中间 button 仅用来占位，解决上面按钮隐藏后，下载图标纵向没对齐 -->
-                                        <button v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item, true)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testRandomResultDurationButtons" @mouseover="setTestHint(index, item, true, true)" @click="handleTest(true, index, item, true, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
+                                        <button class="hint--left" ref="testRandomHandleButtons" @mouseover="setTestHint(index, item, true, null, true)" v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item, true)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testRandomResultDurationButtons" @mouseover="setTestHint(index, item, true, true)" @click="handleTest(true, index, item, true, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
                                     </div>
                                 </div>
 
@@ -572,7 +572,7 @@ fun(true, 1, 'a'..);
                             <use xlink:href="svg/icon.svg#record"></use>
                         </svg>
                     </a>
-                    <img v-show="isLoading" width="15" height="15" src="img/loading.gif" style="margin-bottom: 4px; margin-left: 6px" />
+                    <img v-show="loadingCount > 0" width="15" height="15" src="img/loading.gif" style="margin-bottom: 4px; margin-left: 6px" />
 
                 </div>
 
@@ -585,7 +585,7 @@ fun(true, 1, 'a'..);
                               <br/>
                               <div style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
                                 <!-- 只能写成一行来消除间隙，不能换行、空格 -->
-                                <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" @click="onClickLogoutSummary('total')" >{{ (getLogoutSummary().totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'white' ? 'underline': 'none'}" @click="onClickLogoutSummary('white')" >{{ getLogoutSummary().whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'green' ? 'underline': 'none'}" @click="onClickLogoutSummary('green')" >{{ getLogoutSummary().greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'blue' ? 'underline': 'none'}" @click="onClickLogoutSummary('blue')" >{{ getLogoutSummary().blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'orange' ? 'underline': 'none'}" @click="onClickLogoutSummary('orange')" >{{ getLogoutSummary().orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'red' ? 'underline': 'none'}"  @click="onClickLogoutSummary('red')" >{{ getLogoutSummary().redCount || 0 }}</a>
+                                <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" @click="onClickLogoutSummary('total')" >{{ (getLogoutSummary().totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'white' ? 'underline': 'none'}" @click="onClickLogoutSummary('white')" >{{ getLogoutSummaryWhiteText() }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'green' ? 'underline': 'none'}" @click="onClickLogoutSummary('green')" >{{ getLogoutSummaryGreenText() }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'blue' ? 'underline': 'none'}" @click="onClickLogoutSummary('blue')" >{{ getLogoutSummaryBlueText() }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'orange' ? 'underline': 'none'}" @click="onClickLogoutSummary('orange')" >{{ getLogoutSummaryOrangeText() }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px" :style="{'text-decoration': getLogoutSummary().summaryType == 'red' ? 'underline': 'none'}"  @click="onClickLogoutSummary('red')" >{{ getLogoutSummaryRedText() }}</a>
                               </div>
                             </div>
                             <button style="background-color: #DDD;margin: 0px;outline: none;border: #DDD 1px solid;" href="javascript:void(0)" @click="removeAccountTab()"> - </button>
@@ -680,13 +680,13 @@ fun(true, 1, 'a'..);
 
             <!--格式化错误视图-->
             <div class="view-error" v-show="view == 'error'">
-                <pre style="overflow: auto; overflow-y: auto" v-cloak>{{error.msg}}</pre>
+                <pre v-cloak>{{error.msg}}</pre>
             </div>
 
             <!--diff视图-->
-            <div id="diffoutput" v-show="baseview == 'diff' && view != 'error'">
+            <!-- <div id="diffoutput" v-show="baseview == 'diff' && view != 'error'">
 
-            </div>
+            </div> -->
 
         </div>
     </div>
@@ -931,7 +931,7 @@ fun(true, 1, 'a'..);
 <!-- 必须在main.js前 TODO 可能有冲突，代码写入vue文件？ >>>>>>>>>>>>>>>> -->
 <script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 
-
+<script src="https://unpkg.com/vconsole@latest/dist/vconsole.min.js"></script>
 <script src="js/main.js"></script>
 
 <script type="text/javascript" language="JavaScript" charset="UTF-8" >
@@ -1005,24 +1005,6 @@ fun(true, 1, 'a'..);
 <script src="md/lib/jquery.flowchart.min.js"></script>
 
 <script src="md/editormd.js"></script>
-
-
-<!-- 百度统计 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<  -->
-<script>
-  var _hmt = _hmt || [];
-  (function() {
-    try {
-      var hm = document.createElement("script");
-//      hm.src = "https://hm.baidu.com/hm.js?b8fc421d7c0dc354c6c8fb5a2c4f7729"; //cn
-      hm.src = "https://hm.baidu.com/hm.js?965ec968d2d53b729b90efc7ffb3ead2"; //org
-      var s = document.getElementsByTagName("script")[0];
-      s.parentNode.insertBefore(hm, s);
-    } catch (e) {
-      console.log('BaiduStatistics: catch\n' + e.message)
-    }
-  })();
-</script>
-<!-- 百度统计 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>  -->
 
 </body>
 </html>
