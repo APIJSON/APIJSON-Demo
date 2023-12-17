@@ -91,7 +91,7 @@ public class DemoParser extends APIJSONParser<Long> {
     }
 
     @Override
-    public APIJSONObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig
+    public APIJSONObjectParser<Long> createObjectParser(JSONObject request, String parentPath, SQLConfig<Long> arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
                 , isSubquery, isTable, isArrayMainTable).setMethod(getMethod()).setParser(this);
@@ -117,7 +117,7 @@ public class DemoParser extends APIJSONParser<Long> {
     }
 
     @Override
-    public JSONObject executeSQL(SQLConfig config, boolean isSubquery) throws Exception {
+    public JSONObject executeSQL(SQLConfig<Long> config, boolean isSubquery) throws Exception {
         if (asDBAccount && config instanceof DemoSQLConfig) {
           DemoSQLConfig cfg = (DemoSQLConfig) config;
           if (StringUtil.isEmpty(cfg.getDBAccount())) {

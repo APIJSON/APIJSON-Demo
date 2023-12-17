@@ -37,7 +37,7 @@ public class DemoVerifier extends APIJSONRouterVerifier<Long> {  // APIJSONVerif
 
 	// 重写方法来自定义字段名等	
 	//	@Override
-	//	public String getVisitorIdKey(SQLConfig config) {
+	//	public String getVisitorIdKey(SQLConfig<Long> config) {
 	//		return super.getVisitorIdKey(config);  // return "userid"; // return "uid" 等自定义的字段名
 	//	}
 
