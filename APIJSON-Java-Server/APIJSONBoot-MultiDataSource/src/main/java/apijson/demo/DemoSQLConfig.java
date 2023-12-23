@@ -189,11 +189,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		return "";
 	}
 
-	@Override
-	public String getSQLTable() {
-		String t = super.getSQLTable();
-		return isInfluxDB() ? t.toLowerCase() : t;
-	}
+
 
 	// TODO 迁移到 APIJSON 主项目 <<<<<<<<<<<<<<<<<<<<
 	@Override
@@ -390,10 +386,20 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 
+	@Override
+	public String getSQLTable() {
+		String t = super.getSQLTable();
+		return isInfluxDB() ? t.toLowerCase() : t;
+	//	return isInfluxDB() ? t.toLowerCase() : StringUtil.firstCase(JSONRequest.recoverUnderline(t, false), false);
+	}
+
 	// 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
 	//	@Override
 	//	public String getSQLKey(String key) {
-	//		return super.getSQLKey(JSONRequest.recoverUnderline(key, false));
+	//		if (DemoVerifier.SYSTEM_ACCESS_MAP.containsKey(getTable())) {
+	//			return key;
+	//		}
+	//		return super.getSQLKey(StringUtil.firstCase(JSONRequest.recoverUnderline(key, false), false));
 	//	}
 
 }

@@ -376,7 +376,11 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     //    @Override
     //    protected String getKey(SQLConfig<Long> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
     //        String key = super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
-    //        return JSONResponse.formatUnderline(key, true);
+    //        String tbl = StringUtil.firstCase(JSONResponse.formatUnderline(rsmd.getTableName(columnIndex), true), true);
+    //        if (DemoVerifier.SYSTEM_ACCESS_MAP.containsKey(tbl)) {
+    //            return key;
+    //        }
+    //        return StringUtil.firstCase(JSONResponse.formatUnderline(key, true), false);
     //    }
 
 }
