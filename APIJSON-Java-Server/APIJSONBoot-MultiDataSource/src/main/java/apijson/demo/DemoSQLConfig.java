@@ -26,8 +26,6 @@ import apijson.*;
 import apijson.orm.AbstractSQLConfig;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import apijson.RequestMethod;
-import apijson.StringUtil;
 import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.Join;
@@ -49,9 +47,30 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		super(method, table);
 	}
 
+	// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	//	public static final String DATABASE_MONGODB = "MONGODB";
+	//	@Override
+	//	public boolean isPrepared() {
+	//		return super.isPrepared() && ! isMongoDB(); // MongoDB JDBC 还不支持预编译
+	//	}
+	//
+	//	public boolean isMongoDB() {
+	//		return DATABASE_MONGODB.equals(getDatabase());
+	//	}
+
+	// MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
+	//	@Override
+	//	public String getQuote() {
+	//		return "MONGODB".equals(getDatabase()) ? "`" : super.getQuote();
+	//	}
+
 	static {
+		//	DATABASE_LIST.add(DATABASE_MONGODB);
+
+	// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
-		DEFAULT_SCHEMA = "sys";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
+		DEFAULT_SCHEMA = "sys"; // ""apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
 		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
 		// 这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
@@ -140,6 +159,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isTDengine()) {
 			return "2.6.0.8"; //TODO 改成你自己的
 		}
+		if (isMongoDB()) {
+			return "6.0.12"; //TODO 改成你自己的
+		}
+
 		return null;
 	}
 
@@ -185,10 +208,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isInfluxDB()) {
 			return "http://localhost:8086";
 		}
+		if (isMongoDB()) {
+			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
+		}
 
 		return "";
 	}
-
 
 
 	// TODO 迁移到 APIJSON 主项目 <<<<<<<<<<<<<<<<<<<<
@@ -221,7 +246,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 
 		if (isMySQL()) {
-			return "root";  //TODO 改成你自己的
+			return "root"; // ""apijson";  //TODO 改成你自己的
 		}
 		if (isPostgreSQL()) {
 			return "postgres";  //TODO 改成你自己的
@@ -246,6 +271,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 		if (isInfluxDB()) {
 			return "root";
+		}
+		if (isMongoDB()) {
+			return "root"; //TODO 改成你自己的
 		}
 
 		return null;
@@ -289,6 +317,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 		if (isInfluxDB()) {
 			return "apijson@123"; //TODO 改成你自己的
+		}
+		if (isMongoDB()) {
+			return "apijson";  //TODO 改成你自己的
 		}
 
 		return null;

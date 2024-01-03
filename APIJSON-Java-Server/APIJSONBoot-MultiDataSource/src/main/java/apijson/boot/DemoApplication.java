@@ -107,7 +107,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
     // 支持 APIAuto 中 JavaScript 代码跨域请求
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
+    public WebMvcConfigurer corsConfig() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {

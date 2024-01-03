@@ -1057,10 +1057,10 @@ https://github.com/Tencent/APIJSON/issues
       isRandomListShow: false,
       isRandomSubListShow: false,
       isRandomEditable: false,
-      isPercentShow: false,
       isLoginShow: false,
       isConfigShow: false,
       isDeleteShow: false,
+      statisticsShowType: 0,
       currentHttpResponse: {},
       currentDocItem: {},
       currentRemoteItem: {
@@ -1099,6 +1099,7 @@ https://github.com/Tencent/APIJSON/issues
       isDelegateEnabled: false,
       isEnvCompareEnabled: false,
       isPreviewEnabled: false,
+      isStatisticsEnabled: false,
       isEncodeEnabled: true,
       isEditResponse: false,
       isLocalShow: false,
@@ -1115,6 +1116,7 @@ https://github.com/Tencent/APIJSON/issues
       themes: themes,
       checkedTheme: 0,
       isExpand: true,
+      reportId: null,
       User: {
         id: 0,
         name: '',
@@ -1462,6 +1464,7 @@ https://github.com/Tencent/APIJSON/issues
             isMLEnabled: this.isMLEnabled,
             isDelegateEnabled: this.isDelegateEnabled,
             isPreviewEnabled: this.isPreviewEnabled,
+            isStatisticsEnabled: this.isStatisticsEnabled,
             isEncodeEnabled: this.isEncodeEnabled,
             isEditResponse: this.isEditResponse,
             isLocalShow: this.isTestCaseShow ? this.isLocalShow : undefined,
@@ -1869,6 +1872,17 @@ https://github.com/Tencent/APIJSON/issues
 
               this.onChange(false)
               break
+            case 17:
+              this.isStatisticsEnabled = show
+              this.saveCache('', 'isStatisticsEnabled', show)
+
+              this.isTestCaseShow = false
+              // this.resetTestCount(this.currentAccountIndex)
+
+              this.remotes = null
+              this.reportId = 0
+              this.showTestCase(true, false)
+              break
             case 12:
               this.isEncodeEnabled = show
               this.saveCache('', 'isEncodeEnabled', show)
@@ -1921,6 +1935,10 @@ https://github.com/Tencent/APIJSON/issues
           this.isPreviewEnabled = show
           this.saveCache('', 'isPreviewEnabled', show)
           // vRequestMarkdown.innerHTML = ''
+        }
+        else if (index == 17) {
+          this.isStatisticsEnabled = show
+          this.saveCache('', 'isStatisticsEnabled', show)
         }
         else if (index == 14) {
           this.isEnvCompareEnabled = show
@@ -4013,12 +4031,31 @@ https://github.com/Tencent/APIJSON/issues
           var accountIndex = (this.accounts[this.currentAccountIndex] || {}).isLoggedIn ? this.currentAccountIndex : -1
           this.currentAccountIndex = accountIndex  //解决 onTestResponse 用 -1 存进去， handleTest 用 currentAccountIndex 取出来为空
 
+          var reportId = this.reportId
+          if (reportId == null || Number.isNaN(reportId)) {
+            reportId = null
+          }
+
           var tests = this.tests[String(accountIndex)]
-          if (tests != null && JSONObject.isEmpty(tests) != true) {
+          if ((reportId != null && reportId >= 0) || (tests != null && JSONObject.isEmpty(tests) != true)) {
             for (var i = 0; i < allCount; i++) {
               var item = testCases[i]
               var d = item == null ? null : item.Document
               if (d == null || d.id == null) {
+                continue
+              }
+
+              if (reportId != null && reportId >= 0) {
+                var tr = item.TestRecord || {}
+                var rsp = parseJSON(tr.response)
+                tests[d.id] = [rsp]
+
+                var cmp = parseJSON(tr.compare)
+                if (cmp == null || Object.keys(cmp).length <= 0) {
+                  cmp = JSONResponse.compareWithBefore(null, null)
+                }
+
+                this.onTestResponse(null, allCount, testCases, i, item, d, item.Random, tr, rsp, cmp, false, accountIndex, true);
                 continue
               }
 
@@ -4057,6 +4094,7 @@ https://github.com/Tencent/APIJSON/issues
           }
 
           this.isTestCaseShow = false
+          var reportId = this.reportId
 
           var methods = this.methods
           var types = this.types
@@ -4084,8 +4122,10 @@ https://github.com/Tencent/APIJSON/issues
                 'userId': this.User.id,
 //                'testAccountId': this.getCurrentAccountId(),
                 'randomId': 0,
+                'reportId': reportId <= 0 ? null : reportId,
+                'invalid': reportId == null ? 0 : null,
                 '@order': 'date-',
-                '@column': 'id,userId,documentId,testAccountId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
+                '@column': 'id,userId,documentId,testAccountId,reportId,duration,minDuration,maxDuration,response' + (this.isStatisticsEnabled ? ',compare' : '')+ (this.isMLEnabled ? ',standard' : ''),
                 'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
               },
               'Script:pre': {
@@ -4172,7 +4212,7 @@ https://github.com/Tencent/APIJSON/issues
         if (color == null || color == 'total') {
           list = arr
           if (isCur) {
-            this.isPercentShow = ! this.isPercentShow;
+            this.statisticsShowType = (this.statisticsShowType + 1)%3;
           }
         } else if (arr != null) {
           for (var i = 0; i < arr.length; i++) {
@@ -7746,6 +7786,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        */
       onClickTestRandom: function (isCross, callback) {
         this.isRandomTest = true
+        this.isStatisticsEnabled = true
         this.testRandom(! this.isRandomListShow && ! this.isRandomSubListShow, this.isRandomListShow, this.isRandomSubListShow, null, isCross, true, callback)
       },
       testRandom: function (show, testList, testSubList, limit, isCross, isManual, callback) {
@@ -8570,6 +8611,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
       onClickTest: function (callback) {
         this.isRandomTest = false
+        this.isStatisticsEnabled = true
+        this.reportId = new Date().getTime();
 
         // 自动往右移动，避免断言结果遮挡太多接口名称、URL
         var split_obj = IS_BROWSER ? $('.splitx') : null
@@ -8904,13 +8947,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
       onTestResponse: function(res, allCount, list, index, it, d, r, tr, response, cmp, isRandom, accountIndex, justRecoverTest, isCross, callback) {
         tr = tr || {}
-        tr.compare = cmp;
+        cmp = cmp || {}
+        tr.compare = cmp
         var status = res == null ? null : res.status
 
         it = it || {}
-        var p = tr.compare.path;
-        it.compareType = tr.compare.code;
-        it.compareMessage = (StringUtil.isEmpty(p, true) ? '' : p + '  ') + (tr.compare.msg || '查看结果');
+        var p = cmp.path
+        it.compareType = cmp.code;
+        it.compareMessage = (StringUtil.isEmpty(p, true) ? '' : p + '  ') + (cmp.msg || '查看结果')
         switch (it.compareType) {
           case JSONResponse.COMPARE_ERROR:
             it.compareColor = 'red'
@@ -9152,25 +9196,117 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       getCurrentRandomSummary: function () {
         return (this.isRandomSubListShow ? this.currentRandomItem : this.currentRemoteItem) || {}
       },
+
+      getStatisticsShowStr: function (count, total) {
+        if (count == null) {
+          count = 0;
+        }
+        if (total == null) {
+          total = 0;
+        }
+
+        var showType = this.statisticsShowType;
+        if (showType == 0) {
+          return '' + count;
+        }
+        return Math.round(total <= 0 ? 0 : count*1000/total)/10 + '%' + (showType == 1 ? '' : ' ' + count)
+      },
+
+      getLogoutSummaryTotalText: function () {
+        return this.getStatisticsShowStr(this.getLogoutSummary().totalCount, this.getAllSummary().totalCount)
+      },
+
       getLogoutSummaryWhiteText: function () {
         var summary = this.getLogoutSummary()
-        return this.isPercentShow ? Math.round(summary.whiteCount*1000/summary.totalCount)/10 + '%' : '' + summary.whiteCount
+        return this.getStatisticsShowStr(summary.whiteCount, summary.totalCount)
       },
       getLogoutSummaryGreenText: function () {
         var summary = this.getLogoutSummary()
-        return this.isPercentShow ? Math.round(summary.greenCount*1000/summary.totalCount)/10 + '%' : '' + summary.greenCount
+        return this.getStatisticsShowStr(summary.greenCount, summary.totalCount)
       },
       getLogoutSummaryBlueText: function () {
         var summary = this.getLogoutSummary()
-        return this.isPercentShow ? Math.round(summary.blueCount*1000/summary.totalCount)/10 + '%' : '' + summary.blueCount
+        return this.getStatisticsShowStr(summary.blueCount, summary.totalCount)
       },
       getLogoutSummaryOrangeText: function () {
         var summary = this.getLogoutSummary()
-        return this.isPercentShow ? Math.round(summary.orangeCount*1000/summary.totalCount)/10 + '%' : '' + summary.orangeCount
+        return this.getStatisticsShowStr(summary.orangeCount, summary.totalCount)
       },
       getLogoutSummaryRedText: function () {
         var summary = this.getLogoutSummary()
-        return this.isPercentShow ? Math.round(summary.redCount*1000/summary.totalCount)/10 + '%' : '' + summary.redCount
+        return this.getStatisticsShowStr(summary.redCount, summary.totalCount)
+      },
+
+      getSummaryTotalText: function (index) {
+        return this.getStatisticsShowStr(this.getSummary(index).totalCount, this.getAllSummary().totalCount)
+      },
+      getSummaryWhiteText: function (index) {
+        var summary = this.getSummary(index)
+        return this.getStatisticsShowStr(summary.whiteCount, summary.totalCount)
+      },
+      getSummaryGreenText: function (index) {
+        var summary = this.getSummary(index)
+        return this.getStatisticsShowStr(summary.greenCount, summary.totalCount)
+      },
+      getSummaryBlueText: function (index) {
+        var summary = this.getSummary(index)
+        return this.getStatisticsShowStr(summary.blueCount, summary.totalCount)
+      },
+      getSummaryOrangeText: function (index) {
+        var summary = this.getSummary(index)
+        return this.getStatisticsShowStr(summary.orangeCount, summary.totalCount)
+      },
+      getSummaryRedText: function (index) {
+        var summary = this.getSummary(index)
+        return this.getStatisticsShowStr(summary.redCount, summary.totalCount)
+      },
+
+      getCurrentSummaryTotalText: function () {
+        return this.getStatisticsShowStr(this.getCurrentSummary().totalCount, this.getAllSummary().totalCount)
+      },
+      getCurrentSummaryWhiteText: function () {
+        var summary = this.getCurrentSummary()
+        return this.getStatisticsShowStr(summary.whiteCount, summary.totalCount)
+      },
+      getCurrentSummaryGreenText: function () {
+        var summary = this.getCurrentSummary()
+        return this.getStatisticsShowStr(summary.greenCount, summary.totalCount)
+      },
+      getCurrentSummaryBlueText: function () {
+        var summary = this.getCurrentSummary()
+        return this.getStatisticsShowStr(summary.blueCount, summary.totalCount)
+      },
+      getCurrentSummaryOrangeText: function () {
+        var summary = this.getCurrentSummary()
+        return this.getStatisticsShowStr(summary.orangeCount, summary.totalCount)
+      },
+      getCurrentSummaryRedText: function () {
+        var summary = this.getCurrentSummary()
+        return this.getStatisticsShowStr(summary.redCount, summary.totalCount)
+      },
+
+      getAllSummaryTotalText: function () {
+        return this.getStatisticsShowStr(this.getAllSummary().totalCount, this.getAllSummary().totalCount)
+      },
+      getAllSummaryWhiteText: function () {
+        var summary = this.getAllSummary()
+        return this.getStatisticsShowStr(summary.whiteCount, summary.totalCount)
+      },
+      getAllSummaryGreenText: function () {
+        var summary = this.getAllSummary()
+        return this.getStatisticsShowStr(summary.greenCount, summary.totalCount)
+      },
+      getAllSummaryBlueText: function () {
+        var summary = this.getAllSummary()
+        return this.getStatisticsShowStr(summary.blueCount, summary.totalCount)
+      },
+      getAllSummaryOrangeText: function () {
+        var summary = this.getAllSummary()
+        return this.getStatisticsShowStr(summary.orangeCount, summary.totalCount)
+      },
+      getAllSummaryRedText: function () {
+        var summary = this.getAllSummary()
+        return this.getStatisticsShowStr(summary.redCount, summary.totalCount)
       },
 
       isSummaryShow: function (accountIndex) {
@@ -9538,6 +9674,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               },
               TestRecord: isDuration ? Object.assign(testRecord, {
                 id: undefined,
+                reportId: this.reportId,
                 host: this.getBaseUrl(),
                 testAccountId: this.getCurrentAccountId(),
                 duration: item.duration,
@@ -9547,6 +9684,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }) : {
                 documentId: isNewRandom ? null : (isRandom ? random.documentId : document.id),
                 randomId: isRandom && ! isNewRandom ? random.id : null,
+                reportId: this.reportId,
                 host: this.getBaseUrl(),
                 testAccountId: this.getCurrentAccountId(),
                 compare: JSON.stringify(testRecord.compare || {}),
@@ -9641,9 +9779,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             documentId: isRandom ? doc.documentId : doc.id,
             randomId: isRandom ? doc.id : null,
             testAccountId: this.getCurrentAccountId(),
+            'invalid': 0,
             'host': this.getBaseUrl(),
             '@order': 'date-',
-            '@column': 'id,userId,testAccountId,documentId,randomId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
+            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,response' + (this.isMLEnabled ? ',standard' : ''),
             'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
           }
         }, {}, function (url, res, err) {
@@ -10758,6 +10897,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         this.isEncodeEnabled = this.getCache('', 'isEncodeEnabled', this.isEncodeEnabled)
         this.isEnvCompareEnabled = this.getCache('', 'isEnvCompareEnabled', this.isEnvCompareEnabled)
         //预览了就不能编辑了，点开看会懵 this.isPreviewEnabled = this.getCache('', 'isPreviewEnabled', this.isPreviewEnabled)
+        this.isStatisticsEnabled = this.getCache('', 'isStatisticsEnabled', this.isStatisticsEnabled)
         this.isHeaderShow = this.getCache('', 'isHeaderShow', this.isHeaderShow)
         this.isRandomShow = this.getCache('', 'isRandomShow', this.isRandomShow)
       } catch (e) {
@@ -10833,7 +10973,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       }
 
       var rawReq = getRequestFromURL()
-      if (rawReq == null || StringUtil.isEmpty(rawReq.type, true)) {
+      if (rawReq == null || (StringUtil.isEmpty(rawReq.type, true) && StringUtil.isEmpty(rawReq.reportId, true))) {
         this.transfer()
 
         if (this.User != null && this.User.id != null && this.User.id > 0) {
@@ -10889,6 +11029,22 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             vRandom.value = StringUtil.trim(rawReq.random, true)
             App.isRandomShow = true
             App.isRandomListShow = false
+          }
+
+          if (StringUtil.isEmpty(rawReq.reportId, true) == false) {
+            try {
+              App.reportId = + StringUtil.trim(rawReq.reportId, true)
+              if (Number.isNaN(App.reportId)) {
+                throw new Error('URL query 中 reportId= 的值必须是 0 以上整数！')
+              }
+              App.isStatisticsEnabled = true
+              App.isRandomShow = true
+              App.isRandomListShow = false
+              App.showTestCase(true, false)
+            } catch (e) {
+              App.onResponse(null, {}, e)
+              alert(e)
+            }
           }
 
           var delayTime = 0
