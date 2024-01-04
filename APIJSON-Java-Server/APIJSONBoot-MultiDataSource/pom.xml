@@ -73,6 +73,11 @@
             <artifactId>apijson-router</artifactId>
             <version>1.8.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-mongodb</artifactId>
+            <version>1.0.0</version>
+        </dependency>
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
         <!-- 需要用的数据库 JDBC 驱动 -->
@@ -139,6 +144,17 @@
         <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
         <!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
 
+        <dependency>
+            <groupId>org.datayoo.moql</groupId>
+            <artifactId>moql-querier-milvus</artifactId>
+            <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                        <groupId>org.apache.logging.log4j</groupId>
+                        <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
 
         <!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.0 以上 -->
         <dependency>

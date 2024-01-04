@@ -48,26 +48,54 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 	// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	//	public static final String DATABASE_MONGODB = "MONGODB";
-	//	@Override
-	//	public boolean isPrepared() {
-	//		return super.isPrepared() && ! isMongoDB(); // MongoDB JDBC 还不支持预编译
-	//	}
-	//
-	//	public boolean isMongoDB() {
-	//		return DATABASE_MONGODB.equals(getDatabase());
-	//	}
+	public static final String DATABASE_MONGODB = "MONGODB";
+	public static final String DATABASE_MILVUS = "MILVUS";
 
-	// MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
-	//	@Override
-	//	public String getQuote() {
-	//		return "MONGODB".equals(getDatabase()) ? "`" : super.getQuote();
-	//	}
+	@Override
+	public boolean isPrepared() {
+		return super.isPrepared() && ! isMongoDB(); // MongoDB JDBC 还不支持预编译
+	}
+
+	public boolean isMongoDB() {
+		return DATABASE_MONGODB.equals(getDatabase());
+
+	}
+	public boolean isMilvus() {
+		return DATABASE_MILVUS.equals(getDatabase());
+	}
+
+	//	 MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
+	@Override
+	public String getQuote() {
+		return isMilvus() ? "`" : super.getQuote();
+	}
+
+	@Override
+	public String getLimitString() {
+		if (DATABASE_MILVUS.equals(getDatabase()) && RequestMethod.isGetMethod(getMethod(), true)) {
+			int count = getCount();
+			int offset = getOffset(getPage(), count);
+			return " LIMIT " + offset + ", " + count;
+		}
+		return super.getLimitString();
+	}
 
 	static {
-		//	DATABASE_LIST.add(DATABASE_MONGODB);
+		DATABASE_LIST.add(DATABASE_MONGODB);
+		DATABASE_LIST.add(DATABASE_MILVUS);
 
-	// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		SQL_FUNCTION_MAP.put("vMatch", "");
+		SQL_FUNCTION_MAP.put("consistencyLevel", "");
+		SQL_FUNCTION_MAP.put("partitionBy", "");
+		SQL_FUNCTION_MAP.put("gracefulTime", "");
+		SQL_FUNCTION_MAP.put("guaranteeTimestamp", "");
+		SQL_FUNCTION_MAP.put("roundDecimal", "");
+		SQL_FUNCTION_MAP.put("travelTimestamp", "");
+		SQL_FUNCTION_MAP.put("nProbe", "");
+		SQL_FUNCTION_MAP.put("ef", "");
+		SQL_FUNCTION_MAP.put("searchK", "");
+
+		// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
 		DEFAULT_SCHEMA = "sys"; // ""apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
@@ -159,6 +187,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isTDengine()) {
 			return "2.6.0.8"; //TODO 改成你自己的
 		}
+		if (isMilvus()) {
+			return "2.3.4"; //TODO 改成你自己的
+		}
 		if (isMongoDB()) {
 			return "6.0.12"; //TODO 改成你自己的
 		}
@@ -206,7 +237,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
 		if (isInfluxDB()) {
-			return "http://localhost:8086";
+			return "http://203.189.6.3:8086";
+		}
+		if (isMilvus()) {
+			return "http://localhost:19530";
 		}
 		if (isMongoDB()) {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
@@ -270,6 +304,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "root"; //TODO 改成你自己的
 		}
 		if (isInfluxDB()) {
+			return "iotos";
+		}
+		if (isMilvus()) {
 			return "root";
 		}
 		if (isMongoDB()) {
@@ -317,6 +354,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 		if (isInfluxDB()) {
 			return "apijson@123"; //TODO 改成你自己的
+		}
+		if (isMilvus()) {
+			return "apijson"; //TODO 改成你自己的
 		}
 		if (isMongoDB()) {
 			return "apijson";  //TODO 改成你自己的

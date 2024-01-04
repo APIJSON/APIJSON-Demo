@@ -15,21 +15,18 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.*;
-import apijson.orm.AbstractSQLConfig;
+import apijson.mongodb.MongoUtil;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.PreparedStatement;
+
 import java.sql.ResultSet;
 import com.datastax.oss.driver.api.core.cql.Row;
 //import com.vesoft.nebula.jdbc.impl.NebulaDriver;
-import com.zaxxer.hikari.HikariDataSource;
+//import com.zaxxer.hikari.HikariDataSource;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.net.URL;
-import java.nio.file.Paths;
 import java.sql.Connection;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -41,6 +38,12 @@ import javax.sql.DataSource;
 import apijson.boot.DemoApplication;
 import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
+import io.milvus.client.MilvusServiceClient;
+import io.milvus.param.ConnectParam;
+import org.datayoo.moql.ColumnDefinition;
+import org.datayoo.moql.RecordSet;
+import org.datayoo.moql.RecordSetDefinition;
+import org.datayoo.moql.querier.milvus.MilvusQuerier;
 import org.influxdb.BatchOptions;
 import org.influxdb.InfluxDB;
 import org.influxdb.InfluxDBFactory;
@@ -52,6 +55,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import static apijson.demo.DemoSQLConfig.DATABASE_MILVUS;
 import static apijson.framework.APIJSONConstant.PRIVACY_;
 import static apijson.framework.APIJSONConstant.USER_;
 
@@ -162,10 +166,10 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
             try {
                 DataSource ds;
                 switch (datasource) {
-                    case "HIKARICP":
-                        ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
-                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
-                        break;
+//                    case "HIKARICP":
+//                        ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
+//                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
+//                        break;
                     default:
                         Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
                         // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
@@ -199,9 +203,68 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
         return super.getConnection(config);
     }
 
-
     @Override
     public JSONObject execute(@NotNull SQLConfig<Long> config, boolean unknownType) throws Exception {
+        if (DATABASE_MILVUS.equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
+            String uri = config.getDBUri();
+//
+//            int start = uri.indexOf("://");
+//            String prefix = uri.substring(0, start);
+//
+//            uri = uri.substring(start + "://".length());
+//            int end = uri.indexOf(":");
+//            int port = Integer.parseInt(uri.substring(end + 1));
+//            String host = uri.substring(0, end);
+
+            // 构建Milvus客户端
+            MilvusServiceClient milvusClient = new MilvusServiceClient(
+                    ConnectParam.newBuilder().withUri(uri).build()
+            );
+
+            // 使用Milvus客户端创建Milvus查询器
+            MilvusQuerier milvusQuerier = new MilvusQuerier(milvusClient);
+
+            /*
+            查询语句含义：从book集合中筛选数据，并返回col1,col2两个列。筛选条件为，当数据的col3列值为4，col4列值为'a','b','c'中的任意一
+            个，且vec向量字段采用'L2'类型匹配，值为'[[1.0, 2.0, 3.0],[1.1,2.1,3.1]]'。另外，采用强一致性级别在10个单元内进行检索，取第11到第15，5条命中记录。
+            */
+            String sql = config.getSQL(false); //
+//            String sql = "select id,userId,momentId,content,date from Comment where vMatch(vec, 'L2', '[[1]]') and consistencyLevel('STRONG')  limit 1,1";
+            // 使用查询器执行sql语句，并返回查询结果
+            RecordSet recordSet = milvusQuerier.query(sql);
+
+//            int count = recordSet == null ? 0 : recordSet.getRecordsCount();
+            List<Map<String, Object>> list = recordSet == null ? null : recordSet.getRecordsAsMaps();
+//            RecordSetDefinition def = recordSet.getRecordSetDefinition();
+//            List<ColumnDefinition> cols = def.getColumns();
+
+//            List<Object[]> list = count <= 0 ? null : recordSet.getRecords();
+
+            if (list == null || list.isEmpty()) {
+                return new JSONObject(true);
+            }
+
+            List<JSONObject> nl = new ArrayList<>(list.size());
+            for (int i = 0; i < list.size(); i++) {
+                Map<String, Object> map = list.get(i);
+
+                JSONObject obj = new JSONObject(map == null ? new HashMap<>() : map);
+                // obj.put(col.getValue(), os[j]);
+//                for (int j = 0; j < os.length; j++) {
+//                    ColumnDefinition col = cols.get(j);
+//                    obj.put(col.getValue(), os[j]);
+//                }
+                nl.add(obj);
+            }
+
+            JSONObject result = nl.get(0); // JSON.parseObject(list.get(0));
+            if (nl.size() > 1) {
+                result.put(KEY_RAW_LIST, nl);
+            }
+
+            return result;
+        }
+
         boolean isCassandra = config.isCassandra();
         boolean isInfluxDB = config.isInfluxDB();
 
@@ -383,4 +446,10 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     //        return StringUtil.firstCase(JSONResponse.formatUnderline(key, true), false);
     //    }
 
+
+    @Override
+    protected Object getValue(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
+        Object v = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
+        return MongoUtil.getValue(v);
+    }
 }
