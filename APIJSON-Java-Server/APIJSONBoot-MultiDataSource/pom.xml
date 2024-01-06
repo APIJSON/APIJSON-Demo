@@ -75,6 +75,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-milvus</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-mongodb</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -148,10 +153,13 @@
             <groupId>org.datayoo.moql</groupId>
             <artifactId>moql-querier-milvus</artifactId>
             <version>1.0.0</version>
+            <groupId>io.milvus</groupId>
+            <artifactId>milvus-sdk-java</artifactId>
+            <version>2.2.2</version>
             <exclusions>
                 <exclusion>
-                        <groupId>org.apache.logging.log4j</groupId>
-                        <artifactId>log4j-slf4j-impl</artifactId>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -193,6 +201,24 @@
                     <artifactId>jedis</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.datayoo.moql</groupId>
+            <artifactId>moql-meta</artifactId>
+            <version>1.1.8</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.datayoo.moql</groupId>
+            <artifactId>moql-engine</artifactId>
+            <version>1.4.6</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.datayoo.moql</groupId>
+            <artifactId>moql-querier</artifactId>
+            <version>1.2.3</version>
+            <scope>compile</scope>
         </dependency>
 
     </dependencies>
@@ -237,14 +263,14 @@
 
         <repository>
             <id>spring-snapshots</id>
-            <url>http://repo.spring.io/snapshot</url>
+            <url>https://repo.spring.io/snapshot</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
         </repository>
         <repository>
             <id>spring-milestones</id>
-            <url>http://repo.spring.io/milestone</url>
+            <url>https://repo.spring.io/milestone</url>
             <snapshots>
                 <enabled>true</enabled>
             </snapshots>
@@ -253,11 +279,11 @@
     <pluginRepositories>
         <pluginRepository>
             <id>spring-snapshots</id>
-            <url>http://repo.spring.io/snapshot</url>
+            <url>https://repo.spring.io/snapshot</url>
         </pluginRepository>
         <pluginRepository>
             <id>spring-milestones</id>
-            <url>http://repo.spring.io/milestone</url>
+            <url>https://repo.spring.io/milestone</url>
         </pluginRepository>
     </pluginRepositories>
 

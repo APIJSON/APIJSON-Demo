@@ -23,7 +23,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import apijson.*;
+import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
+import apijson.orm.Parser;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.column.ColumnUtil;
@@ -72,11 +74,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	@Override
 	public String getLimitString() {
-		if (DATABASE_MILVUS.equals(getDatabase()) && RequestMethod.isGetMethod(getMethod(), true)) {
+		if (isMilvus()) {
 			int count = getCount();
+			if (count == 0) {
+				Parser<Long> parser = getParser();
+				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
+			}
+
 			int offset = getOffset(getPage(), count);
-			return " LIMIT " + offset + ", " + count;
+			return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
 		}
+
 		return super.getLimitString();
 	}
 
@@ -210,7 +218,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 
 		if (isMySQL()) {
-			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
+			// 这个是 MySQL 8.0 及以上，要加 userSSL=false
+//			 return "jdbc:mysql://47.122.25.116:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
 			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
@@ -246,26 +255,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
 		}
 
-		return "";
+		return null;
 	}
-
-
-	// TODO 迁移到 APIJSON 主项目 <<<<<<<<<<<<<<<<<<<<
-	@Override
-	public String getSchema() {
-		String sch = super.getSchema();
-		if (StringUtil.isEmpty(sch) && isInfluxDB()) {
-			sch = DEFAULT_SCHEMA;
-		}
-		return sch;
-	}
-
-	@Override
-	public String getSQLSchema() {
-		return isInfluxDB() ? null : super.getSQLSchema();
-	}
-
-	// TODO 迁移到 APIJSON 主项目 >>>>>>>>>>>>>>>>>>>>>>
 
 	private String dbAccount;
 	public DemoSQLConfig setDBAccount(String dbAccount) {
@@ -456,6 +447,24 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, join, table, onList, on);
 	}
 
+
+
+	// TODO 迁移到 apijson-influxdb 主项目 <<<<<<<<<<<<<<<<<<<<
+	@Override
+	public String getSchema() {
+		String sch = super.getSchema();
+		if (StringUtil.isEmpty(sch) && isInfluxDB()) {
+			sch = DEFAULT_SCHEMA;
+		}
+		return sch;
+	}
+
+	@Override
+	public String getSQLSchema() {
+		return isInfluxDB() ? null : super.getSQLSchema();
+	}
+
+	// TODO 迁移到 apijson-influxdb 主项目 >>>>>>>>>>>>>>>>>>>>>>
 
 	@Override
 	public String getSQLTable() {
