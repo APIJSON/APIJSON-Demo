@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.*;
+import apijson.influxdb.InfluxDBUtil;
 import apijson.milvus.MilvusUtil;
 import apijson.mongodb.MongoUtil;
 import com.alibaba.druid.pool.DruidDataSource;
@@ -224,18 +225,24 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                 return result;
             }
 
-            RequestMethod method = config.getMethod();
-            boolean isWrite = ! RequestMethod.isQueryMethod(method);
-            if (method == null && ! isWrite) {
-                String trimmedSQL = sql == null ? null : sql.trim();
-                String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
-                isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+            if (sql != null && config.getMethod() == null) {
+                String trimmedSQL = sql.trim();
+                String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
+                if (sqlPrefix.startsWith("INSERT ")) {
+                    config.setMethod(RequestMethod.POST);
+                }
+                else if (sqlPrefix.startsWith("UPDATE ")) {
+                    config.setMethod(RequestMethod.PUT);
+                }
+                else if (sqlPrefix.startsWith("DELETE ")) {
+                    config.setMethod(RequestMethod.DELETE);
+                }
             }
 
             List<JSONObject> resultList = new ArrayList<>();
 
             if (isMilvus) {
-                return MilvusUtil.execute(config, unknownType);
+                return MilvusUtil.execute(config, sql, unknownType);
             }
 
             if (isCassandra) {
@@ -243,7 +250,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 //                        .withCloudSecureConnectBundle(Paths.get("/path/to/secure-connect-database_name.zip"))
                         .withCloudSecureConnectBundle(new URL(config.getDBUri()))
                         .withAuthCredentials(config.getDBAccount(), config.getDBPassword())
-                        .withKeyspace(config.getSQLSchema())
+                        .withKeyspace(config.getSchema())
                         .build();
 
                 //            if (config.isPrepared()) {
@@ -270,91 +277,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                 }
             }
             else if (isInfluxDB) {
-                InfluxDB influxDB = InfluxDBFactory.connect(config.getDBUri(), config.getDBAccount(), config.getDBPassword());
-                influxDB.setDatabase(config.getSchema());
-
-                if (isWrite) {
-                    influxDB.enableBatch(
-                            BatchOptions.DEFAULTS
-                                    .threadFactory(runnable -> {
-                                        Thread thread = new Thread(runnable);
-                                        thread.setDaemon(true);
-                                        return thread;
-                                    })
-                    );
-
-                    Runtime.getRuntime().addShutdownHook(new Thread(influxDB::close));
-
-                    influxDB.write(sql);
-
-                    result = DemoParser.newSuccessResult();
-
-                    if (method == RequestMethod.POST) {
-                        List<List<Object>> values = config.getValues();
-                        result.put(JSONResponse.KEY_COUNT, values == null ? 0 : values.size());
-                    } else {
-                        String idKey = config.getIdKey();
-                        Object id = config.getId();
-                        Object idIn = config.getIdIn();
-                        if (id != null) {
-                            result.put(idKey, id);
-                        }
-                        if (idIn != null) {
-                            result.put(idKey + "[]", idIn);
-                        }
-
-                        if (method == RequestMethod.PUT) {
-                            Map<String, Object> content = config.getContent();
-                            result.put(JSONResponse.KEY_COUNT, content == null ? 0 : content.size());
-                        } else {
-                            result.put(JSONResponse.KEY_COUNT, id == null && idIn instanceof Collection ? ((Collection<?>) idIn).size() : 1); // FIXME 直接 SQLAuto 传 Flux/InfluxQL INSERT 如何取数量？
-                        }
-                    }
-
-                    return result;
-                }
-
-                QueryResult qr = influxDB.query(new Query(sql));
-
-                String err = qr == null ? null : qr.getError();
-                if (StringUtil.isNotEmpty(err, true)) {
-                    throw new SQLException(err);
-                }
-
-                List<QueryResult.Result> list = qr == null ? null : qr.getResults();
-                if (list == null || list.isEmpty()) {
-                    return new JSONObject(true);
-                }
-
-                for (int i = 0; i < list.size(); i++) {
-                    QueryResult.Result qyrt = list.get(i);
-                    List<QueryResult.Series> seriesList = qyrt.getSeries();
-                    if (seriesList == null || seriesList.isEmpty()) {
-                        continue;
-                    }
-
-                    for (int j = 0; j < seriesList.size(); j++) {
-                        QueryResult.Series series = seriesList.get(j);
-                        List<List<Object>> valuesList = series.getValues();
-                        if (valuesList == null || valuesList.isEmpty()) {
-                            continue;
-                        }
-
-                        List<String> columns = series.getColumns();
-                        for (int k = 0; k < valuesList.size(); k++) {
-
-                            List<Object> values = valuesList.get(k);
-                            JSONObject obj = new JSONObject(true);
-                            if (values != null) {
-                                for (int l = 0; l < values.size(); l++) {
-                                    obj.put(columns.get(l), values.get(l));
-                                }
-                            }
-                            resultList.add(obj);
-                        }
-                    }
-                }
-
+                return InfluxDBUtil.execute(config, sql, unknownType);
             }
 
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数

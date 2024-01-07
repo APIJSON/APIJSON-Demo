@@ -80,6 +80,11 @@
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-influxdb</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-mongodb</artifactId>
             <version>1.0.0</version>
         </dependency>
