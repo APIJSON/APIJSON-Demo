@@ -14,49 +14,34 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.*;
+import apijson.JSON;
+import apijson.Log;
+import apijson.NotNull;
+import apijson.RequestMethod;
+import apijson.boot.DemoApplication;
+import apijson.cassandra.CassandraUtil;
+import apijson.framework.APIJSONSQLExecutor;
 import apijson.influxdb.InfluxDBUtil;
 import apijson.milvus.MilvusUtil;
 import apijson.mongodb.MongoUtil;
+import apijson.orm.SQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
-import com.datastax.oss.driver.api.core.CqlSession;
-
-import java.sql.ResultSet;
-import com.datastax.oss.driver.api.core.cql.Row;
-//import com.vesoft.nebula.jdbc.impl.NebulaDriver;
-//import com.zaxxer.hikari.HikariDataSource;
-
-import java.io.Serializable;
-import java.net.URL;
-import java.sql.Connection;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.*;
-import java.util.concurrent.TimeUnit;
-
-import javax.sql.DataSource;
-
-import apijson.boot.DemoApplication;
-import apijson.framework.APIJSONSQLExecutor;
-import apijson.orm.SQLConfig;
-import io.milvus.client.MilvusServiceClient;
-import io.milvus.param.ConnectParam;
-import org.datayoo.moql.ColumnDefinition;
-import org.datayoo.moql.RecordSet;
-import org.datayoo.moql.RecordSetDefinition;
-import org.datayoo.moql.querier.DataQuerier;
-import org.datayoo.moql.querier.milvus.MilvusQuerier;
-import org.influxdb.BatchOptions;
-import org.influxdb.InfluxDB;
-import org.influxdb.InfluxDBFactory;
-import org.influxdb.dto.Query;
-import org.influxdb.dto.QueryResult;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+
+import javax.sql.DataSource;
+import java.io.Serializable;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static apijson.demo.DemoSQLConfig.DATABASE_MILVUS;
 import static apijson.framework.APIJSONConstant.PRIVACY_;
@@ -215,16 +200,6 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
         if (isMilvus || isCassandra || isInfluxDB) {
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             String sql = config.getSQL(false); // config.isPrepared());
-            List<JSONObject> cache = getCache(sql, config);
-            int position = config.getPosition();
-            JSONObject result = getCacheItem(cache, position, config);
-            if (result != null) {
-                if (position == 0 && cache != null && cache.size() > 1) {
-                    result.put(KEY_RAW_LIST, cache);
-                }
-                return result;
-            }
-
             if (sql != null && config.getMethod() == null) {
                 String trimmedSQL = sql.trim();
                 String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
@@ -239,45 +214,41 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                 }
             }
 
+            boolean isWrite = ! RequestMethod.isQueryMethod(config.getMethod());
+
+            List<JSONObject> cache = isWrite ? null : getCache(sql, config);
+            int position = config.getPosition();
+            JSONObject result = getCacheItem(cache, position, config);
+            if (result != null) {
+                if (position == 0 && cache != null && cache.size() > 1) {
+                    result.put(KEY_RAW_LIST, cache);
+                }
+                return result;
+            }
+
+
             List<JSONObject> resultList = new ArrayList<>();
 
             if (isMilvus) {
-                return MilvusUtil.execute(config, sql, unknownType);
+                if (isWrite) {
+                    return MilvusUtil.executeUpdate(config, sql);
+                }
+
+                resultList = MilvusUtil.executeQuery(config, sql, unknownType);
             }
-
-            if (isCassandra) {
-                CqlSession session = CqlSession.builder()
-//                        .withCloudSecureConnectBundle(Paths.get("/path/to/secure-connect-database_name.zip"))
-                        .withCloudSecureConnectBundle(new URL(config.getDBUri()))
-                        .withAuthCredentials(config.getDBAccount(), config.getDBPassword())
-                        .withKeyspace(config.getSchema())
-                        .build();
-
-                //            if (config.isPrepared()) {
-                //                PreparedStatement stt = session.prepare(sql);
-                //
-                //                List<Object> pl = config.getPreparedValueList();
-                //                if (pl != null) {
-                //                    for (Object o : pl) {
-                //                        stt.bind(pl.toArray());
-                //                    }
-                //                }
-                //                sql = stt.getQuery();
-                //            }
-
-                com.datastax.oss.driver.api.core.cql.ResultSet rs = session.execute(sql);
-
-                List<Row> list = rs.all();
-                if (list == null || list.isEmpty()) {
-                    return new JSONObject(true);
+            else if (isCassandra) {
+                if (isWrite) {
+                    return CassandraUtil.executeUpdate(config, sql);
                 }
 
-                for (int i = 0; i < list.size(); i++) {
-                    resultList.add(JSON.parseObject(list.get(i)));
-                }
+                resultList = CassandraUtil.executeQuery(config, sql, unknownType);
             }
             else if (isInfluxDB) {
-                return InfluxDBUtil.execute(config, sql, unknownType);
+                if (isWrite) {
+                    return InfluxDBUtil.executeUpdate(config, sql);
+                }
+
+                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
             }
 
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
@@ -292,6 +263,15 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
         }
 
         return super.execute(config, unknownType);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+        MilvusUtil.closeAllClient();
+        CassandraUtil.closeAllSession();
+        InfluxDBUtil.closeAllClient();
     }
 
     // 不需要隐藏字段这个功能时，取消注释来提升性能

@@ -91,6 +91,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	static {
 		DATABASE_LIST.add(DATABASE_MONGODB);
 		DATABASE_LIST.add(DATABASE_MILVUS);
+		DATABASE_LIST.add(DATABASE_CASSANDRA);
 
 		SQL_FUNCTION_MAP.put("vMatch", "");
 		SQL_FUNCTION_MAP.put("consistencyLevel", "");
@@ -201,6 +202,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMongoDB()) {
 			return "6.0.12"; //TODO 改成你自己的
 		}
+		if (isCassandra()) {
+			return "4.0.1"; //TODO 改成你自己的
+		}
 
 		return null;
 	}
@@ -254,6 +258,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMongoDB()) {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
 		}
+		if (isCassandra()) {
+			return "http://localhost:7001";
+		}
 
 		return null;
 	}
@@ -303,6 +310,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMongoDB()) {
 			return "root"; //TODO 改成你自己的
 		}
+		if (isCassandra()) {
+			return "root"; //TODO 改成你自己的
+		}
 
 		return null;
 	}
@@ -350,6 +360,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "apijson"; //TODO 改成你自己的
 		}
 		if (isMongoDB()) {
+			return "apijson";  //TODO 改成你自己的
+		}
+		if (isCassandra()) {
 			return "apijson";  //TODO 改成你自己的
 		}
 
