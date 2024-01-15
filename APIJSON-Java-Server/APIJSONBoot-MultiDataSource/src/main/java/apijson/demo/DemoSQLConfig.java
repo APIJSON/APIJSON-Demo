@@ -172,10 +172,22 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		RAW_MAP.put("substr(url,1,length(url) - length(substring_index(url,'/',-1)) - 1) url", "");  // APIAuto 获取分组
 		RAW_MAP.put("length(substr(url,1,length(url)-length(substring_index(url,'/',-1))-1))", "");  // APIAuto 获取分组
 		RAW_MAP.put("ifnull(`group`,'_')", "");  // APIAuto 获取分组
+		RAW_MAP.put("ifnull(`group`,'-')", "");  // APIAuto 获取分组
 		RAW_MAP.put("any_value(ifnull(`group`,'_'))", "");  // APIAuto 获取分组
+		RAW_MAP.put("any_value(ifnull(`group`,'-'))", "");  // APIAuto 获取分组
+		RAW_MAP.put("length(`group`)", "");  // APIAuto 获取分组
+		RAW_MAP.put("length(`group`) > 0", "");  // APIAuto 获取分组
 		RAW_MAP.put("CASE WHEN length(`group`) > 0 THEN `group` ELSE '_' END", "");  // APIAuto 获取分组
 		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '_' END)", "");  // APIAuto 获取分组
 		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '_' END) `name`", "");  // APIAuto 获取分组
+		RAW_MAP.put("CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END", "");  // APIAuto 获取分组
+		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END)", "");  // APIAuto 获取分组
+		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END) `name`", "");  // APIAuto 获取分组
+		RAW_MAP.put("LIKE", "");  // UnitAuto 获取分组
+		RAW_MAP.put("substr(package,2)", "");  // UnitAuto 获取分组
+		RAW_MAP.put("CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END", "");  // UnitAuto 获取分组
+		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `url`", "");  // UnitAuto 获取分组
+		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `groupUrl`", "");  // UnitAuto 获取分组
 	}
 
 
