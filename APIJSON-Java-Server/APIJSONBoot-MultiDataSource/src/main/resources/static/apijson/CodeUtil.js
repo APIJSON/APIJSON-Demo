@@ -86,7 +86,7 @@ var CodeUtil = {
    */
   parseComment: function (reqStr, tableList, method, database, language, isReq, standardObj, isExtract, isWarning, isAPIJSONRouter) { //怎么都获取不到真正的长度，cols不行，默认20不变，maxLineLength不行，默认undefined不变 , maxLineLength) {
     if (StringUtil.isEmpty(reqStr)) {
-      return;
+      return '';
     }
 
     var reqObj = JSON5.parse(reqStr);
@@ -132,8 +132,8 @@ var CodeUtil = {
 
       var comment = '';
       if (cIndex >= 0) {
-        if (isExtract && standardObj != null && (depth != 1
-          || (isReq != true && [JSONResponse.KEY_CODE, JSONResponse.KEY_MSG, JSONResponse.KEY_THROW].indexOf(key) < 0))) {
+        if (isExtract && standardObj != null && (isReq || depth != 1
+          || [JSONResponse.KEY_CODE, JSONResponse.KEY_MSG, JSONResponse.KEY_THROW].indexOf(key) < 0)) {
           comment = line.substring(cIndex + ccLen).trim();
           // standardObj = CodeUtil.updateStandardPart(standardObj, names, key, value, comment)
         }
@@ -295,7 +295,7 @@ var CodeUtil = {
 
   getOperation: function (method, json) {
         var ind = method == null ? -1 : method.indexOf('?');
-        var method = StringUtil.toLowerCase(ind < 0 ? method : method.substring(0, ind));
+        method = StringUtil.toLowerCase(ind < 0 ? method : method.substring(0, ind));
         if (method.startsWith('insert') || method.startsWith('post') || method.startsWith('add')
           || method.startsWith('pub') || method.startsWith('write')) {
           return 'INSERT'

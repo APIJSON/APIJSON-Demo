@@ -518,7 +518,7 @@ var JSONResponse = {
       if (real != null && real.throw != null) {
         return {
           code: JSONResponse.COMPARE_CODE_CHANGE, //未上传对比标准
-          msg: '没有校验标准，且 throw 不是 null，而是 ' + real.throw,
+          msg: '没有校验标准，且 throw 是 ' + real.throw,
           path: folder == null ? '' : folder
         };
       }
@@ -526,7 +526,7 @@ var JSONResponse = {
       if (real == null || real.data == null) {
         return {
           code: JSONResponse.COMPARE_KEY_LESS, //未上传对比标准
-          msg: '没有校验标准，且缺少非 null 值的 data 字段',
+          msg: '没有校验标准，且缺少有效 data 值',
           path: folder == null ? '' : folder
         };
       }
