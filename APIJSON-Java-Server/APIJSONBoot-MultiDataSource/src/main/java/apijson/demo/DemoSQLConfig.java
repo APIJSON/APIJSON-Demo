@@ -93,6 +93,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		DATABASE_LIST.add(DATABASE_MILVUS);
 		DATABASE_LIST.add(DATABASE_CASSANDRA);
 
+		// Milvus 需要
 		SQL_FUNCTION_MAP.put("vMatch", "");
 		SQL_FUNCTION_MAP.put("consistencyLevel", "");
 		SQL_FUNCTION_MAP.put("partitionBy", "");
@@ -164,6 +165,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		RAW_MAP.put("commentWhereItem1","(`Comment`.`userId` = 38710 AND `Comment`.`momentId` = 470)");
 		RAW_MAP.put("to_days(now())-to_days(`date`)<=7", "");  // 给 @having 使用
 		RAW_MAP.put("sexShowStr", "CASE sex WHEN 0 THEN '男' WHEN 1 THEN '女' ELSE '其它' END");  // 给 @having 使用
+
+		RAW_MAP.put("length(url)", "");  // APIAuto 获取分组
+		RAW_MAP.put("length(substring_index(url,'/',-1))", "");  // APIAuto 获取分组
 		RAW_MAP.put("length(url)-length(substring_index(url,'/',-1))-1", "");  // APIAuto 获取分组
 		RAW_MAP.put("length(url) - length(substring_index(url,'/',-1)) - 1", "");  // APIAuto 获取分组
 		RAW_MAP.put("substr(url,1,length(url)-length(substring_index(url,'/',-1))-1)", "");  // APIAuto 获取分组
@@ -171,23 +175,21 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		RAW_MAP.put("substr(url,1,length(url)-length(substring_index(url,'/',-1))-1) url", "");  // APIAuto 获取分组
 		RAW_MAP.put("substr(url,1,length(url) - length(substring_index(url,'/',-1)) - 1) url", "");  // APIAuto 获取分组
 		RAW_MAP.put("length(substr(url,1,length(url)-length(substring_index(url,'/',-1))-1))", "");  // APIAuto 获取分组
-		RAW_MAP.put("ifnull(`group`,'_')", "");  // APIAuto 获取分组
+		RAW_MAP.put("substr(url,1,length(url)-length(substring_index(url,'/',-1))-1):groupUrl", "substr(url,1,length(url)-length(substring_index(url,'/',-1))-1) `groupUrl`");  // APIAuto 获取分组
 		RAW_MAP.put("ifnull(`group`,'-')", "");  // APIAuto 获取分组
-		RAW_MAP.put("any_value(ifnull(`group`,'_'))", "");  // APIAuto 获取分组
 		RAW_MAP.put("any_value(ifnull(`group`,'-'))", "");  // APIAuto 获取分组
 		RAW_MAP.put("length(`group`)", "");  // APIAuto 获取分组
 		RAW_MAP.put("length(`group`) > 0", "");  // APIAuto 获取分组
-		RAW_MAP.put("CASE WHEN length(`group`) > 0 THEN `group` ELSE '_' END", "");  // APIAuto 获取分组
-		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '_' END)", "");  // APIAuto 获取分组
-		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '_' END) `name`", "");  // APIAuto 获取分组
 		RAW_MAP.put("CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END", "");  // APIAuto 获取分组
 		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END)", "");  // APIAuto 获取分组
 		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END) `name`", "");  // APIAuto 获取分组
+		RAW_MAP.put("(CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END):groupName`", "(CASE WHEN length(`group`) > 0 THEN `group` ELSE '-' END) `groupName`");  // APIAuto 获取分组
 		RAW_MAP.put("LIKE", "");  // UnitAuto 获取分组
 		RAW_MAP.put("substr(package,2)", "");  // UnitAuto 获取分组
 		RAW_MAP.put("CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END", "");  // UnitAuto 获取分组
 		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `url`", "");  // UnitAuto 获取分组
 		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `groupUrl`", "");  // UnitAuto 获取分组
+		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END):groupUrl", "(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `groupUrl`");  // UnitAuto 获取分组
 	}
 
 
