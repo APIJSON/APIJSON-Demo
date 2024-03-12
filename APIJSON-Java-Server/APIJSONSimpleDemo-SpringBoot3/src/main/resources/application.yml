@@ -1,0 +1,29 @@
+server:
+  # port: 
+  servlet:
+    session:
+      cookie:
+        same-site: none
+        secure: true
+spring:
+  datasource:
+    apijson:
+      type: com.zaxxer.hikari.HikariDataSource
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://127.0.0.1:3306
+      username: root
+      password: 123456
+    db1:
+      type: com.zaxxer.hikari.HikariDataSource
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://127.0.0.1:3306
+      username: root
+      password: 123456
+    db2:
+      type: com.zaxxer.hikari.HikariDataSource
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://127.0.0.1:3306
+      username: root
+      password: 123456
+
+      
