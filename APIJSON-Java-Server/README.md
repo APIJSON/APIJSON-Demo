@@ -4,7 +4,8 @@
 ### JDBC Demo：
 [APIJSONDemo](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo) 为 APIJSON + SpringBoot + MySQL + PostgreSQL 的最简单的初级使用 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
 [APIJSONBoot](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONBoot) 为 APIJSON + SpringBoot + MySQL + PostgreSQL + SQLServer + TDengine 的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
-[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal + MySQL + PostgreSQL  的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库。 <br />
+[APIJSONFinal](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONFinal) 为 APIJSON + JFinal + MySQL + PostgreSQL  的接近生产环境成品的 Demo，通过 DemoSQLConfig 代码配置数据库； <br />
+[APIJSONSimpleDemo-SpringBoot3](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONSimpleDemo-SpringBoot3) 为 APIJSON + SpringBoot3 + HikariCP + MySQL 的复杂度介于 APIJSONBoot 和 APIJSONDemo 之间的 Demo，完成了一些常用配置，包括简单鉴权、多数据源等，通过 application.yml 文件配置数据库； <br />
 
 ### 连接池 Demo
 [APIJSONDemo-Druid](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server/APIJSONDemo-Druid) 为 APIJSON + SpringBoot + Druid + MySQL + PostgreSQL 的简单初级使用 Demo，通过 application.yml 文件配置数据库； <br />
