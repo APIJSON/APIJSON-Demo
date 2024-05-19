@@ -174,11 +174,11 @@
 <!--            <artifactId>nebula-jdbc</artifactId>-->
 <!--            <version>3.0.0</version>-->
 <!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>org.influxdb</groupId>-->
-<!--            <artifactId>influxdb-java</artifactId>-->
-<!--            <version>2.23</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <version>2.23</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>net.snowflake</groupId>-->
 <!--            <artifactId>snowflake-jdbc</artifactId>-->
