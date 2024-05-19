@@ -25,7 +25,7 @@ import apijson.framework.APIJSONSQLExecutor;
 //import apijson.milvus.MilvusUtil;
 //import apijson.mongodb.MongoUtil;
 import apijson.orm.SQLConfig;
-//import com.alibaba.druid.pool.DruidDataSource;
+import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
 //import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 //import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -124,155 +124,155 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     public static final String DATABASE_NEBULA = "NEBULA";
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
-//    @Override
-//    public Connection getConnection(SQLConfig<Long> config) throws Exception {
-////        if (DATABASE_NEBULA.equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
-////            String uri = config.getDBUri();
-////
-////            int start = uri.indexOf("://");
-////            String prefix = uri.substring(0, start);
-////
-////            uri = uri.substring(start + "://".length());
-////            int end = uri.indexOf("/");
-////            String space = uri.substring(end + 1);
-////
-////            Properties props = new Properties();
-////            props.put("url", prefix + "://" + space);
-////            props.put("graphSpace", space);
-////
-////            NebulaDriver driver = new NebulaDriver(uri.substring(0, end));
-////            return driver.connect(prefix + "://" + space, props);
-////            //    return DriverManager.getConnection("jdbc:nebula://JDBC_TEST_SPACE", "root", "nebula");
-////        }
+    @Override
+    public Connection getConnection(SQLConfig<Long> config) throws Exception {
+//        if (DATABASE_NEBULA.equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
+//            String uri = config.getDBUri();
 //
-//        String datasource = config.getDatasource();
-//        Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
+//            int start = uri.indexOf("://");
+//            String prefix = uri.substring(0, start);
 //
-//        String key = datasource + "-" + config.getDatabase();
-//        Connection c = connectionMap.get(key);
-//        if (datasource != null && (c == null || c.isClosed())) {
-//            try {
-//                DataSource ds;
-//                switch (datasource) {
-////                    case "HIKARICP":
-////                        ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
-////                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
-////                        break;
-//                    default:
-//                        Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
-//                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
-//                        switch (datasource) {
-//                            case "DRUID-TEST":
-//                                ds = dsMap.get("druidTestDataSource");
-//                                break;
-//                            case "DRUID-ONLINE":
-//                                ds = dsMap.get("druidOnlineDataSource");
-//                                break;
-//                            case "DRUID":
-//                                ds = dsMap.get("druidDataSource");
-//                                break;
-//                            default:
-//                                ds = null;
-//                                break;
-//                        }
+//            uri = uri.substring(start + "://".length());
+//            int end = uri.indexOf("/");
+//            String space = uri.substring(end + 1);
+//
+//            Properties props = new Properties();
+//            props.put("url", prefix + "://" + space);
+//            props.put("graphSpace", space);
+//
+//            NebulaDriver driver = new NebulaDriver(uri.substring(0, end));
+//            return driver.connect(prefix + "://" + space, props);
+//            //    return DriverManager.getConnection("jdbc:nebula://JDBC_TEST_SPACE", "root", "nebula");
+//        }
+
+        String datasource = config.getDatasource();
+        Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
+
+        String key = datasource + "-" + config.getDatabase();
+        Connection c = connectionMap.get(key);
+        if (datasource != null && (c == null || c.isClosed())) {
+            try {
+                DataSource ds;
+                switch (datasource) {
+//                    case "HIKARICP":
+//                        ds = DemoApplication.getApplicationContext().getBean(HikariDataSource.class);
+//                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_HIKARICP 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_HIKARICP.getConnection();
 //                        break;
+                    default:
+                        Map<String, DruidDataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DruidDataSource.class);
+                        // 另一种方式是 DemoDataSourceConfig 初始化获取到 DataSource 后给静态变量 DATA_SOURCE_DRUID 赋值： ds = DemoDataSourceConfig.DATA_SOURCE_DRUID.getConnection();
+                        switch (datasource) {
+                            case "DRUID-TEST":
+                                ds = dsMap.get("druidTestDataSource");
+                                break;
+                            case "DRUID-ONLINE":
+                                ds = dsMap.get("druidOnlineDataSource");
+                                break;
+                            case "DRUID":
+                                ds = dsMap.get("druidDataSource");
+                                break;
+                            default:
+                                ds = null;
+                                break;
+                        }
+                        break;
+                }
+
+                connectionMap.put(key, ds == null ? null : ds.getConnection());
+            } catch (Exception e) {
+                Log.e(TAG, "getConnection   try { "
+                        + "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
+                        + "} catch (Exception e) = " + e.getMessage());
+            }
+        }
+
+        // 必须最后执行 super 方法，因为里面还有事务相关处理。
+        // 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
+        return super.getConnection(config);
+    }
+
+    @Override
+    public JSONObject execute(@NotNull SQLConfig<Long> config, boolean unknownType) throws Exception {
+        boolean isMilvus = DATABASE_MILVUS.equals(config.getDatabase()); // APIJSON 6.4.0+ 可用 config.isMilvus();
+        boolean isCassandra = config.isCassandra();
+        boolean isInfluxDB = config.isInfluxDB();
+
+        if (isMilvus || isCassandra || isInfluxDB) {
+            // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
+            String sql = config.getSQL(false); // config.isPrepared());
+            if (sql != null && config.getMethod() == null) {
+                String trimmedSQL = sql.trim();
+                String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
+                if (sqlPrefix.startsWith("INSERT ")) {
+                    config.setMethod(RequestMethod.POST);
+                }
+                else if (sqlPrefix.startsWith("UPDATE ")) {
+                    config.setMethod(RequestMethod.PUT);
+                }
+                else if (sqlPrefix.startsWith("DELETE ")) {
+                    config.setMethod(RequestMethod.DELETE);
+                }
+            }
+
+            boolean isWrite = ! RequestMethod.isQueryMethod(config.getMethod());
+
+            List<JSONObject> cache = isWrite ? null : getCache(sql, config);
+            int position = config.getPosition();
+            JSONObject result = getCacheItem(cache, position, config);
+            if (result != null) {
+                if (position == 0 && cache != null && cache.size() > 1) {
+                    result.put(KEY_RAW_LIST, cache);
+                }
+                return result;
+            }
+
+
+            List<JSONObject> resultList = new ArrayList<>();
+
+//            if (isMilvus) {
+//                if (isWrite) {
+//                    return MilvusUtil.executeUpdate(config, sql);
 //                }
 //
-//                connectionMap.put(key, ds == null ? null : ds.getConnection());
-//            } catch (Exception e) {
-//                Log.e(TAG, "getConnection   try { "
-//                        + "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
-//                        + "} catch (Exception e) = " + e.getMessage());
+//                resultList = MilvusUtil.executeQuery(config, sql, unknownType);
 //            }
-//        }
-//
-//        // 必须最后执行 super 方法，因为里面还有事务相关处理。
-//        // 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
-//        return super.getConnection(config);
-//    }
-//
-//    @Override
-//    public JSONObject execute(@NotNull SQLConfig<Long> config, boolean unknownType) throws Exception {
-//        boolean isMilvus = DATABASE_MILVUS.equals(config.getDatabase()); // APIJSON 6.4.0+ 可用 config.isMilvus();
-//        boolean isCassandra = config.isCassandra();
-//        boolean isInfluxDB = config.isInfluxDB();
-//
-//        if (isMilvus || isCassandra || isInfluxDB) {
-//            // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
-//            String sql = config.getSQL(false); // config.isPrepared());
-//            if (sql != null && config.getMethod() == null) {
-//                String trimmedSQL = sql.trim();
-//                String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
-//                if (sqlPrefix.startsWith("INSERT ")) {
-//                    config.setMethod(RequestMethod.POST);
+//            else if (isCassandra) {
+//                if (isWrite) {
+//                    return CassandraUtil.executeUpdate(config, sql);
 //                }
-//                else if (sqlPrefix.startsWith("UPDATE ")) {
-//                    config.setMethod(RequestMethod.PUT);
-//                }
-//                else if (sqlPrefix.startsWith("DELETE ")) {
-//                    config.setMethod(RequestMethod.DELETE);
-//                }
+//
+//                resultList = CassandraUtil.executeQuery(config, sql, unknownType);
 //            }
-//
-//            boolean isWrite = ! RequestMethod.isQueryMethod(config.getMethod());
-//
-//            List<JSONObject> cache = isWrite ? null : getCache(sql, config);
-//            int position = config.getPosition();
-//            JSONObject result = getCacheItem(cache, position, config);
-//            if (result != null) {
-//                if (position == 0 && cache != null && cache.size() > 1) {
-//                    result.put(KEY_RAW_LIST, cache);
+//            else if (isInfluxDB) {
+//                if (isWrite) {
+//                    return InfluxDBUtil.executeUpdate(config, sql);
 //                }
-//                return result;
+//
+//                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
 //            }
-//
-//
-//            List<JSONObject> resultList = new ArrayList<>();
-//
-////            if (isMilvus) {
-////                if (isWrite) {
-////                    return MilvusUtil.executeUpdate(config, sql);
-////                }
-////
-////                resultList = MilvusUtil.executeQuery(config, sql, unknownType);
-////            }
-////            else if (isCassandra) {
-////                if (isWrite) {
-////                    return CassandraUtil.executeUpdate(config, sql);
-////                }
-////
-////                resultList = CassandraUtil.executeQuery(config, sql, unknownType);
-////            }
-////            else if (isInfluxDB) {
-////                if (isWrite) {
-////                    return InfluxDBUtil.executeUpdate(config, sql);
-////                }
-////
-////                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
-////            }
-//
-//            // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
-//            result = resultList.isEmpty() ? new JSONObject() : resultList.get(0);
-//            if (resultList.size() > 1) {
-//                result.put(KEY_RAW_LIST, resultList);
-//            }
-//
-//            putCache(sql, resultList, config);
-//
-//            return result;
-//        }
-//
-//        return super.execute(config, unknownType);
-//    }
-//
-//    @Override
-//    public void close() {
-//        super.close();
-//
-////        MilvusUtil.closeAllClient();
-////        CassandraUtil.closeAllSession();
-////        InfluxDBUtil.closeAllClient();
-//    }
+
+            // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
+            result = resultList.isEmpty() ? new JSONObject() : resultList.get(0);
+            if (resultList.size() > 1) {
+                result.put(KEY_RAW_LIST, resultList);
+            }
+
+            putCache(sql, resultList, config);
+
+            return result;
+        }
+
+        return super.execute(config, unknownType);
+    }
+
+    @Override
+    public void close() {
+        super.close();
+
+//        MilvusUtil.closeAllClient();
+//        CassandraUtil.closeAllSession();
+//        InfluxDBUtil.closeAllClient();
+    }
 
     // 不需要隐藏字段这个功能时，取消注释来提升性能
     //	@Override
