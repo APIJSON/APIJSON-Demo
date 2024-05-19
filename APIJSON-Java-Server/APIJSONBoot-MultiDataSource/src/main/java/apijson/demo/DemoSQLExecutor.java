@@ -27,11 +27,11 @@ import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
-//import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
-//import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
-//import org.springframework.data.redis.core.RedisTemplate;
-//import org.springframework.data.redis.serializer.GenericToStringSerializer;
-//import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
+import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericToStringSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
@@ -58,66 +58,66 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     public static final String TAG = "DemoSQLExecutor";
 
     // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
-//    public static final RedisTemplate<String, String> REDIS_TEMPLATE;
-//    static {
-//        REDIS_TEMPLATE = new RedisTemplate<>();
-//        try {
-//            REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
-//            REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
-//            REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
-//            REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
-//            //    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONObject>>(List.class));
-//            REDIS_TEMPLATE.afterPropertiesSet();
-//        } catch (Throwable e) {
-//            e.printStackTrace();
-//        }
-//    }
-//
-//    //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
-//    @Override
-//    public List<JSONObject> getCache(String sql, SQLConfig<Long> config) {
-//        List<JSONObject> list = super.getCache(sql, config);
-//        if (list == null) {
-//            try {
-//                list = JSON.parseArray(REDIS_TEMPLATE.opsForValue().get(sql), JSONObject.class);
-//            } catch (Throwable e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return list;
-//    }
-//
-//    @Override
-//    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig<Long> config) {
-//        super.putCache(sql, list, config);
-//
-//        String table = config != null && config.isMain() ? config.getTable() : null;
-//        if (table != null && ! DemoSQLConfig.CONFIG_TABLE_LIST.contains(table)) {
-//            try {
-//                if (config.isExplain() || RequestMethod.isHeadMethod(config.getMethod(), true)) {
-//                    REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), 10 * 60, TimeUnit.SECONDS);
-//                } else {
-//                    REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), USER_.equals(table) || PRIVACY_.equals(table) ? 10 * 60 : 60, TimeUnit.SECONDS);
-//                }
-//            } catch (Throwable e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-//
-//    @Override
-//    public synchronized void removeCache(String sql, SQLConfig<Long> config) {
-//        super.removeCache(sql, config);
-//        try {
-//            if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
-//                REDIS_TEMPLATE.expire(sql, 60, TimeUnit.SECONDS);
-//            } else {
-//                REDIS_TEMPLATE.delete(sql);
-//            }
-//        } catch (Throwable e) {
-//            e.printStackTrace();
-//        }
-//    }
+    public static final RedisTemplate<String, String> REDIS_TEMPLATE;
+    static {
+        REDIS_TEMPLATE = new RedisTemplate<>();
+        try {
+            REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
+            REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
+            REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+            REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+            //    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONObject>>(List.class));
+            REDIS_TEMPLATE.afterPropertiesSet();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
+    //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
+    @Override
+    public List<JSONObject> getCache(String sql, SQLConfig<Long> config) {
+        List<JSONObject> list = super.getCache(sql, config);
+        if (list == null) {
+            try {
+                list = JSON.parseArray(REDIS_TEMPLATE.opsForValue().get(sql), JSONObject.class);
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+        return list;
+    }
+
+    @Override
+    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig<Long> config) {
+        super.putCache(sql, list, config);
+
+        String table = config != null && config.isMain() ? config.getTable() : null;
+        if (table != null && ! DemoSQLConfig.CONFIG_TABLE_LIST.contains(table)) {
+            try {
+                if (config.isExplain() || RequestMethod.isHeadMethod(config.getMethod(), true)) {
+                    REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), 10 * 60, TimeUnit.SECONDS);
+                } else {
+                    REDIS_TEMPLATE.opsForValue().set(sql, JSON.toJSONString(list), USER_.equals(table) || PRIVACY_.equals(table) ? 10 * 60 : 60, TimeUnit.SECONDS);
+                }
+            } catch (Throwable e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    @Override
+    public synchronized void removeCache(String sql, SQLConfig<Long> config) {
+        super.removeCache(sql, config);
+        try {
+            if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
+                REDIS_TEMPLATE.expire(sql, 60, TimeUnit.SECONDS);
+            } else {
+                REDIS_TEMPLATE.delete(sql);
+            }
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
 
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
