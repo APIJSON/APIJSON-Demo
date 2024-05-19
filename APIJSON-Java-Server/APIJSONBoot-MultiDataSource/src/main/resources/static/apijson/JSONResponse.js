@@ -815,11 +815,11 @@ var JSONResponse = {
     var guess = target.guess;
     log('compareWithStandard  guess = target.guess = ' + guess + ' >>');
 
-    var notnull = target.notnull;
-    log('compareWithStandard  notnull = target.notnull = ' + notnull + ' >>');
+    var notNull = target.notNull;
+    log('compareWithStandard  notNull = target.notNull = ' + notNull + ' >>');
 
-    var notempty = target.notempty;
-    log('compareWithStandard  notempty = target.notempty = ' + notempty + ' >>');
+    var notEmpty = target.notEmpty;
+    log('compareWithStandard  notEmpty = target.notEmpty = ' + notEmpty + ' >>');
 
     var type = target.type;
     log('compareWithStandard  type = target.type = ' + type + ' >>');
@@ -832,8 +832,8 @@ var JSONResponse = {
     var firstVal = values == null || values.length <= 0 ? null : values[0];
 
     if (firstVal == null && (type == 'object' || type == 'array')) {
-      if (notnull == true) { // values{} values&{}
-        throw new Error('Standard 在 ' + folder + ' 语法错误，Object 或 Array 在 notnull: true 时 values 必须为有值的数组 !');
+      if (notNull == true) { // values{} values&{}
+        throw new Error('Standard 在 ' + folder + ' 语法错误，Object 或 Array 在 notNull: true 时 values 必须为有值的数组 !');
       }
 
       log('compareWithStandard  values == null; real ' + (real == null ? '=' : '!') + '= null >> return ' + (real == null ? 'COMPARE_EQUAL' : 'COMPARE_KEY_MORE'));
@@ -846,17 +846,17 @@ var JSONResponse = {
     }
 
     if (real == null) { //少了key
-      log('compareWithStandard  real == null >> return ' + (notnull == true ? 'COMPARE_KEY_LESS' : 'COMPARE_EQUAL'));
+      log('compareWithStandard  real == null >> return ' + (notNull == true ? 'COMPARE_KEY_LESS' : 'COMPARE_EQUAL'));
       return {
-        code: notnull == true ? JSONResponse.COMPARE_KEY_LESS : JSONResponse.COMPARE_EQUAL,
-        msg: notnull == true ? '是缺少的' : '结果正确',
-        path: notnull == true ? folder : '',
+        code: notNull == true ? JSONResponse.COMPARE_KEY_LESS : JSONResponse.COMPARE_EQUAL,
+        msg: notNull == true ? '是缺少的' : '结果正确',
+        path: notNull == true ? folder : '',
         value: real
       };
     }
 
-    if (notempty == true && typeof real != 'boolean' && typeof real != 'number' && StringUtil.isEmpty(real, true)) { // 空
-      log('compareWithStandard  notempty == true && StringUtil.isEmpty(real, true) >> return COMPARE_VALUE_EMPTY');
+    if (notEmpty == true && typeof real != 'boolean' && typeof real != 'number' && StringUtil.isEmpty(real, true)) { // 空
+      log('compareWithStandard  notEmpty == true && StringUtil.isEmpty(real, true) >> return COMPARE_VALUE_EMPTY');
       return {
         code: JSONResponse.COMPARE_VALUE_EMPTY,
         msg: '是空的',
@@ -1162,18 +1162,30 @@ var JSONResponse = {
 
   getType: function(o) { //typeof [] = 'object'
     if (o == null) {
-      return 'object';
+      return 'object'; // FIXME return null
     }
+
     if (o instanceof Array) {
       return 'array';
     }
 
-    var t = typeof o;
-    if (t == 'number' && Number.isInteger(o)) {
+    if (JSONResponse.isBoolean(o)) {
+      return 'boolean';
+    }
+
+    if (JSONResponse.isInteger(o)) {
       return 'integer';
     }
 
-    return t;
+    if (JSONResponse.isNumber(o)) {
+      return 'number';
+    }
+
+    if (JSONResponse.isString(o)) {
+      return 'string';
+    }
+
+    return typeof o;
   },
 
   isObject: function(o) {
@@ -1184,16 +1196,16 @@ var JSONResponse = {
     return o instanceof Array;
   },
   isString: function(o) {
-    return typeof o == 'string';
+    return typeof o == 'string' || o instanceof String;
   },
   isNumber: function(o) {
-    return typeof o == 'number';
+    return typeof o == 'number' || o instanceof Number;
   },
   isInteger: function(o) {
-    return JSONResponse.getType(o) == 'integer';
+    return Number.isInteger(o);
   },
   isBoolean: function(o) {
-    return typeof o == 'boolean';
+    return typeof o == 'boolean' || o instanceof Boolean;
   },
 
 
@@ -1282,16 +1294,16 @@ var JSONResponse = {
     log('\n\n\n\n\nupdateStandard <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n' +
       ' \ntarget = ' + JSON.stringify(target, null, '    ') + '\n\n\nreal = ' + JSON.stringify(real, null, '    '));
 
-    var notnull = target.notnull;
-    log('updateStandard  notnull = target.notnull = ' + notnull + ' >>');
-    if (notnull == null) {
-      notnull = target.notnull = real != null;
+    var notNull = target.notNull;
+    log('updateStandard  notNull = target.notNull = ' + notNull + ' >>');
+    if (notNull == null) {
+      notNull = target.notNull = real != null;
     }
 
-    var notempty = target.notempty;
-    log('updateStandard  notempty = target.notempty = ' + notempty + ' >>');
+    var notEmpty = target.notEmpty;
+    log('updateStandard  notEmpty = target.notEmpty = ' + notEmpty + ' >>');
     if (real != null && typeof real != 'boolean' && typeof real != 'number') {
-      notempty = target.notempty = StringUtil.isNotEmpty(real, true);
+      notEmpty = target.notEmpty = StringUtil.isNotEmpty(real, true);
     }
 
     var type = target.type;
@@ -1470,10 +1482,10 @@ var JSONResponse = {
           // 解决总是报错缺少字段  delete real[k2];  // 解决总是多出来 key: null    real[k2] = null;
 
           if (firstVal[k2] == null) {
-            firstVal[k2] = { notnull: false };
+            firstVal[k2] = { notNull: false };
           }
           else {
-            firstVal[k2].notnull = false;
+            firstVal[k2].notNull = false;
           }
         }
       }
@@ -1559,6 +1571,71 @@ var JSONResponse = {
     return target;
   },
 
+  /**根据 APIJSON 引用赋值路径精准地获取值
+   */
+  getValByPath: function(target, pathKeys, isTry) {
+    if (target == null) {
+      return null;
+    }
+
+    var tgt = target;
+    var depth = pathKeys == null ? 0 : pathKeys.length
+    if (depth <= 0) {
+      return target;
+    }
+
+    for (var i = 0; i < depth; i ++) {
+      if (tgt == null) {
+        return null;
+      }
+
+      var k = pathKeys[i];
+      if (k == null) {
+        return null;
+      }
+      k = decodeURI(k)
+
+      if (tgt instanceof Object) {
+        if (k == '') {
+          if (tgt instanceof Array) {
+              k = 0;
+          } else {
+              ks = Object.keys(tgt);
+              k = ks == null ? null : ks[0];
+              if (k == null) {
+                return null;
+              }
+          }
+        }
+        else {
+          k = decodeURI(k)
+          if (tgt instanceof Array) {
+            try {
+              var n = Number.parseInt(k);
+              if (Number.isSafeInteger(n)) {
+                k = n >= 0 ? n : n + tgt.length;
+              }
+            } catch (e) {
+            }
+          }
+        }
+
+        tgt = tgt[k];
+
+        continue;
+      }
+
+      if (isTry != true) {
+        throw new Error('getValByPath 语法错误，' + k + ': value 中 value 类型应该是 Object 或 Array ！');
+      }
+
+      return null;
+    }
+
+    return tgt;
+  },
+
+
   /**根据路径精准地更新测试标准中的键值对
    */
   getStandardByPath: function(target, pathKeys) {
@@ -1590,12 +1667,15 @@ var JSONResponse = {
         k = 0;
       }
       else {
-        try {
-          var n = Number.parseInt(k);
-          if (Number.isSafeInteger(n)) {
-            k = 0;
-          }
-        } catch (e) {
+        k = decodeURI(k)
+        if (tgt instanceof Array) {
+            try {
+              var n = Number.parseInt(k);
+              if (Number.isSafeInteger(n)) {
+                k = n > 0 ? n : n + tgt.length;
+              }
+            } catch (e) {
+            }
         }
       }
 
@@ -1664,7 +1744,7 @@ var JSONResponse = {
         if (child == null) {
           child = {};
           child.type = typeof k == 'number' ? 'array' : 'number';  // TODO 没看懂为啥是 array
-          child.notnull = false;
+          child.notNull = false;
           tgt.values[0] = child;
         }
 
@@ -1686,7 +1766,7 @@ var JSONResponse = {
     }
     var startsWithQuestion = comment.startsWith('?')
     tgt.type = JSONResponse.getType(real);
-    tgt.notnull = real != null && startsWithQuestion != true
+    tgt.notNull = real != null && startsWithQuestion != true
     tgt.comment = startsWithQuestion ? comment.substring(1) : comment
 
     return target;
