@@ -159,16 +159,16 @@
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.39.3.0</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.dameng</groupId>-->
-<!--            <artifactId>Dm7JdbcDriver15</artifactId>-->
-<!--            <version>7.6.0.165</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.taosdata.jdbc</groupId>-->
-<!--            <artifactId>taos-jdbcdriver</artifactId>-->
-<!--            <version>2.0.38</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.dameng</groupId>
+            <artifactId>Dm7JdbcDriver15</artifactId>
+            <version>7.6.0.165</version>
+        </dependency>
+        <dependency>
+            <groupId>com.taosdata.jdbc</groupId>
+            <artifactId>taos-jdbcdriver</artifactId>
+            <version>2.0.38</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.nebula-contrib</groupId>-->
 <!--            <artifactId>nebula-jdbc</artifactId>-->
