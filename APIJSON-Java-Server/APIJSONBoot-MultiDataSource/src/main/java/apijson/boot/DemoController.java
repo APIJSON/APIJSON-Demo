@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.boot;
 
 import apijson.orm.AbstractParser;
+import apijson.orm.Parser;
 import apijson.orm.exception.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -62,9 +63,9 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import apijson.JSON;
 import apijson.JSONResponse;
@@ -138,7 +139,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("router/{method}/{tag}")
     @Override
-    public String router(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String router(@PathVariable("method") String method, @PathVariable("tag") String tag
+            , @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.router(method, tag, params, request, session);
     }
 
@@ -163,7 +165,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping(value = "crud/{method}")  // 直接 {method} 或 apijson/{method} 会和内置网页的路由有冲突
     @Override
-    public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
+    public String crud(@PathVariable("method") String method, @RequestBody String request, HttpSession session) {
         return super.crud(method, request, session);
     }
 
@@ -265,7 +267,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("crud/{method}/{tag}")  // 直接 {method}/{tag} 或 apijson/{method}/{tag} 会和内置网页的路由有冲突
     @Override
-    public String crudByTag(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String crudByTag(@PathVariable("method") String method, @PathVariable("tag") String tag
+            , @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.crudByTag(method, tag, params, request, session);
     }
 
@@ -277,7 +280,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("get/{tag}")  // 虽然看起来 APIAuto 更好识别是否为 APIJSON 万能接口，但 tag 导致空格截断前 Host 不固定不方便批量测试  {tag}/get")
     @Override
-    public String getByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String getByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.getByTag(tag, params, request, session);
     }
 
@@ -289,7 +292,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("head/{tag}")
     @Override
-    public String headByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String headByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.headByTag(tag, params, request, session);
     }
 
@@ -301,7 +304,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("gets/{tag}")
     @Override
-    public String getsByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String getsByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.getsByTag(tag, params, request, session);
     }
 
@@ -313,7 +316,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("heads/{tag}")
     @Override
-    public String headsByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String headsByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.headsByTag(tag, params, request, session);
     }
 
@@ -325,7 +328,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("post/{tag}")
     @Override
-    public String postByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String postByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.postByTag(tag, params, request, session);
     }
 
@@ -337,7 +340,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("put/{tag}")
     @Override
-    public String putByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String putByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.putByTag(tag, params, request, session);
     }
 
@@ -349,7 +352,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @PostMapping("delete/{tag}")
     @Override
-    public String deleteByTag(@PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+    public String deleteByTag(@PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
         return super.deleteByTag(tag, params, request, session);
     }
 
@@ -366,7 +369,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      * @see {@link RequestMethod#GET}
      */
     @GetMapping("get/{request}")
-    public String openGet(@PathVariable String request, HttpSession session) {
+    public String openGet(@PathVariable("request") String request, HttpSession session) {
         try {
             request = URLDecoder.decode(request, StringUtil.UTF_8);
         } catch (Exception e) {
@@ -383,7 +386,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      * @see {@link RequestMethod#HEAD}
      */
     @GetMapping("head/{request}")
-    public String openHead(@PathVariable String request, HttpSession session) {
+    public String openHead(@PathVariable("request") String request, HttpSession session) {
         try {
             request = URLDecoder.decode(request, StringUtil.UTF_8);
         } catch (Exception e) {
@@ -1804,8 +1807,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 //                }
 //            }
 
-            HttpStatus status = entity.getStatusCode();
-            httpServletResponse.setStatus(status.value(), status.getReasonPhrase());
+            HttpStatusCode status = entity.getStatusCode();
+            httpServletResponse.setStatus(status.value()); // , status.getReasonPhrase());
             rspBody = entity.getBody();
         }
         catch (Throwable e) {
@@ -1814,15 +1817,15 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                     RestClientResponseException hce = (RestClientResponseException) e;
                     String msg = hce.getStatusText();
                     rspBody = hce.getResponseBodyAsString();
-                    httpServletResponse.setStatus(hce.getRawStatusCode(), StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
+                    httpServletResponse.setStatus(hce.getRawStatusCode()); // , StringUtil.isEmpty(msg, true) ? e.getMessage() : msg);
                 } else {
                     int code = CommonException.getCode(e);
-                    httpServletResponse.setStatus(code, e.getMessage());
+                    httpServletResponse.setStatus(code); // , e.getMessage());
                 }
             }
             catch (Throwable ex) {
                 int code = CommonException.getCode(e);
-                httpServletResponse.setStatus(code, e.getMessage());
+                httpServletResponse.setStatus(code); // , e.getMessage());
                 // throw e;
             }
         }
@@ -1911,7 +1914,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /sql/execute ！")).toJSONString();
             }
 
-            DemoVerifier.verifyLogin(session);
+//            DemoVerifier.verifyLogin(session);
 
             long startTime = System.currentTimeMillis();
 
@@ -2023,7 +2026,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                             ((PreparedStatement) statement).execute();
                         }
                     } else {
-                        if (arg != null && !arg.isEmpty()) {
+                        if (arg != null && ! arg.isEmpty()) {
                             throw new UnsupportedOperationException("非预编译模式不允许传参 arg ！");
                         }
 

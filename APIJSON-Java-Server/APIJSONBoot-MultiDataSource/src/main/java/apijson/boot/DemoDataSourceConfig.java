@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.alibaba.druid.pool.DruidDataSource;
-import com.zaxxer.hikari.HikariDataSource;
+//import com.zaxxer.hikari.HikariDataSource;
 
 
 /**数据源配置，对应 application.yml 的数据库连接池 datasource 配置
@@ -32,11 +32,11 @@ public class DemoDataSourceConfig {
 	 * 也可以直接 new 再 set 属性，具体见 HikariCP 的文档  
 	 * https://github.com/brettwooldridge/HikariCP#rocket-initialization
 	 */
-	@Bean
-	@ConfigurationProperties(prefix = "spring.datasource.hikari")
-	public HikariDataSource hikaricpDataSource() {
-		return new HikariDataSource();
-	}
+//	@Bean
+//	@ConfigurationProperties(prefix = "spring.datasource.hikari")
+//	public HikariDataSource hikaricpDataSource() {
+//		return new HikariDataSource();
+//	}
 
 
 	/**数据源配置，对应 application.yml 的数据库连接池 datasource 配置。

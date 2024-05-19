@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import apijson.*;
+//import apijson.influxdb.InfluxDBUtil;
 import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Parser;
@@ -32,6 +33,7 @@ import apijson.column.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.Join;
 import apijson.orm.Join.On;
+//import org.influxdb.InfluxDB;
 
 
 /**SQL配置
@@ -487,21 +489,23 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 
+	@Override
+	protected int getMaxCombineCount() {
+		return 10;
+	}
+
+
 
 	// TODO 迁移到 apijson-influxdb 主项目 <<<<<<<<<<<<<<<<<<<<
-	@Override
-	public String getSchema() {
-		String sch = super.getSchema();
-		if (StringUtil.isEmpty(sch) && isInfluxDB()) {
-			sch = DEFAULT_SCHEMA;
-		}
-		return sch;
-	}
-
-	@Override
-	public String getSQLSchema() {
-		return isInfluxDB() ? null : super.getSQLSchema();
-	}
+//	@Override
+//	public String getSchema() {
+//		return InfluxDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isInfluxDB());
+//	}
+//
+//	@Override
+//	public String getSQLSchema() {
+//		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isInfluxDB());
+//	}
 
 	// TODO 迁移到 apijson-influxdb 主项目 >>>>>>>>>>>>>>>>>>>>>>
 

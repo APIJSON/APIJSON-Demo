@@ -19,11 +19,11 @@ import apijson.Log;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.boot.DemoApplication;
-import apijson.cassandra.CassandraUtil;
+//import apijson.cassandra.CassandraUtil;
 import apijson.framework.APIJSONSQLExecutor;
-import apijson.influxdb.InfluxDBUtil;
-import apijson.milvus.MilvusUtil;
-import apijson.mongodb.MongoUtil;
+//import apijson.influxdb.InfluxDBUtil;
+//import apijson.milvus.MilvusUtil;
+//import apijson.mongodb.MongoUtil;
 import apijson.orm.SQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
@@ -229,27 +229,27 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
             List<JSONObject> resultList = new ArrayList<>();
 
-            if (isMilvus) {
-                if (isWrite) {
-                    return MilvusUtil.executeUpdate(config, sql);
-                }
-
-                resultList = MilvusUtil.executeQuery(config, sql, unknownType);
-            }
-            else if (isCassandra) {
-                if (isWrite) {
-                    return CassandraUtil.executeUpdate(config, sql);
-                }
-
-                resultList = CassandraUtil.executeQuery(config, sql, unknownType);
-            }
-            else if (isInfluxDB) {
-                if (isWrite) {
-                    return InfluxDBUtil.executeUpdate(config, sql);
-                }
-
-                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
-            }
+//            if (isMilvus) {
+//                if (isWrite) {
+//                    return MilvusUtil.executeUpdate(config, sql);
+//                }
+//
+//                resultList = MilvusUtil.executeQuery(config, sql, unknownType);
+//            }
+//            else if (isCassandra) {
+//                if (isWrite) {
+//                    return CassandraUtil.executeUpdate(config, sql);
+//                }
+//
+//                resultList = CassandraUtil.executeQuery(config, sql, unknownType);
+//            }
+//            else if (isInfluxDB) {
+//                if (isWrite) {
+//                    return InfluxDBUtil.executeUpdate(config, sql);
+//                }
+//
+//                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
+//            }
 
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             result = resultList.isEmpty() ? new JSONObject() : resultList.get(0);
@@ -269,9 +269,9 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     public void close() {
         super.close();
 
-        MilvusUtil.closeAllClient();
-        CassandraUtil.closeAllSession();
-        InfluxDBUtil.closeAllClient();
+//        MilvusUtil.closeAllClient();
+//        CassandraUtil.closeAllSession();
+//        InfluxDBUtil.closeAllClient();
     }
 
     // 不需要隐藏字段这个功能时，取消注释来提升性能
@@ -293,9 +293,9 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     //    }
 
 
-    @Override
-    protected Object getValue(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
-        Object v = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
-        return MongoUtil.getValue(v);
-    }
+//    @Override
+//    protected Object getValue(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
+//        Object v = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
+//        return MongoUtil.getValue(v);
+//    }
 }

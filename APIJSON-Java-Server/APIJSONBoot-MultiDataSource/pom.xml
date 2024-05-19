@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>6.3.0</version>
+    <version>7.0.0</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -14,8 +14,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
-        <version>2.5.13</version>
+        <java.version>17</java.version>
+        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <version>3.2.5</version>
     </properties>
 
     <dependencies>
@@ -28,9 +31,9 @@
 
         <!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
         <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <version>4.0.1</version>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <version>6.0.0</version>
         </dependency>
 
         <!-- 单元测试：可使用 libs 目录的 unitauto-java.jar 和 unitauto-jar.jar 来替代，两种方式二选一 <<<<<<<<< -->
@@ -56,22 +59,22 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>6.3.0</version>
+            <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-framework</artifactId>
-            <version>6.3.0</version>
+            <version>7.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-column</artifactId>
-            <version>1.8.0</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-router</artifactId>
-            <version>1.8.0</version>
+            <version>2.0.0</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
@@ -93,72 +96,135 @@
             <artifactId>apijson-cassandra</artifactId>
             <version>0.9.0</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-milvus</artifactId>-->
+<!--            <version>1.1.0</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.github.Tencent</groupId>-->
+<!--                    <artifactId>APIJSON</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+<!--&lt;!&ndash;        <dependency>&ndash;&gt;-->
+<!--&lt;!&ndash;            <groupId>com.github.APIJSON</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;            <artifactId>apijson-influxdb</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;            <version>1.1.0</version>&ndash;&gt;-->
+<!--&lt;!&ndash;        </dependency>&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-mongodb</artifactId>-->
+<!--            <version>1.0.0</version>-->
+<!--&lt;!&ndash;            <scope>provided</scope>&ndash;&gt;-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.github.Tencent</groupId>-->
+<!--                    <artifactId>APIJSON</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-cassandra</artifactId>-->
+<!--            <version>0.9.0</version>-->
+<!--&lt;!&ndash;            <scope>provided</scope>&ndash;&gt;-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.github.Tencent</groupId>-->
+<!--                    <artifactId>APIJSON</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 >>>>>>>>>> -->
 
         <!-- 需要用的数据库 JDBC 驱动 -->
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.33</version>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.3.8</version>
+            <version>42.7.3</version>
         </dependency>
-        <dependency>
-            <groupId>net.sourceforge.jtds</groupId>
-            <artifactId>jtds</artifactId>
-            <version>1.3.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.39.3.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.dameng</groupId>
-            <artifactId>Dm7JdbcDriver15</artifactId>
-            <version>7.6.0.165</version>
-        </dependency>
-        <dependency>
-            <groupId>com.taosdata.jdbc</groupId>
-            <artifactId>taos-jdbcdriver</artifactId>
-            <version>2.0.38</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>net.sourceforge.jtds</groupId>-->
+<!--            <artifactId>jtds</artifactId>-->
+<!--            <version>1.3.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.xerial</groupId>-->
+<!--            <artifactId>sqlite-jdbc</artifactId>-->
+<!--            <version>3.39.3.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.dameng</groupId>-->
+<!--            <artifactId>Dm7JdbcDriver15</artifactId>-->
+<!--            <version>7.6.0.165</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.taosdata.jdbc</groupId>-->
+<!--            <artifactId>taos-jdbcdriver</artifactId>-->
+<!--            <version>2.0.38</version>-->
+<!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>org.nebula-contrib</groupId>-->
 <!--            <artifactId>nebula-jdbc</artifactId>-->
 <!--            <version>3.0.0</version>-->
 <!--        </dependency>-->
-        <dependency>
-            <groupId>org.influxdb</groupId>
-            <artifactId>influxdb-java</artifactId>
-            <version>2.23</version>
-        </dependency>
-        <dependency>
-            <groupId>net.snowflake</groupId>
-            <artifactId>snowflake-jdbc</artifactId>
-            <version>3.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.datastax.oss</groupId>
-            <artifactId>java-driver-core</artifactId>
-            <version>4.15.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.databricks</groupId>
-            <artifactId>databricks-jdbc</artifactId>
-            <version>2.6.25-1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.mongodb</groupId>
-            <artifactId>mongodb-jdbc</artifactId>
-            <version>2.0.3</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.influxdb</groupId>-->
+<!--            <artifactId>influxdb-java</artifactId>-->
+<!--            <version>2.23</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>net.snowflake</groupId>-->
+<!--            <artifactId>snowflake-jdbc</artifactId>-->
+<!--            <version>3.0.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.datastax.oss</groupId>-->
+<!--            <artifactId>java-driver-core</artifactId>-->
+<!--            <version>4.15.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.databricks</groupId>-->
+<!--            <artifactId>databricks-jdbc</artifactId>-->
+<!--            <version>2.6.25-1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.mongodb</groupId>-->
+<!--            <artifactId>mongodb-jdbc</artifactId>-->
+<!--            <version>2.0.3</version>-->
+<!--        </dependency>-->
         <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
         <!-- 数据库 JDBC 驱动 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
 
+<!--        <dependency>-->
+<!--            <groupId>org.datayoo.moql</groupId>-->
+<!--            <artifactId>moql-querier-milvus</artifactId>-->
+<!--            <version>1.0.3</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                        <groupId>org.apache.logging.log4j</groupId>-->
+<!--                        <artifactId>log4j-slf4j-impl</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>io.milvus</groupId>-->
+<!--            <artifactId>milvus-sdk-java</artifactId>-->
+<!--            <version>2.2.2</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>org.apache.logging.log4j</groupId>-->
+<!--                    <artifactId>log4j-slf4j-impl</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+        <!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.0 以上 -->
         <dependency>
             <groupId>org.datayoo.moql</groupId>
             <artifactId>moql-querier-milvus</artifactId>
@@ -176,19 +242,28 @@
             </exclusions>
         </dependency>
 
-        <!-- APIJSONBoot 需要用的 SpringBoot 框架，1.4.0 以上 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <version>2.5.13</version>
+            <version>3.2.5</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>ch.qos.logback</groupId>
+                    <artifactId>logback-classic</artifactId>
+                </exclusion>
+<!--                <exclusion>-->
+<!--                    <groupId>org.slf4j</groupId>-->
+<!--                    <artifactId>slf4j-simple</artifactId>-->
+<!--                </exclusion>-->
+            </exclusions>
         </dependency>
 
-        <!-- 需要用的 HikariCP 数据库连接池库，3.1.0 以上 -->
-        <dependency>
-            <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
-            <version>5.0.1</version>
-        </dependency>
+<!--        &lt;!&ndash; 需要用的 HikariCP 数据库连接池库，3.1.0 以上 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.zaxxer</groupId>-->
+<!--            <artifactId>HikariCP</artifactId>-->
+<!--            <version>5.0.1</version>-->
+<!--        </dependency>-->
 
         <!-- 需要用的 Druid 数据库连接池库，1.0.29 以上 -->
         <dependency>
@@ -206,7 +281,7 @@
         <dependency>
             <groupId>org.springframework.data</groupId>
             <artifactId>spring-data-redis</artifactId>
-            <version>2.4.0</version>
+            <version>3.3.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>redis.clients</groupId>
@@ -214,24 +289,24 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.datayoo.moql</groupId>
-            <artifactId>moql-meta</artifactId>
-            <version>1.1.8</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.datayoo.moql</groupId>
-            <artifactId>moql-engine</artifactId>
-            <version>1.4.6</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.datayoo.moql</groupId>
-            <artifactId>moql-querier</artifactId>
-            <version>1.2.3</version>
-            <scope>compile</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.datayoo.moql</groupId>-->
+<!--            <artifactId>moql-meta</artifactId>-->
+<!--            <version>1.1.8</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.datayoo.moql</groupId>-->
+<!--            <artifactId>moql-engine</artifactId>-->
+<!--            <version>1.4.6</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.datayoo.moql</groupId>-->
+<!--            <artifactId>moql-querier</artifactId>-->
+<!--            <version>1.2.3</version>-->
+<!--            <scope>compile</scope>-->
+<!--        </dependency>-->
 
     </dependencies>
 
@@ -240,7 +315,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
-                <version>2.5.13</version>
+                <version>3.2.1</version>
                 <executions>
                     <execution>
                         <goals>
@@ -254,8 +329,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <source>17</source>
+                    <target>17</target>
                 </configuration>
             </plugin>
         </plugins>

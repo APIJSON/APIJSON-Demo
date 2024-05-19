@@ -7,7 +7,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+//import javax.annotation.PostConstruct;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -46,7 +46,7 @@ public class FileController {
 
 	private static List<String> fileRepository = new ArrayList<>();
 
-	@PostConstruct
+//	@PostConstruct
 	public void initFileRepository(){
 		// 判断文件夹是否存在，不存在就创建
 		String osName = System.getProperty("os.name");

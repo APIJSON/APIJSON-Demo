@@ -16,7 +16,7 @@ package apijson.demo;
 
 import java.util.*;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import apijson.orm.script.JavaScriptExecutor;
 import com.alibaba.fastjson.JSON;
@@ -262,4 +262,22 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 	//		public String getMethodDefinition(JSONObject request, String method, String arguments, String type, String exceptions, String language) throws IllegalArgumentException, ClassNotFoundException, IOException {
 	//			return super.getMethodDefination(request, method, arguments, type, exceptions, language);
 	//		}
+
+	public void verifyGroupUrlLike(@NotNull JSONObject curObj, String urlLike) throws Exception {
+		String urlLikeVal = getArgStr(urlLike);
+
+		if (StringUtil.isEmpty(urlLikeVal) || urlLikeVal.endsWith("/%") == false) {
+			throw new IllegalArgumentException(urlLike + "必须以 /% 结尾！");
+		}
+
+		String url = urlLikeVal.substring(0, urlLike.length() - 2);
+		String rest = url.replaceAll("_", "")
+				.replaceAll("%", "%")
+				.replaceAll("/", "%")
+				.trim();
+
+		if (StringUtil.isEmpty(rest)) {
+			throw new IllegalArgumentException(urlLike + "必须以包含有效 URL 字符！");
+		}
+	}
 }

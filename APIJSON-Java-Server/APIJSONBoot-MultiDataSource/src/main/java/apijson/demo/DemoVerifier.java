@@ -33,6 +33,8 @@ public class DemoVerifier extends APIJSONRouterVerifier<Long> {  // APIJSONVerif
 		COMPILE_MAP.put("EMAIL", Pattern.compile("^\\w+([-+.]\\w+)*@\\w+([-.]\\w+)*\\.\\w+([-.]\\w+)*$"));
 		COMPILE_MAP.put("IDCARD", Pattern.compile("(^\\d{15}$)|(^\\d{18}$)|(^\\d{17}(\\d|X|x)$)"));
 		COMPILE_MAP.put("TEL", Pattern.compile("(^\\(\\d{3,4}-)|\\d{3,4}-\\)?\\d{7,8}$"));
+
+		IS_UPDATE_MUST_HAVE_ID_CONDITION = false;
 	}
 
 	// 重写方法来自定义字段名等	
