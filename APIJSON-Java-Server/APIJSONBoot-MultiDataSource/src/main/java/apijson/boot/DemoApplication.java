@@ -83,11 +83,11 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
     public static void main(String[] args) throws Exception {
         APPLICATION_CONTEXT = SpringApplication.run(DemoApplication.class, args);
 
-//        try {
-//            DemoSQLExecutor.REDIS_TEMPLATE.discard();
-//        } catch (Throwable e) {
-//            e.printStackTrace();
-//        }
+        try {
+            DemoSQLExecutor.REDIS_TEMPLATE.discard();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
 
         // FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
         // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
@@ -102,7 +102,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
     // SpringBoot 2.x 自定义端口方式
     @Override
     public void customize(ConfigurableServletWebServerFactory server) {
-        server.setPort(8080);
+        server.setPort(9090);
     }
 
     // 支持 APIAuto 中 JavaScript 代码跨域请求

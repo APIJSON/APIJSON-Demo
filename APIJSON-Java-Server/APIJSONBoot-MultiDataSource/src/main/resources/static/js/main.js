@@ -4832,7 +4832,7 @@ https://github.com/Tencent/APIJSON/issues
 
           var url = this.server + '/get'
           var userId = this.User.id
-          
+
           this.coverage = {}
           this.view = 'markdown'
           var req = {
@@ -5534,7 +5534,7 @@ https://github.com/Tencent/APIJSON/issues
               }
             }
           }
-          
+
           this.scripts = newDefaultScript()
 
           const isLoginShow = this.isLoginShow
@@ -9215,7 +9215,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           const which = i;
           var rawConfig = testSubList && i < existCount ? ((subs[i] || {}).Random || {}).config : random.config
-          
+
           var cb = function (url, res, err) {
             if (callback != null) {
               callback(url, res, err, random)
@@ -9224,7 +9224,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               App.onResponse(url, res, err)
             }
           };
-                  
+
           try {
             this.parseRandom(
               JSON.parse(JSON.stringify(json)), rawConfig, random.id
@@ -9825,7 +9825,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               else if (fun == CTX_PUT) {
                 var as = StringUtil.split(value.substring(start + 1, end), ', ')
                 if (as.length >= 2) {
-                  as[1] = 'get4Path((ctx || {}).ctx, ' + StringUtil.trim(as[1]) + ')'
+                  as[1] = 'get4Path(((ctx || {}).pre || {}).data, ' + StringUtil.trim(as[1]) + ')'
                 }
                 toEval = 'put4Path((ctx || {}).ctx, ' + (value == 'CTX_PUT()' ? JSON.stringify(path) : '') + as.join(', ') + value.substring(end);
               }
@@ -10043,7 +10043,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         // }
 
         const list = (isRandom ? this.randoms : (this.isChainShow ? (
-            this.isChainGroupShow() ? this.chainGroups : [this.chainGroups[0]]
+            this.isChainGroupShow() ? this.chainGroups : [this.chainGroups[this.currentChainGroupIndex]]
           ) : this.remotes)
         ) || []
 
@@ -10339,7 +10339,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           if (isRandom) {
             stdd = stdd || ((this.currentRemoteItem || {}).TestRecord || {})[standardKey]
           }
-          
+
           var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : JSON.parse(stdd))
           tr.compare = JSONResponse.compareResponse(res, standard, this.removeDebugInfo(response) || {}, '', isML, null, null, ignoreTrend) || {}
           tr.compare.duration = it.durationHint
