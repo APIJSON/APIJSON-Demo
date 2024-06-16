@@ -86,6 +86,7 @@ import apijson.framework.BaseModel;
 import apijson.orm.JSONRequest;
 import apijson.orm.model.TestRecord;
 import apijson.router.APIJSONRouterController;
+import org.springframework.web.servlet.ModelAndView;
 import unitauto.MethodUtil;
 
 import static apijson.RequestMethod.DELETE;
@@ -128,8 +129,29 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     // 可以更方便地通过日志排查错误
     @Override
     public String getRequestURL() {
-        return httpServletRequest.getRequestURL().toString();
+        HttpServletRequest httpReq = httpServletRequest;
+
+        String path = httpReq.getServletPath();
+        int index = path.lastIndexOf("/");
+        path = index < 0 ? path : path.substring(0, index);
+        String host = httpReq.getHeader("origin");
+        if (StringUtil.isEmpty(host)) {
+            host = httpReq.getHeader("host");
+            String prefix = httpReq.getProtocol().trim().toLowerCase().contains("https") ? "https://" : "http://";
+            if (StringUtil.isEmpty(host)) {
+                host = prefix + httpReq.getServerName() + ":" + httpReq.getServerPort();
+            } else {
+                host = prefix + host;
+            }
+        }
+
+        return host + path;
     }
+
+//    @Override
+//    public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+//        return super.newParser(session, method).setNeedVerify(false);
+//    }
 
     /**增删改查统一的类 RESTful API 入口，牺牲一点路由解析性能来提升一些开发效率
      * @param method
@@ -385,24 +407,9 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         // 以下代码是为了方便调试，引导手动/自动跳转 http://apijson.cn/api 来测试接口
         String newUrl = null;
         try {
-            HttpServletRequest httpReq = httpServletRequest;
+            String url = getRequestURL();
 
-            String path = httpReq.getServletPath();
-            int index = path.lastIndexOf("/");
-            path = index < 0 ? path : path.substring(0, index);
-            String host = httpReq.getHeader("origin");
-            if (StringUtil.isEmpty(host)) {
-                host = httpReq.getHeader("host");
-                String prefix = httpReq.getProtocol().trim().toLowerCase().contains("https") ? "https://" : "http://";
-                if (StringUtil.isEmpty(host)) {
-                    host = prefix + httpReq.getServerName() + ":" + httpReq.getServerPort();
-                } else {
-                    host = prefix + host;
-                }
-            }
-
-            String url = host + path;
-            String query = StringUtil.getTrimedString(httpReq.getQueryString());
+            String query = StringUtil.getTrimedString(httpServletRequest.getQueryString());
             if (StringUtil.isNotEmpty(query)) {
                 try {
                     query = "?" + URLEncoder.encode(query, StandardCharsets.UTF_8);
@@ -412,7 +419,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 }
             }
 
-            newUrl = "http://apijson.cn/api?send=false&redirect=false&type=JSON&unquote=true&url="
+            newUrl = "http://apijson.cn/api?send=false&redirect=false&type=JSON&decode=true&url="
                     + url + query + "&json=" + request;
 
             //  httpServletResponse.setHeader("Referer", newUrl);
@@ -2724,6 +2731,50 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     // 为 APIAuto 提供的代理接口(解决跨域问题) 和 导入第三方文档的测试接口 https://github.com/TommyLemon/APIAuto   https://github.com/TommyLemon/APIAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
+    // 为 APIAuto, UnitAuto, SQLAuto, UIGO 提供网页入口 <<<<<<<<<<<<<<<<<<<<<<<<<<<
+    @GetMapping("api")
+    public String api() {
+        try {
+            httpServletResponse.sendRedirect("/api/index.html");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "forward:/api/index.html"; // 两者都无效 "redirect:/api/index.html";
+    }
+
+    @GetMapping("unit")
+    public String unit() {
+        try {
+            httpServletResponse.sendRedirect("/unit/index.html");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "forward:/unit/index.html"; // 两者都无效 "redirect:/unit/index.html";
+    }
+
+    @GetMapping("sql")
+    public String sql() {
+        try {
+            httpServletResponse.sendRedirect("/sql/index.html");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "forward:/ui/index.html"; // 加载不了完整网页 return new ModelAndView("forward:/sql/index.html");
+    }
+
+    @GetMapping("ui")
+    public String ui() {
+        try {
+            httpServletResponse.sendRedirect("/ui/index.html");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "forward:/ui/index.html"; // 两者都无效 "redirect:/ui/index.html";
+    }
+
+    // 为 APIAuto, UnitAuto, SQLAuto, UIGO 提供网页入口 >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
 
     // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
@@ -2738,7 +2789,6 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     }
 
     // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 
     // 为 APIAuto, UnitAuto, SQLAuto 提供的后台 Headless 无 UI 测试转发接口  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
