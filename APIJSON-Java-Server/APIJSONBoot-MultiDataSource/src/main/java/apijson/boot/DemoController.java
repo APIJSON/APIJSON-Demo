@@ -54,6 +54,8 @@ import org.springframework.web.client.RestTemplate;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -370,12 +372,84 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @GetMapping("get/{request}")
     public String openGet(@PathVariable("request") String request, HttpSession session) {
+        if (! Log.DEBUG) { // 一般情况这样简单使用
+            try {
+                request = URLDecoder.decode(request, StandardCharsets.UTF_8);
+            } catch (Exception e) {
+                // Parser会报错
+            }
+
+            return get(request, session);
+        }
+
+        // 以下代码是为了方便调试，引导手动/自动跳转 http://apijson.cn/api 来测试接口
+        String newUrl = null;
         try {
-            request = URLDecoder.decode(request, StringUtil.UTF_8);
+            HttpServletRequest httpReq = httpServletRequest;
+
+            String path = httpReq.getServletPath();
+            int index = path.lastIndexOf("/");
+            path = index < 0 ? path : path.substring(0, index);
+            String host = httpReq.getHeader("origin");
+            if (StringUtil.isEmpty(host)) {
+                host = httpReq.getHeader("host");
+                String prefix = httpReq.getProtocol().trim().toLowerCase().contains("https") ? "https://" : "http://";
+                if (StringUtil.isEmpty(host)) {
+                    host = prefix + httpReq.getServerName() + ":" + httpReq.getServerPort();
+                } else {
+                    host = prefix + host;
+                }
+            }
+
+            String url = host + path;
+            String query = StringUtil.getTrimedString(httpReq.getQueryString());
+            if (StringUtil.isNotEmpty(query)) {
+                try {
+                    query = "?" + URLEncoder.encode(query, StandardCharsets.UTF_8);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                    query = "&" + query;
+                }
+            }
+
+            newUrl = "http://apijson.cn/api?send=false&redirect=false&type=JSON&unquote=true&url="
+                    + url + query + "&json=" + request;
+
+            //  httpServletResponse.setHeader("Referer", newUrl);
+            //  httpServletResponse.setHeader("Redirect-Ref", newUrl);
+            //  httpServletResponse.sendRedirect(newUrl);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
+        try {
+            request = URLDecoder.decode(request, StandardCharsets.UTF_8);
         } catch (Exception e) {
             // Parser会报错
         }
-        return get(request, session);
+
+        JSONObject rsp = newParser(session, GET).parseResponse(request);
+        rsp.put("@link", newUrl);
+        String str = JSON.format(rsp); // rsp.toJSONString();
+        if (StringUtil.isEmpty(newUrl) || Math.random() < 0.5) {
+            return str;
+        }
+
+        String html = "<!DOCTYPE html>\n" +
+                "<html>\n" +
+                "<head>\n" +
+                "  <title>APIAuto-机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释</title>\n" +
+                "  <meta charset=\"utf-8\" />\n" +
+                "</head>\n" +
+                "\n" +
+                "<body>\n" +
+                "  <span style=\"white-space: pre\">" + str + "</span>\n" +
+                "  <script language=\"javascript\">setTimeout(function() {\n" +
+                "    window.open('" + newUrl.replaceAll("'", "\\\\'") + "') \n" +
+                "  }, 5000)</script>\n" +
+                "</body>";
+
+        return html;
     }
 
     /**计数
