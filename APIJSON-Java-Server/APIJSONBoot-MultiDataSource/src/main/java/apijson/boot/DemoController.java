@@ -126,26 +126,34 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 public class DemoController extends APIJSONRouterController<Long> {  // APIJSONController<Long> {
     private static final String TAG = "DemoController";
 
-    // 可以更方便地通过日志排查错误
-    @Override
-    public String getRequestURL() {
+    public String getRequestBaseURL() {
         HttpServletRequest httpReq = httpServletRequest;
-
-        String path = httpReq.getServletPath();
-        int index = path.lastIndexOf("/");
-        path = index < 0 ? path : path.substring(0, index);
         String host = httpReq.getHeader("origin");
+
         if (StringUtil.isEmpty(host)) {
             host = httpReq.getHeader("host");
             String prefix = httpReq.getProtocol().trim().toLowerCase().contains("https") ? "https://" : "http://";
             if (StringUtil.isEmpty(host)) {
-                host = prefix + httpReq.getServerName() + ":" + httpReq.getServerPort();
-            } else {
-                host = prefix + host;
+                return prefix + httpReq.getServerName() + ":" + httpReq.getServerPort();
             }
+
+            return prefix + host;
         }
 
-        return host + path;
+        return host;
+    }
+
+    public String getRequestPath() {
+        String path = httpServletRequest.getServletPath();
+        int index = path.lastIndexOf("/");
+        path = index < 0 ? path : path.substring(0, index);
+        return path;
+    }
+
+    // 可以更方便地通过日志排查错误
+    @Override
+    public String getRequestURL() {
+        return getRequestBaseURL() + getRequestPath();
     }
 
 //    @Override
@@ -394,13 +402,13 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      */
     @GetMapping("get/{request}")
     public String openGet(@PathVariable("request") String request, HttpSession session) {
-        if (! Log.DEBUG) { // 一般情况这样简单使用
-            try {
-                request = URLDecoder.decode(request, StandardCharsets.UTF_8);
-            } catch (Exception e) {
-                // Parser会报错
-            }
+        try {
+            request = URLDecoder.decode(request, StandardCharsets.UTF_8);
+        } catch (Exception e) {
+            // Parser 会报错
+        }
 
+        if (! Log.DEBUG) { // 一般情况这样简单使用
             return get(request, session);
         }
 
@@ -419,20 +427,32 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 }
             }
 
-            newUrl = "http://apijson.cn/api?send=false&redirect=false&type=JSON&decode=true&url="
-                    + url + query + "&json=" + request;
+            if (StringUtil.isNotEmpty(url)) {
+                try {
+                    url = URLEncoder.encode(url, StandardCharsets.UTF_8);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String req = request;
+            if (StringUtil.isNotEmpty(req)) {
+                try {
+                    req = URLEncoder.encode(req, StandardCharsets.UTF_8);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+            }
+
+            String baseUrl = getRequestBaseURL();
+            newUrl = baseUrl + "/api/index.html?send=false&redirect=false&type=JSON&decode=true&url="
+                    + url + query + "&json=" + req;
 
             //  httpServletResponse.setHeader("Referer", newUrl);
             //  httpServletResponse.setHeader("Redirect-Ref", newUrl);
             //  httpServletResponse.sendRedirect(newUrl);
         } catch (Throwable e) {
             e.printStackTrace();
-        }
-
-        try {
-            request = URLDecoder.decode(request, StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            // Parser会报错
         }
 
         JSONObject rsp = newParser(session, GET).parseResponse(request);
