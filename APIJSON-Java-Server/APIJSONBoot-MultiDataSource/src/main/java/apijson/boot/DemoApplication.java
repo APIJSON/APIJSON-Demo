@@ -102,7 +102,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
     // SpringBoot 2.x 自定义端口方式
     @Override
     public void customize(ConfigurableServletWebServerFactory server) {
-        server.setPort(9090);
+        server.setPort(8080); // 9090);
     }
 
     // 支持 APIAuto 中 JavaScript 代码跨域请求
