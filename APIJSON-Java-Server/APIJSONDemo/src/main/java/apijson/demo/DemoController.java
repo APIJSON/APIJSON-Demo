@@ -17,7 +17,7 @@ package apijson.demo;
 import java.net.URLDecoder;
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -61,7 +61,7 @@ public class DemoController extends APIJSONController<Long> {
 	 */
 	@PostMapping(value = "{method}")  // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method} 或 Controller 注解 @RequestMapping("crud")
 	@Override
-	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
+	public String crud(@PathVariable("method") String method, @RequestBody String request, HttpSession session) {
 		return super.crud(method, request, session);
 	}
 
@@ -87,7 +87,7 @@ public class DemoController extends APIJSONController<Long> {
 	 */
 	@PostMapping("{method}/{tag}")  // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method}/{tag} 或 Controller 注解 @RequestMapping("crud")
 	@Override
-	public String crudByTag(@PathVariable String method, @PathVariable String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
+	public String crudByTag(@PathVariable("method") String method, @PathVariable("tag") String tag, @RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {
 		return super.crudByTag(method, tag, params, request, session);
 	}
 
@@ -99,7 +99,7 @@ public class DemoController extends APIJSONController<Long> {
 	 * @see {@link RequestMethod#GET}
 	 */
 	@GetMapping("get/{request}")
-	public String openGet(@PathVariable String request, HttpSession session) {
+	public String openGet(@PathVariable("request") String request, HttpSession session) {
 		try {
 			request = URLDecoder.decode(request, StringUtil.UTF_8);
 		} catch (Exception e) {
