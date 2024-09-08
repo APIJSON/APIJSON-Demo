@@ -6478,6 +6478,8 @@ https://github.com/Tencent/APIJSON/issues
         const wait = wait_ != null ? wait_ : (this.wait || 0)
         var retry = retry_ != null ? retry_ : (this.retry || 0)
 
+        var evalPostScript = function () {}
+
         const onHttpResponse = function (res) {
           App.currentHttpResponse = res
           clearTimeout(errHandler)
@@ -6601,8 +6603,6 @@ https://github.com/Tencent/APIJSON/issues
 
           return true
         }
-
-        var evalPostScript = function () {}
 
         var sendRequest = function (isAdminOperation, method, type, url, req, header, callback) {
           var hs = ""
@@ -10264,8 +10264,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             const header = hdr
 
             const caseScript = {
-              pre: (item['Script:pre'] || {}).script,
-              post: (item['Script:post'] || {}).script
+              pre: (item['Script:pre'] || {}),
+              post: (item['Script:post'] || {})
             }
 
             const method = document.method
@@ -10318,7 +10318,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   }, caseScript)
 
                 }, caseScript)
-            }, caseScript.pre, {
+            }, (caseScript.pre || {}).script, {
                 list: list,
                 allCount: allCount,
                 index: index,
