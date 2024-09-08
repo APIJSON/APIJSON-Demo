@@ -1395,7 +1395,7 @@ https://github.com/Tencent/APIJSON/issues
         var clazz = StringUtil.trim(index < 0 ? url : url.substring(index + 1))
         var lang = this.language
         if (StringUtil.isBigName(clazz) != true) {
-          if (lang == CodeUtil.LANGUAGE_GO) {
+          if (lang == CodeUtil.LANGUAGE_GO || lang == CodeUtil.LANGUAGE_C_PLUS_PLUS) {
             return ''
           }
 
@@ -1418,7 +1418,7 @@ https://github.com/Tencent/APIJSON/issues
         var cls = url.substring(index + 1)
         var pkg = index < 0 ? '' : url.substring(0, index)
 
-        if (this.language == CodeUtil.LANGUAGE_GO && StringUtil.isBigName(cls) != true) {
+        if ((this.language == CodeUtil.LANGUAGE_GO || this.language == CodeUtil.LANGUAGE_C_PLUS_PLUS) && StringUtil.isBigName(cls) != true) {
           pkg = StringUtil.isEmpty(pkg) ? cls : pkg + '.' + cls
         }
         return StringUtil.trim(pkg)
