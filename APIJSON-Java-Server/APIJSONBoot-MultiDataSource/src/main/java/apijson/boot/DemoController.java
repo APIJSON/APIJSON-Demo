@@ -55,7 +55,6 @@ import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -403,7 +402,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     @GetMapping("get/{request}")
     public String openGet(@PathVariable("request") String request, HttpSession session) {
         try {
-            request = URLDecoder.decode(request, StandardCharsets.UTF_8);
+            request = URLDecoder.decode(request, StringUtil.UTF_8);
         } catch (Exception e) {
             // Parser 会报错
         }
@@ -420,7 +419,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             String query = StringUtil.getTrimedString(httpServletRequest.getQueryString());
             if (StringUtil.isNotEmpty(query)) {
                 try {
-                    query = "?" + URLEncoder.encode(query, StandardCharsets.UTF_8);
+                    query = "?" + URLEncoder.encode(query, StringUtil.UTF_8);
                 } catch (Throwable e) {
                     e.printStackTrace();
                     query = "&" + query;
@@ -429,7 +428,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
             if (StringUtil.isNotEmpty(url)) {
                 try {
-                    url = URLEncoder.encode(url, StandardCharsets.UTF_8);
+                    url = URLEncoder.encode(url, StringUtil.UTF_8);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
@@ -438,7 +437,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             String req = request;
             if (StringUtil.isNotEmpty(req)) {
                 try {
-                    req = URLEncoder.encode(req, StandardCharsets.UTF_8);
+                    req = URLEncoder.encode(req, StringUtil.UTF_8);
                 } catch (Throwable e) {
                     e.printStackTrace();
                 }
