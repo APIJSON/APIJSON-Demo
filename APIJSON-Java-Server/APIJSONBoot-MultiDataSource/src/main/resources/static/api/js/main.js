@@ -6822,6 +6822,22 @@ https://github.com/Tencent/APIJSON/issues
             req = newReq
           }
 
+          axios.interceptors.request.use(function (config) {
+            config.metadata = { startTime: new Date().getTime()}
+            return config;
+          }, function (error) {
+            return Promise.reject(error);
+          });
+          axios.interceptors.response.use(function (response) {
+            response.config.metadata.endTime = new Date().getTime()
+            response.duration = response.config.metadata.endTime - response.config.metadata.startTime
+            return response;
+          }, function (error) {
+            error.config.metadata.endTime = new Date().getTime();
+            error.duration = error.config.metadata.endTime - error.config.metadata.startTime;
+            return Promise.reject(error);
+          });
+
           // axios.defaults.withcredentials = true
           axios({
             method: method != null ? method : (HTTP_METHODS.indexOf(type) >= 0 ? type.toLowerCase() : (type == REQUEST_TYPE_PARAM ? 'get' : 'post')),
@@ -7037,13 +7053,21 @@ https://github.com/Tencent/APIJSON/issues
         retryReq()
       },
 
-
+      lastReqTime: 0,
       /**请求回调
        */
       onResponse: function (url, res, err) {
         if (res == null) {
           res = {}
+        } else {
+          var time = res.config == null || res.config.metadata == null ? 0 : (res.config.metadata.startTime || 0)
+          if (time < this.lastReqTime) {
+            return
+          }
+
+          this.lastReqTime = time
         }
+
         if (DEBUG) {
           log('onResponse url = ' + url + '\nerr = ' + err + '\nreq = \n'
             + (res.request == null || res.request.data == null ? 'null' : JSON.stringify(res.request.data))
@@ -8054,6 +8078,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         })
       },
 
+      lastDocReqTime: 0,
       onDocumentListResponse: function(url, res, err, callback) {
         if (err != null || res == null || res.data == null) {
           log('getDoc  err != null || res == null || res.data == null >> return;');
@@ -8062,6 +8087,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
           return;
         }
+
+        var time = res.config == null || res.config.metadata == null ? 0 : (res.config.metadata.startTime || 0)
+        if (time < this.lastDocReqTime) {
+          return
+        }
+
+        this.lastDocReqTime = time;
 
 //        log('getDoc  docRq.responseText = \n' + docRq.responseText);
         docObj = res.data || {};  //避免后面又调用 onChange ，onChange 又调用 getDoc 导致死循环
