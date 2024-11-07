@@ -239,7 +239,7 @@
                           var pathKeys = StringUtil.split(pathUri, '/');
                           var target = App.isMLEnabled ? JSONResponse.getStandardByPath(standardObj, pathKeys) : JSONResponse.getValByPath(standardObj, pathKeys);
                           var real = JSONResponse.getValByPath(responseObj, pathKeys);
-                          var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, path) : JSONResponse.compareWithBefore(target, real, path);
+                          var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, pathUri) : JSONResponse.compareWithBefore(target, real, pathUri);
                           cmp.path = pathUri;
                           var cmpShowObj = JSONResponse.getCompareShowObj(cmp);
                           thiz[k] = [cmpShowObj.compareType, cmpShowObj.compareColor, cmpShowObj.compareMessage];
@@ -299,7 +299,7 @@
                     var target = App.isMLEnabled ? JSONResponse.getStandardByPath(standardObj, pathKeys) : JSONResponse.getValByPath(standardObj, pathKeys);
                     var real = JSONResponse.getValByPath(responseObj, pathKeys);
             //              c = JSONResponse.compareWithBefore(target, real, path);
-                    var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, path) : JSONResponse.compareWithBefore(target, real, path);
+                    var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, pathUri) : JSONResponse.compareWithBefore(target, real, pathUri);
                     cmp.path = pathUri;
                     var cmpShowObj = JSONResponse.getCompareShowObj(cmp);
                     thiz[k] = [cmpShowObj.compareType, cmpShowObj.compareColor, cmpShowObj.compareMessage];
