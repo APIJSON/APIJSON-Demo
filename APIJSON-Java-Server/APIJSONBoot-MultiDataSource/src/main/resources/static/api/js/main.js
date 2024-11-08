@@ -194,7 +194,6 @@
 
         try {
           if (val instanceof Array) {
-            if (val[0] instanceof Object && (val[0] instanceof Array == false)) {  // && JSONObject.isArrayKey(key, null, isRestful)) {
               // alert('onRenderJSONItem  key = ' + key + '; val = ' + JSON.stringify(val))
 
               var ckey = key == null ? null : key.substring(0, key.lastIndexOf('[]'));
@@ -210,7 +209,7 @@
 
                 var vi = val[i]
 
-                if (JSONObject.isTableKey(firstKey, val, isRestful)) {
+                if (JSONResponse.isObject(vi) && JSONObject.isTableKey(firstKey || '', vi, isRestful)) {
                   // var newVal = JSON.parse(JSON.stringify(val[i]))
                   if (vi == null) {
                     continue
@@ -240,7 +239,7 @@
                           var target = App.isMLEnabled ? JSONResponse.getStandardByPath(standardObj, pathKeys) : JSONResponse.getValByPath(standardObj, pathKeys);
                           var real = JSONResponse.getValByPath(responseObj, pathKeys);
                           var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, pathUri) : JSONResponse.compareWithBefore(target, real, pathUri);
-                          cmp.path = pathUri;
+//                          cmp.path = pathUri;
                           var cmpShowObj = JSONResponse.getCompareShowObj(cmp);
                           thiz[k] = [cmpShowObj.compareType, cmpShowObj.compareColor, cmpShowObj.compareMessage];
                           var countKey = '_$_' + cmpShowObj.compareColor + 'Count_$_';
@@ -267,7 +266,6 @@
                 // this.$children[i]._$_this_$_ = key
                 // alert('this.$children[i]._$_this_$_ = ' + this.$children[i]._$_this_$_)
               }
-            }
           }
           else if (val instanceof Object) {
             var aliaIndex = key == null ? -1 : key.indexOf(':');
@@ -276,7 +274,7 @@
             // var newVal = JSON.parse(JSON.stringify(val))
 
             var curPath = (StringUtil.isEmpty(path, false) ? '' : path + '/') + key;
-            var curTable = JSONObject.isTableKey(objName, val, isRestful) ? objName : null;
+            var curTable = JSONObject.isTableKey(objName || '', val, isRestful) ? objName : null;
             var thiz = {
               _$_path_$_: curPath,
               _$_table_$_: curTable
@@ -300,7 +298,7 @@
                     var real = JSONResponse.getValByPath(responseObj, pathKeys);
             //              c = JSONResponse.compareWithBefore(target, real, path);
                     var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, pathUri) : JSONResponse.compareWithBefore(target, real, pathUri);
-                    cmp.path = pathUri;
+//                    cmp.path = pathUri;
                     var cmpShowObj = JSONResponse.getCompareShowObj(cmp);
                     thiz[k] = [cmpShowObj.compareType, cmpShowObj.compareColor, cmpShowObj.compareMessage];
                     var countKey = '_$_' + cmpShowObj.compareColor + 'Count_$_';
@@ -395,9 +393,9 @@
 
             // alert('valString = ' + valString)
 
-            var i = valString.indexOf('"_$_this_$_":  ')
+            var i = valString.indexOf('"_$_this_$_":')
             if (i >= 0) {
-              valString = valString.substring(i + '"_$_this_$_":  '.length)
+              valString = valString.substring(i + '"_$_this_$_":'.length)
               i = valString.indexOf('}"')
               var i2 = valString.indexOf('"{')
               if (i >= 0 && i2 >= 0 && i2 < i) {
@@ -411,10 +409,10 @@
               var aliaIndex = key == null ? -1 : key.indexOf(':');
               var objName = aliaIndex < 0 ? key : key.substring(0, aliaIndex);
 
-              if (JSONObject.isTableKey(objName, val, isRestful)) {
+              if (JSONObject.isTableKey(objName || '', val, isRestful)) {
                 table = objName
               }
-              else if (JSONObject.isTableKey(table, val, isRestful)) {
+              else if (JSONObject.isTableKey(table || '', val, isRestful)) {
                 column = key
               }
 
@@ -427,9 +425,9 @@
 
             // alert('valString = ' + valString)
 
-            var i = valString.indexOf('"_$_this_$_":  ')
+            var i = valString.indexOf('"_$_this_$_":')
             if (i >= 0) {
-              valString = valString.substring(i + '"_$_this_$_":  '.length)
+              valString = valString.substring(i + '"_$_this_$_":'.length)
               i = valString.indexOf('}"')
               var i2 = valString.indexOf('"{')
               if (i >= 0 && i2 >= 0 && i2 < i) {
@@ -451,7 +449,7 @@
               var firstKey = firstIndex < 0 ? objName : objName.substring(0, firstIndex);
 
               // alert('key = ' + key + '; firstKey = ' + firstKey + '; firstIndex = ' + firstIndex)
-              if (JSONObject.isTableKey(firstKey, null, isRestful)) {
+              if (JSONObject.isTableKey(firstKey || '', null, isRestful)) {
                 table = firstKey
 
                 var s0 = '';
@@ -482,7 +480,7 @@
                       var real = JSONResponse.getValByPath(responseObj, pathKeys);
         //              c = JSONResponse.compareWithBefore(target, real, path);
                       var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, path) : JSONResponse.compareWithBefore(target, real, path);
-                      cmp.path = pathUri;
+//                      cmp.path = pathUri;
                       return JSONResponse.getCompareShowObj(cmp);
                     } catch (e) {
                       s += '\n' + e.message
@@ -528,7 +526,7 @@
               var real = JSONResponse.getValByPath(responseObj, pathKeys);
 //              c = JSONResponse.compareWithBefore(target, real, path);
               var cmp = App.isMLEnabled ? JSONResponse.compareWithStandard(target, real, path) : JSONResponse.compareWithBefore(target, real, path);
-              cmp.path = pathUri;
+//              cmp.path = pathUri;
               return JSONResponse.getCompareShowObj(cmp);
             } catch (e) {
               s += '\n' + e.message
@@ -810,7 +808,7 @@ https://github.com/Tencent/APIJSON/issues
   var CTX_PUT = 'CTX_PUT' // CTX_PUT('key', val)
 
   function get4Path(obj, path, defaultVal, msg) {
-    var val = JSONResponse.getValByPath(obj, StringUtil.split(path, '/'))
+    var val = path == null || path == '' ? obj : JSONResponse.getValByPath(obj, StringUtil.split(path, '/'))
     if (val == null && defaultVal == undefined) {
       throw new Error('找不到 ' + path + ' 对应在 obj 中的非 null 值！' + StringUtil.get(msg))
     }
@@ -1520,6 +1518,9 @@ https://github.com/Tencent/APIJSON/issues
               log(ex)
             }
 
+            var method = this.getMethod();  // m 已经 toUpperCase 了
+            var isRestful = ! JSONObject.isAPIJSONPath(method);
+
             var path = null;
             var key = null;
             var thiz = {
@@ -1527,9 +1528,9 @@ https://github.com/Tencent/APIJSON/issues
                _$_table_$_: null
             };
 
-            if (isSingle || ret instanceof Array || (ret instanceof Object == false)) {
+            if (isSingle || ! JSONResponse.isObject(vi)) {
               var val = ret;
-              if (isSingle != true && val instanceof Array && val[0] instanceof Object && (val[0] instanceof Array == false)) {
+              if (isSingle != true && val instanceof Array) {
                   // alert('onRenderJSONItem  key = ' + key + '; val = ' + JSON.stringify(val))
                   var ckey = key == null ? null : key.substring(0, key.lastIndexOf('[]'));
 
@@ -1542,11 +1543,7 @@ https://github.com/Tencent/APIJSON/issues
                   for (var i = 0; i < val.length; i++) {
                     var vi = val[i]
 
-                    if (vi instanceof Object && vi instanceof Array == false && JSONObject.isTableKey(firstKey, val, isRestful)) {
-                      // var newVal = JSON.parse(JSON.stringify(val[i]))
-                      if (vi == null) {
-                        continue
-                      }
+                    if (JSONResponse.isObject(vi) && JSONObject.isTableKey(firstKey || '', vi, isRestful)) {
 
                       var curPath = '' + i;
                       var curTable = firstKey;
@@ -1572,7 +1569,7 @@ https://github.com/Tencent/APIJSON/issues
                               var target = this.isMLEnabled ? JSONResponse.getStandardByPath(standardObj, pathKeys) : JSONResponse.getValByPath(standardObj, pathKeys);
                               var real = JSONResponse.getValByPath(responseObj, pathKeys);
                               var cmp = this.isMLEnabled ? JSONResponse.compareWithStandard(target, real, pathUri) : JSONResponse.compareWithBefore(target, real, pathUri);
-                              cmp.path = pathUri;
+//                              cmp.path = pathUri;
                               var cmpShowObj = JSONResponse.getCompareShowObj(cmp);
                               thiz[k] = [cmpShowObj.compareType, cmpShowObj.compareColor, cmpShowObj.compareMessage];
                               var countKey = '_$_' + cmpShowObj.compareColor + 'Count_$_';
@@ -1615,7 +1612,7 @@ https://github.com/Tencent/APIJSON/issues
                         var real = JSONResponse.getValByPath(responseObj, pathKeys);
                 //              c = JSONResponse.compareWithBefore(target, real, path);
                         var cmp = this.isMLEnabled ? JSONResponse.compareWithStandard(target, real, pathUri) : JSONResponse.compareWithBefore(target, real, pathUri);
-                        cmp.path = pathUri;
+//                        cmp.path = pathUri;
                         var cmpShowObj = JSONResponse.getCompareShowObj(cmp);
                         thiz[k] = [cmpShowObj.compareType, cmpShowObj.compareColor, cmpShowObj.compareMessage];
                         var countKey = '_$_' + cmpShowObj.compareColor + 'Count_$_';
@@ -2432,10 +2429,10 @@ https://github.com/Tencent/APIJSON/issues
         this.adminRequest(url, req, {}, function (url, res, err) {
           App.onResponse(url, res, err)
 
-          var rpObj = res.data || {}
+          var data = res.data || {}
 
           if (isDeleteRandom) {
-            if (rpObj.Random != null && JSONResponse.isSuccess(rpObj.Random)) {
+            if (data.Random != null && JSONResponse.isSuccess(data.Random)) {
               if (((item.Random || {}).toId || 0) <= 0) {
                 App.randoms.splice(item.index, 1)
               }
@@ -2450,7 +2447,7 @@ https://github.com/Tencent/APIJSON/issues
             App.selectChainGroup(App.currentChainGroupIndex, null)
           }
           else {
-            if (rpObj.Document != null && JSONResponse.isSuccess(rpObj.Document)) {
+            if (data.Document != null && JSONResponse.isSuccess(data.Document)) {
               App.remotes.splice(item.index, 1)
               App.showTestCase(true, App.isLocalShow)
             }
@@ -2596,9 +2593,9 @@ https://github.com/Tencent/APIJSON/issues
                 '@order': 'date-'
               }
             }, {}, function (url, res, err) {
-              var rpObj = res.data
-              if (JSONResponse.isSuccess(rpObj) != true) {
-                App.log(err != null ? err : (rpObj == null ? '' : rpObj.msg))
+              var data = res.data
+              if (JSONResponse.isSuccess(data) != true) {
+                App.log(err != null ? err : (data == null ? '' : data.msg))
                 return
               }
 
@@ -2616,14 +2613,14 @@ https://github.com/Tencent/APIJSON/issues
 
               var bs = scripts
 
-              var pre = rpObj['Script:pre']
+              var pre = data['Script:pre']
               if (pre != null && pre.script != null) {
-                bs.pre = originItem['Script:pre'] = rpObj['Script:pre']
+                bs.pre = originItem['Script:pre'] = data['Script:pre']
               }
 
-              var post = rpObj['Script:post']
+              var post = data['Script:post']
               if (post != null && post.script != null) {
-                bs.post = originItem['Script:post'] = rpObj['Script:post']
+                bs.post = originItem['Script:post'] = data['Script:post']
               }
 
               originItem.scripts = scripts
@@ -2724,14 +2721,14 @@ https://github.com/Tencent/APIJSON/issues
         }
 
         this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/get', req, {}, function (url, res, err) {
-          var rpObj = res.data
-          if (JSONResponse.isSuccess(rpObj) != true) {
-            App.log(err != null ? err : (rpObj == null ? '' : rpObj.msg))
+          var data = res.data
+          if (JSONResponse.isSuccess(data) != true) {
+            App.log(err != null ? err : (data == null ? '' : data.msg))
             return
           }
 
           var projectHosts = App.getCache('', 'projectHosts', [])
-          var list = rpObj['TestRecord[]'] || []
+          var list = data['TestRecord[]'] || []
 //          var phs = []
 //          for (var i = 0; i < list.length; i ++) {
 //            var item = list[i] || {}
@@ -2781,8 +2778,8 @@ https://github.com/Tencent/APIJSON/issues
 
         this.adminRequest('/put', req, {}, function (url, res, err) {
           App.onResponse(url, res, err)
-          var rpObj = res.data
-          if (JSONResponse.isSuccess(rpObj)) {
+          var data = res.data
+          if (JSONResponse.isSuccess(data)) {
              App.listProjectHost()
           }
         })
@@ -2978,13 +2975,13 @@ https://github.com/Tencent/APIJSON/issues
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
               App.onResponse(url, res, err)
 
-              var rpObj = res.data || {}
+              var data = res.data || {}
               var isPut = url.indexOf('/put') >= 0
-              var ok = JSONResponse.isSuccess(rpObj)
-              alert((isPut ? '修改' : '上传') + (ok ? '成功' : '失败！\n' + StringUtil.get(err != null ? err.message : rpObj.msg)))
+              var ok = JSONResponse.isSuccess(data)
+              alert((isPut ? '修改' : '上传') + (ok ? '成功' : '失败！\n' + StringUtil.get(err != null ? err.message : data.msg)))
 
               if (ok && ! isPut) {
-                script.id = (rpObj.Script || {}).id
+                script.id = (data.Script || {}).id
               }
             })
 
@@ -3066,7 +3063,7 @@ https://github.com/Tencent/APIJSON/issues
           const isML = this.isMLEnabled;
           const stddObj = isML ? JSONResponse.updateStandard({}, currentResponse) : {};
           stddObj.status = (this.currentHttpResponse || {}).status || 200;
-          stddObj.code = code;
+          stddObj.code = code || 0;
           stddObj.throw = thrw;
           currentResponse.code = code;
           currentResponse.throw = thrw;
@@ -3224,10 +3221,10 @@ https://github.com/Tencent/APIJSON/issues
             App.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
               App.onResponse(url, res, err)
 
-              var rpObj = res.data || {}
+              var data = res.data || {}
 
               if (isExportRandom && btnIndex <= 0) {
-                if (JSONResponse.isSuccess(rpObj)) {
+                if (JSONResponse.isSuccess(data)) {
                   App.randoms = []
                   App.showRandomList(true, (App.currentRemoteItem || {}).Document)
                 }
@@ -3235,10 +3232,10 @@ https://github.com/Tencent/APIJSON/issues
               else {
                 var isPut = url.indexOf('/put') >= 0
 
-                if (JSONResponse.isSuccess(rpObj) != true) {
+                if (JSONResponse.isSuccess(data) != true) {
                   if (isPut) {  // 修改失败就转为新增
                     App.currentRemoteItem = null;
-                    alert('修改失败，请重试(自动转为新增)！' + StringUtil.trim(rpObj.msg))
+                    alert('修改失败，请重试(自动转为新增)！' + StringUtil.trim(data.msg))
                   }
                 }
                 else {
@@ -3282,7 +3279,7 @@ https://github.com/Tencent/APIJSON/issues
 
                   const isGenerate = StringUtil.isEmpty(config, true);
                   var req = isGenerate != true ? null : (isReleaseRESTful ? mapReq : App.getRequest(vInput.value, {}))
-                  App.newAndUploadRandomConfig(baseUrl, req, (rpObj.Document || {}).id, config, App.requestCount, function (url, res, err) {
+                  App.newAndUploadRandomConfig(baseUrl, req, (data.Document || {}).id, config, App.requestCount, function (url, res, err) {
 
 
 
@@ -4259,7 +4256,7 @@ https://github.com/Tencent/APIJSON/issues
       },
 
       //上传第三方平台的 API 至 APIAuto
-      uploadThirdPartyApi: function(method, type, name, url, parameters, json, header, description, creator, rspObj) {
+      uploadThirdPartyApi: function(method, type, name, url, parameters, json, header, description, creator, data) {
         if (typeof json == 'string') {
           json = parseJSON(json)
         }
@@ -4307,7 +4304,7 @@ https://github.com/Tencent/APIJSON/issues
 
         var commentObj = JSONResponse.updateStandard({}, reqObj);
         CodeUtil.parseComment(req, null, url, this.database, this.language, true, commentObj, true)
-        var standard = this.isMLEnabled ? JSONResponse.updateStandard({}, rspObj) : null
+        var standard = this.isMLEnabled ? JSONResponse.updateStandard({}, data) : null
 
         name = StringUtil.get(name)
         if (name.length > 100) {
@@ -4348,14 +4345,14 @@ https://github.com/Tencent/APIJSON/issues
                 'randomId': 0,
                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
                 'testAccountId': currentAccountId,
-                'response': rspObj == null ? '' : JSON.stringify(rspObj, null, '    '),
+                'response': data == null ? '' : JSON.stringify(data, null, '    '),
                 'standard': standard == null ? '' : JSON.stringify(standard, null, '    '),
               },
               'tag': isRandom ? 'Random' : 'Document'
             }, {}, function (url, res, err) {
               //太卡 App.onResponse(url, res, err)
-              var rpObj = res.data || {}
-              var tblObj = isRandom ? rpObj.Random : rpObj.Document
+              var data = res.data || {}
+              var tblObj = isRandom ? data.Random : data.Document
               if (tblObj.id != null && tblObj.id > 0) {
                 App.uploadDoneCount ++
                 if (isRandom) {
@@ -4543,7 +4540,7 @@ https://github.com/Tencent/APIJSON/issues
                 App.onResponse(url, res, err)
 
                 var data = res.data || {}
-                var user = JSONResponse.isSuccess(data) ? data.user : null
+                var user = data.user || data.userObj || data.userObject || data.userRsp || data.userResp || data.userBean || data.userData || data.data || data.User || data.Data
                 if (user == null) {
                   if (callback != null) {
                     callback(false, index, err)
@@ -4554,11 +4551,12 @@ https://github.com/Tencent/APIJSON/issues
                   baseUrl = App.getBaseUrl(vUrl.value)
 
                   item.baseUrl = item.baseUrl || baseUrl
-                  item.id = user.id
-                  item.name = user.name
+                  item.id = user.id || user.userId || user.user_id || user.userid  // TODO 工具函数直接遍历 key 判断可能的名称
+                  item.name = user.name || user.nickname || user.nickName || user.user_name || user.username || user.userName
+//                  item.phone = user.phone = user.mobile || user.mobileNo || user.mobileNum || user.mobileNumber || user.phone || user.phoneNo || user.phoneNum || user.phoneNumber || user.mobile_no || user.mobile_num || user.mobile_number || user.phone_no || user.phone_num || user.phone_number
                   item.remember = data.remember
                   item.isLoggedIn = true
-                  item.token = headers.token || headers.Token || data.token || data.Token || user.token || user.Token
+                  item.token = headers.token || headers.Token || data.token || data.Token || user.token || user.Token || user.accessToken || user.access_token || data.accessToken || data.access_token
                   item.cookie = res.cookie || headers.cookie || headers.Cookie || headers['set-cookie'] || headers['Set-Cookie']
 
                   App.accounts[App.currentAccountIndex] = item
@@ -4717,6 +4715,7 @@ https://github.com/Tencent/APIJSON/issues
             'count': count || 0,
             'page': page || 0,
             'Chain': {
+              'userId': userId,
               'toGroupId': groupId,
               'groupName$': search,
 //              '@raw': '@column',
@@ -4731,6 +4730,7 @@ https://github.com/Tencent/APIJSON/issues
               'join': '&/Document',
               'Chain': {
                 // TODO 后续再支持嵌套子组合 'toGroupId': groupId,
+                'userId': userId,
                 'groupId@': '[]/Chain/groupId',
                 '@column': "id,groupId,documentId,randomId,rank",
                 '@order': 'rank+,id+',
@@ -5260,12 +5260,12 @@ https://github.com/Tencent/APIJSON/issues
 
         this.onResponse(url, res, err)
 
-        var rpObj = res.data
+        var data = res.data
 
-        if (JSONResponse.isSuccess(rpObj)) {
+        if (JSONResponse.isSuccess(data)) {
           this.isTestCaseShow = true
           this.isLocalShow = false
-          this.testCases = App.remotes = rpObj['[]']
+          this.testCases = App.remotes = data['[]']
           this.getCurrentRandomSummary().summaryType = 'total' // App.onClickSummary('total', true)
           if (this.isChainShow && this.currentChainGroupIndex >= 0) {
             var chain = this.chainGroups[this.currentChainGroupIndex]
@@ -5517,22 +5517,22 @@ https://github.com/Tencent/APIJSON/issues
 
         App.onResponse(url, res, err)
 
-        var rpObj = res.data
+        var data = res.data
 
-        if (JSONResponse.isSuccess(rpObj)) {
+        if (JSONResponse.isSuccess(data)) {
           App.isRandomListShow = ! isSub
           App.isRandomSubListShow = isSub
           if (isSub) {
             if (App.currentRandomItem == null) {
               App.currentRandomItem = {}
             }
-            App.randomSubs = App.currentRandomItem.subs = App.currentRandomItem['[]'] = rpObj['[]']
+            App.randomSubs = App.currentRandomItem.subs = App.currentRandomItem['[]'] = data['[]']
           }
           else {
             if (App.currentRemoteItem == null) {
               App.currentRemoteItem = {}
             }
-            App.randoms = App.currentRemoteItem.randoms = rpObj['[]']
+            App.randoms = App.currentRemoteItem.randoms = data['[]']
           }
           this.getCurrentRandomSummary().summaryType = 'total' // App.onClickSummary('total', true)
 
@@ -5633,9 +5633,9 @@ https://github.com/Tencent/APIJSON/issues
         }
 
         this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, '/get', req, {}, function (url, res, err) {
-          var rpObj = res.data
-          if (JSONResponse.isSuccess(rpObj) != true) {
-            App.log(err != null ? err : (rpObj == null ? '' : rpObj.msg))
+          var data = res.data
+          if (JSONResponse.isSuccess(data) != true) {
+            App.log(err != null ? err : (data == null ? '' : data.msg))
             return
           }
 
@@ -5650,25 +5650,25 @@ https://github.com/Tencent/APIJSON/issues
             ss['0'] = bs = {}
           }
 
-          var pre = rpObj['Script:pre']
+          var pre = data['Script:pre']
           if (pre != null && pre.script != null) {
-            bs.pre = rpObj['Script:pre']
+            bs.pre = data['Script:pre']
           }
-          var post = rpObj['Script:post']
+          var post = data['Script:post']
           if (post != null && post.script != null) {
-            bs.post = rpObj['Script:post']
+            bs.post = data['Script:post']
           }
 
-          // delete rpObj['Script:pre']
-          // delete rpObj['Script:post']
+          // delete data['Script:pre']
+          // delete data['Script:post']
 
           var cs = scripts.account
           if (cs == null) {
             scripts.account = cs = {}
           }
 
-          for (let key in rpObj) {
-            var val = rpObj[key]
+          for (let key in data) {
+            var val = data[key]
             var pre = val == null || key.startsWith('account_') != true ? null : val['Script:pre']
             if (pre == null) {
               continue
@@ -5921,7 +5921,7 @@ https://github.com/Tencent/APIJSON/issues
                 App.request(isAdminOperation, loginMethod, loginType, App.getBaseUrl(App.otherEnv) + loginUrl
                     , loginReq, loginHeader, function(url_, res_, err_) {
                       var data = res_.data
-                      var user = JSONResponse.isSuccess(data) ? data.user : null
+                      var user = data.user || data.userObj || data.userObject || data.userRsp || data.userResp || data.userBean || data.userData || data.data || data.User || data.Data
                       if (user != null) {
                         var headers = res.headers || {}
                         App.otherEnvTokenMap[req.phone + '@' + baseUrl] = headers.token || headers.Token || data.token || data.Token || user.token || user.Token
@@ -5946,20 +5946,21 @@ https://github.com/Tencent/APIJSON/issues
       onLoginResponse: function(isAdmin, req, url, res, err, loginMethod, loginType, loginUrl, loginReq, loginRandom, loginHeader) {
         res = res || {}
         if (isAdmin) {
-          var rpObj = res.data || {}
+          var data = res.data || {}
 
-          if (JSONResponse.isSuccess(rpObj) != true) {
-            alert('登录失败，请检查网络后重试。\n' + rpObj.msg + '\n详细信息可在浏览器控制台查看。')
+          var user = data.user || data.userObj || data.userObject || data.userRsp || data.userResp || data.userBean || data.userData || data.data || data.User || data.Data
+          if (user == null) {
+            alert('登录失败，请检查网络后重试。\n' + data.msg + '\n详细信息可在浏览器控制台查看。')
             App.onResponse(url, res, err)
           }
           else {
-            var user = rpObj.user || {}
-
-            if (user.id > 0) {
-              user.remember = rpObj.remember
-              user.phone = req.phone
+            if (user != null) {
+              var headers = res.headers || {}
+              user.remember = data.remember
+              user.phone = req.mobile || req.mobileNo || req.mobileNum || req.mobileNumber || req.phone || req.phoneNo || req.phoneNum || req.phoneNumber || req.mobile_no || req.mobile_num || req.mobile_number || req.phone_no || req.phone_num || req.phone_number
               user.password = req.password
-              user.cookie = res.cookie || (res.headers || {}).cookie
+              user.token = headers.token || headers.Token || data.token || data.Token || user.token || user.Token || user.accessToken || user.access_token || data.accessToken || data.access_token
+              user.cookie = res.cookie || headers.cookie || headers.Cookie || headers['set-cookie'] || headers['Set-Cookie']
               App.User = user
             }
 
@@ -5989,12 +5990,13 @@ https://github.com/Tencent/APIJSON/issues
           //由login按钮触发，不能通过callback回调来实现以下功能
           var data = res.data || {}
           if (JSONResponse.isSuccess(data)) {
-            var user = data.user || {}
+            var headers = res.headers || {}
+            var user = data.user || data.userObj || data.userObject || data.userRsp || data.userResp || data.userBean || data.userData || data.data || data.User || data.Data
             App.accounts.push({
               isLoggedIn: true,
               baseUrl: App.getBaseUrl(),
               id: user.id,
-              name: user.name,
+              name: user.name || user.nickname || user.nickName || user.user_name || user.username || user.userName,
               phone: req.phone,
               password: req.password,
               remember: data.remember,
@@ -6004,7 +6006,8 @@ https://github.com/Tencent/APIJSON/issues
               loginReq: loginReq,
               loginRandom: loginRandom,
               loginHeader: loginHeader,
-              cookie: res.cookie || (res.headers || {}).cookie
+              cookie: res.cookie || headers.cookie,
+              token: headers.token || headers.Token || data.token || data.Token || user.token || user.Token || user.accessToken || user.access_token || data.accessToken || data.access_token
             })
 
             var lastItem = App.accounts[App.currentAccountIndex]
@@ -6041,12 +6044,12 @@ https://github.com/Tencent/APIJSON/issues
         this.send(isAdminOperation, function (url, res, err) {
           App.onResponse(url, res, err)
 
-          var rpObj = res.data
+          var data = res.data
 
-          if (JSONResponse.isSuccess(rpObj)) {
+          if (JSONResponse.isSuccess(data)) {
             alert('注册成功')
 
-            var privacy = rpObj.Privacy || {}
+            var privacy = data.Privacy || {}
 
             App.account = privacy.phone
             App.loginType = 'login'
@@ -6073,12 +6076,12 @@ https://github.com/Tencent/APIJSON/issues
         this.send(isAdminOperation, function (url, res, err) {
           App.onResponse(url, res, err)
 
-          var rpObj = res.data
+          var data = res.data
 
-          if (JSONResponse.isSuccess(rpObj)) {
+          if (JSONResponse.isSuccess(data)) {
             alert('重置密码成功')
 
-            var privacy = rpObj.Privacy || {}
+            var privacy = data.Privacy || {}
 
             App.account = privacy.phone
             App.loginType = 'login'
@@ -7632,6 +7635,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
               App.options = options
               document.activeElement = vOption // vChainAdd.focusout()
+              currentTarget = vChainAdd
               vOption.focus()
               //              App.showOptions(target, text, before, after);
 
@@ -10192,7 +10196,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 toEval = 'get4Path((ctx || {}).ctx, ' + (value == 'CTX_GET()' ? JSON.stringify(path) : '') + value.substring(start + 1);
               }
               else if (fun == CTX_PUT) {
-                var as = StringUtil.split(value.substring(start + 1, end), ', ')
+                var as = StringUtil.split(value.substring(start + 1, end), ', ') || []
                 if (as.length >= 2) {
                   as[1] = 'get4Path(((ctx || {}).pre || {}).data, ' + StringUtil.trim(as[1]) + ')'
                 }
@@ -10697,9 +10701,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (err != null) {
           var status = res == null ? null : res.status
+          var rsp = (err.response || {}).data || {}
           tr.compare = {
             code: JSONResponse.COMPARE_ERROR, //请求出错
-            msg: '请求出错！',
+            msg: StringUtil.trim(StringUtil.trim(rsp.code) + ' ' + StringUtil.trim(rsp.message)) || err.message || '请求出错！',
             path: (status != null && status != 200 ? status + ' ' : '') + err.message
           }
         }

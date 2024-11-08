@@ -921,8 +921,8 @@ var JSONResponse = {
     };
 
     var realType = JSONResponse.getType(real);
-    if (type != realType && (type != 'number' || realType != 'integer')) { //类型改变
-      log('compareWithStandard  type != getType(real) >> return COMPARE_TYPE_CHANGE');
+    if (type != realType && type != 'undefined' && (type != 'number' || realType != 'integer')) { //类型改变
+      log('compareWithStandard  type != realType && type != undefined && (type != number || realType != integer) >> return COMPARE_TYPE_CHANGE');
 
       max = {
         code: JSONResponse.COMPARE_TYPE_CHANGE,
@@ -982,7 +982,7 @@ var JSONResponse = {
         }
         log('compareWithStandard  for tk = ' + tk + ' >> ');
 
-        each = JSONResponse.compareWithStandard(firstVal[tk], real[tk], JSONResponse.getAbstractPath(folder,  tk), exceptKeys);
+        each = JSONResponse.compareWithStandard(firstVal[tk], real[tk], JSONResponse.getAbstractPath(folder, tk), exceptKeys);
         if (max.code < each.code) {
           max = each;
         }
