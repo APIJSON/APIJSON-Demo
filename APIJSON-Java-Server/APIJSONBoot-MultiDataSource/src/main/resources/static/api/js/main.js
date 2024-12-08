@@ -274,7 +274,7 @@
             // var newVal = JSON.parse(JSON.stringify(val))
 
             var curPath = (StringUtil.isEmpty(path, false) ? '' : path + '/') + key;
-            var curTable = JSONObject.isTableKey(objName || '', val, isRestful) ? objName : null;
+            var curTable = JSONObject.isTableKey(objName, val, isRestful) ? objName : null;
             var thiz = {
               _$_path_$_: curPath,
               _$_table_$_: curTable
@@ -409,10 +409,10 @@
               var aliaIndex = key == null ? -1 : key.indexOf(':');
               var objName = aliaIndex < 0 ? key : key.substring(0, aliaIndex);
 
-              if (JSONObject.isTableKey(objName || '', val, isRestful)) {
+              if (JSONObject.isTableKey(objName, val, isRestful)) {
                 table = objName
               }
-              else if (JSONObject.isTableKey(table || '', val, isRestful)) {
+              else if (JSONObject.isTableKey(table, val, isRestful)) {
                 column = key
               }
 
@@ -1523,10 +1523,6 @@ https://github.com/Tencent/APIJSON/issues
 
             var path = null;
             var key = null;
-            var thiz = {
-               _$_path_$_: null,
-               _$_table_$_: null
-            };
 
             if (isSingle || ! JSONResponse.isObject(vi)) {
               var val = ret;
@@ -1596,6 +1592,11 @@ https://github.com/Tencent/APIJSON/issues
                 this.jsonhtml = val;
             }
             else {
+                var thiz = {
+                   _$_path_$_: null,
+                   _$_table_$_: null
+                };
+
                 for (var k in ret) {
                   if (this.isFullAssert) {
                       try {
