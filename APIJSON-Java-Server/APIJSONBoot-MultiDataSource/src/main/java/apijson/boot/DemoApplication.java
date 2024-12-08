@@ -91,8 +91,9 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
         // FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
         // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-        unitauto.Log.DEBUG = Log.DEBUG = true;
-        APIJSONParser.IS_PRINT_BIG_LOG = true;
+        unitauto.Log.DEBUG = Log.DEBUG = true; // 是否开启调试模式（打印详细日志、返回详细调试信息等）
+        APIJSONParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
+//        APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
 //        APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
         APIJSONApplication.init();
         APIJSONRouterApplication.init();

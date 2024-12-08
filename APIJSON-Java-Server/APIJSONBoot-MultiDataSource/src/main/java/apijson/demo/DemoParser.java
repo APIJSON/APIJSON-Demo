@@ -53,6 +53,12 @@ public class DemoParser extends APIJSONParser<Long> {
         super(method, needVerify);
     }
 
+//    //	可重写来设置分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
+//    @Override
+//    public boolean isStartFrom1() {
+//        return true;
+//    }
+
     private int maxQueryCount = 2000;
 //    //	可重写来设置最大查询数量
 //    @Override
