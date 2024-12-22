@@ -21,7 +21,7 @@ import apijson.framework.APIJSONSQLExecutor;
 //import apijson.influxdb.InfluxDBUtil;
 //import apijson.milvus.MilvusUtil;
 //import apijson.mongodb.MongoUtil;
-import apijson.iotdb.IoTDBUtil;
+//import apijson.iotdb.IoTDBUtil;
 import apijson.orm.SQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
@@ -250,14 +250,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 //
 //                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
 //            }
-//            else
-            if (isIoTDB) {
-                if (isWrite) {
-                    return IoTDBUtil.executeUpdate(config, sql);
-                }
-
-                resultList = IoTDBUtil.executeQuery(config, sql, unknownType);
-            }
+//            else if (isIoTDB) {
+//                if (isWrite) {
+//                    return IoTDBUtil.executeUpdate(config, sql);
+//                }
+//
+//                resultList = IoTDBUtil.executeQuery(config, sql, unknownType);
+//            }
 
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             result = resultList.isEmpty() ? new JSONObject() : resultList.get(0);

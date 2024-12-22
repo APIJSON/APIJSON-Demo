@@ -24,7 +24,7 @@ import java.util.*;
 
 import apijson.*;
 //import apijson.influxdb.InfluxDBUtil;
-import apijson.iotdb.IoTDBUtil;
+//import apijson.iotdb.IoTDBUtil;
 import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Parser;
@@ -452,20 +452,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		return 10;
 	}
 
-
-
-	// TODO 迁移到 apijson-influxdb 主项目 <<<<<<<<<<<<<<<<<<<<
-	@Override
-	public String getSchema() {
-		return IoTDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
-	}
-
-	@Override
-	public String getSQLSchema() {
-		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
-	}
-
-	// TODO 迁移到 apijson-influxdb 主项目 >>>>>>>>>>>>>>>>>>>>>>
+//	@Override
+//	public String getSchema() {
+//		return InfluxDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
+////		return IoTDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
+//	}
+//
+//	@Override
+//	public String getSQLSchema() {
+//		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isIoTDB());
+////		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
+//	}
 
 	@Override
 	public String getSQLTable() {
@@ -474,10 +471,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	//	return isInfluxDB() ? t.toLowerCase() : StringUtil.firstCase(JSONRequest.recoverUnderline(t, false), false);
 	}
 
-	@Override
-	public String getTablePath() {
-		return IoTDBUtil.getTablePath(super.getTablePath(), isIoTDB());
-	}
+//	@Override
+//	public String getTablePath() {
+//		return IoTDBUtil.getTablePath(super.getTablePath(), isIoTDB());
+//	}
 
 	// 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
 	//	@Override
