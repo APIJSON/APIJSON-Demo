@@ -24,6 +24,7 @@ import java.util.*;
 
 import apijson.*;
 //import apijson.influxdb.InfluxDBUtil;
+import apijson.iotdb.IoTDBUtil;
 import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Parser;
@@ -51,69 +52,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		super(method, table);
 	}
 
-	// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	public static final String DATABASE_MONGODB = "MONGODB";
-	public static final String DATABASE_MILVUS = "MILVUS";
-	public static final String DATABASE_IOTDB = "IOTDB";
-
-	@Override
-	public boolean isPrepared() {
-		return super.isPrepared() && ! isMongoDB(); // MongoDB JDBC 还不支持预编译
-	}
-
-	public boolean isMongoDB() {
-		return DATABASE_MONGODB.equals(getDatabase());
-
-	}
-	public boolean isMilvus() {
-		return DATABASE_MILVUS.equals(getDatabase());
-	}
-	public boolean isIoTDB() {
-		return DATABASE_IOTDB.equals(getDatabase());
-	}
-
-	//	 MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
-	@Override
-	public String getQuote() {
-		return isMilvus() ? "`" : (isIoTDB() ? "" : super.getQuote());
-	}
-
-	@Override
-	public String getLimitString() {
-		if (isMilvus()) {
-			int count = getCount();
-			if (count == 0) {
-				Parser<Long> parser = getParser();
-				count = parser == null ? AbstractParser.MAX_QUERY_COUNT : parser.getMaxQueryCount();
-			}
-
-			int offset = getOffset(getPage(), count);
-			return " LIMIT " + offset + ", " + count; // 目前 moql-transx 的限制
-		}
-
-		return super.getLimitString();
-	}
-
 	static {
-		DATABASE_LIST.add(DATABASE_MONGODB);
-		DATABASE_LIST.add(DATABASE_MILVUS);
-		DATABASE_LIST.add(DATABASE_CASSANDRA);
-		DATABASE_LIST.add(DATABASE_IOTDB);
-
-		// Milvus 需要
-		SQL_FUNCTION_MAP.put("vMatch", "");
-		SQL_FUNCTION_MAP.put("consistencyLevel", "");
-		SQL_FUNCTION_MAP.put("partitionBy", "");
-		SQL_FUNCTION_MAP.put("gracefulTime", "");
-		SQL_FUNCTION_MAP.put("guaranteeTimestamp", "");
-		SQL_FUNCTION_MAP.put("roundDecimal", "");
-		SQL_FUNCTION_MAP.put("travelTimestamp", "");
-		SQL_FUNCTION_MAP.put("nProbe", "");
-		SQL_FUNCTION_MAP.put("ef", "");
-		SQL_FUNCTION_MAP.put("searchK", "");
-
-		// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
 		DEFAULT_SCHEMA = "sys"; // ""apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
@@ -292,7 +231,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "http://localhost:19530";
 		}
 		if (isIoTDB()) {
-			return "jdbc:iotdb://127.0.0.1:6667?charset=GB18030";
+			return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误
 		}
 		if (isMongoDB()) {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
@@ -468,6 +407,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	//	public boolean isDb2() {
 	//		return false;
 	//	}
+	//
+	//  其它数据库 ...
 
 
 	// 取消注释来兼容 Oracle DATETIME, TIMESTAMP 等日期时间类型的值来写库。5.0.0+ 重写以下方法，4.9.1 及以下改为重写 getValue(String)
@@ -514,15 +455,15 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 
 	// TODO 迁移到 apijson-influxdb 主项目 <<<<<<<<<<<<<<<<<<<<
-//	@Override
-//	public String getSchema() {
-//		return InfluxDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isInfluxDB());
-//	}
-//
-//	@Override
-//	public String getSQLSchema() {
-//		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isInfluxDB());
-//	}
+	@Override
+	public String getSchema() {
+		return IoTDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
+	}
+
+	@Override
+	public String getSQLSchema() {
+		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
+	}
 
 	// TODO 迁移到 apijson-influxdb 主项目 >>>>>>>>>>>>>>>>>>>>>>
 
@@ -535,8 +476,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	@Override
 	public String getTablePath() {
-		String p = super.getTablePath();
-		return isIoTDB() ? p + ".**" : p;
+		return IoTDBUtil.getTablePath(super.getTablePath(), isIoTDB());
 	}
 
 	// 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
