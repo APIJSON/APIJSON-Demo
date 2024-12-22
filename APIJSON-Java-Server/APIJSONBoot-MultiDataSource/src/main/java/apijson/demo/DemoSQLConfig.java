@@ -54,6 +54,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	// 支持 NoSQL 数据库 MongoDB，APIJSON 6.4.0- 版本需要手动添加相关代码 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 	public static final String DATABASE_MONGODB = "MONGODB";
 	public static final String DATABASE_MILVUS = "MILVUS";
+	public static final String DATABASE_IOTDB = "IOTDB";
 
 	@Override
 	public boolean isPrepared() {
@@ -67,11 +68,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	public boolean isMilvus() {
 		return DATABASE_MILVUS.equals(getDatabase());
 	}
+	public boolean isIoTDB() {
+		return DATABASE_IOTDB.equals(getDatabase());
+	}
 
 	//	 MongoDB  同时支持 `tbl` 反引号 和 "col" 双引号
 	@Override
 	public String getQuote() {
-		return isMilvus() ? "`" : super.getQuote();
+		return isMilvus() ? "`" : (isIoTDB() ? "" : super.getQuote());
 	}
 
 	@Override
@@ -94,6 +98,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		DATABASE_LIST.add(DATABASE_MONGODB);
 		DATABASE_LIST.add(DATABASE_MILVUS);
 		DATABASE_LIST.add(DATABASE_CASSANDRA);
+		DATABASE_LIST.add(DATABASE_IOTDB);
 
 		// Milvus 需要
 		SQL_FUNCTION_MAP.put("vMatch", "");
@@ -227,6 +232,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "2.3.4"; //TODO 改成你自己的
 		}
+		if (isIoTDB()) {
+			return "1.3.1"; //TODO 改成你自己的
+		}
 		if (isMongoDB()) {
 			return "6.0.12"; //TODO 改成你自己的
 		}
@@ -283,6 +291,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "http://localhost:19530";
 		}
+		if (isIoTDB()) {
+			return "jdbc:iotdb://127.0.0.1:6667?charset=GB18030";
+		}
 		if (isMongoDB()) {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
 		}
@@ -333,6 +344,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "iotos";
 		}
 		if (isMilvus()) {
+			return "root";
+		}
+		if (isIoTDB()) {
 			return "root";
 		}
 		if (isMongoDB()) {
@@ -386,6 +400,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 		if (isMilvus()) {
 			return "apijson"; //TODO 改成你自己的
+		}
+		if (isIoTDB()) {
+			return "root";
 		}
 		if (isMongoDB()) {
 			return "apijson";  //TODO 改成你自己的
@@ -512,8 +529,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	@Override
 	public String getSQLTable() {
 		String t = super.getSQLTable();
-		return isInfluxDB() ? t.toLowerCase() : t;
+		return isInfluxDB() || isIoTDB() ? t.toLowerCase() : t;
 	//	return isInfluxDB() ? t.toLowerCase() : StringUtil.firstCase(JSONRequest.recoverUnderline(t, false), false);
+	}
+
+	@Override
+	public String getTablePath() {
+		String p = super.getTablePath();
+		return isIoTDB() ? p + ".**" : p;
 	}
 
 	// 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg

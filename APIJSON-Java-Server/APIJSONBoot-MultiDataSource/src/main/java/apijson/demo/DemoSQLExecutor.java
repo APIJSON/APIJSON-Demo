@@ -14,10 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.JSON;
-import apijson.Log;
-import apijson.NotNull;
-import apijson.RequestMethod;
+import apijson.*;
 import apijson.boot.DemoApplication;
 //import apijson.cassandra.CassandraUtil;
 import apijson.framework.APIJSONSQLExecutor;
@@ -27,6 +24,10 @@ import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.iotdb.isession.SessionDataSet;
+import org.apache.iotdb.session.Session;
+import org.apache.iotdb.tsfile.read.common.Field;
+import org.apache.iotdb.tsfile.read.common.RowRecord;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -39,6 +40,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -196,8 +198,9 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
         boolean isMilvus = DATABASE_MILVUS.equals(config.getDatabase()); // APIJSON 6.4.0+ 可用 config.isMilvus();
         boolean isCassandra = config.isCassandra();
         boolean isInfluxDB = config.isInfluxDB();
+        boolean isIoTDB = DemoSQLConfig.DATABASE_IOTDB.equals(config.getDatabase());
 
-        if (isMilvus || isCassandra || isInfluxDB) {
+        if (isMilvus || isCassandra || isInfluxDB || isIoTDB) {
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             String sql = config.getSQL(false); // config.isPrepared());
             if (sql != null && config.getMethod() == null) {
@@ -250,6 +253,65 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 //
 //                resultList = InfluxDBUtil.executeQuery(config, sql, unknownType);
 //            }
+//            else
+            if (isIoTDB) {
+                Session session = new Session.Builder()
+                        .username(config.getDBAccount())
+                        .password(config.getDBPassword())
+                        .build();
+                session.open();
+
+                if (isWrite) {
+                    session.executeNonQueryStatement(sql);
+
+                    Object id = config.getId();
+                    Object idIn = id != null ? null : config.getIdIn();
+                    Collection<?> ids = idIn instanceof Collection<?> ? (Collection<?>) idIn : null;
+                    int count = id != null ? 1 : (ids == null || ids.isEmpty() ? 1 : ids.size());
+
+                    result = DemoParser.newSuccessResult();
+                    result.put(JSONResponse.KEY_COUNT, 1);
+                    result.put(JSONResponse.KEY_OK, true);
+
+                    session.close();
+
+                    return result;
+                }
+
+                SessionDataSet ds = session.executeQueryStatement(sql);
+                List<String> ns = ds == null ? null : ds.getColumnNames();
+                List<String> nameList = ns == null || ns.isEmpty() ? null : new ArrayList<>(ns.size());
+                if (nameList != null) {
+                    String prefix = config.getSQLSchema() + "." + config.getSQLTable() + ".";
+
+                    for (String name : ns) {
+                        if (name.startsWith(prefix)) {
+                            name = name.substring(prefix.length());
+                        }
+
+                        nameList.add(name);
+                    }
+
+                    resultList = new ArrayList<>(ds.getFetchSize());
+
+                    while (ds.hasNext()) {
+                        RowRecord row = ds.next();
+                        List<Field> fs = row.getFields();
+
+                        JSONObject obj = new JSONObject(true);
+                        obj.put(nameList.get(0), row.getTimestamp());
+                        for (int i = 0; i < fs.size(); i++) {
+                            Field f = fs.get(i);
+                            Object v = f == null ? null : f.getObjectValue(f.getDataType());
+                            obj.put(nameList.get(i + 1), v);
+                        }
+
+                        resultList.add(obj);
+                    }
+                }
+
+                session.close();
+            }
 
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             result = resultList.isEmpty() ? new JSONObject() : resultList.get(0);

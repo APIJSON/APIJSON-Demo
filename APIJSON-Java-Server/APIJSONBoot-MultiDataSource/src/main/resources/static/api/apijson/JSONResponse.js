@@ -531,8 +531,9 @@ var JSONResponse = {
    3-对象缺少字段/整数变小数，黄色；
    4-code/值类型 改变，红色；
    */
-  compareResponse: function(res, target, real, folder, isMachineLearning, codeName, exceptKeys, ignoreTrend) {
-    var tStatus = (target || {}).status || 200;
+  compareResponse: function(res, target, real, folder, isMachineLearning, codeName, exceptKeys, ignoreTrend, noBizCode) {
+    target = target || {}
+    var tStatus = target.status || 200;
     var rStatus = (res || {}).status;
     if (rStatus != null && rStatus != tStatus) {
       return {
@@ -542,8 +543,8 @@ var JSONResponse = {
       }
     }
     codeName = StringUtil.isEmpty(codeName, true) ? JSONResponse.KEY_CODE : codeName;
-    var tCode = (target || {})[codeName];
-    var rCode = (real || {})[codeName];
+    var tCode = (isMachineLearning != true && noBizCode) ? 0 : (target || {})[codeName];
+    var rCode = noBizCode ? tCode : (real || {})[codeName];
 
     //解决了弹窗提示机器学习更新标准异常，但导致所有项测试结果都变成状态码 code 改变
     // if (real == null) {
@@ -587,7 +588,7 @@ var JSONResponse = {
     }
 
     var tThrw = target.throw;
-    var rThrw = real.throw;
+    var rThrw = noBizCode ? tThrw : real.throw;
 
     var exceptions = target.exceptions || [];
     if (rCode != tCode || rThrw != tThrw) {
@@ -620,11 +621,12 @@ var JSONResponse = {
       };
     }
 
-    delete target[codeName];
-    delete real[codeName];
-
-    delete target.throw;
-    delete real.throw;
+    if (noBizCode != true) {
+        delete target[codeName];
+        delete real[codeName];
+        delete target.throw;
+        delete real.throw;
+    }
 
     //可能提示语变化，也要提示
     // delete target.msg;
@@ -636,11 +638,14 @@ var JSONResponse = {
         ? JSONResponse.compareWithStandard(target, real, folder, exceptKeys, ignoreTrend)
         : JSONResponse.compareWithBefore(target, real, folder, exceptKeys);
     } finally {
-      target[codeName] = tCode;
-      real[codeName] = rCode;
-
-      target.throw = tThrw;
-      real.throw = rThrw;
+      if (isMachineLearning || noBizCode != true) {
+        target[codeName] = tCode;
+      }
+      if (noBizCode != true) {
+        real[codeName] = rCode;
+        target.throw = tThrw;
+        real.throw = rThrw;
+      }
     }
 
     if (exceptions.length > 0 && (target.repeat || 0) <= 0 && (result || {}).code < JSONResponse.COMPARE_VALUE_CHANGE) {
@@ -1257,7 +1262,7 @@ var JSONResponse = {
   },
 
 
-  updateFullStandard: function (standard, currentResponse, isML) {
+  updateFullStandard: function (standard, currentResponse, isML, noBizCode) {
     if (currentResponse == null) {
       return standard;
     }
@@ -1271,7 +1276,7 @@ var JSONResponse = {
     var msg = currentResponse.msg;
 
     var hasCode = standard.code != null;
-    var isCodeChange = standard.code != code;
+    var isCodeChange = noBizCode != true && standard.code != code;
     var exceptions = standard.exceptions || [];
 
     delete currentResponse.code; //code必须一致
@@ -1295,8 +1300,14 @@ var JSONResponse = {
 
     var stddObj = isML ? (isCodeChange && hasCode ? standard : JSONResponse.updateStandard(standard, currentResponse)) : {};
 
-    currentResponse.code = code;
-    currentResponse.throw = thrw;
+//    if (noBizCode != true) {
+        currentResponse.code = code;
+        currentResponse.throw = thrw;
+//    }
+
+    if (hasCode || isML) {
+      stddObj.code = code || 0;
+    }
 
     if (isCodeChange) {
       if (hasCode != true) {  // 走正常分支

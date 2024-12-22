@@ -227,8 +227,9 @@
                     newVal[k] = vi[k]; //提升性能
                     if (App.isFullAssert) {
                         try {
-                          var tr = App.currentRemoteItem.TestRecord || {};
-                          var d = App.currentRemoteItem.Document || {};
+                          var cri = App.currentRemoteItem || {};
+                          var tr = cri.TestRecord || {};
+                          var d = cri.Document || {};
                           var standard = App.isMLEnabled ? tr.standard : tr.response;
                           var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
                           var tests = App.tests[String(App.currentAccountIndex)] || {};
@@ -285,8 +286,9 @@
               newVal[k] = val[k]; //提升性能
               if (App.isFullAssert) {
                   try {
-                    var tr = App.currentRemoteItem.TestRecord || {};
-                    var d = App.currentRemoteItem.Document || {};
+                    var cri = App.currentRemoteItem || {};
+                    var tr = cri.TestRecord || {};
+                    var d = cri.Document || {};
                     var standard = App.isMLEnabled ? tr.standard : tr.response;
                     var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
                     var tests = App.tests[String(App.currentAccountIndex)] || {};
@@ -1553,8 +1555,9 @@ https://github.com/Tencent/APIJSON/issues
                         newVal[k] = vi[k]; //提升性能
                         if (this.isFullAssert) {
                             try {
-                              var tr = this.currentRemoteItem.TestRecord || {};
-                              var d = this.currentRemoteItem.Document || {};
+                              var cri = this.currentRemoteItem || {};
+                              var tr = cri.TestRecord || {};
+                              var d = cri.Document || {};
                               var standard = this.isMLEnabled ? tr.standard : tr.response;
                               var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
                               var tests = this.tests[String(this.currentAccountIndex)] || {};
@@ -1600,8 +1603,9 @@ https://github.com/Tencent/APIJSON/issues
                 for (var k in ret) {
                   if (this.isFullAssert) {
                       try {
-                        var tr = this.currentRemoteItem.TestRecord || {};
-                        var d = this.currentRemoteItem.Document || {};
+                        var cri = this.currentRemoteItem || {};
+                        var tr = cri.TestRecord || {};
+                        var d = cri.Document || {};
                         var standard = this.isMLEnabled ? tr.standard : tr.response;
                         var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
                         var tests = this.tests[String(this.currentAccountIndex)] || {};
