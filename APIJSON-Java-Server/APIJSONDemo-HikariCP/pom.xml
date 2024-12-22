@@ -6,7 +6,7 @@
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo-hikaricp</artifactId>
 	<packaging>jar</packaging>
-	<version>6.2.0</version>
+	<version>7.0.3</version>
 
 	<name>APIJSONDemo</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -22,12 +22,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>6.2.0</version>
+			<version>7.0.3</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>6.2.0</version>
+			<version>7.0.3</version>
 		</dependency>
 
 		<!-- 需要用的数据库 JDBC 驱动 -->
