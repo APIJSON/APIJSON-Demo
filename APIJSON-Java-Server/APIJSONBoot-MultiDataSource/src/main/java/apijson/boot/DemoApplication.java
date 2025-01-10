@@ -204,6 +204,16 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
             Log.e(TAG, "加载 IoTDB 驱动失败，请检查 pom.xml 中 org.apache.iotdb.jdbc 版本是否存在以及可用 ！！！");
         }
 
+        try { //加载驱动程序
+            Log.d(TAG, "尝试加载 DuckDB 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+            Class.forName("org.duckdb.DuckDBDriver");
+            Log.d(TAG, "成功加载 DuckDB 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+        }
+        catch (ClassNotFoundException e) {
+            e.printStackTrace();
+            Log.e(TAG, "加载 DuckDB 驱动失败，请检查 pom.xml 中 org.duckdb 版本是否存在以及可用 ！！！");
+        }
+
         //    try { //加载驱动程序
         //      Log.d(TAG, "尝试加载 TDengine 驱动 <<<<<<<<<<<<<<<<<<<<< ");
         //      Class.forName("com.taosdata.jdbc.TSDBDriver");

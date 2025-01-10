@@ -56,11 +56,11 @@
 
 
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-        <dependency>
-            <groupId>com.github.Tencent</groupId>
-            <artifactId>APIJSON</artifactId>
-            <version>7.0.3</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.Tencent</groupId>-->
+<!--            <artifactId>APIJSON</artifactId>-->
+<!--            <version>7.2.0</version>-->
+<!--        </dependency>-->
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-framework</artifactId>

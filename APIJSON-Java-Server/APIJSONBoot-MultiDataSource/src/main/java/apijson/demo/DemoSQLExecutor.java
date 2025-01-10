@@ -25,6 +25,7 @@ import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
+//import org.duckdb.JsonNode;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -303,6 +304,10 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 //    @Override
 //    protected Object getValue(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
 //        Object v = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
-//        return MongoUtil.getValue(v);
+////        if (v instanceof JsonNode) { // DuckDB json 类型需要转换
+////            JsonNode jn = (JsonNode) v;
+////            v = jn.isNull() ? null : JSON.parse(jn.toString());
+////        }
+//        return v; // MongoUtil.getValue(v);
 //    }
 }

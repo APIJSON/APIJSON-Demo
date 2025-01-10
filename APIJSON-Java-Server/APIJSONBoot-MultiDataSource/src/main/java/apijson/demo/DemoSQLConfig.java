@@ -180,6 +180,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isCassandra()) {
 			return "4.0.1"; //TODO 改成你自己的
 		}
+		if (isDuckDB()) {
+			return "1.1.3"; //TODO 改成你自己的
+		}
 
 		return null;
 	}
@@ -225,19 +228,22 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
 		if (isInfluxDB()) {
-			return "http://203.189.6.3:8086";
+			return "http://203.189.6.3:8086"; //TODO 改成你自己的
 		}
 		if (isMilvus()) {
-			return "http://localhost:19530";
+			return "http://localhost:19530"; //TODO 改成你自己的
 		}
 		if (isIoTDB()) {
-			return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误
+			return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
 		}
 		if (isMongoDB()) {
-			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin";
+			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin"; //TODO 改成你自己的
 		}
 		if (isCassandra()) {
-			return "http://localhost:7001";
+			return "http://localhost:7001"; //TODO 改成你自己的
+		}
+		if (isDuckDB()) {
+			return "jdbc:duckdb:/Users/tommylemon/my_database.duckdb"; //TODO 改成你自己的
 		}
 
 		return null;
@@ -294,6 +300,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isCassandra()) {
 			return "root"; //TODO 改成你自己的
 		}
+		if (isDuckDB()) {
+			return "root"; //TODO 改成你自己的
+		}
 
 		return null;
 	}
@@ -348,6 +357,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 		if (isCassandra()) {
 			return "apijson";  //TODO 改成你自己的
+		}
+		if (isDuckDB()) {
+			return ""; //TODO 改成你自己的
 		}
 
 		return null;
