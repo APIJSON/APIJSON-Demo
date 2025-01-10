@@ -49,9 +49,6 @@ comment on column "Document".type is 'PARAM - GET  url parameters,\nFORM - POST 
 comment on column "Document".sqlauto is '用于 SQLAuto 测试的 SQL 语句';
 
 
-alter table "Document"
-    owner to postgres;
-
 
 insert into "Document" (id, debug, "userId", "testAccountId", version, name, type, url, request, apijson, sqlauto, standard, header, date, detail) values (1, 0, 82001, 82001, 1, '登录', 'JSON', '/login', '{
     "type": 0,
