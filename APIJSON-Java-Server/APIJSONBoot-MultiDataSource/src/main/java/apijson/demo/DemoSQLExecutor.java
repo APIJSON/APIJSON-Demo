@@ -23,6 +23,7 @@ import apijson.framework.APIJSONSQLExecutor;
 //import apijson.mongodb.MongoUtil;
 //import apijson.iotdb.IoTDBUtil;
 import apijson.orm.SQLConfig;
+//import apijson.surrealdb.SurrealDBUtil;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
 //import org.duckdb.JsonNode;
@@ -194,11 +195,12 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     @Override
     public JSONObject execute(@NotNull SQLConfig<Long> config, boolean unknownType) throws Exception {
         boolean isMilvus = config.isMilvus(); // DATABASE_MILVUS.equals(config.getDatabase()); // APIJSON 6.4.0+ 可用 config.isMilvus();
-        boolean isCassandra = config.isCassandra();
-        boolean isInfluxDB = config.isInfluxDB();
-        boolean isIoTDB = config.isIoTDB(); // DemoSQLConfig.DATABASE_IOTDB.equals(config.getDatabase());
+        boolean isCassandra = config.isCassandra(); // DemoSQLConfig.DATABASE_CASSANDRA.equals(config.getDatabase());
+        boolean isInfluxDB = config.isInfluxDB(); // DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase());
+        // boolean isIoTDB = config.isIoTDB(); // DemoSQLConfig.DATABASE_IOTDB.equals(config.getDatabase());
+        // boolean isSurrealDB = config.isSurrealDB(); // DemoSQLConfig.DATABASE_SURREALDB.equals(config.getDatabase());
 
-        if (isMilvus || isCassandra || isInfluxDB || isIoTDB) {
+        if (isMilvus || isCassandra || isInfluxDB) { // || isIoTDB || isSurrealDB) {
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             String sql = config.getSQL(false); // config.isPrepared());
             if (sql != null && config.getMethod() == null) {
@@ -257,6 +259,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 //                }
 //
 //                resultList = IoTDBUtil.executeQuery(config, sql, unknownType);
+//            }
+//            else if (isSurrealDB) {
+//                if (isWrite) {
+//                    return SurrealDBUtil.executeUpdate(config, sql);
+//                }
+//
+//                resultList = SurrealDBUtil.executeQuery(config, sql, unknownType);
 //            }
 
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数

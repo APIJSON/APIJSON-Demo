@@ -28,6 +28,7 @@ import apijson.*;
 import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Parser;
+//import apijson.surrealdb.SurrealDBUtil;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.column.ColumnUtil;
@@ -54,7 +55,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
-		DEFAULT_SCHEMA = "sys"; // ""apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
+		//	DEFAULT_NAMESPACE = "root"; //TODO 默认数据库名/模式，改成你自己的，仅对 PostgreSQL: posgres, SurrealDB: root 等数据库有效
+		DEFAULT_SCHEMA = "sys"; // "apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
 		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
 		// 这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
@@ -77,9 +79,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			//取消注释来实现自定义各个表的主键名
 			//			@Override
 			//			public String getIdKey(String database, String schema, String datasource, String table) {
+			//				//	return "_id"; // SurrealDB 强制用 id 作为主键名，surrealdb.java 查不到也改不了，所以需要另外加主键
 			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
-			//				//		return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
-			//				//		return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
+			//				//	return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
+			//				//	return StringUtil.toUpperCase(t) + "_ID";  // USER_ID, COMMENT_ID ...
 			//			}
 
 			@Override
@@ -159,9 +162,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isDb2()) {
 			return "11.5"; //TODO 改成你自己的
 		}
-        //if (isSQLite()) {
-        //    return "3.39.3"; //TODO 改成你自己的
-        //}
+        //	if (isSQLite()) {
+        //  	return "3.39.3"; //TODO 改成你自己的
+        //	}
 		if (isDameng()) {
 			return "8.1.2.141"; //TODO 改成你自己的
 		}
@@ -171,18 +174,21 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "2.3.4"; //TODO 改成你自己的
 		}
-		if (isIoTDB()) {
-			return "1.3.1"; //TODO 改成你自己的
-		}
+		//	if (isIoTDB()) {
+		//		return "1.3.1"; //TODO 改成你自己的
+		//	}
 		if (isMongoDB()) {
 			return "6.0.12"; //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "4.0.1"; //TODO 改成你自己的
 		}
-		if (isDuckDB()) {
-			return "1.1.3"; //TODO 改成你自己的
-		}
+		//	if (isDuckDB()) {
+		//		return "1.1.3"; //TODO 改成你自己的
+		//	}
+		//	if (isSurrealDB()) {
+		//		return "2.0.0"; //TODO 改成你自己的
+		//	}
 
 		return null;
 	}
@@ -233,18 +239,23 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "http://localhost:19530"; //TODO 改成你自己的
 		}
-		if (isIoTDB()) {
-			return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
-		}
+		//	if (isIoTDB()) {
+		//		return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
+		//	}
 		if (isMongoDB()) {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin"; //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "http://localhost:7001"; //TODO 改成你自己的
 		}
-		if (isDuckDB()) {
-			return "jdbc:duckdb:/Users/tommylemon/my_database.duckdb"; //TODO 改成你自己的
-		}
+		//	if (isDuckDB()) {
+		//		return "jdbc:duckdb:/Users/tommylemon/my_database.duckdb"; //TODO 改成你自己的
+		//	}
+		//	if (isSurrealDB()) {
+		//		//	return "memory"; //TODO 改成你自己的
+		//		//	return "surrealkv://localhost:8000"; //TODO 改成你自己的
+		//		return "ws://localhost:8000"; //TODO 改成你自己的
+		//	}
 
 		return null;
 	}
@@ -291,18 +302,21 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "root";
 		}
-		if (isIoTDB()) {
-			return "root";
-		}
+		//	if (isIoTDB()) {
+		//		return "root";
+		//	}
 		if (isMongoDB()) {
 			return "root"; //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "root"; //TODO 改成你自己的
 		}
-		if (isDuckDB()) {
-			return "root"; //TODO 改成你自己的
-		}
+		//	if (isDuckDB()) {
+		//		return "root"; //TODO 改成你自己的
+		//	}
+		//	if (isSurrealDB()) {
+		//		return "root"; //TODO 改成你自己的
+		//	}
 
 		return null;
 	}
@@ -334,9 +348,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isDb2()) {
 			return "123"; //TODO 改成你自己的
 		}
-        //if (isSQLite()) {
-        //    return "apijson"; //TODO 改成你自己的
-        //}
+        //	if (isSQLite()) {
+        //  	return "apijson"; //TODO 改成你自己的
+        //	}
 		if (isDameng()) {
 			return "SYSDBA";
 		}
@@ -349,18 +363,21 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "apijson"; //TODO 改成你自己的
 		}
-		if (isIoTDB()) {
-			return "root";
-		}
+		//	if (isIoTDB()) {
+		//		return "root";
+		//	}
 		if (isMongoDB()) {
 			return "apijson";  //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "apijson";  //TODO 改成你自己的
 		}
-		if (isDuckDB()) {
-			return ""; //TODO 改成你自己的
-		}
+		//	if (isDuckDB()) {
+		//		return ""; //TODO 改成你自己的
+		//	}
+		//	if (isSurrealDB()) {
+		//		return "root"; //TODO 改成你自己的
+		//	}
 
 		return null;
 	}
@@ -464,29 +481,42 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		return 10;
 	}
 
-//	@Override
-//	public String getSchema() {
-//		return InfluxDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
-////		return IoTDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
-//	}
-//
-//	@Override
-//	public String getSQLSchema() {
-//		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isIoTDB());
-////		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
-//	}
+	//	@Override
+	//	public String getNamespace() {
+	//		return SurrealDBUtil.getNamespace(super.getNamespace(), DEFAULT_NAMESPACE, isSurrealDB());
+	//	}
+	//
+	//	@Override
+	//	public String getSQLNamespace() {
+	//		return SurrealDBUtil.getSQLNamespace(super.getSQLNamespace(), isSurrealDB());
+	//	}
+	//
+	//	@Override
+	//	public String getSchema() {
+	//		return SurrealDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isSurrealDB());
+	////		return InfluxDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
+	////		return IoTDBUtil.getSchema(super.getSchema(), DEFAULT_SCHEMA, isIoTDB());
+	//	}
+	//
+	//	@Override
+	//	public String getSQLSchema() {
+	//		return SurrealDBUtil.getSQLSchema(super.getSQLSchema(), isSurrealDB());
+	////		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isIoTDB());
+	////		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
+	//	}
 
 	@Override
 	public String getSQLTable() {
 		String t = super.getSQLTable();
-		return isInfluxDB() || isIoTDB() ? t.toLowerCase() : t;
-	//	return isInfluxDB() ? t.toLowerCase() : StringUtil.firstCase(JSONRequest.recoverUnderline(t, false), false);
+		return isInfluxDB() ? t.toLowerCase() : t;
+		//	return isInfluxDB() || isIoTDB() ? t.toLowerCase() : t;
+		//	return isInfluxDB() ? t.toLowerCase() : StringUtil.firstCase(JSONRequest.recoverUnderline(t, false), false);
 	}
 
-//	@Override
-//	public String getTablePath() {
-//		return IoTDBUtil.getTablePath(super.getTablePath(), isIoTDB());
-//	}
+	//	@Override
+	//	public String getTablePath() {
+	//		return IoTDBUtil.getTablePath(super.getTablePath(), isIoTDB());
+	//	}
 
 	// 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
 	//	@Override
