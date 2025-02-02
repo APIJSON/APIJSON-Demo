@@ -22,20 +22,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.serializer.ValueFilter;
 import com.fasterxml.jackson.databind.util.LRUMap;
-//import com.vesoft.nebula.Date;
-//import com.vesoft.nebula.DateTime;
-//import com.vesoft.nebula.Duration;
-//import com.vesoft.nebula.Edge;
-//import com.vesoft.nebula.NullType;
-//import com.vesoft.nebula.Tag;
-//import com.vesoft.nebula.Time;
-//import com.vesoft.nebula.Value;
-//import com.vesoft.nebula.Vertex;
-//import com.vesoft.nebula.client.graph.data.DateTimeWrapper;
-//import com.vesoft.nebula.client.graph.data.DateWrapper;
-//import com.vesoft.nebula.client.graph.data.DurationWrapper;
-//import com.vesoft.nebula.client.graph.data.TimeWrapper;
-//import com.vesoft.nebula.client.graph.data.ValueWrapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -2065,8 +2051,6 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                             account = "test"; // "peter";
                             password = "test"; // null;
                         }
-                    } else if (DemoSQLExecutor.DATABASE_NEBULA.equalsIgnoreCase(prefix)) {
-                        database = prefix.toUpperCase();
                     }
                 }
 
