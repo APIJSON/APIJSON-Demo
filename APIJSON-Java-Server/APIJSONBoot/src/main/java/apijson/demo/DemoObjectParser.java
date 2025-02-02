@@ -18,7 +18,7 @@ import com.alibaba.fastjson.JSONObject;
 
 import java.util.List;
 
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 import apijson.NotNull;
 import apijson.RequestMethod;

@@ -7,7 +7,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;

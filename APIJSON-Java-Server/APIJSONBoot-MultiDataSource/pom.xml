@@ -29,7 +29,7 @@
             <version>1.2.83</version>
         </dependency>
 
-        <!-- apijson-framework 需要用的依赖库，4.0.0 以上 -->
+        <!-- apijson-framework 需要用的依赖库，6.0.0 以上 -->
         <dependency>
             <groupId>jakarta.servlet</groupId>
             <artifactId>jakarta.servlet-api</artifactId>
@@ -262,6 +262,8 @@
 <!--            </exclusions>-->
 <!--        </dependency>-->
 
+
+        <!-- APIJSONBoot 需要用的 SpringBoot 框架，JDK 17+ 对应 SpringBoot 3.0+，排除导致编译报错的 snakeyaml 和 logback，重新依赖 snakeyaml -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
