@@ -222,15 +222,6 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         //      e.printStackTrace();
         //      Log.e(TAG, "加载 TDengine 驱动失败，请检查 pom.xml 中 com.taosdata.jdbc 版本是否存在以及可用 ！！！");
         //    }
-        //
-        //    try { //加载驱动程序
-        //      Log.d(TAG, "尝试加载 NebulaGraph 驱动 <<<<<<<<<<<<<<<<<<<<< ");
-        //      Class.forName("com.vesoft.nebula.jdbc.impl.NebulaDriver");
-        //      Log.d(TAG, "成功加载 NebulaGraph 驱动！>>>>>>>>>>>>>>>>>>>>> ");
-        //    } catch (ClassNotFoundException e) {
-        //      e.printStackTrace();
-        //      Log.e(TAG, "加载 NebulaGraph 驱动失败，请检查 pom.xml 中 org.nebula-contrib 版本是否存在以及可用 ！！！");
-        //    }
 
         // APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 

@@ -122,30 +122,10 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    public static final String DATABASE_NEBULA = "NEBULA";
 
     // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
     public Connection getConnection(SQLConfig<Long> config) throws Exception {
-//        if (DATABASE_NEBULA.equals(config.getDatabase())) {  // 3.0.0 及以下要这样连接
-//            String uri = config.getDBUri();
-//
-//            int start = uri.indexOf("://");
-//            String prefix = uri.substring(0, start);
-//
-//            uri = uri.substring(start + "://".length());
-//            int end = uri.indexOf("/");
-//            String space = uri.substring(end + 1);
-//
-//            Properties props = new Properties();
-//            props.put("url", prefix + "://" + space);
-//            props.put("graphSpace", space);
-//
-//            NebulaDriver driver = new NebulaDriver(uri.substring(0, end));
-//            return driver.connect(prefix + "://" + space, props);
-//            //    return DriverManager.getConnection("jdbc:nebula://JDBC_TEST_SPACE", "root", "nebula");
-//        }
-
         String datasource = config.getDatasource();
         Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
 

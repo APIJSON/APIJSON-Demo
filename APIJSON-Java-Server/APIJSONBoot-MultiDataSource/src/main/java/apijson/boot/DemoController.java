@@ -155,10 +155,10 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         return getRequestBaseURL() + getRequestPath();
     }
 
-//    @Override
-//    public Parser<Long> newParser(HttpSession session, RequestMethod method) {
-//        return super.newParser(session, method).setNeedVerify(false);
-//    }
+    //  @Override
+    //  public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+    //      return super.newParser(session, method).setNeedVerify(false);
+    //  }
 
     /**增删改查统一的类 RESTful API 入口，牺牲一点路由解析性能来提升一些开发效率
      * @param method
@@ -2189,127 +2189,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
                 result.put("time:start|duration|end|parse|sql", startTime + "|" + duration + "|" + endTime + "|" + parseDuration + "|" + sqlDuration);
 
-                if (DemoSQLExecutor.DATABASE_NEBULA.equalsIgnoreCase(database) == false) {
-                    return result.toJSONString();
-                }
-
-                return com.alibaba.fastjson.JSON.toJSONString(result, new ValueFilter() {
-                    @Override
-                    public Object process(Object o, String key, Object val) {
-//                        if (val instanceof ValueWrapper) {
-//                            return process(o, key, ((ValueWrapper) val).getValue());
-//                        }
-//
-//                        if (val instanceof Value) {
-//                            return process(o, key, ((Value) val).getFieldValue());
-//                        }
-//
-//                        if (val instanceof Vertex) {
-//                            JSONObject obj = new JSONObject(true);
-//                            obj.put("vid", new String(((Vertex) val).getVid().getSVal()));
-//                            obj.put("str", val.toString());
-//
-//                            List<Tag> tags = ((Vertex) val).getTags();
-//
-//                            if (tags != null) {
-//                                JSONArray arr = new JSONArray();
-//                                for (int i = 0; i < tags.size(); i++) {
-//                                    arr.add(process(o, String.valueOf(i), tags.get(i)));
-//                                }
-//                                obj.put("tags", arr);
-//                            }
-//
-//                            return obj;
-//                        }
-//
-//                        if (val instanceof Tag) {
-//                            JSONObject obj = new JSONObject(true);
-//                            obj.put("name", new String(((Tag) val).getName()));
-//                            obj.put("str", val.toString());
-//
-//                            Map<byte[], Value> props = ((Tag) val).getProps();
-//
-//                            if (props != null) {
-//                                JSONObject propsObj = new JSONObject(true);
-//                                props.forEach(new BiConsumer<byte[], Value>() {
-//                                    @Override
-//                                    public void accept(byte[] bytes, Value value) {
-//                                        String k = new String(bytes);
-//                                        propsObj.put(k, process(propsObj, k, value));
-//                                    }
-//                                });
-//                                obj.put("props", propsObj);
-//                            }
-//
-//                            return obj;
-//                        }
-//
-//                        if (val instanceof Edge) {
-//                            JSONObject obj = new JSONObject(true);
-//                            obj.put("name", new String(((Edge) val).getName()));
-//                            obj.put("str", val.toString());
-//
-//                            Map<byte[], Value> props = ((Edge) val).getProps();
-//
-//                            if (props != null) {
-//                                JSONObject propsObj = new JSONObject(true);
-//                                props.forEach(new BiConsumer<byte[], Value>() {
-//                                    @Override
-//                                    public void accept(byte[] bytes, Value value) {
-//                                        String k = new String(bytes);
-//                                        propsObj.put(k, process(propsObj, k, value));
-//                                    }
-//                                });
-//                                obj.put("props", propsObj);
-//                            }
-//
-//                            return obj;
-//                        }
-//
-//                        if (val instanceof NullType) {
-//                            return null;
-//                        }
-//
-//                        if (val instanceof DateWrapper) {
-//                            return ((DateWrapper) val).toString();
-//                        }
-//
-//                        if (val instanceof TimeWrapper) {
-//                            return ((TimeWrapper) val).getLocalTimeStr();
-//                        }
-//
-//                        if (val instanceof DateTimeWrapper) {
-//                            return ((DateTimeWrapper) val).getLocalDateTimeStr();
-//                        }
-//
-//                        if (val instanceof DurationWrapper) {
-//                            return ((DurationWrapper) val).getMicroseconds();
-//                        }
-//
-//                        if (val instanceof Date) {
-//                            Date d = (Date) val;
-//                            return new java.sql.Date(d.getYear() - 1900, d.getMonth(), d.getDay()).toString();
-//                        }
-//
-//                        if (val instanceof Time) {
-//                            Time t = (Time) val;
-//                            return new java.sql.Time(t.getHour(), t.getMinute(), t.getSec()).toString();
-//                        }
-//
-//                        if (val instanceof DateTime) {
-//                            DateTime dt = (DateTime) val;
-//                            //  return new java.util.Date(dt.getYear(), dt.getNonth(), dt.getDayO, dt.getHour(), dt.getMinute(), dt.getSec0).toGnTString();
-//                            return new java.sql.Date(dt.getYear() - 1988, dt.getMonth(), dt.getDay())
-//                                    + " " + new java.sql.Time(dt.getHour(), dt.getMinute(), dt.getSec());
-//                        }
-//
-//                        if (val instanceof Duration) {
-//                            return ((Duration) val).getMicroseconds();
-//                        }
-
-                        return val;
-                    }
-                }, SerializerFeature.WriteMapNullValue);
+                return result.toJSONString();
             } catch (Exception e) {
                 JSONObject result = DemoParser.newErrorResult(e);
                 result.put("throw", e.getClass().getName());
