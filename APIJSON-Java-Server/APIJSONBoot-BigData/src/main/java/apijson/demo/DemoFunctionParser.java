@@ -28,7 +28,7 @@ import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.framework.APIJSONFunctionParser;
+import apijson.framework.javax.APIJSONFunctionParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.JSONRequest;
 import apijson.orm.Visitor;
@@ -38,7 +38,7 @@ import apijson.orm.Visitor;
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends APIJSONFunctionParser {
+public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 	public static final String TAG = "DemoFunctionParser";
 
 	public DemoFunctionParser() {

@@ -21,14 +21,14 @@ import static apijson.RequestMethod.HEAD;
 import static apijson.RequestMethod.HEADS;
 import static apijson.RequestMethod.POST;
 import static apijson.RequestMethod.PUT;
-import static apijson.framework.APIJSONConstant.ACCESS_;
-import static apijson.framework.APIJSONConstant.COUNT;
-import static apijson.framework.APIJSONConstant.FORMAT;
-import static apijson.framework.APIJSONConstant.FUNCTION_;
-import static apijson.framework.APIJSONConstant.ID;
-import static apijson.framework.APIJSONConstant.REQUEST_;
-import static apijson.framework.APIJSONConstant.USER_ID;
-import static apijson.framework.APIJSONConstant.VERSION;
+import static apijson.framework.javax.APIJSONConstant.ACCESS_;
+import static apijson.framework.javax.APIJSONConstant.COUNT;
+import static apijson.framework.javax.APIJSONConstant.FORMAT;
+import static apijson.framework.javax.APIJSONConstant.FUNCTION_;
+import static apijson.framework.javax.APIJSONConstant.ID;
+import static apijson.framework.javax.APIJSONConstant.REQUEST_;
+import static apijson.framework.javax.APIJSONConstant.USER_ID;
+import static apijson.framework.javax.APIJSONConstant.VERSION;
 import static org.springframework.http.HttpHeaders.COOKIE;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
@@ -49,6 +49,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import apijson.orm.Parser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -78,8 +79,8 @@ import apijson.demo.DemoVerifier;
 import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
 import apijson.demo.model.Verify;
-import apijson.framework.APIJSONController;
-import apijson.framework.BaseModel;
+import apijson.framework.javax.APIJSONController;
+import apijson.framework.javax.BaseModel;
 import apijson.orm.JSONRequest;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
@@ -110,13 +111,15 @@ public class DemoController extends APIJSONController<Long> {
 		return httpServletRequest.getRequestURL().toString();
 	}
 
-	
+	@Override
+	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+		return super.newParser(session, method).setNeedVerify(false);
+	}
+
 	// 通用接口，非事务型操作 和 简单事务型操作 都可通过这些接口自动化实现 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 	/**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一些路由解析性能来提升一点开发效率
 	 * @param method
-	 * @param tag
-	 * @param params
 	 * @param request
 	 * @param session
 	 * @return

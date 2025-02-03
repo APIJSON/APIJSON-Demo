@@ -43,9 +43,9 @@ import apijson.demo.DemoParser;
 import apijson.demo.DemoSQLConfig;
 import apijson.demo.DemoSQLExecutor;
 import apijson.demo.DemoVerifier;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
-import apijson.framework.APIJSONParser;
+import apijson.framework.javax.APIJSONApplication;
+import apijson.framework.javax.APIJSONCreator;
+import apijson.framework.javax.APIJSONParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
 import apijson.orm.Parser;
@@ -188,7 +188,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
             }
 
             @Override
-            public FunctionParser createFunctionParser() {
+            public FunctionParser<Long> createFunctionParser() {
                 return new DemoFunctionParser();
             }
 
@@ -198,12 +198,12 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
             }
 
             @Override
-            public SQLConfig createSQLConfig() {
+            public SQLConfig<Long> createSQLConfig() {
                 return new DemoSQLConfig();
             }
 
             @Override
-            public SQLExecutor createSQLExecutor() {
+            public SQLExecutor<Long> createSQLExecutor() {
                 return new DemoSQLExecutor();
             }
 

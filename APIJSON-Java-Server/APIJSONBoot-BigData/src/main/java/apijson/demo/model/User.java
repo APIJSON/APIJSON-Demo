@@ -20,7 +20,7 @@ import static apijson.orm.AbstractVerifier.UNKNOWN;
 import java.util.List;
 
 import apijson.MethodAccess;
-import apijson.framework.BaseModel;
+import apijson.framework.javax.BaseModel;
 import apijson.orm.Visitor;
 
 /**用户开放信息

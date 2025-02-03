@@ -20,7 +20,7 @@ import javax.sql.DataSource;
 
 import apijson.Log;
 import apijson.boot.DemoApplication;
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 

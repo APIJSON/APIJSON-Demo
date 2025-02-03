@@ -14,10 +14,10 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import static apijson.framework.APIJSONConstant.ID;
-import static apijson.framework.APIJSONConstant.PRIVACY_;
-import static apijson.framework.APIJSONConstant.USER_;
-import static apijson.framework.APIJSONConstant.USER_ID;
+import static apijson.framework.javax.APIJSONConstant.ID;
+import static apijson.framework.javax.APIJSONConstant.PRIVACY_;
+import static apijson.framework.javax.APIJSONConstant.USER_;
+import static apijson.framework.javax.APIJSONConstant.USER_ID;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -31,7 +31,7 @@ import com.alibaba.fastjson.annotation.JSONField;
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.column.ColumnUtil;
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Join;
 import apijson.orm.Join.On;
@@ -309,8 +309,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
     }
 
     @Override
-    protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-        // 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
+    protected void onJoinComplexRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+        // 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, j, jt, onList, on);
     }
 
 }

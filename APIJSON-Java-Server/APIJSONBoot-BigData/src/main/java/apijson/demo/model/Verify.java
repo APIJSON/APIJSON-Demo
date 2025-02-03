@@ -22,7 +22,7 @@ import static apijson.orm.AbstractVerifier.OWNER;
 import static apijson.orm.AbstractVerifier.UNKNOWN;
 
 import apijson.MethodAccess;
-import apijson.framework.BaseModel;
+import apijson.framework.javax.BaseModel;
 
 /**验证码
  * @author Lemon

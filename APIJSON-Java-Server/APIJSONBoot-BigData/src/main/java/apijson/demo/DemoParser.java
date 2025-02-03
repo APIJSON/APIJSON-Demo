@@ -17,8 +17,8 @@ package apijson.demo;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.RequestMethod;
-import apijson.framework.APIJSONObjectParser;
-import apijson.framework.APIJSONParser;
+import apijson.framework.javax.APIJSONObjectParser;
+import apijson.framework.javax.APIJSONParser;
 import apijson.orm.SQLConfig;
 
 
@@ -46,7 +46,7 @@ public class DemoParser extends APIJSONParser<Long> {
 
 
     @Override
-    public APIJSONObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig
+    public APIJSONObjectParser<Long> createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
                 , isSubquery, isTable, isArrayMainTable).setMethod(getMethod()).setParser(this);

@@ -22,7 +22,7 @@ import javax.servlet.http.HttpSession;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.framework.APIJSONObjectParser;
+import apijson.framework.javax.APIJSONObjectParser;
 import apijson.orm.Join;
 import apijson.orm.SQLConfig;
 
@@ -30,7 +30,7 @@ import apijson.orm.SQLConfig;
 /**对象解析器，用来简化 Parser
  * @author Lemon
  */
-public class DemoObjectParser extends APIJSONObjectParser {
+public class DemoObjectParser extends APIJSONObjectParser<Long> {
 
     public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
