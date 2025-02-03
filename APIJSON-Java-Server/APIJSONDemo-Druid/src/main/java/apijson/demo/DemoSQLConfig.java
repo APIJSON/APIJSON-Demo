@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 
 
 /**SQL 配置，这里不配置数据库账号密码等信息，改为使用 DemoDataSourceConfig 来配置

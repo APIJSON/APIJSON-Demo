@@ -18,7 +18,7 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 
