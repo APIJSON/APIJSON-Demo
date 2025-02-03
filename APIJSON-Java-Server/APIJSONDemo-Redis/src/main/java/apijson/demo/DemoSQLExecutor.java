@@ -30,8 +30,8 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static apijson.framework.APIJSONConstant.PRIVACY_;
-import static apijson.framework.APIJSONConstant.USER_;
+import static apijson.framework.javax.APIJSONConstant.PRIVACY_;
+import static apijson.framework.javax.APIJSONConstant.USER_;
 
 
 /**
@@ -46,8 +46,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
     public static final RedisTemplate<String, String> REDIS_TEMPLATE;
     static {
+        RedisStandaloneConfiguration config = new RedisStandaloneConfiguration("127.0.0.1", 6379); // TODO 改成你自己的
+        // 如果需要账号及密码则按以下方式设置
+        // config.setUsername("root"); // TODO 改成你自己的
+        // config.setPassword("apijson"); // TODO 改成你自己的
+
         REDIS_TEMPLATE = new RedisTemplate<>();
-        REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
+        REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(config));
         REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
         REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
         REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
@@ -57,7 +62,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
     @Override
-    public List<JSONObject> getCache(String sql, SQLConfig config) {
+    public List<JSONObject> getCache(String sql, SQLConfig<Long> config) {
         List<JSONObject> list = super.getCache(sql, config);
         if (list == null) {
             list = JSON.parseArray(REDIS_TEMPLATE.opsForValue().get(sql), JSONObject.class);
@@ -66,7 +71,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig config) {
+    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig<Long> config) {
         super.putCache(sql, list, config);
 
         String table = config != null && config.isMain() ? config.getTable() : null;
@@ -80,7 +85,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public synchronized void removeCache(String sql, SQLConfig config) {
+    public synchronized void removeCache(String sql, SQLConfig<Long> config) {
         super.removeCache(sql, config);
         if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
             REDIS_TEMPLATE.expire(sql, 60, TimeUnit.SECONDS);
