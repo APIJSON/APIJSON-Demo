@@ -16,7 +16,7 @@ package apijson.demo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 
 
 /**SQL 配置
