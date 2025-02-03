@@ -25,8 +25,8 @@ import java.util.regex.Pattern;
 
 import apijson.Log;
 import apijson.RequestMethod;
-import apijson.framework.APIJSONSQLConfig;
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 
@@ -37,13 +37,20 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	@Override
-	protected String getKey(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+	protected String getKey(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
 		String key = super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
-		String table_name = config.getTable();
-		if(APIJSONSQLConfig.TABLE_KEY_MAP.containsKey(table_name)) table_name = APIJSONSQLConfig.TABLE_KEY_MAP.get(table_name);
-		String pattern = "^" + table_name + "\\." + "[a-zA-Z]+$";
+		String tbl = config.getTable();
+
+		if (APIJSONSQLConfig.TABLE_KEY_MAP.containsKey(tbl)) {
+			tbl = APIJSONSQLConfig.TABLE_KEY_MAP.get(tbl);
+		}
+
+		String pattern = "^" + tbl + "\\." + "[a-zA-Z]+$";
 		boolean isMatch = Pattern.matches(pattern, key);
-		if(isMatch) key = key.split("\\.")[1];
+		if (isMatch) {
+			key = key.split("\\.")[1];
+		}
+
 		return key;
 	}
 

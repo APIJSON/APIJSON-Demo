@@ -16,7 +16,7 @@ package apijson.demo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 
 
 /**SQL 配置
@@ -44,7 +44,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
     @Override
     public String getDBVersion() {
-        return "4.0.0-alpha-1";  // TODO 改成你自己的
+        return "4.0.1";  // TODO 改成你自己的
     }
 
     @JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
