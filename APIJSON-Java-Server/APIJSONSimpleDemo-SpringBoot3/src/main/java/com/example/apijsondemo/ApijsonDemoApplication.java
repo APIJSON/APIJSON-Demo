@@ -42,7 +42,7 @@ public class ApijsonDemoApplication {
 	// TODO 需要设置限制条件
 	// 支持 APIAuto 中 JavaScript 代码跨域请求
 	@Bean
-	public WebMvcConfigurer corsConfigurer() {
+	public WebMvcConfigurer corsConfig() {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
@@ -60,12 +60,12 @@ public class ApijsonDemoApplication {
 		// 使用本项目的自定义处理类
 		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 			@Override
-			public SQLConfig createSQLConfig() {
+			public SQLConfig<Long> createSQLConfig() {
 				return new DemoSQLConfig();
 			}
 
 			@Override
-			public SQLExecutor createSQLExecutor() {
+			public SQLExecutor<Long> createSQLExecutor() {
 				return new DemoSQLExecutor();
 			}
 		};

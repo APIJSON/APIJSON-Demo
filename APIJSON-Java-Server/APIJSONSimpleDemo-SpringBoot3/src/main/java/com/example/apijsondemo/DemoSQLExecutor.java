@@ -24,7 +24,7 @@ import javax.sql.DataSource;
 
 import com.alibaba.fastjson.JSONObject;
 import apijson.Log;
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 /**
@@ -33,11 +33,11 @@ import apijson.orm.SQLConfig;
  * 
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	public static final String TAG = "SQL执行器";
 
 	// 解决 id 精度丢失 问题
-	protected Object getValue(SQLConfig config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+	protected Object getValue(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
 			JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
 
 		Object value = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
@@ -60,7 +60,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor {
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount,
 	@Override
-	public Connection getConnection(SQLConfig config) throws Exception {
+	public Connection getConnection(SQLConfig<Long> config) throws Exception {
 		String datasource = config.getDatasource();
 
 		Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);

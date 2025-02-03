@@ -70,7 +70,7 @@ public class DemoController extends APIJSONController<Long> {
 	 * @param session
 	 * @return
 	 */
-	@PostMapping(value = "crud/{method}") // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method} 或 Controller 注解
+	@PostMapping(value = "{method}") // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method} 或 Controller 注解
 	@Override
 	public String crud(@PathVariable String method, @RequestBody String request, HttpSession session) {
 		return super.crud(method, request, session);
@@ -86,7 +86,7 @@ public class DemoController extends APIJSONController<Long> {
 	 * @param session
 	 * @return
 	 */
-	@PostMapping("crud/{method}/{tag}") // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method}/{tag} 或 Controller 注解
+	@PostMapping("{method}/{tag}") // 如果和其它的接口 URL 冲突，可以加前缀，例如改为 crud/{method}/{tag} 或 Controller 注解
 	@Override
 	public String crudByTag(@PathVariable String method, @PathVariable String tag,
 			@RequestParam Map<String, String> params, @RequestBody String request, HttpSession session) {

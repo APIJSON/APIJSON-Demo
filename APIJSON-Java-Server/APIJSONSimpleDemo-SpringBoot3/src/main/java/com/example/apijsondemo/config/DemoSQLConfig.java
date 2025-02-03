@@ -1,14 +1,12 @@
 package com.example.apijsondemo.config;
 
-import com.alibaba.fastjson.annotation.JSONField;
-
 import apijson.framework.APIJSONSQLConfig;
 
-public class DemoSQLConfig extends APIJSONSQLConfig {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
     static {
         DEFAULT_DATABASE = DATABASE_MYSQL; // 用的数据库软件
-        DEFAULT_SCHEMA = "apijson"; // 数据库名
+        DEFAULT_SCHEMA = "sys"; // 数据库名
 
         // 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
         // 如果用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
