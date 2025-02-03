@@ -109,8 +109,8 @@ public class DemoSQLConfig extends AbstractSQLConfig<Long> {
 		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
 	}
 	@Override
-	protected void onJoinComplextRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
+	protected void onJoinComplexRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, j, jt, onList, on);
 	}
 
 

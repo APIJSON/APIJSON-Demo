@@ -24,7 +24,7 @@ import apijson.RequestMethod;
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends AbstractFunctionParser {
+public class DemoFunctionParser extends AbstractFunctionParser<Long> {
 	public static final String TAG = "DemoFunctionParser";
 
 

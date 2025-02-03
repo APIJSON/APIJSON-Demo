@@ -30,7 +30,7 @@ import jakarta.servlet.http.HttpSession;
 /**对象解析器，用来简化 Parser
  * @author Lemon
  */
-public class DemoObjectParser extends AbstractObjectParser {
+public class DemoObjectParser extends AbstractObjectParser<Long> {
 
     public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {

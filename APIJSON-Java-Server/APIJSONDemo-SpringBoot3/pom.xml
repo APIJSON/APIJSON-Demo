@@ -5,14 +5,14 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.0.6</version>
+		<version>3.2.5</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
 	<name>apijson-demo</name>
 	<description>Demo project for Spring Boot</description>
-	<version>7.0.3</version>
+	<version>7.1.0</version>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>7.0.3</version>
+			<version>7.1.0</version>
 		</dependency>
 
 		<!-- 数据库 JDBC 驱动 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< -->
@@ -42,11 +42,13 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
+			<version>3.2.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<version>3.2.5</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
@@ -56,6 +58,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.2.5</version>
 			</plugin>
 		</plugins>
 	</build>

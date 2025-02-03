@@ -85,24 +85,24 @@ public class DemoParser extends AbstractParser<Long> {
     }
 
     @Override
-    public ObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig
+    public ObjectParser<Long> createObjectParser(JSONObject request, String parentPath, SQLConfig<Long> arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
                 , isSubquery, isTable, isArrayMainTable).setMethod(getMethod()).setParser(this);
     }
 
     @Override
-    public FunctionParser createFunctionParser() {
+    public FunctionParser<Long> createFunctionParser() {
         return new DemoFunctionParser();
     }
 
     @Override
-    public SQLConfig createSQLConfig() {
+    public SQLConfig<Long> createSQLConfig() {
         return new DemoSQLConfig();
     }
 
     @Override
-    public SQLExecutor createSQLExecutor() {
+    public SQLExecutor<Long> createSQLExecutor() {
         return new DemoSQLExecutor();
     }
 
@@ -111,11 +111,13 @@ public class DemoParser extends AbstractParser<Long> {
         return new DemoVerifier();
     }
 
-    private FunctionParser functionParser;
-    public FunctionParser getFunctionParser() {
+    private FunctionParser<Long> functionParser;
+    public FunctionParser<Long> getFunctionParser() {
         return functionParser;
     }
-    public Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject, boolean containRaw) throws Exception {
+
+    public Object onFunctionParse(String key, String function, String parentPath, String currentName
+            , JSONObject currentObject, boolean containRaw) throws Exception {
         if (functionParser == null) {
             functionParser = createFunctionParser();
             functionParser.setMethod(getMethod());
