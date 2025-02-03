@@ -30,15 +30,17 @@ import org.noear.solon.core.handle.SessionState;
 /**对象解析器，用来简化 Parser
  * @author Lemon
  */
-public class DemoObjectParser extends AbstractObjectParser {
+public class DemoObjectParser extends AbstractObjectParser<Long> {
 
     public DemoObjectParser(SessionState session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         super(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
     }
 
+
     @Override
     public SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
         return DemoSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure);
     }
+
 }
