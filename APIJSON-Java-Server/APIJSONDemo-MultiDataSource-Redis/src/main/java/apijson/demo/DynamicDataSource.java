@@ -93,7 +93,7 @@ public class DynamicDataSource implements ApplicationRunner {
 
 		initRedisSingle();
 		
-		initRedisSentinel();
+		//initRedisSentinel();
 	}
 
 

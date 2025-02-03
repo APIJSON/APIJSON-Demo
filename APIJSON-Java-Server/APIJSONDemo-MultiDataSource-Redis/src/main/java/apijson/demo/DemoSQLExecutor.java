@@ -36,7 +36,7 @@ import apijson.demo.redis.RedisBuildData;
 import apijson.demo.redis.RedisClusterModelEnum;
 import apijson.demo.redis.RedisExecutor;
 import apijson.demo.resultSet.DataBuildResultSet;
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 import lombok.extern.log4j.Log4j2;
 import redis.clients.jedis.ListPosition;
@@ -51,13 +51,13 @@ import unitauto.JSON;
  * @author Lemon
  */
 @Log4j2
-public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<String> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount,
 	// dbPassword
 	@Override
-	public Connection getConnection(SQLConfig config) throws Exception {
+	public Connection getConnection(SQLConfig<String> config) throws Exception {
 		String datasource = config.getDatasource();
 		Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
 
@@ -71,7 +71,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	}
 
 	@Override
-	public ResultSet executeQuery(@NotNull SQLConfig config, String sql) throws Exception {
+	public ResultSet executeQuery(@NotNull SQLConfig<String> config, String sql) throws Exception {
 		if (config.isRedis()) {
 			return redisExecuteQuery(config, sql);
 		}
@@ -80,7 +80,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	
 	
 	@Override
-	public int executeUpdate(@NotNull SQLConfig config, String sql) throws Exception {
+	public int executeUpdate(@NotNull SQLConfig<String> config, String sql) throws Exception {
 		if (config.isRedis()) {
 			return redisExecuteUpdate(config, sql).intValue();
 		}
@@ -88,7 +88,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public ResultSet redisExecuteQuery(@NotNull SQLConfig config, String sql) throws Exception {
+	public ResultSet redisExecuteQuery(@NotNull SQLConfig<String> config, String sql) throws Exception {
 		try {
 			List<List<Object>> rsData = new ArrayList<>();
 			List<String> headers = new ArrayList<>();
@@ -517,7 +517,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 		return null;
 	}
 
-	private Long redisExecuteUpdate(@NotNull SQLConfig config, String sql) throws Exception {
+	private Long redisExecuteUpdate(@NotNull SQLConfig<String> config, String sql) throws Exception {
 		try {
 			RedisExecutor redisExecutor = DynamicDataSource.getDetail(config.getDatasource()).getRedisExecutor();
 			String configTable = config.getTable();

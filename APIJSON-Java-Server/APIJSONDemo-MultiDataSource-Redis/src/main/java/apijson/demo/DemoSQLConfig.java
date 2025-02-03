@@ -19,7 +19,7 @@ import java.util.UUID;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 
 
@@ -29,7 +29,7 @@ import apijson.orm.AbstractSQLConfig;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
+public class DemoSQLConfig extends APIJSONSQLConfig<String> {
 
 	public DemoSQLConfig() {
 		super();
@@ -52,7 +52,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
         SIMPLE_CALLBACK = new SimpleCallback<String>() {
 
 			@Override
-			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema,
+			public AbstractSQLConfig<String> getSQLConfig(RequestMethod method, String database, String schema,
 					String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}

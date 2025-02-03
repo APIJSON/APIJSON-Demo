@@ -59,7 +59,7 @@ public class RedisDataSource {
 	}
 	
 	public void createSentinel() {
-		Set<String> sentinels = new HashSet<String>(Arrays.asList("xxx:26379", "xxx:26380", "xxx:26381"));
+		Set<String> sentinels = new HashSet<String>(Arrays.asList("localhost:26379", "localhost:26380", "localhost:26381"));
 		// 创建Jedis配置对象
 		String password = "";
 		Integer port = 6379;
@@ -72,7 +72,8 @@ public class RedisDataSource {
 		poolConfig.setTestOnReturn(TEST_ON_RETURN);
 		String masterName = "mymaster";
 		// 初始化
-		sentinelPool = new JedisSentinelPool(masterName, sentinels, poolConfig, TIMEOUT, password);
+		sentinelPool = new JedisSentinelPool(masterName, sentinels, poolConfig, TIMEOUT);
+		//sentinelPool = new JedisSentinelPool(masterName, sentinels, poolConfig, TIMEOUT, password);
 	}
 
 	/**
@@ -81,12 +82,20 @@ public class RedisDataSource {
 	public void createCluster() {
 		Set<HostAndPort> jedisClusterNode = new HashSet<HostAndPort>();
 		String password = "apijson";
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6371));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6372));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6373));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6374));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6375));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6376));
+
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6380));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6381));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6382));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6383));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6384));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6385));
+
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6371));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6372));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6373));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6374));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6375));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6376));
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		/*
 		 * 注意： 在高版本的jedis jar包，比如本版本2.9.0，JedisPoolConfig没有setMaxActive和setMaxWait属性了
@@ -103,9 +112,9 @@ public class RedisDataSource {
 		int maxAttempts = 5;
 		// JedisCluster jc = new JedisCluster(jedisClusterNode, DEFAULT_TIMEOUT,
 		// DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
-		jedisCluster = new JedisCluster(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
+		jedisCluster = new JedisCluster(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, poolConfig);
+		//jedisCluster = new JedisCluster(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, password, poolConfig);
 		log.info("节点信息:{}", jedisCluster.getClusterNodes().keySet());
 	}
-
 	
 }
