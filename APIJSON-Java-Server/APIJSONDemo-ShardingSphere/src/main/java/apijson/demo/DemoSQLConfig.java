@@ -16,7 +16,7 @@ package apijson.demo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 
 
 /**SQL 配置
@@ -50,7 +50,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
 	public String getDBUri() {
-		return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+		if (isConfigTable()) {
+			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+		}
+		return "jdbc:shardingsphere:classpath:config.yaml"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 	}
 	
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
@@ -65,4 +68,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
 	}
 
+	@Override
+	public String getSQLSchema() {
+		return isConfigTable() ? super.getSQLSchema() : null;
+	}
 }

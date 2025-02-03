@@ -15,11 +15,13 @@ limitations under the License.*/
 package apijson.demo;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.Map;
 
 import javax.sql.DataSource;
 
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 
@@ -32,21 +34,30 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
 	@Override
-	public Connection getConnection(SQLConfig config) throws Exception {
+	public Connection getConnection(SQLConfig<Long> config) throws Exception {
 		//		Log.d(TAG, "getConnection  config.getDatasource() = " + config.getDatasource());
 
-		String key = config.getDatasource() + "-" + config.getDatabase();
-		Connection c = connectionMap.get(key);
-		if (c == null || c.isClosed()) {
-			Map<String, DataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DataSource.class);
-            DataSource ds = dsMap == null ? null : dsMap.get("dataSourceDS0");
-			// 另一种方式是 DemoDataSourceConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DemoDataSourceConfig.DATA_SOURCE.getConnection();
-			connectionMap.put(key, ds == null ? null : ds.getConnection());
-		}
+		//String key = config.getDatasource() + "-" + config.getDatabase();
+		//Connection c = connectionMap.get(key);
+		//if (c == null || c.isClosed()) {
+		//	Map<String, DataSource> dsMap = DemoApplication.getApplicationContext().getBeansOfType(DataSource.class);
+        //    DataSource ds = dsMap == null ? null : dsMap.get("dataSourceDS0");
+		//	// 另一种方式是 DemoDataSourceConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DemoDataSourceConfig.DATA_SOURCE.getConnection();
+		//	connectionMap.put(key, ds == null ? null : ds.getConnection());
+		//}
 
 		// 必须最后执行 super 方法，因为里面还有事务相关处理。
 		// 如果这里是 return c，则会导致 增删改 多个对象时只有第一个会 commit，即只有第一个对象成功插入数据库表
 		return super.getConnection(config);
 	}
 
+	@Override
+	public ResultSet executeQuery(SQLConfig<Long> config, String sql) throws Exception {
+		return super.executeQuery(config, sql);
+	}
+
+	@Override
+	public ResultSet executeQuery(Statement statement, String sql) throws Exception {
+		return super.executeQuery(statement, sql);
+	}
 }
