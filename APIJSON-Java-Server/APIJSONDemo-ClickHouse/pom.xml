@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>7.0.3</version>
+	<version>7.1.5</version>
 
 	<name>APIJSONDemo-ClickHouse</name>
 	<description>Demo project for testing APIJSON server based on SpringBoot</description>
@@ -13,7 +13,11 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<java.version>1.8</java.version>
+		<java.version>17</java.version>
+		<maven.compiler.encoding>UTF-8</maven.compiler.encoding>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<version>3.2.5</version>
 	</properties>
 
 	<dependencies>
@@ -45,12 +49,12 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>7.0.3</version>
+			<version>7.1.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>7.0.3</version>
+			<version>7.1.5</version>
 		</dependency>
 
         <!-- Oracle, SQLServer 等其它数据库的 JDBC 驱动，可以在这里加上 Maven 依赖或 libs 目录放 Jar 包并依赖 -->
@@ -69,6 +73,7 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<version>3.2.5</version>
 				<executions>
 					<execution>
 						<goals>
@@ -80,9 +85,10 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>17</source>
+					<target>17</target>
 				</configuration>
 			</plugin>
 		</plugins>
