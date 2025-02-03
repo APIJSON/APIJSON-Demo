@@ -12,9 +12,40 @@ Access、Request配置 访问操作权限 <br/>
 rediSQL安装使用 <br/>
 https://github.com/RedBeardLab/rediSQL
 
+下载 rediSQL.so
+https://github.com/RedBeardLab/rediSQL/releases
+
+启动 redis-server 并加载 RediSQL.so
+```shell
+redis-server --loadmodule RediSQL_<version>.so
+```
+
+例如
+```shell
+redis-server --loadmodule RediSQL_v1.1.1_9b110f__debug.so
+```
+
+```shell
+redis-server --loadmodule RediSQL_v1.1.1_9b110f__release.so
+```
+
+```shell
+redis-server --loadmodule RediSQL_v1.1.1_9b110f_x86_64-unknown-linux-gnu_debug.so
+```
+
+```shell
+redis-server --loadmodule RediSQL_v1.1.1_9b110f_armv7-unknown-linux-gnueabihf_debug.so
+```
+
+```shell
+redis-server --loadmodule RediSQL_v1.1.1_9b110f_arm-unknown-linux-gnueabi_debug.so
+```
+
 官方docker安装 <br/>
+```shell
 docker pull dalongrong/redisql
 docker run -itd --name redisql -p 6399:6379  dalongrong/redisql
+```
 
 rediSQL注意事项 <br/>
 rediSQL免费版有后遥控制,每个小时会发送 redist info 统计信息<br/>
@@ -30,7 +61,7 @@ https://www.youtube.com/watch?v=YRusC-AIq_g
 将 libredis_sql.so 导入redis.config<br/>
 --loadmodule /etc/redis/libredis_sql.so<br/>
 rediSQL 创建数据库表命令 <br/>
-```
+```shell
 REDISQL.EXEC DB "CREATE TABLE REDIS_TABLE_A(id TEXT, A INT, B TEXT, C TEXT, userId TEXT);"
 
 REDISQL.EXEC DB "INSERT INTO REDIS_TABLE_A(id,A,B,C,userId) VALUES('1', 3, '1c', 'bar','1');"

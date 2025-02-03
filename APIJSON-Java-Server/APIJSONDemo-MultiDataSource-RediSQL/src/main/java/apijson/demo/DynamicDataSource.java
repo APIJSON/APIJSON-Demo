@@ -65,7 +65,7 @@ public class DynamicDataSource implements ApplicationRunner {
 	public static DynamicDataSource getDetail(String datasource) {
 		if (datasource == null) {
 			// 默认数据源
-			datasource = DataBaseConfig.getInstence().getPrimary();
+			datasource = DataBaseConfig.getInstance().getPrimary();
 		}
 		// 不存在交给框架处理
 		return dataSourceMap.get(datasource);

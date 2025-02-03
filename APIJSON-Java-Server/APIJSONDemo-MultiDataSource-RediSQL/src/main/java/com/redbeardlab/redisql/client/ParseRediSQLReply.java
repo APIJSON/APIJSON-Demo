@@ -4,18 +4,23 @@ import java.util.List;
 
 public class ParseRediSQLReply {
     public static boolean done_reply(List<Object> reply) {
-        if (reply.size() != 2) { return false; }
-        if ((reply.get(0) instanceof byte[]) && (new String((byte[])reply.get(0)).equals("DONE"))) {
+        if (reply == null || reply.size() != 2) {
+            return false;
+        }
+
+        Object first = reply.get(0);
+        if ((first instanceof byte[]) && (new String((byte[]) first).equals("DONE"))) {
             return (reply.get(1) instanceof Long);
         }
+
         return false;
     }
 
     public static Long how_many_done(List<Object> reply)  {
-        if (reply == null || reply.size() == 0 ||done_reply(reply) == false) {
+        if (reply == null || reply.isEmpty() || ! done_reply(reply)) {
             return 0L;
         }
-        return (Long)reply.get(1);
+        return (Long) reply.get(1);
     }
 
     public static boolean is_integer(Object o) {

@@ -51,12 +51,22 @@ public class JedisClusterUtil {
 	 */
 	public void createJedisPool() {
 		Set<HostAndPort> jedisClusterNode = new HashSet<HostAndPort>();
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6371));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6372));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6373));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6374));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6375));
-		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6376));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6379));
+
+		// TODO 至少启动 6 个节点，参考教程 https://medium.com/@bertrandoubida/setting-up-redis-cluster-on-macos-cf35a21465a
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6380));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6381));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6382));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6383));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6384));
+		jedisClusterNode.add(new HostAndPort("127.0.0.1", 6385));
+
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6371));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6372));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6373));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6374));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6375));
+		//jedisClusterNode.add(new HostAndPort("127.0.0.1", 6376));
 		JedisPoolConfig poolConfig = new JedisPoolConfig();
 		/*
 		 * 注意： 在高版本的jedis jar包，比如本版本2.9.0，JedisPoolConfig没有setMaxActive和setMaxWait属性了
@@ -73,7 +83,8 @@ public class JedisClusterUtil {
 		int maxAttempts = 5;
 		// JedisCluster jc = new JedisCluster(jedisClusterNode, DEFAULT_TIMEOUT,
 		// DEFAULT_TIMEOUT, DEFAULT_REDIRECTIONS, "cluster", DEFAULT_CONFIG);
-		jedisCluster = new JedisCluster(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, PASSWORD, poolConfig);
+		jedisCluster = new JedisCluster(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, poolConfig); // TODO 如果需要密码则用下面一行代码，并设置正确的密码
+		//jedisCluster = new JedisCluster(jedisClusterNode, connectionTimeout, soTimeout, maxAttempts, PASSWORD, poolConfig);
 		log.info("节点信息:{}", jedisCluster.getClusterNodes().keySet());
 	}
 
@@ -92,7 +103,6 @@ public class JedisClusterUtil {
 	public Jedis getJedis(String key) {
 		int slot = JedisClusterCRC16.getSlot(key);
 		return jedisCluster.getConnectionFromSlot(slot);
-
 	}
 
 	private String ok_returns(RediSQLCommand.ModuleCommand cmd, String... args) {
