@@ -26,8 +26,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import apijson.Log;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
+import apijson.framework.javax.APIJSONApplication;
+import apijson.framework.javax.APIJSONCreator;
 import apijson.orm.SQLConfig;
 
 
@@ -60,7 +60,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
     // 支持 APIAuto 中 JavaScript 代码跨域请求
     @Bean
-    public WebMvcConfigurer corsConfigurer() {
+    public WebMvcConfigurer corsConfig() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
@@ -77,7 +77,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         // 使用本项目的自定义处理类
         APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
             @Override
-            public SQLConfig createSQLConfig() {
+            public SQLConfig<Long> createSQLConfig() {
                 return new DemoSQLConfig();
             }
         };
