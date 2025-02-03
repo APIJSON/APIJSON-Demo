@@ -16,11 +16,11 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.framework.APIJSONConstant;
-import apijson.framework.APIJSONFunctionParser;
-import apijson.router.APIJSONRouterVerifier;
+import apijson.framework.javax.APIJSONConstant;
+import apijson.framework.javax.APIJSONFunctionParser;
+import apijson.router.javax.APIJSONRouterVerifier;
 
-public class DemoFunctionParser extends APIJSONFunctionParser {
+public class DemoFunctionParser extends APIJSONFunctionParser<String> {
 	public DemoFunctionParser() {
 		this(null, null, 0, null, null);
 	}

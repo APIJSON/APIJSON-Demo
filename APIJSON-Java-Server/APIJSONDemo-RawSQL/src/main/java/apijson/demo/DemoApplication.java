@@ -28,8 +28,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import apijson.Log;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
+import apijson.framework.javax.APIJSONApplication;
+import apijson.framework.javax.APIJSONCreator;
 import apijson.orm.FunctionParser;
 import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
@@ -87,19 +87,19 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
 	static {
 		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
+		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<String>() {
 			@Override
-			public SQLConfig createSQLConfig() {
+			public SQLConfig<String> createSQLConfig() {
 				return new DemoSQLConfig();
 			}
 
 			@Override
-			public SQLExecutor createSQLExecutor() {
+			public SQLExecutor<String> createSQLExecutor() {
 				return new DemoSQLExecutor();
 			}
 			
 			@Override
-			public FunctionParser createFunctionParser() {
+			public FunctionParser<String> createFunctionParser() {
 				return new DemoFunctionParser();
 			}
 		};

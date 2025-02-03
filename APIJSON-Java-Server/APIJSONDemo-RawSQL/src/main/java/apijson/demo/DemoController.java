@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.orm.Parser;
-import apijson.router.APIJSONRouterController;
+import apijson.router.javax.APIJSONRouterController;
 
 
 /**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理

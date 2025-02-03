@@ -18,7 +18,7 @@ import java.sql.Connection;
 
 import javax.sql.DataSource;
 
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 
 
@@ -26,12 +26,12 @@ import apijson.orm.SQLConfig;
  * 具体见 https://github.com/Tencent/APIJSON/issues/151
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<String> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
 	@Override
-	public Connection getConnection(SQLConfig config) throws Exception {
+	public Connection getConnection(SQLConfig<String> config) throws Exception {
 		//		Log.d(TAG, "getConnection  config.getDatasource() = " + config.getDatasource());
 
 		String key = config.getDatasource() + "-" + config.getDatabase();
