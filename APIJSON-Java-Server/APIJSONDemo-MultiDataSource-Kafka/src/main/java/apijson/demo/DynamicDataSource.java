@@ -85,7 +85,7 @@ public class DynamicDataSource implements ApplicationRunner {
 			ItemDataSource dataSource = (ItemDataSource) dataSourceList.getDataSources().get(datasourceName);
 			DruidDataSource druid = (DruidDataSource) dataSource.getRealDataSource();
 			String url = druid.getDataSourceStat().getUrl(); // 数据库连接url
-			String schema = DataBaseUtil.getLibname(url); // 数据库名;
+			String schema = DataBaseUtil.getDbName(url); // 数据库名;
 			String database = JdbcUtils.getDbType(url).getDb().toUpperCase(); // 数据库类型
 			String dbAccount = druid.getUsername(); // 数据库用户名
 			String dbPassword = druid.getPassword(); // 数据库密码
@@ -111,9 +111,9 @@ public class DynamicDataSource implements ApplicationRunner {
 		/* 1.创建kafka生产者的配置信息 */
 		Properties props = new Properties();
 		/*2.指定连接的kafka集群, broker-list */
-		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "xxx:9092");  
+		props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "http://localhost:9092"); // TODO 改成你自己的
 		/*3.ack应答级别*/
-		props.put(ProducerConfig.ACKS_CONFIG, "all");
+		props.put(ProducerConfig.ACKS_CONFIG, "all"); // TODO 改成你自己的
 		/*4.重试次数*/ 
 		props.put(ProducerConfig.RETRIES_CONFIG, 3); 
 		/*5.批次大小，一次发送多少数据，当数据大于16k，生产者会发送数据到 kafka集群 */
@@ -128,11 +128,11 @@ public class DynamicDataSource implements ApplicationRunner {
 		
 		
 		DynamicDataSource dynDataSource = new DynamicDataSource();
-		dynDataSource.setDatasourceName("kafka");
-		dynDataSource.setDatabase("MQ");
+		dynDataSource.setDatasourceName("kafka"); // TODO 改成你自己的
+		dynDataSource.setDatabase("MQ"); // TODO 改成你自己的
 		dynDataSource.setSchema(""); // 不需要配置数据库名
-		dynDataSource.setDbVersion("2.8.1"); // 后面做成动态的
-		dynDataSource.setClusterName("kafka");
+		dynDataSource.setDbVersion("2.8.1"); // TODO 改成你自己的 后面做成动态的
+		dynDataSource.setClusterName("kafka"); // TODO 改成你自己的
 		dynDataSource.setProps(props);
 		dataSourceMap.put(dynDataSource.getDatasourceName(), dynDataSource);
 	}

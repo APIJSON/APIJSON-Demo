@@ -8,11 +8,11 @@ import com.alibaba.fastjson.JSONObject;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.framework.APIJSONObjectParser;
+import apijson.framework.javax.APIJSONObjectParser;
 import apijson.orm.Join;
 import apijson.orm.SQLConfig;
 
-public class DemoObjectParser extends APIJSONObjectParser {
+public class DemoObjectParser extends APIJSONObjectParser<String> {
 	
     public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {

@@ -12,7 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class KafkaSimpleProducer {
 
-	public static int sendMessage(String datasource, Properties props,String topic, Object message) {
+	public static int sendMessage(String datasource, Properties props, String topic, Object message) {
 		KafkaProducer<String, Object> producer = null;
 		try {
 			/* 9.创建生产者对象 */
@@ -25,7 +25,7 @@ public class KafkaSimpleProducer {
 			e.printStackTrace();
 			throw new IllegalArgumentException("动态数据源配置错误 " + datasource);
 		} finally {
-			if(producer != null) {
+			if (producer != null) {
 				/* 关闭资源 */  
 				producer.close();
 			}

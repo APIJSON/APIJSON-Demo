@@ -26,8 +26,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import apijson.Log;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
+import apijson.framework.javax.APIJSONApplication;
+import apijson.framework.javax.APIJSONCreator;
 import apijson.orm.AbstractFunctionParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
@@ -62,11 +62,14 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
 	// 支持 APIAuto 中 JavaScript 代码跨域请求
 	@Bean
-	public WebMvcConfigurer corsConfigurer() {
+	public WebMvcConfigurer corsConfig() {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
-				registry.addMapping("/**").allowedOriginPatterns("*").allowedMethods("*").allowCredentials(true)
+				registry.addMapping("/**")
+						.allowedOriginPatterns("*")
+						.allowedMethods("*")
+						.allowCredentials(true)
 						.maxAge(3600);
 			}
 		};
@@ -81,17 +84,17 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 			}
 
 			@Override
-			public SQLConfig createSQLConfig() {
+			public SQLConfig<String> createSQLConfig() {
 				return new DemoSQLConfig();
 			}
 
 			@Override
-			public FunctionParser createFunctionParser() {
+			public FunctionParser<String> createFunctionParser() {
 				return new DemoFunctionParser();
 			}
 
 			@Override
-			public SQLExecutor createSQLExecutor() {
+			public SQLExecutor<String> createSQLExecutor() {
 				return new DemoSQLExecutor();
 			}
 		};
