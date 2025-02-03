@@ -15,7 +15,7 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.RequestMethod;
-import apijson.framework.APIJSONParser;
+import apijson.framework.javax.APIJSONParser;
 
 
 /**请求解析器

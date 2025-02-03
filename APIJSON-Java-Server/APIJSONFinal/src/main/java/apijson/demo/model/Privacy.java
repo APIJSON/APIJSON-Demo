@@ -21,7 +21,7 @@ import static apijson.orm.AbstractVerifier.UNKNOWN;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.MethodAccess;
-import apijson.framework.BaseModel;
+import apijson.framework.javax.BaseModel;
 
 /**
  * TODO 漏洞：如果GETS允许CONTACT，则CONTACT能看到自己的余额，tag可以不是Privacy-circle。

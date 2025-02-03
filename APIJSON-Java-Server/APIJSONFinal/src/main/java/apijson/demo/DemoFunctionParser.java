@@ -28,7 +28,7 @@ import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.framework.APIJSONFunctionParser;
+import apijson.framework.javax.APIJSONFunctionParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.JSONRequest;
 import apijson.orm.Visitor;
