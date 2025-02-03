@@ -16,7 +16,7 @@ public class DataBaseConfig {
 		return primary;
 	}
 
-	public static DataBaseConfig getInstence() {
+	public static DataBaseConfig getInstance() {
 		return SpringContextUtils.getBean(DataBaseConfig.class);
 	}
 }

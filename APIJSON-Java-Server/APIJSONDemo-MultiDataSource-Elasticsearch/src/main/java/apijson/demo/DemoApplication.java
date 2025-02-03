@@ -26,9 +26,9 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import apijson.Log;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONApplication;
+import apijson.framework.javax.APIJSONCreator;
+import apijson.framework.javax.APIJSONSQLConfig;
 import apijson.orm.AbstractFunctionParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
@@ -67,7 +67,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
 	// 支持 APIAuto 中 JavaScript 代码跨域请求
 	@Bean
-	public WebMvcConfigurer corsConfigurer() {
+	public WebMvcConfigurer corsConfig() {
 		return new WebMvcConfigurer() {
 			@Override
 			public void addCorsMappings(CorsRegistry registry) {
@@ -79,24 +79,24 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
 	static {
 		// 使用本项目的自定义处理类
-		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<String>() {
+		APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Object>() {
 			@Override
-			public Parser<String> createParser() {
+			public Parser<Object> createParser() {
 				return new DemoParser();
 			}
 
 			@Override
-			public SQLConfig createSQLConfig() {
+			public SQLConfig<Object> createSQLConfig() {
 				return new DemoSQLConfig();
 			}
 
 			@Override
-			public FunctionParser createFunctionParser() {
+			public FunctionParser<Object> createFunctionParser() {
 				return new DemoFunctionParser();
 			}
 
 			@Override
-			public SQLExecutor createSQLExecutor() {
+			public SQLExecutor<Object> createSQLExecutor() {
 				return new DemoSQLExecutor();
 			}
 		};

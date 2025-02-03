@@ -75,7 +75,7 @@ public class DynamicJdbcDataSource implements ApplicationRunner {
 	public static DynamicJdbcDataSource getDetail(String datasource) {
 		if (datasource == null) {
 			// 默认数据源
-			datasource = DataBaseConfig.getInstence().getPrimary();
+			datasource = DataBaseConfig.getInstance().getPrimary();
 		}
 		// 不存在交给框架处理
 		return dataSourceMap.get(datasource);
@@ -157,7 +157,7 @@ public class DynamicJdbcDataSource implements ApplicationRunner {
 			ItemDataSource dataSource = (ItemDataSource) dataSourceList.getDataSources().get(datasourceName);
 			DruidDataSource druid = (DruidDataSource) dataSource.getRealDataSource();
 			String url = druid.getDataSourceStat().getUrl(); // 数据库连接url
-			String schema = DataBaseUtil.getLibname(url); // 数据库名;
+			String schema = DataBaseUtil.getDBName(url); // 数据库名;
 			String database = JdbcUtils.getDbType(url).getDb().toUpperCase(); // 数据库类型
 			String dbAccount = druid.getUsername(); // 数据库用户名
 			String dbPassword = druid.getPassword(); // 数据库密码

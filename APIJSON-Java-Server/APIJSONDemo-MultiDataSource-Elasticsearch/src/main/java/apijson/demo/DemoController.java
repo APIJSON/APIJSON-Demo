@@ -29,7 +29,7 @@ import javax.servlet.http.HttpSession;
 
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.framework.APIJSONController;
+import apijson.framework.javax.APIJSONController;
 import apijson.orm.Parser;
 
 
@@ -46,10 +46,10 @@ import apijson.orm.Parser;
  */
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONController<Long> {
+public class DemoController extends APIJSONController<Object> {
 
 	@Override
-	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+	public Parser<Object> newParser(HttpSession session, RequestMethod method) {
 		return super.newParser(session, method).setNeedVerify(false);  // TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
 	}
 

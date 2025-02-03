@@ -141,10 +141,10 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         return getRequestBaseURL() + getRequestPath();
     }
 
-    //  @Override
-    //  public Parser<Long> newParser(HttpSession session, RequestMethod method) {
-    //      return super.newParser(session, method).setNeedVerify(false);
-    //  }
+      @Override
+      public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+          return super.newParser(session, method).setNeedVerify(false);
+      }
 
     /**增删改查统一的类 RESTful API 入口，牺牲一点路由解析性能来提升一些开发效率
      * @param method

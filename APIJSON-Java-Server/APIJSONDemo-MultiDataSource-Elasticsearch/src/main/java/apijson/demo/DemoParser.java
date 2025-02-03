@@ -3,11 +3,11 @@ package apijson.demo;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.RequestMethod;
-import apijson.framework.APIJSONObjectParser;
-import apijson.framework.APIJSONParser;
+import apijson.framework.javax.APIJSONObjectParser;
+import apijson.framework.javax.APIJSONParser;
 import apijson.orm.SQLConfig;
 
-public class DemoParser extends APIJSONParser<String> {
+public class DemoParser extends APIJSONParser<Object> {
 	public DemoParser() {
 		super();
 	}

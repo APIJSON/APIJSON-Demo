@@ -7,12 +7,12 @@ import com.alibaba.fastjson.JSONObject;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.framework.APIJSONFunctionParser;
-import apijson.framework.APIJSONVerifier;
+import apijson.framework.javax.APIJSONFunctionParser;
+import apijson.framework.javax.APIJSONVerifier;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class DemoFunctionParser extends APIJSONFunctionParser {
+public class DemoFunctionParser extends APIJSONFunctionParser<Object> {
 	public DemoFunctionParser() {
 		this(null, null, 0, null, null);
 	}

@@ -19,7 +19,7 @@ import javax.sql.DataSource;
 import apijson.Log;
 import apijson.NotNull;
 import apijson.StringUtil;
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.framework.javax.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 import lombok.extern.log4j.Log4j2;
 
@@ -29,7 +29,7 @@ import lombok.extern.log4j.Log4j2;
  * @author Lemon
  */
 @Log4j2
-public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Object> {
 	public static final String TAG = "DemoSQLExecutor";
 
 	// 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig 不需要配置 dbVersion, dbUri, dbAccount,
@@ -68,33 +68,33 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	/***
 	 * 查询返回字段值进行二次处理
 	 */
-//	@Override
-//	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
-//			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Join join, Map<String, JSONObject> childMap) throws Exception {
-//		if (table == null) {  // 对应副表 viceSql 不能生成正常 SQL， 或者是 ! - Outer, ( - ANTI JOIN 的副表这种不需要缓存及返回的数据
-//			Log.i(TAG, "onPutColumn table == null >> return table;");
-//			return table;
-//		}
-//
-//		if (isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap)) {
-//			Log.i(TAG, "onPutColumn isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap) >> return table;");
-//			return table;
-//		}
-//
-//		String label = getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
-//		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, label, childMap);
-//		
-//		// TODO
-//		if(StringUtils.equals(config.getTable(), "User") && StringUtils.equals(label, "addr_id")) {
-//			value = "1-1-1";
-//		}
-//		// 主表必须 put 至少一个 null 进去，否则全部字段为 null 都不 put 会导致中断后续正常返回值
-//		if (value != null || (join == null && table.isEmpty())) {
-//			table.put(label, value);
-//		}
-//
-//		return table;
-//	}
+	//	@Override
+	//	protected JSONObject onPutColumn(@NotNull SQLConfig config, @NotNull ResultSet rs, @NotNull ResultSetMetaData rsmd
+	//			, final int tablePosition, @NotNull JSONObject table, final int columnIndex, Join join, Map<String, JSONObject> childMap) throws Exception {
+	//		if (table == null) {  // 对应副表 viceSql 不能生成正常 SQL， 或者是 ! - Outer, ( - ANTI JOIN 的副表这种不需要缓存及返回的数据
+	//			Log.i(TAG, "onPutColumn table == null >> return table;");
+	//			return table;
+	//		}
+	//
+	//		if (isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap)) {
+	//			Log.i(TAG, "onPutColumn isHideColumn(config, rs, rsmd, tablePosition, table, columnIndex, childMap) >> return table;");
+	//			return table;
+	//		}
+	//
+	//		String label = getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
+	//		Object value = getValue(config, rs, rsmd, tablePosition, table, columnIndex, label, childMap);
+	//
+	//		// TODO
+	//		if(StringUtils.equals(config.getTable(), "User") && StringUtils.equals(label, "addr_id")) {
+	//			value = "1-1-1";
+	//		}
+	//		// 主表必须 put 至少一个 null 进去，否则全部字段为 null 都不 put 会导致中断后续正常返回值
+	//		if (value != null || (join == null && table.isEmpty())) {
+	//			table.put(label, value);
+	//		}
+	//
+	//		return table;
+	//	}
 
 	// 取消注释支持 !key 反选字段 和 字段名映射，需要先依赖插件 https://github.com/APIJSON/apijson-column
 	// @Override

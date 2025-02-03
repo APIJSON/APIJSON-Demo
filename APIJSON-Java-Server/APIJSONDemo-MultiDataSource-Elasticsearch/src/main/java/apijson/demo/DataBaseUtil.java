@@ -13,7 +13,7 @@ public class DataBaseUtil {
      * @param url
      * @return
      */
-    public static String getLibname(String url) {
+    public static String getDBName(String url) {
         Pattern p = Pattern.compile("jdbc:(?<db>\\w+):.*((//)|@)(?<host>.+):(?<port>\\d+)(/|(;DatabaseName=)|:)(?<dbName>\\w+)\\??.*");
         Matcher m = p.matcher(url);
         if(m.find()) {
@@ -41,7 +41,7 @@ public class DataBaseUtil {
 	}
 
 	public static String getDruidSchema(String datasource) {
-		return getLibname(DynamicJdbcDataSource.getDetail(datasource).getUrl()); // 数据库名;
+		return getDBName(DynamicJdbcDataSource.getDetail(datasource).getUrl()); // 数据库名;
 	}
 	
 	public static String getDruidDBAccount(String datasource) {

@@ -19,7 +19,7 @@ import java.util.UUID;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.javax.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 
 
@@ -29,7 +29,7 @@ import apijson.orm.AbstractSQLConfig;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
+public class DemoSQLConfig extends APIJSONSQLConfig<Object> {
 
 	public DemoSQLConfig() {
 		super();
@@ -40,8 +40,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 	
     static {
-//        DEFAULT_DATABASE = DATABASE_ELASTICSEARCH;  // TODO 默认数据库类型，改成你自己的
-//        DEFAULT_SCHEMA = "sys";  // TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle:
+		//	DEFAULT_DATABASE = DATABASE_ELASTICSEARCH;  // TODO 默认数据库类型，改成你自己的
+		//	DEFAULT_SCHEMA = "sys";  // TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: public, SQL Server: dbo, Oracle:
 
         // 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
         // 如果用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
@@ -79,8 +79,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	@JSONField(serialize = false) // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getDatabase() {
-		if (super.getDatabase() != null) {
-			return super.getDatabase();
+		String db = super.getDatabase();
+		if (db != null) {
+			return db;
 		}
 		try {
 			return DynamicJdbcDataSource.getDetail(this.getDatasource()).getDatabase();
@@ -92,8 +93,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	@JSONField(serialize = false) // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
 	public String getSchema() {
-		if (super.getSchema() != null) {
-			return super.getSchema();
+		String sch = super.getSchema();
+		if (sch != null) {
+			return sch;
 		}
 		try {
 			return DynamicJdbcDataSource.getDetail(this.getDatasource()).getSchema();

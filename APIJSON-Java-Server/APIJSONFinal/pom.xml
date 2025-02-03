@@ -114,6 +114,7 @@
 				资源复制到 jar 包中去，注意打包的时候需要配置 engine： me.setBaseTemplatePath("webapp"); me.setToClassPathSourceFactory();
 				如果 web 资源本身就放在 src/main/resources/webapp 之下，则不需要此插件 -->
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
 				<version>3.1.0</version>
 				<executions>
