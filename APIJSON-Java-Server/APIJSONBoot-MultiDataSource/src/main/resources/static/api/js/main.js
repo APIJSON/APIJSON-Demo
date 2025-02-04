@@ -12898,10 +12898,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       //无效，只能在index里设置 vUrl.value = this.getCache('', 'URL_BASE')
 
       this.listHistory()
-      if (this.isScriptShow) {
+//      if (this.isScriptShow) {
         this.changeScriptType()
         this.listScript()
-      }
+//      }
 
       var isLoggedIn = this.User != null && this.User.id != null && this.User.id > 0
       if (isLoggedIn) {
