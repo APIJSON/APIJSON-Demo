@@ -2699,6 +2699,8 @@ https://github.com/Tencent/APIJSON/issues
 
         vUrl.value = item.host + bu
         this.showUrl(false, bu)
+
+        this.saveCache('', 'projectHost', this.projectHost)
       },
 
       listProjectHost: function() {
@@ -7505,6 +7507,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (type == 'project') {
           if (isEnter || item.host == (this.projectHost || {}).host) {
             this.projectHost = {project: item.project}
+            this.saveCache('', 'projectHost', this.projectHost)
           }
           return
         }
@@ -12795,6 +12798,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           '\n} catch (e) {\n' + e.message)
       }
       try { //这里是初始化，不能出错
+        var projectHost = this.getCache('', 'projectHost')
+        if (projectHost != null) {
+            this.projectHost = projectHost
+        }
+
         var projectHosts = this.getCache('', 'projectHosts')
         if (projectHosts != null && projectHosts.length >= 1) {
           this.projectHosts = projectHosts
