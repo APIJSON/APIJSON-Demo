@@ -190,6 +190,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//	if (isSurrealDB()) {
 		//		return "2.0.0"; //TODO 改成你自己的
 		//	}
+		//  if (isOpenGauss()) {
+		// 	    return "5.0.0"; //TODO 改成你自己的
+		//  }
 
 		return null;
 	}
@@ -257,6 +260,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//		//	return "surrealkv://localhost:8000"; //TODO 改成你自己的
 		//		return "ws://localhost:8000"; //TODO 改成你自己的
 		//	}
+		//  if (isOpenGauss()) {
+		//	    return "jdbc:opengauss://127.0.0.1:5432/postgres?currentSchema=" + DEFAULT_SCHEMA; //TODO 改成你自己的
+		//  }
 
 		return null;
 	}
@@ -318,6 +324,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//	if (isSurrealDB()) {
 		//		return "root"; //TODO 改成你自己的
 		//	}
+		//  if (isOpenGauss()) {
+		//      return "postgres"; //TODO 改成你自己的
+		// 	    // 不允许用初始账号，需要 CREATE USER 创建新账号并 GRANT 授权 return "opengauss"; //TODO 改成你自己的
+		//  }
 
 		return null;
 	}
@@ -379,6 +389,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//	if (isSurrealDB()) {
 		//		return "root"; //TODO 改成你自己的
 		//	}
+		//  if (isOpenGauss()) {
+		// 	    return "openGauss@123"; //TODO 改成你自己的
+		//  }
 
 		return null;
 	}
@@ -501,7 +514,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	//
 	//	@Override
 	//	public String getSQLSchema() {
-	//		return SurrealDBUtil.getSQLSchema(super.getSQLSchema(), isSurrealDB());
+	//		return isOpenGauss() ? "public" : super.getSQLSchema();
+	//		// return SurrealDBUtil.getSQLSchema(super.getSQLSchema(), isSurrealDB());
 	////		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isIoTDB());
 	////		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
 	//	}

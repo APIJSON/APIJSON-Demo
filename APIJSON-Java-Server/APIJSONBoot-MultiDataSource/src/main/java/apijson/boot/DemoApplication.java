@@ -223,6 +223,15 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         //      Log.e(TAG, "加载 TDengine 驱动失败，请检查 pom.xml 中 com.taosdata.jdbc 版本是否存在以及可用 ！！！");
         //    }
 
+        // try { //加载驱动程序
+        //     Log.d(TAG, "尝试加载 openGauss 驱动 <<<<<<<<<<<<<<<<<<<<< ");
+        //     Class.forName("org.opengauss.Driver");
+        //     Log.d(TAG, "成功加载 openGauss 驱动！>>>>>>>>>>>>>>>>>>>>> ");
+        // } catch (ClassNotFoundException e) {
+        //     e.printStackTrace();
+        //     Log.e(TAG, "加载 openGauss 驱动失败，请检查 pom.xml 中 org.opengauss 版本是否存在以及可用 ！！！");
+        // }
+
         // APIJSON 配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
         Map<String, Pattern> COMPILE_MAP = AbstractVerifier.COMPILE_MAP;
