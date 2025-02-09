@@ -25,14 +25,9 @@ import com.fasterxml.jackson.databind.util.LRUMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -1869,6 +1864,14 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         String rspBody = null;
         try {
             RestTemplate client = new RestTemplate();
+            try { // 支持 PATCH 方法，需要 Maven 依赖 org.apache.httpcomponents.client5:httpclient5
+                HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+                client.setRequestFactory(requestFactory);
+            }
+            catch (Throwable e) {
+                e.printStackTrace();
+            }
+
             HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
             ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
 

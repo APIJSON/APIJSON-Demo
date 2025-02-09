@@ -203,7 +203,7 @@
                         <li v-for="(item, index) in caseGroups" :id="'caseGroup' + index" >
                             <div style="display: inline-table; width: 100%">
                                 <input v-show="isCaseGroupEditable" style="min-width: 60px; width: 40%; margin-right: 6px" v-model="item.groupName" @keyup="doOnKeyUp(event, 'caseGroup', false, item)" />
-                                <a href="javascript:void(0)" @click="selectCaseGroup(index, item)" > {{(isCaseGroupEditable ? '' : (StringUtil.isEmpty(item.groupName) ? '-' : item.groupName) + ' ') + item.groupUrl}}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white">{{' (' + item.count + ')  '}}</a>
+                                <a href="javascript:void(0)" @click="selectCaseGroup(index, item)" > {{(isCaseGroupEditable ? '' : (StringUtil.isEmpty(item.groupName) ? '-' : item.groupName) + ' ') + item.groupUrl}}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white" class="hint--left" :data-hint="(StringUtil.isEmpty(item.groupName) ? '-' : item.groupName) + ' ' + item.groupUrl">{{' (' + item.count + ')  '}}</a>
                                 <!--                            <div v-show="isStatisticsEnabled" style="position: absolute; right: 36px; top: 8px; display: inline-flex">-->
     <!--                                <div v-show="(item.totalCount || 0) > 0" style="background: lightgray; padding: 1px; margin-right: 2px; display: inline-block; position: relative" @click="restoreRemote(index, item, null, true)" >-->
     <!--                                    &lt;!&ndash; 只能写成一行来消除间隙，不能换行、空格 &ndash;&gt;-->
@@ -231,13 +231,13 @@
                 </div>
 
                 <div v-show="isChainShow && isChainGroupShow() && ! isLocalShow" :style="{width: chainShowType == 0 ? '40%' : '100%', 'border-right': chainShowType != 0 ? 'none' : '#DDD 1px solid' }" style="float: left; min-width: 30px; width: 40%; height: 100%;">
-                    <input id="vChainGroupAdd" style="width: 100%"  @keyup="doOnKeyUp(event, 'chainGroupAdd', false, {'groupName': vChainGroupAdd.value})" placeholder="输入名称，回车来添加" />
+                    <input id="vChainGroupAdd" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainGroupAdd', false, {'groupName': vChainGroupAdd.value})" placeholder="输入名称，回车来添加" />
 
                     <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
                         <li v-for="(item, index) in chainGroups" :id="'chainGroup' + index" >
                             <div style="display: inline-table; width: 100%">
                                 <input v-show="isCaseGroupEditable" style="min-width: 60px; width: 40%; margin-right: 6px" v-model="item.Chain.groupName" @keyup="doOnKeyUp(event, 'chainGroup', false, item)" />
-                                <a href="javascript:void(0)" @click="selectChainGroup(index, item.Chain)" :style="{ color: index == currentChainGroupIndex ? 'black' : 'gray' }" >{{ isCaseGroupEditable ? '' : item.Chain.groupName }}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white; margin-right: 24px">{{' (' + (item.Chain.count - 1) + ')  '}}</a>
+                                <a href="javascript:void(0)" @click="selectChainGroup(index, item.Chain)" :style="{ color: index == currentChainGroupIndex ? 'black' : 'gray' }" >{{ isCaseGroupEditable ? '' : item.Chain.groupName }}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white; margin-right: 24px" class="hint--left" :data-hint="item.Chain.groupName">{{' (' + (item.Chain.count - 1) + ')  '}}</a>
                                 <svg class="icon" @click="remove(item, index, true, false, false, true)" style="background-color: white; width: 27px; height: 18px; right: -2px; top: 10px; padding-left: 3px; padding-right: 4px; padding-top: 2px; padding-bottom: 2px;" >
                                     <use xlink:href="svg/icon.svg#trash"></use>
                                 </svg>
@@ -256,7 +256,7 @@
 
 
                 <div v-show="isLocalShow || isCaseItemShow()" :style="{width: isCaseGroupShow() && ! isLocalShow ? '60%' : '100%'}" style="float: right; flex-grow: 1; height: 100%;">
-                    <input id="vChainAdd" v-show="isChainShow && currentChainGroupIndex >= 0" style="width: 100%"  @keyup="doOnKeyUp(event, 'chainAdd', false, {'groupName': vChainAdd.value})" placeholder="输入名称，回车来搜索及添加" />
+                    <input id="vChainAdd" v-show="isChainShow && currentChainGroupIndex >= 0" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainAdd', false, {'groupName': vChainAdd.value})" placeholder="输入名称，回车来搜索及添加" />
 
                     <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
                         <li v-for="(item, index) in testCases" :id="'docItem' + index" >

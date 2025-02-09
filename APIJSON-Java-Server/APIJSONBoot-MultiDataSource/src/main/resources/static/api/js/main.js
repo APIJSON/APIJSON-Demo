@@ -2700,6 +2700,7 @@ https://github.com/Tencent/APIJSON/issues
         vUrl.value = item.host + bu
         this.showUrl(false, bu)
 
+        this.saveCache('', 'URL_BASE', baseUrl)
         this.saveCache('', 'projectHost', this.projectHost)
       },
 
@@ -3136,7 +3137,6 @@ https://github.com/Tencent/APIJSON/issues
             commentObj = JSONResponse.updateStandard({}, mapReq2);
           }
 
-
           var callback = function (randomName, constConfig, constJson) {
             // 用现成的测试过的更好，Response 与 Request 严格对应
             // var mapReq = {};
@@ -3169,6 +3169,7 @@ https://github.com/Tencent/APIJSON/issues
             //   commentObj = JSONResponse.updateStandard({}, mapReq2);
             // }
 
+            const userId = App.User.id;
             const methods = App.methods;
             const method = App.isShowMethod() ? App.method : null;
             const extName = App.exTxt.name;
@@ -3178,6 +3179,7 @@ https://github.com/Tencent/APIJSON/issues
             const req = isExportRandom && btnIndex <= 0 ? {
               format: false,
               'Random': {
+                userId: userId,
                 toId: 0,
                 chainGroupId: cgId,
                 chainId: cId,
@@ -3187,6 +3189,8 @@ https://github.com/Tencent/APIJSON/issues
                 config: config
               },
               'TestRecord': {
+                'userId': userId,
+                'documentId': documentId,
                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
                 'chainGroupId': cgId,
                 'chainId': cId,
@@ -3198,6 +3202,7 @@ https://github.com/Tencent/APIJSON/issues
               format: false,
               'Document': isEditResponse ? null : {
                 'id': did == null ? undefined : did,
+                'userId': userId,
                 'project': StringUtil.isEmpty(project, true) ? null : project,
 //                'testAccountId': currentAccountId,
 //                'chainGroupId': cgId,
@@ -3213,6 +3218,7 @@ https://github.com/Tencent/APIJSON/issues
                 'detail': App.getExtraComment() || ((App.currentRemoteItem || {}).Document || {}).detail,
               },
               'TestRecord': isEditResponse != true && did != null ? null : {
+                'userId': userId,
 //                'chainGroupId': cgId,
                 'documentId': isEditResponse ? did : undefined,
                 'randomId': 0,
@@ -7184,12 +7190,12 @@ https://github.com/Tencent/APIJSON/issues
         if (res == null) {
           res = {}
         } else {
-          var time = res.config == null || res.config.metadata == null ? 0 : (res.config.metadata.startTime || 0)
-          if (time < this.lastReqTime) {
+          var time = res.config == null || res.config.metadata == null ? null : res.config.metadata.startTime;
+          if (time != null && time > 0 && time < this.lastReqTime) {
             return
           }
 
-          this.lastReqTime = time
+          this.lastReqTime = time == null || time <= 0 ? 0 : time;
         }
 
         if (DEBUG) {
@@ -7514,8 +7520,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         var project = (this.projectHost || {}).project
 
-        if (isFilter && type == 'caseGroup') {
+        if (isFilter && (type == 'caseGroup' || type == 'chainGroup')) {
           this.isCaseGroupEditable = true
+//          this.isChainGroupEditable = true
         }
 
         var obj = event.srcElement ? event.srcElement : event.target;
