@@ -49,13 +49,13 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 	@Override
 	public Connection getConnection(SQLConfig config) throws Exception {
 		Log.d(TAG, "getConnection  config.getDatasource() = " + config.getDatasource());
-		
-		Connection c = connectionMap.get(config.getDatabase());
+		String connectionKey = config.getDatasource() + "-" + config.getDatabase();
+		Connection c = connectionMap.get(connectionKey);
 		if (c == null || c.isClosed()) {
 			try {
 				DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class);
 				// 另一种方式是 DruidConfig 初始化获取到 Datasource 后给静态变量 DATA_SOURCE 赋值： ds = DruidConfig.DATA_SOURCE.getConnection();
-				connectionMap.put(config.getDatabase(), ds == null ? null : ds.getConnection());
+				connectionMap.put(connectionKey, ds == null ? null : ds.getConnection());
 			} catch (Exception e) {
 				Log.e(TAG, "getConnection   try { "
 						+ "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."
