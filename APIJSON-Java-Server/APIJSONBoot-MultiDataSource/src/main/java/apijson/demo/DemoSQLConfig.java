@@ -55,7 +55,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
-		//	DEFAULT_NAMESPACE = "root"; //TODO 默认数据库名/模式，改成你自己的，仅对 PostgreSQL: posgres, SurrealDB: root 等数据库有效
+		//	DEFAULT_NAMESPACE = "root"; //TODO 默认数据库名/模式，改成你自己的，仅对 SurrealDB: root 等数据库有效
+		//	DEFAULT_CATALOG = "postgres"; //TODO 默认数据库名/模式，改成你自己的，仅对 PostgreSQL: posgres 等数据库有效
 		DEFAULT_SCHEMA = "sys"; // "apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
 
 		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
@@ -72,7 +73,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
 
 			@Override
-			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
+			public AbstractSQLConfig<Long> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
@@ -215,9 +216,13 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			// 以下是 MySQL 5.7 及以下
 			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
-		if (isPostgreSQL()) {
+		if (isPostgreSQL()) { // PG JDBC 必须在 URI 传 catalog
 			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
 		}
+		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	return "jdbc:postgresql://localhost:26257/movr?sslmode=require"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach && cockroach demo
+		//	//return "jdbc:postgresql://localhost:26258/postgres?sslmode=disable"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach # && start 3 nodes and init cluster
+		//}
 		if (isSQLServer()) {
 			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
 		}
@@ -285,6 +290,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) {
 			return "postgres";  //TODO 改成你自己的
 		}
+		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	return "demo"; //TODO 改成你自己的
+		//	//return "postgres"; //TODO 改成你自己的
+		//}
 		if (isSQLServer()) {
 			return "sa";  //TODO 改成你自己的
 		}
@@ -350,6 +359,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) {
 			return null;  //TODO 改成你自己的
 		}
+		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	return "demo39865";  //TODO 改成你自己的
+		//	//return null;  //TODO 改成你自己的
+		//}
 		if (isSQLServer()) {
 			return "apijson@123";  //TODO 改成你自己的
 		}
