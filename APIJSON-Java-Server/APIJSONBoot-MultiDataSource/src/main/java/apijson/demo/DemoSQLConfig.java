@@ -248,6 +248,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "http://localhost:19530"; //TODO 改成你自己的
 		}
+		//if (isManticore()) {
+		//	return "jdbc:mysql://localhost:3306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
+		//}
 		//	if (isIoTDB()) {
 		//		return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
 		//	}
@@ -318,6 +321,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "root";
 		}
+		//if (isManticore()) {
+		//	return "root";
+		//}
 		//	if (isIoTDB()) {
 		//		return "root";
 		//	}
@@ -387,6 +393,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isMilvus()) {
 			return "apijson"; //TODO 改成你自己的
 		}
+		//if (isManticore()) {
+		//	return null;
+		//}
 		//	if (isIoTDB()) {
 		//		return "root";
 		//	}
