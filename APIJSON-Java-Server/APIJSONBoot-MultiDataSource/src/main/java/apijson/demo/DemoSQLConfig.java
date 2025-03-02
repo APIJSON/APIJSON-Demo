@@ -57,7 +57,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
 		//	DEFAULT_NAMESPACE = "root"; //TODO 默认数据库名/模式，改成你自己的，仅对 SurrealDB: root 等数据库有效
 		//	DEFAULT_CATALOG = "postgres"; //TODO 默认数据库名/模式，改成你自己的，仅对 PostgreSQL: posgres 等数据库有效
-		DEFAULT_SCHEMA = "sys"; // "apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Oracle:
+		DEFAULT_SCHEMA = "sys"; // "apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Manticore: Manticore, Oracle:
 
 		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
 		// 这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
@@ -249,7 +249,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "http://localhost:19530"; //TODO 改成你自己的
 		}
 		//if (isManticore()) {
-		//	return "jdbc:mysql://localhost:3306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
+		//	return "jdbc:mysql://localhost:9306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
 		//}
 		//	if (isIoTDB()) {
 		//		return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
@@ -322,7 +322,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "root";
 		}
 		//if (isManticore()) {
-		//	return "root";
+		//	return null; // "root";
 		//}
 		//	if (isIoTDB()) {
 		//		return "root";
@@ -546,6 +546,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	public String getSQLTable() {
 		String t = super.getSQLTable();
 		return isInfluxDB() ? t.toLowerCase() : t;
+		//return isInfluxDB() || isManticore() ? t.toLowerCase() : t;
 		//	return isInfluxDB() || isIoTDB() ? t.toLowerCase() : t;
 		//	return isInfluxDB() ? t.toLowerCase() : StringUtil.firstCase(JSONRequest.recoverUnderline(t, false), false);
 	}
