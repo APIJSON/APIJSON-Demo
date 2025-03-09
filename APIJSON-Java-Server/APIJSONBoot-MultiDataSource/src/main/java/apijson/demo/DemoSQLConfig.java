@@ -164,9 +164,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isDb2()) {
 			return "11.5"; //TODO 改成你自己的
 		}
-        //	if (isSQLite()) {
-        //  	return "3.39.3"; //TODO 改成你自己的
-        //	}
+		//	if (isSQLite()) {
+		//  	return "3.39.3"; //TODO 改成你自己的
+		//	}
 		if (isDameng()) {
 			return "8.1.2.141"; //TODO 改成你自己的
 		}
@@ -212,17 +212,17 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 		if (isMySQL()) {
 			// 这个是 MySQL 8.0 及以上，要加 userSSL=false
-//			 return "jdbc:mysql://47.122.25.116:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
+			// return "jdbc:mysql://47.122.25.116:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
 			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) { // PG JDBC 必须在 URI 传 catalog
 			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
 		}
-		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
-		//	return "jdbc:postgresql://localhost:26257/movr?sslmode=require"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach && cockroach demo
-		//	//return "jdbc:postgresql://localhost:26258/postgres?sslmode=disable"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach # && start 3 nodes and init cluster
-		//}
+		//  if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//		return "jdbc:postgresql://localhost:26257/movr?sslmode=require"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach && cockroach demo
+		//		// return "jdbc:postgresql://localhost:26258/postgres?sslmode=disable"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach # && start 3 nodes and init cluster
+		//  }
 		if (isSQLServer()) {
 			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
 		}
@@ -232,9 +232,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isDb2()) {
 			return "jdbc:db2://localhost:50000/BLUDB"; //TODO 改成你自己的
 		}
-        //if (isSQLite()) {
-        //    return "jdbc:sqlite:sample.db"; //TODO 改成你自己的
-        //}
+		//  if (isSQLite()) {
+		//  	return "jdbc:sqlite:sample.db"; //TODO 改成你自己的
+		//  }
 		if (isDameng()) {
 			return "jdbc:dm://localhost:5236"; //TODO 改成你自己的
 		}
@@ -242,15 +242,18 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			//      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
+		//  if (isTimescaleDB()) { // PG JDBC 必须在 URI 传 catalog
+		//  	return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
+		//  }
 		if (isInfluxDB()) {
 			return "http://203.189.6.3:8086"; //TODO 改成你自己的
 		}
 		if (isMilvus()) {
 			return "http://localhost:19530"; //TODO 改成你自己的
 		}
-		//if (isManticore()) {
-		//	return "jdbc:mysql://localhost:9306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
-		//}
+		//  if (isManticore()) {
+		//		return "jdbc:mysql://localhost:9306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
+		//  }
 		//	if (isIoTDB()) {
 		//		return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
 		//	}
@@ -293,10 +296,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) {
 			return "postgres";  //TODO 改成你自己的
 		}
-		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
-		//	return "demo"; //TODO 改成你自己的
-		//	//return "postgres"; //TODO 改成你自己的
-		//}
+		//  if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//		return "demo"; //TODO 改成你自己的
+		//		//return "postgres"; //TODO 改成你自己的
+		//  }
 		if (isSQLServer()) {
 			return "sa";  //TODO 改成你自己的
 		}
@@ -306,24 +309,27 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isDb2()) {
 			return "db2admin"; //TODO 改成你自己的
 		}
-        //if (isSQLite()) {
-        //    return "root"; //TODO 改成你自己的
-        //}
+		//  if (isSQLite()) {
+		//  	return "root"; //TODO 改成你自己的
+		//  }
 		if (isDameng()) {
 			return "SYSDBA";
 		}
 		if (isTDengine()) {
 			return "root"; //TODO 改成你自己的
 		}
+		//  if (isTimescaleDB()) {
+		//		return "postgres";  //TODO 改成你自己的
+		//  }
 		if (isInfluxDB()) {
 			return "iotos";
 		}
 		if (isMilvus()) {
 			return "root";
 		}
-		//if (isManticore()) {
-		//	return null; // "root";
-		//}
+		//  if (isManticore()) {
+		//		return null; // "root";
+		//  }
 		//	if (isIoTDB()) {
 		//		return "root";
 		//	}
@@ -365,10 +371,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) {
 			return null;  //TODO 改成你自己的
 		}
-		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
-		//	return "demo39865";  //TODO 改成你自己的
-		//	//return null;  //TODO 改成你自己的
-		//}
+		//  if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//		return "demo39865";  //TODO 改成你自己的
+		//		// return null;  //TODO 改成你自己的
+		//  }
 		if (isSQLServer()) {
 			return "apijson@123";  //TODO 改成你自己的
 		}
@@ -378,24 +384,27 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isDb2()) {
 			return "123"; //TODO 改成你自己的
 		}
-        //	if (isSQLite()) {
-        //  	return "apijson"; //TODO 改成你自己的
-        //	}
+		//	if (isSQLite()) {
+		//  	return "apijson"; //TODO 改成你自己的
+		//	}
 		if (isDameng()) {
 			return "SYSDBA";
 		}
 		if (isTDengine()) {
 			return "taosdata"; //TODO 改成你自己的
 		}
+		//  if (isTimescaleDB()) {
+		//		return "password";  //TODO 改成你自己的
+		//  }
 		if (isInfluxDB()) {
 			return "apijson@123"; //TODO 改成你自己的
 		}
 		if (isMilvus()) {
 			return "apijson"; //TODO 改成你自己的
 		}
-		//if (isManticore()) {
-		//	return null;
-		//}
+		//  if (isManticore()) {
+		//		return null;
+		//  }
 		//	if (isIoTDB()) {
 		//		return "root";
 		//	}
