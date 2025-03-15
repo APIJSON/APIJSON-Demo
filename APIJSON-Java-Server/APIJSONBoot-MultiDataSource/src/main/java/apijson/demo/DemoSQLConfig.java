@@ -245,6 +245,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//  if (isTimescaleDB()) { // PG JDBC 必须在 URI 传 catalog
 		//  	return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
 		//  }
+		// if (isQuestDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	 return "jdbc:postgresql://localhost:8812/qdb"; //TODO 改成你自己的
+		// }
 		if (isInfluxDB()) {
 			return "http://203.189.6.3:8086"; //TODO 改成你自己的
 		}
@@ -321,6 +324,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//  if (isTimescaleDB()) {
 		//		return "postgres";  //TODO 改成你自己的
 		//  }
+		// if (isQuestDB()) {
+		//	 return "admin";  //TODO 改成你自己的
+		// }
 		if (isInfluxDB()) {
 			return "iotos";
 		}
@@ -396,6 +402,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//  if (isTimescaleDB()) {
 		//		return "password";  //TODO 改成你自己的
 		//  }
+		// if (isQuestDB()) {
+		// 	 return "quest";  //TODO 改成你自己的
+		// }
 		if (isInfluxDB()) {
 			return "apijson@123"; //TODO 改成你自己的
 		}
