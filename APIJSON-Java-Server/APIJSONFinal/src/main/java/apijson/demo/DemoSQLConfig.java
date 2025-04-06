@@ -19,17 +19,13 @@ import static apijson.framework.javax.APIJSONConstant.PRIVACY_;
 import static apijson.framework.javax.APIJSONConstant.USER_;
 import static apijson.framework.javax.APIJSONConstant.USER_ID;
 
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import apijson.Log;
-import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.RequestMethod;
-import apijson.StringUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.annotation.JSONField;
+
 import apijson.framework.javax.APIJSONSQLConfig;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Join;
@@ -42,7 +38,7 @@ import apijson.orm.Join.On;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray> {
 
 	public DemoSQLConfig() {
 		super();
@@ -66,10 +62,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
 		// 主键名映射
-		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
+		SIMPLE_CALLBACK = new SimpleCallback<Long, JSONObject, JSONArray>() {
 
 			@Override
-			public AbstractSQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
+			public AbstractSQLConfig<Long, JSONObject, JSONArray> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
@@ -117,7 +113,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	// 如果 DemoSQLExecutor.getConnection 能拿到连接池的有效 Connection，则这里不需要配置 dbVersion, dbUri, dbAccount, dbPassword
 
 	@Override
-	public String getDBVersion() {
+	public String gainDBVersion() {
 		if (isMySQL()) {
 			return "5.7.22"; //"8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 		}
@@ -141,7 +137,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
-	public String getDBUri() {
+	public String gainDBUri() {
 		if (isMySQL()) {
 			// 这个是 MySQL 8.0 及以上，要加 userSSL=false  return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
@@ -168,7 +164,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
-	public String getDBAccount() {
+	public String gainDBAccount() {
 		if (isMySQL()) {
 			return "root";  //TODO 改成你自己的
 		}
@@ -192,7 +188,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
-	public String getDBPassword() {
+	public String gainDBPassword() {
 		if (isMySQL()) {
 			return "apijson";  //TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
 		}
@@ -287,16 +283,16 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 
 	@Override
-	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
-		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
+	protected void onGainCrossJoinString(Join<Long, JSONObject, JSONArray> join) throws UnsupportedOperationException {
+		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(join);
 	}
 	@Override
-	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
+	protected void onJoinNotRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> join, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, join, jt, onList, on);
 	}
 	@Override
-	protected void onJoinComplexRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
+	protected void onJoinComplexRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> join, String jt, List<On> onList, On on) {
+		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, join, jt, onList, on);
 	}
 
 }

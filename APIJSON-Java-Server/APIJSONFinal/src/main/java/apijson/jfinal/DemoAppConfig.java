@@ -14,6 +14,11 @@ limitations under the License.*/
 
 package apijson.jfinal;
 
+import apijson.JSONParser;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.jfinal.aop.Interceptor;
 import com.jfinal.aop.Invocation;
 import com.jfinal.config.Constants;
@@ -26,6 +31,7 @@ import com.jfinal.core.Controller;
 import com.jfinal.server.undertow.UndertowServer;
 import com.jfinal.template.Engine;
 
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -41,10 +47,6 @@ import apijson.demo.DemoVerifier;
 import apijson.framework.javax.APIJSONApplication;
 import apijson.framework.javax.APIJSONCreator;
 import apijson.orm.AbstractVerifier;
-import apijson.orm.FunctionParser;
-import apijson.orm.Parser;
-import apijson.orm.SQLConfig;
-import apijson.orm.Verifier;
 
 
 /**
@@ -61,8 +63,10 @@ public class DemoAppConfig extends JFinalConfig {
     UndertowServer.start(DemoAppConfig.class);   // src/main/resources/undertow.txt 中配置 undertow.port 优先于 UndertowServer.start 传参 int port
 
     Log.DEBUG = true;  // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-    APIJSONApplication.init();
+    APIJSONApplication.init(false);
   }
+
+  public static JSONParser<JSONObject, JSONArray> DEFAULT_JSON_PARSER;
 
   static {
     // 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
@@ -103,26 +107,75 @@ public class DemoAppConfig extends JFinalConfig {
     COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
     COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 
-    // 使用本项目的自定义处理类
-    APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
+    // 使用 fastjson
+    apijson.JSON.JSON_OBJECT_CLASS = JSONObject.class;
+    apijson.JSON.JSON_ARRAY_CLASS = JSONArray.class;
+
+    final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.UseBigDecimal};
+    apijson.JSON.DEFAULT_JSON_PARSER = DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
 
       @Override
-      public Parser<Long> createParser() {
+      public JSONObject createJSONObject() {
+        return new JSONObject(true);
+      }
+
+      @Override
+      public JSONArray createJSONArray() {
+        return new JSONArray();
+      }
+
+      @Override
+      public String toJSONString(Object obj) {
+        return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
+      }
+
+      @Override
+      public Object parseJSON(Object json) {
+        return JSON.parse(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public JSONObject parseObject(Object json) {
+        return JSON.parseObject(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public <T> T parseObject(Object json, Class<T> clazz) {
+        return JSON.parseObject(toJSONString(json), clazz, DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public JSONArray parseArray(Object json) {
+        return JSON.parseArray(toJSONString(json));
+      }
+
+      @Override
+      public <T> List<T> parseArray(Object json, Class<T> clazz) {
+        return JSON.parseArray(toJSONString(json), clazz);
+      }
+
+    };
+
+    // 使用本项目的自定义处理类
+    APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long, JSONObject, JSONArray>() {
+
+      @Override
+      public DemoParser createParser() {
         return new DemoParser();
       }
 
       @Override
-      public FunctionParser createFunctionParser() {
+      public DemoFunctionParser createFunctionParser() {
         return new DemoFunctionParser();
       }
 
       @Override
-      public Verifier<Long> createVerifier() {
+      public DemoVerifier createVerifier() {
         return new DemoVerifier();
       }
 
       @Override
-      public SQLConfig createSQLConfig() {
+      public DemoSQLConfig createSQLConfig() {
         return new DemoSQLConfig();
       }
 

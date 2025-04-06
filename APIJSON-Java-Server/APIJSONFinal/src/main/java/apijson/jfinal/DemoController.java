@@ -43,7 +43,13 @@ import java.util.concurrent.TimeoutException;
 
 import javax.servlet.http.HttpSession;
 
+import apijson.JSONResponse;
+import apijson.Log;
+import apijson.RequestMethod;
+import apijson.StringUtil;
+import apijson.demo.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 import com.jfinal.aop.Before;
 import com.jfinal.core.ActionKey;
 import com.jfinal.core.Controller;
@@ -51,11 +57,6 @@ import com.jfinal.core.NotAction;
 import com.jfinal.ext.interceptor.POST;
 import com.jfinal.kit.HttpKit;
 
-import apijson.JSON;
-import apijson.JSONResponse;
-import apijson.Log;
-import apijson.RequestMethod;
-import apijson.StringUtil;
 import apijson.demo.DemoFunctionParser;
 import apijson.demo.DemoParser;
 import apijson.demo.DemoVerifier;
@@ -63,11 +64,8 @@ import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
 import apijson.demo.model.Verify;
 import apijson.framework.javax.APIJSONController;
-import apijson.framework.javax.APIJSONParser;
 import apijson.framework.javax.BaseModel;
-import apijson.orm.AbstractParser;
 import apijson.orm.JSONRequest;
-import apijson.orm.Parser;
 import apijson.orm.exception.ConditionErrorException;
 import apijson.orm.exception.ConflictException;
 import apijson.orm.exception.NotExistException;
@@ -88,17 +86,11 @@ import apijson.orm.exception.OutOfRangeException;
 public class DemoController extends Controller {
 	private static final String TAG = "DemoController";
 
-	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
-		@SuppressWarnings("unchecked")
-		Parser<Long> parser = (Parser<Long>) APIJSONController.APIJSON_CREATOR.createParser();
+	public DemoParser newParser(HttpSession session, RequestMethod method) {
+		DemoParser parser = (DemoParser) APIJSONController.APIJSON_CREATOR.createParser();
 		parser.setMethod(method);
-		if (parser instanceof APIJSONParser) {
-			((APIJSONParser<Long>) parser).setSession(session);
-		}
-		// 可以更方便地通过日志排查错误
-		if (parser instanceof AbstractParser) {
-			((AbstractParser<Long>) parser).setRequestURL(getRequest().getRequestURL().toString());
-		}
+		parser.setSession(session);
+		parser.setRequestURL(getRequest().getRequestURL().toString());
 		return parser;
 	}
 
@@ -123,8 +115,9 @@ public class DemoController extends Controller {
 			return;
 		}
 
+		DemoParser parser = newParser(null, null);
 		// /get/User， /gets/Moment[]， /put/Comment:[]  等简版接口，APIJSON 4.8.0+ 可用，对不兼容的低版本需要注释以下代码
-		JSONObject req = AbstractParser.wrapRequest(method, tag, JSON.parseObject(getRawData()), false);
+		JSONObject req = parser.wrapRequest(method, tag, JSON.parseObject(getRawData()), false, DemoAppConfig.DEFAULT_JSON_PARSER);
 		if (req == null) {
 			req = new JSONObject(true);
 		}
@@ -250,7 +243,6 @@ public class DemoController extends Controller {
 
 
 	/**重新加载配置
-	 * @param request
 	 * @return
 	 * @see
 	 * <pre>
@@ -263,6 +255,8 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void reload() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 		JSONObject requestObject = null;
 		String type;
@@ -270,24 +264,24 @@ public class DemoController extends Controller {
 		String phone;
 		String verify;
 		try {
-			requestObject = DemoParser.parseRequest(request);
+			requestObject = JSON.parseObject(request);
 			type = requestObject.getString(TYPE);
 			value = requestObject.getJSONObject(VALUE);
 			phone = requestObject.getString(PHONE);
 			verify = requestObject.getString(VERIFY);
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
 
-		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));
-		response = response.getJSONResponse(VERIFY_);
+		JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(headVerify(Verify.TYPE_RELOAD, phone, verify));
+		response = response.getJSONResponse(VERIFY_, DemoAppConfig.DEFAULT_JSON_PARSER);
 		if (JSONResponse.isExist(response) == false) {
-			renderJson(DemoParser.extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误")));
+			renderJson(parser.extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误")));
 			return;
 		}
 
-		JSONObject result = DemoParser.newSuccessResult();
+		JSONObject result = (JSONObject) parser.newSuccessResult();
 
 		boolean reloadAll = StringUtil.isEmpty(type, true) || "ALL".equals(type);
 
@@ -296,7 +290,7 @@ public class DemoController extends Controller {
 				result.put(ACCESS_, DemoVerifier.initAccess(false, null, value));
 			} catch (ServerException e) {
 				e.printStackTrace();
-				result.put(ACCESS_, DemoParser.newErrorResult(e));
+				result.put(ACCESS_, parser.newErrorResult(e));
 			}
 		}
 
@@ -305,7 +299,7 @@ public class DemoController extends Controller {
 				result.put(FUNCTION_, DemoFunctionParser.init(false, null, value));
 			} catch (ServerException e) {
 				e.printStackTrace();
-				result.put(FUNCTION_, DemoParser.newErrorResult(e));
+				result.put(FUNCTION_, parser.newErrorResult(e));
 			}
 		}
 
@@ -314,7 +308,7 @@ public class DemoController extends Controller {
 				result.put(REQUEST_, DemoVerifier.initRequest(false, null, value));
 			} catch (ServerException e) {
 				e.printStackTrace();
-				result.put(REQUEST_, DemoParser.newErrorResult(e));
+				result.put(REQUEST_, parser.newErrorResult(e));
 			}
 		}
 
@@ -322,7 +316,6 @@ public class DemoController extends Controller {
 	}
 
 	/**生成验证码,修改为post请求
-	 * @param request
 	 * @see
 	 * <pre>
 		{
@@ -334,16 +327,18 @@ public class DemoController extends Controller {
 	@Before(POST.class)
 	@ActionKey("post/verify")
 	public void postVerify() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 		JSONObject requestObject = null;
 		int type;
 		String phone;
 		try {
-			requestObject = DemoParser.parseRequest(request);
+			requestObject = JSON.parseObject(request);
 			type = requestObject.getIntValue(TYPE);
 			phone = requestObject.getString(PHONE);
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
 
@@ -351,7 +346,7 @@ public class DemoController extends Controller {
 
 		JSONObject response = new DemoParser(POST, false).parseResponse(
 				newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
-				);
+		);
 
 		JSONObject verify = null;
 		try {
@@ -359,7 +354,7 @@ public class DemoController extends Controller {
 		} catch (Exception e) {}
 
 		if (verify == null || JSONResponse.isSuccess(verify.getIntValue(JSONResponse.KEY_CODE)) == false) {
-			new DemoParser(DELETE, false).parseResponse(new JSONRequest(new Verify(type, phone)));
+			new DemoParser(DELETE, false).parseResponse((JSONObject) apijson.JSON.parseObject(new Verify(type, phone)));
 			renderJson(response);
 			return;
 		}
@@ -372,7 +367,6 @@ public class DemoController extends Controller {
 	}
 
 	/**获取验证码
-	 * @param request
 	 * @see
 	 * <pre>
 		{
@@ -389,21 +383,23 @@ public class DemoController extends Controller {
 
 	@NotAction
 	public JSONObject getVerify(String request) {
+		DemoParser parser = new DemoParser(GETS, false);
+
 		JSONObject requestObject = null;
 		int type;
 		String phone;
 		try {
-			requestObject = DemoParser.parseRequest(request);
+			requestObject = JSON.parseObject(request);
 			type = requestObject.getIntValue(TYPE);
 			phone = requestObject.getString(PHONE);
 		} catch (Exception e) {
-			return DemoParser.extendErrorResult(requestObject, e);
+			return parser.extendErrorResult(requestObject, e);
 		}
-		return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone, null));
+
+		return parser.parseResponse(newVerifyRequest(type, phone, null));
 	}
 
 	/**校验验证码
-	 * @param request
 	 * @see
 	 * <pre>
 		{
@@ -416,20 +412,23 @@ public class DemoController extends Controller {
 	@Before(POST.class)
 	@ActionKey("heads/verify")
 	public void headVerify() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 		JSONObject requestObject = null;
 		int type;
 		String phone;
 		String verify;
 		try {
-			requestObject = DemoParser.parseRequest(request);
+			requestObject = JSON.parseObject(request);
 			type = requestObject.getIntValue(TYPE);
 			phone = requestObject.getString(PHONE);
 			verify = requestObject.getString(VERIFY);
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
+
 		renderJson(headVerify(type, phone, verify));
 	}
 
@@ -442,17 +441,19 @@ public class DemoController extends Controller {
 	 */
 	@NotAction
 	public JSONObject headVerify(int type, String phone, String code) {
-		JSONResponse response = new JSONResponse(
+		DemoParser parser = new DemoParser();
+
+		JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(
 				new DemoParser(GETS, false).parseResponse(
-						new JSONRequest(
+						(JSONObject) apijson.JSON.parseObject(new JSONRequest(
 								new Verify(type, phone)
 								.setVerify(code)
 								).setTag(VERIFY_)
-						)
+						))
 				);
 		Verify verify = response.getObject(Verify.class);
 		if (verify == null) {
-			return DemoParser.newErrorResult(StringUtil.isEmpty(code, true)
+			return parser.newErrorResult(StringUtil.isEmpty(code, true)
 					? new NotExistException("验证码不存在！") : new ConditionErrorException("手机号或验证码错误！"));
 		}
 
@@ -461,16 +462,20 @@ public class DemoController extends Controller {
 		long now = System.currentTimeMillis();
 		if (now > 60*1000 + time) {
 			new DemoParser(DELETE, false).parseResponse(
-					new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
-					);
-			return DemoParser.newErrorResult(new TimeoutException("验证码已过期！"));
+					(JSONObject) apijson.JSON.parseObject(
+							new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
+					)
+			);
+			return parser.newErrorResult(new TimeoutException("验证码已过期！"));
 		}
 
-		return new JSONResponse(
+		return new JSONResponse<>(
 				new DemoParser(HEADS, false).parseResponse(
-						new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
+						(JSONObject) apijson.JSON.parseObject(
+								new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
 						)
-				);
+				)
+		).toObject(JSONObject.class);
 	}
 
 
@@ -481,8 +486,10 @@ public class DemoController extends Controller {
 	 * @return
 	 */
 	@NotAction
-	private apijson.JSONRequest newVerifyRequest(int type, String phone, String verify) {
-		return new JSONRequest(new Verify(type, phone).setVerify(verify)).setTag(VERIFY_).setFormat(true);
+	private JSONObject newVerifyRequest(int type, String phone, String verify) {
+		JSONObject obj = new JSONObject(true);
+		obj.putAll(new JSONRequest(new Verify(type, phone).setVerify(verify)).setTag(VERIFY_).setFormat(true));
+		return obj;
 	}
 
 
@@ -493,7 +500,6 @@ public class DemoController extends Controller {
 	public static final int LOGIN_TYPE_PASSWORD = 0;//密码登录
 	public static final int LOGIN_TYPE_VERIFY = 1;//验证码登录
 	/**用户登录
-	 * @param request 只用String，避免encode后未decode
 	 * @return
 	 * @see
 	 * <pre>
@@ -507,6 +513,8 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void login() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 		HttpSession session = getSession();
 
@@ -519,7 +527,7 @@ public class DemoController extends Controller {
 		boolean remember;
 		JSONObject defaults;
 		try {
-			requestObject = DemoParser.parseRequest(request);
+			requestObject = JSON.parseObject(request);
 
 			isPassword = requestObject.getIntValue(TYPE) == LOGIN_TYPE_PASSWORD;//登录方式
 			phone = requestObject.getString(PHONE);//手机
@@ -548,35 +556,33 @@ public class DemoController extends Controller {
 			requestObject.remove(REMEMBER);
 			requestObject.remove(DEFAULTS);
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
-
-
 
 		//手机号是否已注册
 		JSONObject phoneResponse = new DemoParser(HEADS, false).parseResponse(
-				new JSONRequest(
-						new Privacy().setPhone(phone)
-						)
-				);
+				(JSONObject) apijson.JSON.parseObject(new Privacy().setPhone(phone))
+		);
 		if (JSONResponse.isSuccess(phoneResponse) == false) {
-			renderJson(DemoParser.newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), phoneResponse.getString(JSONResponse.KEY_MSG)));
+			renderJson(parser.newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), phoneResponse.getString(JSONResponse.KEY_MSG)));
 			return;
 		}
-		JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
+		JSONResponse<JSONObject, JSONArray> response = new JSONResponse<JSONObject, JSONArray>(phoneResponse).getJSONResponse(PRIVACY_);
 		if(JSONResponse.isExist(response) == false) {
-			renderJson(DemoParser.newErrorResult(new NotExistException("手机号未注册")));
+			renderJson(parser.newErrorResult(new NotExistException("手机号未注册")));
 			return;
 		}
 
 		//根据phone获取User
 		JSONObject privacyResponse = new DemoParser(GETS, false).parseResponse(
-				new JSONRequest(
-						new Privacy().setPhone(phone)
+				(JSONObject) apijson.JSON.parseObject(
+						new JSONRequest(
+								new Privacy().setPhone(phone)
 						).setFormat(true)
-				);
-		response = new JSONResponse(privacyResponse);
+				)
+		);
+		response = new JSONResponse<>(privacyResponse);
 
 		Privacy privacy = response == null ? null : response.getObject(Privacy.class);
 		long userId = privacy == null ? 0 : BaseModel.value(privacy.getId());
@@ -587,13 +593,15 @@ public class DemoController extends Controller {
 
 		//校验凭证 
 		if (isPassword) {//password密码登录
-			response = new JSONResponse(
+			response = new JSONResponse<>(
 					new DemoParser(HEADS, false).parseResponse(
-							new JSONRequest(new Privacy(userId).setPassword(password))
+							(JSONObject) apijson.JSON.parseObject(
+									new Privacy(userId).setPassword(password)
 							)
-					);
+					)
+			);
 		} else {//verify手机验证码登录
-			response = new JSONResponse(headVerify(Verify.TYPE_LOGIN, phone, password));
+			response = new JSONResponse<>(headVerify(Verify.TYPE_LOGIN, phone, password));
 		}
 		if (JSONResponse.isSuccess(response) == false) {
 			renderJson(response);
@@ -601,23 +609,23 @@ public class DemoController extends Controller {
 		}
 		response = response.getJSONResponse(isPassword ? PRIVACY_ : VERIFY_);
 		if (JSONResponse.isExist(response) == false) {
-			renderJson(DemoParser.newErrorResult(new ConditionErrorException("账号或密码错误")));
+			renderJson(parser.newErrorResult(new ConditionErrorException("账号或密码错误")));
 			return;
 		}
 
-		response = new JSONResponse(
+		response = new JSONResponse<>(
 				new DemoParser(GETS, false).parseResponse(
-						new JSONRequest(  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
+						JSON.parseObject(new JSONRequest(  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
 								USER_,  // User 里在 setContactIdList(List<Long>) 后加 setContactIdList(String) 没用
-								new apijson.JSONObject(  // fastjson 查到一个就不继续了，所以只能加到前面或者只有这一个，但这样反过来不兼容 5.7+
+								new JSONRequest(  // fastjson 查到一个就不继续了，所以只能加到前面或者只有这一个，但这样反过来不兼容 5.7+
 										new User(userId)  // 所以就用 @json 来强制转为 JSONArray，保证有效
 										).setJson("contactIdList,pictureList")
 								).setFormat(true)
-						)
+						))
 				);
-		User user = response.getObject(User.class);
+		User user = (User) response.getObject(User.class, DemoAppConfig.DEFAULT_JSON_PARSER);
 		if (user == null || BaseModel.value(user.getId()) != userId) {
-			renderJson(DemoParser.newErrorResult(new NullPointerException("服务器内部错误")));
+			renderJson(parser.newErrorResult(new NullPointerException("服务器内部错误")));
 			return;
 		}
 
@@ -641,11 +649,12 @@ public class DemoController extends Controller {
 	}
 
 	/**退出登录，清空session
-	 * @param session
 	 * @return
 	 */
 	@Before(POST.class)
 	public void logout() {
+		DemoParser parser = new DemoParser();
+
 		HttpSession session = getSession();
 		long userId;
 		try {
@@ -653,12 +662,12 @@ public class DemoController extends Controller {
 			Log.d(TAG, "logout  userId = " + userId + "; session.getId() = " + (session == null ? null : session.getId()));
 			session.invalidate();
 		} catch (Exception e) {
-			renderJson(DemoParser.newErrorResult(e));
+			renderJson(parser.newErrorResult(e));
 			return;
 		}
 
-		JSONObject result = DemoParser.newSuccessResult();
-		JSONObject user = DemoParser.newSuccessResult();
+		JSONObject result = parser.newSuccessResult();
+		JSONObject user = parser.newSuccessResult();
 		user.put(ID, userId);
 		user.put(COUNT, 1);
 		result.put(StringUtil.firstCase(USER_), user);
@@ -669,7 +678,6 @@ public class DemoController extends Controller {
 
 	private static final String REGISTER = "register";
 	/**注册
-	 * @param request 只用String，避免encode后未decode
 	 * @return
 	 * @see
 	 * <pre>
@@ -687,6 +695,8 @@ public class DemoController extends Controller {
 	 */
 	@Before(POST.class)
 	public void register() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 		JSONObject requestObject = null;
 
@@ -696,7 +706,7 @@ public class DemoController extends Controller {
 		String verify;
 		String password;
 		try {
-			requestObject = DemoParser.parseRequest(request);
+			requestObject = JSON.parseObject(request);
 			privacyObj = requestObject.getJSONObject(PRIVACY_);
 
 			phone = StringUtil.getString(privacyObj.getString(PHONE));
@@ -716,30 +726,28 @@ public class DemoController extends Controller {
 				return;
 			}
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
 
 
-		JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_REGISTER, phone, verify));
+		JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(headVerify(Verify.TYPE_REGISTER, phone, verify));
 		if (JSONResponse.isSuccess(response) == false) {
 			renderJson(response);
 			return;
 		}
 		//手机号或验证码错误
 		if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-			renderJson(DemoParser.extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！")));
+			renderJson(parser.extendErrorResult(response.toObject(JSONObject.class), new ConditionErrorException("手机号或验证码错误！")));
 			return;
 		}
 
-
-
 		//生成User和Privacy
-		if (StringUtil.isEmpty(requestObject.getString(JSONRequest.KEY_TAG), true)) {
-			requestObject.put(JSONRequest.KEY_TAG, REGISTER);
+		if (StringUtil.isEmpty(requestObject.getString(apijson.JSONRequest.KEY_TAG), true)) {
+			requestObject.put(apijson.JSONRequest.KEY_TAG, REGISTER);
 		}
-		requestObject.put(JSONRequest.KEY_FORMAT, true);
-		response = new JSONResponse( 
+		requestObject.put(apijson.JSONRequest.KEY_FORMAT, true);
+		response = new JSONResponse<>( 
 				new DemoParser(POST).setNeedVerifyLogin(false).parseResponse(requestObject)
 				);
 
@@ -755,11 +763,11 @@ public class DemoController extends Controller {
 
 		if (e != null) { //出现错误，回退
 			new DemoParser(DELETE, false).parseResponse(
-					new JSONRequest(new User(userId))
-					);
+					JSON.parseObject(new User(userId))
+			);
 			new DemoParser(DELETE, false).parseResponse(
-					new JSONRequest(new Privacy(userId2))
-					);
+					JSON.parseObject(new Privacy(userId2))
+			);
 		}
 
 		renderJson(response);
@@ -783,13 +791,13 @@ public class DemoController extends Controller {
 	 */
 	@NotAction
 	public static JSONObject newIllegalArgumentResult(JSONObject requestObject, String key, String msg) {
-		return DemoParser.extendErrorResult(requestObject
+		DemoParser parser = new DemoParser();
+		return parser.extendErrorResult(requestObject
 				, new IllegalArgumentException(key + ":value 中value不合法！" + StringUtil.getString(msg)));
 	}
 
 
 	/**设置密码
-	 * @param request 只用String，避免encode后未decode
 	 * @return
 	 * @see
 	 * <pre>
@@ -814,6 +822,8 @@ public class DemoController extends Controller {
 	@Before(POST.class)
 	@ActionKey("put/password")
 	public void putPassword() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 
 		JSONObject requestObject = null;
@@ -854,18 +864,18 @@ public class DemoController extends Controller {
 				}
 			}
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
 
 
 		if (StringUtil.isPassword(oldPassword)) {
 			if (userId <= 0) { //手机号+验证码不需要userId
-				renderJson(DemoParser.extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！")));
+				renderJson(parser.extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！")));
 				return;
 			}
 			if (oldPassword.equals(password)) {
-				renderJson(DemoParser.extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！")));
+				renderJson(parser.extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！")));
 				return;
 			}
 
@@ -876,33 +886,33 @@ public class DemoController extends Controller {
 			} else {
 				privacy.setPayPassword(oldPassword);
 			}
-			JSONResponse response = new JSONResponse( 
+			JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>( 
 					new DemoParser(HEAD, false).parseResponse(
-							new JSONRequest(privacy).setFormat(true)
-							)
-					);
+							JSON.parseObject(new JSONRequest(privacy).setFormat(true))
+					)
+			);
 			if (JSONResponse.isExist(response.getJSONResponse(PRIVACY_)) == false) {
-				renderJson(DemoParser.extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！")));
+				renderJson(parser.extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！")));
 				return;
 			}
 		}
 		else if (StringUtil.isPhone(phone) && StringUtil.isVerify(verify)) {
-			JSONResponse response = new JSONResponse(headVerify(type, phone, verify));
+			JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(headVerify(type, phone, verify));
 			if (JSONResponse.isSuccess(response) == false) {
 				renderJson(response);
 				return;
 			}
 			if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-				renderJson(DemoParser.extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！")));
+				renderJson(parser.extendErrorResult(response.toObject(JSONObject.class), new ConditionErrorException("手机号或验证码错误！")));
 				return;
 			}
-			response = new JSONResponse(
+			response = new JSONResponse<>(
 					new DemoParser(GET, false).parseResponse(
-							new JSONRequest(
+							JSON.parseObject(
 									new Privacy().setPhone(phone)
-									)
 							)
-					);
+					)
+			);
 			Privacy privacy = response.getObject(Privacy.class);
 			long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
 			privacyObj.remove(PHONE);
@@ -910,14 +920,14 @@ public class DemoController extends Controller {
 
 			requestObject.put(PRIVACY_, privacyObj);
 		} else {
-			renderJson(DemoParser.extendErrorResult(requestObject, new IllegalArgumentException("请输入合法的 旧密码 或 手机号+验证码 ！")));
+			renderJson(parser.extendErrorResult(requestObject, new IllegalArgumentException("请输入合法的 旧密码 或 手机号+验证码 ！")));
 			return;
 		}
 		//TODO 上线版加上   password = MD5Util.MD5(password);
 
 
-		//		requestObject.put(JSONRequest.KEY_TAG, "Password");
-		requestObject.put(JSONRequest.KEY_FORMAT, true);
+		//		requestObject.put(apijson.JSONRequest.KEY_TAG, "Password");
+		requestObject.put(apijson.JSONRequest.KEY_FORMAT, true);
 
 		//修改密码
 		renderJson(new DemoParser(PUT, false).parseResponse(requestObject));
@@ -926,9 +936,6 @@ public class DemoController extends Controller {
 
 
 	/**充值/提现
-	 * @param request 只用String，避免encode后未decode
-	 * @param session
-	 * @return
 	 * @see
 	 * <pre>
 		{
@@ -943,6 +950,8 @@ public class DemoController extends Controller {
 	@Before(POST.class)
 	@ActionKey("put/balance")
 	public void putBalance() {
+		DemoParser parser = new DemoParser();
+
 		String request = HttpKit.readData(getRequest());
 		HttpSession session = getSession();
 		JSONObject requestObject = null;
@@ -969,21 +978,21 @@ public class DemoController extends Controller {
 				throw new IllegalArgumentException(PRIVACY_ + "." + _PAY_PASSWORD + ":value 中value不合法！");
 			}
 		} catch (Exception e) {
-			renderJson(DemoParser.extendErrorResult(requestObject, e));
+			renderJson(parser.extendErrorResult(requestObject, e));
 			return;
 		}
 
 		//验证密码<<<<<<<<<<<<<<<<<<<<<<<
 
 		privacyObj.remove("balance+");
-		JSONResponse response = new JSONResponse(
+		JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(
 				new DemoParser(HEADS, false).setSession(session).parseResponse(
-						new JSONRequest(PRIVACY_, privacyObj)
+						JSON.createJSONObject(PRIVACY_, privacyObj)
 						)
 				);
 		response = response.getJSONResponse(PRIVACY_);
 		if (JSONResponse.isExist(response) == false) {
-			renderJson(DemoParser.extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！")));
+			renderJson(parser.extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！")));
 			return;
 		}
 
@@ -993,33 +1002,33 @@ public class DemoController extends Controller {
 		//验证金额范围<<<<<<<<<<<<<<<<<<<<<<<
 
 		if (change == 0) {
-			renderJson(DemoParser.extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！")));
+			renderJson(parser.extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！")));
 			return;
 		}
 		if (Math.abs(change) > 10000) {
-			renderJson(DemoParser.extendErrorResult(requestObject, new OutOfRangeException("单次 充值/提现 的金额不能超过10000元！")));
+			renderJson(parser.extendErrorResult(requestObject, new OutOfRangeException("单次 充值/提现 的金额不能超过10000元！")));
 			return;
 		}
 
 		//验证金额范围>>>>>>>>>>>>>>>>>>>>>>>>
 
 		if (change < 0) {//提现
-			response = new JSONResponse(
+			response = new JSONResponse<>(
 					new DemoParser(GETS, false).parseResponse(
-							new JSONRequest(
+							JSON.parseObject(
 									new Privacy(userId)
-									)
 							)
-					);
+					)
+			);
 			Privacy privacy = response == null ? null : response.getObject(Privacy.class);
 			long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
 			if (id != userId) {
-				renderJson(DemoParser.extendErrorResult(requestObject, new Exception("服务器内部错误！")));
+				renderJson(parser.extendErrorResult(requestObject, new Exception("服务器内部错误！")));
 				return;
 			}
 
 			if (BaseModel.value(privacy.getBalance()) < -change) {
-				renderJson(DemoParser.extendErrorResult(requestObject, new OutOfRangeException("余额不足！")));
+				renderJson(parser.extendErrorResult(requestObject, new OutOfRangeException("余额不足！")));
 				return;
 			}
 		}
@@ -1028,8 +1037,8 @@ public class DemoController extends Controller {
 		privacyObj.remove(_PAY_PASSWORD);
 		privacyObj.put("balance+", change);
 		requestObject.put(PRIVACY_, privacyObj);
-		requestObject.put(JSONRequest.KEY_TAG, PRIVACY_);
-		requestObject.put(JSONRequest.KEY_FORMAT, true);
+		requestObject.put(apijson.JSONRequest.KEY_TAG, PRIVACY_);
+		requestObject.put(apijson.JSONRequest.KEY_FORMAT, true);
 		//不免验证，里面会验证身份
 		renderJson(new DemoParser(PUT).setSession(session).parseResponse(requestObject));
 	}

@@ -21,24 +21,26 @@ import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
 import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import apijson.framework.javax.APIJSONFunctionParser;
 import apijson.orm.AbstractVerifier;
-import apijson.orm.JSONRequest;
 import apijson.orm.Visitor;
+
+import static apijson.JSONObject.KEY_COLUMN;
+import static apijson.JSONRequest.KEY_COUNT;
 
 
 /**可远程调用的函数类，用于自定义业务逻辑处理
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends APIJSONFunctionParser {
+public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, JSONArray> {
 	public static final String TAG = "DemoFunctionParser";
 
 	public DemoFunctionParser() {
@@ -48,34 +50,34 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 		super(method, tag, version, request, session);
 	}
 	
-	public Visitor<Long> getCurrentUser(@NotNull JSONObject current) {
+	public Visitor<Long> getCurrentUser(@NotNull JSONObject curObj) {
 		return DemoVerifier.getVisitor(getSession());
 	}
 	
-	public Long getCurrentUserId(@NotNull JSONObject current) {
+	public Long getCurrentUserId(@NotNull JSONObject curObj) {
 		return DemoVerifier.getVisitorId(getSession());
 	}
 	
-	public List<Long> getCurrentUserIdAsList(@NotNull JSONObject current) {
+	public List<Long> getCurrentUserIdAsList(@NotNull JSONObject curObj) {
 		List<Long> list = new ArrayList<>(1);
 		list.add(DemoVerifier.getVisitorId(getSession()));
 		return list;
 	}
 	
-	public List<Long> getCurrentContactIdList(@NotNull JSONObject current) {
-		Visitor<Long> user = getCurrentUser(current);
+	public List<Long> getCurrentContactIdList(@NotNull JSONObject curObj) {
+		Visitor<Long> user = getCurrentUser(curObj);
 		return user == null ? null : user.getContactIdList();
 	}
 	
 
 	/**
-	 * @param current
+	 * @param curObj
 	 * @param idList
 	 * @return
 	 * @throws Exception
 	 */
-	public void verifyIdList(@NotNull JSONObject current, @NotNull String idList) throws Exception {
-		Object obj = current.get(idList);
+	public void verifyIdList(@NotNull JSONObject curObj, @NotNull String idList) throws Exception {
+		Object obj = curObj.get(idList);
 		if (obj == null) {
 			return;
 		}
@@ -98,13 +100,13 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**
-	 * @param current
+	 * @param curObj
 	 * @param urlList
 	 * @return
 	 * @throws Exception
 	 */
-	public void verifyURLList(@NotNull JSONObject current, @NotNull String urlList) throws Exception {
-		Object obj = current.get(urlList);
+	public void verifyURLList(@NotNull JSONObject curObj, @NotNull String urlList) throws Exception {
+		Object obj = curObj.get(urlList);
 		if (obj == null) {
 			return;
 		}
@@ -127,21 +129,21 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**
-	 * @param current
+	 * @param curObj
 	 * @param momentId
 	 * @return
 	 * @throws Exception
 	 */
-	public int deleteCommentOfMoment(@NotNull JSONObject current, @NotNull String momentId) throws Exception {
-		long mid = current.getLongValue(momentId);
-		if (mid <= 0 || current.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+	public int deleteCommentOfMoment(@NotNull JSONObject curObj, @NotNull String momentId) throws Exception {
+		long mid = curObj.getLongValue(momentId);
+		if (mid <= 0 || curObj.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
 
-		JSONRequest request = new JSONRequest();
+		JSONObject request = JSON.createJSONObject();
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest comment = new JSONRequest();
+		JSONObject comment = JSON.createJSONObject();
 		comment.put("momentId", mid);
 
 		request.put("Comment", comment);
@@ -155,22 +157,22 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**删除评论的子评论
-	 * @param current
+	 * @param curObj
 	 * @param toId
 	 * @return
 	 */
-	public int deleteChildComment(@NotNull JSONObject current, @NotNull String toId) throws Exception {
-		long tid = current.getLongValue(toId);
-		if (tid <= 0 || current.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
+	public int deleteChildComment(@NotNull JSONObject curObj, @NotNull String toId) throws Exception {
+		long tid = curObj.getLongValue(toId);
+		if (tid <= 0 || curObj.getIntValue(JSONResponse.KEY_COUNT) <= 0) {
 			return 0;
 		}
 
 		//递归获取到全部子评论id
 
-		JSONRequest request = new JSONRequest();
+		JSONObject request = JSON.createJSONObject();
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest comment = new JSONRequest();
+		JSONObject comment = JSON.createJSONObject();
 		comment.put("id{}", getChildCommentIdList(tid));
 
 		request.put("Comment", comment);
@@ -187,19 +189,20 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 		JSONArray arr = new JSONArray();
 
-		JSONRequest request = new JSONRequest();
+		JSONObject request = JSON.createJSONObject();
 
 		//Comment-id[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest idItem = new JSONRequest();
+		JSONObject idItem = JSON.createJSONObject();
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest comment = new JSONRequest();
+		JSONObject comment = JSON.createJSONObject();
 		comment.put("toId", tid);
-		comment.setColumn("id");
+		comment.put(KEY_COLUMN, "id");
 		idItem.put("Comment", comment);
+		idItem.put(KEY_COUNT, 0);
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		request.putAll(idItem.toArray(0, 0, "Comment-id"));
+		request.put("Comment-id[]", idItem);
 		//Comment-id[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		JSONObject rp = new DemoParser().setNeedVerify(false).parseResponse(request);
@@ -223,23 +226,23 @@ public class DemoFunctionParser extends APIJSONFunctionParser {
 
 
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
-	 * @param current
+	 * @param curObj
 	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 * @throws Exception
 	 */
-	public JSONArray getIdList(@NotNull JSONObject current) {
+	public JSONArray getIdList(@NotNull JSONObject curObj) {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
 	}
 
 
 	/**TODO 仅用来测试 "key-()":"verifyAccess()"
-	 * @param current
+	 * @param curObj
 	 * @return
 	 * @throws Exception
 	 */
-	public Object verifyAccess(@NotNull JSONObject current) throws Exception {
-		long userId = current.getLongValue(JSONRequest.KEY_USER_ID);
-		String role = current.getString(JSONRequest.KEY_ROLE);
+	public Object verifyAccess(@NotNull JSONObject curObj) throws Exception {
+		long userId = curObj.getLongValue(apijson.JSONObject.KEY_USER_ID);
+		String role = curObj.getString(apijson.JSONObject.KEY_ROLE);
 		if (AbstractVerifier.OWNER.equals(role) && userId != (Long) DemoVerifier.getVisitorId(getSession())) {
 			throw new IllegalAccessException("登录用户与角色OWNER不匹配！");
 		}

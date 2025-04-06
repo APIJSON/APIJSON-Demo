@@ -35,7 +35,7 @@ import apijson.framework.javax.BaseModel;
 		POST = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
 		PUT = {ADMIN},
 		DELETE = {ADMIN}
-		)
+)
 public class Verify extends BaseModel {
 	private static final long serialVersionUID = 1L;
 	

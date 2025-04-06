@@ -35,7 +35,7 @@ import apijson.framework.javax.BaseModel;
 		GETS = {OWNER, ADMIN},
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
-		)
+)
 public class Privacy extends BaseModel {
 	private static final long serialVersionUID = 1L;
 

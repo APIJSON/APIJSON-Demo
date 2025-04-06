@@ -15,12 +15,14 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.framework.javax.APIJSONVerifier;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**安全校验器，校验请求参数、角色与权限等
  * 具体见 https://github.com/Tencent/APIJSON/issues/12
  * @author Lemon
  */
-public class DemoVerifier extends APIJSONVerifier<Long> {
+public class DemoVerifier extends APIJSONVerifier<Long, JSONObject, JSONArray> {
 	public static final String TAG = "DemoVerifier";
 
 	// 重写方法来自定义字段名等	

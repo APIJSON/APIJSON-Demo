@@ -29,7 +29,7 @@ import apijson.orm.Visitor;
 @MethodAccess(
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
-		)
+)
 public class User extends BaseModel implements Visitor<Long> {
 	private static final long serialVersionUID = 1L;
 	

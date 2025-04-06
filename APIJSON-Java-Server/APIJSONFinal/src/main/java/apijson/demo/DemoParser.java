@@ -14,15 +14,20 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import apijson.JSONResponse;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import apijson.RequestMethod;
 import apijson.framework.javax.APIJSONParser;
+
+import static apijson.JSONResponse.*;
 
 
 /**请求解析器
  * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
-public class DemoParser extends APIJSONParser<Long> {
+public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
 
     public DemoParser() {
         super();
@@ -32,6 +37,18 @@ public class DemoParser extends APIJSONParser<Long> {
     }
     public DemoParser(RequestMethod method, boolean needVerify) {
         super(method, needVerify);
+    }
+
+    public static JSONObject parseRequest(String request) {
+        try {
+            return JSON.parseObject(request);
+        } catch (Throwable e) {
+            JSONObject obj = JSON.createJSONObject();
+            obj.put(KEY_OK, false);
+            obj.put(KEY_CODE, JSONResponse.CODE_ILLEGAL_ARGUMENT);
+            obj.put(KEY_MSG, "JSON 格式不合法！" + request);
+            return obj;
+        }
     }
 
     //	可重写来设置最大查询数量
