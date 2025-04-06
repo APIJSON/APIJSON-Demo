@@ -17,6 +17,9 @@ package apijson.demo;
 import java.net.URLDecoder;
 import java.util.Map;
 
+import apijson.framework.APIJSONParser;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import jakarta.servlet.http.HttpSession;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,7 +33,6 @@ import org.springframework.web.bind.annotation.RestController;
 import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.framework.APIJSONController;
-import apijson.orm.Parser;
 
 
 /**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理
@@ -46,10 +48,10 @@ import apijson.orm.Parser;
  */
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONController<Long> {
+public class DemoController extends APIJSONController<Long, JSONObject, JSONArray> {
 
 	@Override
-	public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+	public APIJSONParser<Long, JSONObject, JSONArray> newParser(HttpSession session, RequestMethod method) {
 		return super.newParser(session, method).setNeedVerify(false);  // TODO 这里关闭校验，方便新手快速测试，实际线上项目建议开启
 	}
 

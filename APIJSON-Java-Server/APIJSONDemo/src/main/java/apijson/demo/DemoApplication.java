@@ -14,8 +14,13 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import apijson.JSONParser;
+import apijson.framework.*;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -26,9 +31,8 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import apijson.Log;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
-import apijson.orm.SQLConfig;
+
+import java.util.List;
 
 
 /**
@@ -73,12 +77,83 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
   }
 
   static {
-    // 使用本项目的自定义处理类
-    APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
+    // 使用 fastjson
+    apijson.JSON.JSON_OBJECT_CLASS = JSONObject.class;
+    apijson.JSON.JSON_ARRAY_CLASS = JSONArray.class;
+
+    final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.UseBigDecimal};
+    apijson.JSON.DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
+
       @Override
-      public SQLConfig createSQLConfig() {
+      public JSONObject createJSONObject() {
+        return new JSONObject(true);
+      }
+
+      @Override
+      public JSONArray createJSONArray() {
+        return new JSONArray();
+      }
+
+      @Override
+      public String toJSONString(Object obj) {
+        return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
+      }
+
+      @Override
+      public Object parseJSON(Object json) {
+        return JSON.parse(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public JSONObject parseObject(Object json) {
+        return JSON.parseObject(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public <T> T parseObject(Object json, Class<T> clazz) {
+        return JSON.parseObject(toJSONString(json), clazz, DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public JSONArray parseArray(Object json) {
+        return JSON.parseArray(toJSONString(json));
+      }
+
+      @Override
+      public <T> List<T> parseArray(Object json, Class<T> clazz) {
+        return JSON.parseArray(toJSONString(json), clazz);
+      }
+
+    };
+
+    // 使用本项目的自定义处理类
+    APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long, JSONObject, JSONArray>() {
+
+      @Override
+      public DemoParser createParser() {
+        return new DemoParser();
+      }
+
+      @Override
+      public DemoFunctionParser createFunctionParser() {
+        return new DemoFunctionParser();
+      }
+
+      @Override
+      public DemoVerifier createVerifier() {
+        return new DemoVerifier();
+      }
+
+      @Override
+      public DemoSQLConfig createSQLConfig() {
         return new DemoSQLConfig();
       }
+
+      @Override
+      public DemoSQLExecutor createSQLExecutor() {
+        return new DemoSQLExecutor();
+      }
+
     };
 
     // 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增

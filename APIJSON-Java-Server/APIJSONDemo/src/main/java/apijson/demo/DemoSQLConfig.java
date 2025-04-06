@@ -14,6 +14,8 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.framework.APIJSONSQLConfig;
@@ -25,7 +27,7 @@ import apijson.framework.APIJSONSQLConfig;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray> {
 
 	static {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  // TODO 默认数据库类型，改成你自己的
@@ -43,25 +45,25 @@ public class DemoSQLConfig extends APIJSONSQLConfig {
 	}
 
 	@Override
-	public String getDBVersion() {
+	public String gainDBVersion() {
 		return "5.7.22";  // "8.0.11";  // TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号  // MYSQL 8 和 7 使用的 JDBC 配置不一样
 	}
-	
+
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
-	public String getDBUri() {
+	public String gainDBUri() {
 		return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 	}
-	
+
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
-	public String getDBAccount() {
+	public String gainDBAccount() {
 		return "root";  // TODO 改成你自己的
 	}
-	
+
 	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息
 	@Override
-	public String getDBPassword() {
+	public String gainDBPassword() {
 		return "apijson";  // TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
 	}
 
