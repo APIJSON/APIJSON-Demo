@@ -16,6 +16,7 @@ package apijson.demo;
 
 import apijson.orm.AbstractObjectParser;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 
 import java.util.List;
 
@@ -30,16 +31,18 @@ import org.noear.solon.core.handle.SessionState;
 /**对象解析器，用来简化 Parser
  * @author Lemon
  */
-public class DemoObjectParser extends AbstractObjectParser<Long> {
+public class DemoObjectParser extends AbstractObjectParser<Long, JSONObject, JSONArray> {
 
-    public DemoObjectParser(SessionState session, @NotNull JSONObject request, String parentPath, SQLConfig arrayConfig
+    public DemoObjectParser(SessionState session, @NotNull JSONObject request, String parentPath
+            , SQLConfig<Long, JSONObject, JSONArray> arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         super(request, parentPath, arrayConfig, isSubquery, isTable, isArrayMainTable);
     }
 
 
     @Override
-    public SQLConfig newSQLConfig(RequestMethod method, String table, String alias, JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
+    public SQLConfig<Long, JSONObject, JSONArray> newSQLConfig(RequestMethod method, String table, String alias
+            , JSONObject request, List<Join<Long, JSONObject, JSONArray>> joinList, boolean isProcedure) throws Exception {
         return DemoSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure);
     }
 

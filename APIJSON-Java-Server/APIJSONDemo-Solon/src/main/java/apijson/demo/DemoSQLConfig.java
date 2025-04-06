@@ -20,8 +20,9 @@ import apijson.orm.AbstractSQLConfig;
 
 import apijson.RequestMethod;
 import apijson.orm.Join;
-import apijson.orm.Join.On;
 import apijson.orm.SQLConfig;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 
 /**SQL配置
@@ -30,7 +31,7 @@ import apijson.orm.SQLConfig;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends AbstractSQLConfig<Long> {
+public class DemoSQLConfig extends AbstractSQLConfig<Long, JSONObject, JSONArray> {
 
 	public DemoSQLConfig() {
 		super(RequestMethod.GET);
@@ -60,59 +61,55 @@ public class DemoSQLConfig extends AbstractSQLConfig<Long> {
 
 
 	@Override
-	public String getDBVersion() {
+	public String gainDBVersion() {
 		return "8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 	}
 	@Override
-	public String getDBUri() {
+	public String gainDBUri() {
 		// 这个是 MySQL 8.0 及以上，要加 userSSL=false
 		return "jdbc:mysql://localhost:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 		// 以下是 MySQL 5.7 及以下
 		// 		return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 	}
 	@Override
-	public String getDBAccount() {
+	public String gainDBAccount() {
 		return "root";  //TODO 改成你自己的
 	}
 	@Override
-	public String getDBPassword() {
+	public String gainDBPassword() {
 		return "apijson";  //TODO 改成你自己的，TiDB 可以当成 MySQL 使用， 默认密码为空字符串 ""
 	}
 
-	public static SQLConfig newSQLConfig(RequestMethod method, String table, String alias, com.alibaba.fastjson.JSONObject request, List<Join> joinList, boolean isProcedure) throws Exception {
-		return AbstractSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure, new SimpleCallback<Object>() {
+	public static SQLConfig<Long, JSONObject, JSONArray> newSQLConfig(RequestMethod method, String table, String alias, com.alibaba.fastjson.JSONObject request, List<Join<Long, JSONObject, JSONArray>> joinList, boolean isProcedure) throws Exception {
+		return AbstractSQLConfig.newSQLConfig(method, table, alias, request, joinList, isProcedure, new SimpleCallback<Long, JSONObject, JSONArray>() {
 			@Override
-			public SQLConfig getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
+			public SQLConfig<Long, JSONObject, JSONArray> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 		});
 	}
 
+	//	@Override
+	//	public boolean isFakeDelete() {
+	//		return false;
+	//	}
+	//
+	//	@Override
+	//	public Map<String, Object> onFakeDelete(Map<String, Object> map) {
+	//		return super.onFakeDelete(map);
+	//	}
 
-
-	@Override
-	public boolean isFakeDelete() {
-		return false;
-	}
-
-	@Override
-	public Map<String, Object> onFakeDelete(Map map) {
-		return super.onFakeDelete(map);
-	}
-
-	@Override
-	protected void onGetCrossJoinString(Join j) throws UnsupportedOperationException {
-		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
-	}
-	@Override
-	protected void onJoinNotRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
-	}
-	@Override
-	protected void onJoinComplexRelation(String sql, String quote, Join j, String jt, List<On> onList, On on) {
-		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplextRelation(sql, quote, j, jt, onList, on);
-	}
-
-
+	//	@Override
+	//	protected void onGainCrossJoinString(Join<Long, JSONObject, JSONArray> j) throws UnsupportedOperationException {
+	//		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(j);
+	//	}
+	//	@Override
+	//	protected void onJoinNotRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> j, String jt, List<On> onList, On on) {
+	//		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, j, jt, onList, on);
+	//	}
+	//	@Override
+	//	protected void onJoinComplexRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> j, String jt, List<On> onList, On on) {
+	//		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, j, jt, onList, on);
+	//	}
 
 }

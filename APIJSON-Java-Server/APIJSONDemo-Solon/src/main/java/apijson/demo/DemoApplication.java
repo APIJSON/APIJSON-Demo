@@ -15,10 +15,16 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.Log;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import org.noear.solon.Solon;
 import org.noear.solon.annotation.Configuration;
 import org.noear.solon.web.cors.CrossFilter;
+import apijson.JSONParser;
 
+import java.util.List;
 
 /**
  * Demo Solon Application 主应用程序启动类
@@ -38,6 +44,56 @@ public class DemoApplication {
     });
 
     Log.DEBUG = true; // TODO 上线前改为 false
+
+    // 使用 fastjson
+    apijson.JSON.JSON_OBJECT_CLASS = JSONObject.class;
+    apijson.JSON.JSON_ARRAY_CLASS = JSONArray.class;
+
+    final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.UseBigDecimal};
+    apijson.JSON.DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
+
+      @Override
+      public JSONObject createJSONObject() {
+        return new JSONObject(true);
+      }
+
+      @Override
+      public JSONArray createJSONArray() {
+        return new JSONArray();
+      }
+
+      @Override
+      public String toJSONString(Object obj) {
+        return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
+      }
+
+      @Override
+      public Object parseJSON(Object json) {
+        return JSON.parse(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public JSONObject parseObject(Object json) {
+        return JSON.parseObject(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public <T> T parseObject(Object json, Class<T> clazz) {
+        return JSON.parseObject(toJSONString(json), clazz, DEFAULT_FASTJSON_FEATURES);
+      }
+
+      @Override
+      public JSONArray parseArray(Object json) {
+        return JSON.parseArray(toJSONString(json));
+      }
+
+      @Override
+      public <T> List<T> parseArray(Object json, Class<T> clazz) {
+        return JSON.parseArray(toJSONString(json), clazz);
+      }
+
+    };
+
     System.out.println("官方网站： http://apijson.cn");
     System.out.println("设计规范： https://github.com/Tencent/APIJSON/blob/master/Document.md#3");
     System.out.println("测试链接： http://apijson.cn/api?type=JSON&url=http://localhost:8080/get");

@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.orm.AbstractFunctionParser;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import apijson.RequestMethod;
@@ -24,16 +25,16 @@ import apijson.RequestMethod;
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends AbstractFunctionParser<Long> {
+public class DemoFunctionParser extends AbstractFunctionParser<Long, JSONObject, JSONArray> {
 	public static final String TAG = "DemoFunctionParser";
 
 
 	public DemoFunctionParser() {
 		this(null, null, 0, null);
 	}
+
 	public DemoFunctionParser(RequestMethod method, String tag, int version, JSONObject request) {
 		super(method, tag, version, request);
 	}
-
 
 }

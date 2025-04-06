@@ -16,6 +16,8 @@ package apijson.demo;
 
 import apijson.Log;
 import apijson.orm.AbstractSQLExecutor;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 
 /**
  * SQL 执行器，支持连接池及多数据源
@@ -23,7 +25,7 @@ import apijson.orm.AbstractSQLExecutor;
  *
  * @author Lemon
  */
-public class DemoSQLExecutor extends AbstractSQLExecutor<Long> {
+public class DemoSQLExecutor extends AbstractSQLExecutor<Long, JSONObject, JSONArray> {
     private static final String TAG = "DemoSQLExecutor";
 
     static {

@@ -15,6 +15,7 @@ limitations under the License.*/
 package apijson.demo;
 
 import apijson.orm.*;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.HashMap;
@@ -28,7 +29,7 @@ import org.noear.solon.core.handle.SessionState;
  * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
-public class DemoParser extends AbstractParser<Long> {
+public class DemoParser extends AbstractParser<Long, JSONObject, JSONArray> {
 
     public static final Map<String, SessionState> KEY_MAP;
     static {
@@ -69,7 +70,7 @@ public class DemoParser extends AbstractParser<Long> {
 
 
     private SessionState session;
-    public Parser<Long> setSession(SessionState session) {
+    public Parser<Long, JSONObject, JSONArray> setSession(SessionState session) {
         this.session = session;
         return this;
     }
@@ -79,39 +80,40 @@ public class DemoParser extends AbstractParser<Long> {
 
 
     @Override
-    public Parser<Long> createParser() {
+    public Parser<Long, JSONObject, JSONArray> createParser() {
         return new DemoParser();
     }
 
     @Override
-    public ObjectParser createObjectParser(JSONObject request, String parentPath, SQLConfig arrayConfig
+    public ObjectParser<Long, JSONObject, JSONArray> createObjectParser(JSONObject request, String parentPath
+            , SQLConfig<Long, JSONObject, JSONArray> arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
                 , isSubquery, isTable, isArrayMainTable).setMethod(getMethod()).setParser(this);
     }
 
     @Override
-    public FunctionParser createFunctionParser() {
+    public FunctionParser<Long, JSONObject, JSONArray> createFunctionParser() {
         return new DemoFunctionParser();
     }
 
     @Override
-    public SQLConfig createSQLConfig() {
+    public SQLConfig<Long, JSONObject, JSONArray> createSQLConfig() {
         return new DemoSQLConfig();
     }
 
     @Override
-    public SQLExecutor createSQLExecutor() {
+    public SQLExecutor<Long, JSONObject, JSONArray> createSQLExecutor() {
         return new DemoSQLExecutor();
     }
 
     @Override
-    public Verifier<Long> createVerifier() {
+    public Verifier<Long, JSONObject, JSONArray> createVerifier() {
         return new DemoVerifier();
     }
 
-    private FunctionParser functionParser;
-    public FunctionParser getFunctionParser() {
+    private FunctionParser<Long, JSONObject, JSONArray> functionParser;
+    public FunctionParser<Long, JSONObject, JSONArray> getFunctionParser() {
         return functionParser;
     }
     public Object onFunctionParse(String key, String function, String parentPath, String currentName, JSONObject currentObject, boolean containRaw) throws Exception {
