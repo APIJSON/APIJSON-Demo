@@ -25,6 +25,7 @@ import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.framework.javax.BaseModel;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -32,6 +33,7 @@ import apijson.framework.javax.APIJSONFunctionParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.Visitor;
 
+import static apijson.JSON.getJSONArray;
 import static apijson.JSONObject.KEY_COLUMN;
 import static apijson.JSONRequest.KEY_COUNT;
 
@@ -68,7 +70,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 		Visitor<Long> user = getCurrentUser(curObj);
 		return user == null ? null : user.getContactIdList();
 	}
-	
+
+	//public int countArray(@NotNull JSONObject curObj, String array) {
+	//	return super.countArray(curObj, array);
+	//}
 
 	/**
 	 * @param curObj

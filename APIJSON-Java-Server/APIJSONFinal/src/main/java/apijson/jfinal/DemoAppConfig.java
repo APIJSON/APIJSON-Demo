@@ -125,7 +125,7 @@ public class DemoAppConfig extends JFinalConfig {
       }
 
       @Override
-      public String toJSONString(Object obj) {
+      public String toJSONString(Object obj, boolean format) {
         return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
       }
 

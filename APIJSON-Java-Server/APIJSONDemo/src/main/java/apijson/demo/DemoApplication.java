@@ -95,7 +95,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
       }
 
       @Override
-      public String toJSONString(Object obj) {
+      public String toJSONString(Object obj, boolean format) {
         return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
       }
 
