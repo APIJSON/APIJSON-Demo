@@ -215,7 +215,7 @@ function format(json) {
   }
 
   try {
-    return JSON.stringify(JSON.parse(json), null, "\t");
+    return JSON.stringify(parseJSON(json), null, "\t");
   } catch(e) {
     log(TAG_REQUEST_UTIL, 'format  try { ... } catch (err) { \n ' + e);
     return json;
@@ -234,9 +234,9 @@ function format(json) {
   // var jsonObj;
   // if (typeof json == 'string'){
   //   try {
-  //     jsonObj = JSON.parse(json);
+  //     jsonObj = parseJSON(json);
   //   } catch (err) {
-  //     console.log('format  try { jsonObj = JSON.parse(json); } catch (err) { \n ' + err);
+  //     console.log('format  try { jsonObj = parseJSON(json); } catch (err) { \n ' + err);
   //     return json;
   //   }
   // }
@@ -266,7 +266,7 @@ function parseJSON(s) {
     return null;
   }
   try {
-  return JSON.parse(s);
+  return parseJSON(s);
   } catch (e) {
     return JSON5.parse(s)
   }

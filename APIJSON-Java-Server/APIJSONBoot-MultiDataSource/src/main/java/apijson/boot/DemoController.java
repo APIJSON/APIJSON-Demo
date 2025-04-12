@@ -14,13 +14,10 @@ limitations under the License.*/
 
 package apijson.boot;
 
-import apijson.orm.AbstractParser;
-import apijson.orm.Parser;
+import apijson.framework.APIJSONParser;
 import apijson.orm.exception.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.serializer.SerializerFeature;
-import com.alibaba.fastjson.serializer.ValueFilter;
 import com.fasterxml.jackson.databind.util.LRUMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +25,9 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -64,11 +59,11 @@ import apijson.demo.model.User;
 import apijson.demo.model.Verify;
 import apijson.framework.BaseModel;
 import apijson.orm.JSONRequest;
-import apijson.orm.model.TestRecord;
 import apijson.router.APIJSONRouterController;
-import org.springframework.web.servlet.ModelAndView;
 import unitauto.MethodUtil;
 
+import static apijson.JSON.getString;
+import static apijson.JSON.parseJSON;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.GETS;
@@ -82,14 +77,13 @@ import static apijson.framework.APIJSONConstant.FORMAT;
 import static apijson.framework.APIJSONConstant.FUNCTION_;
 import static apijson.framework.APIJSONConstant.ID;
 import static apijson.framework.APIJSONConstant.REQUEST_;
-import static apijson.framework.APIJSONConstant.TEST_RECORD_;
 import static apijson.framework.APIJSONConstant.USER_ID;
 import static apijson.framework.APIJSONConstant.VERSION;
 import static org.springframework.http.HttpHeaders.COOKIE;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 
-/**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser 来处理
+/**请求路由入口控制器，包括通用增删改查接口等，转交给 APIJSON 的 Parser<T, M, L> 来处理
  * 具体见 SpringBoot 文档
  * https://www.springcloud.cc/spring-boot.html#boot-features-spring-mvc
  * 以及 APIJSON 通用文档 3.设计规范 3.1 操作方法
@@ -103,7 +97,7 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONRouterController<Long> {  // APIJSONController<Long> {
+public class DemoController extends APIJSONRouterController<Long, JSONObject, JSONArray> {  // APIJSONController<Long, JSONObject, JSONArray> {
     private static final String TAG = "DemoController";
 
     public String getRequestBaseURL() {
@@ -137,7 +131,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     }
 
       @Override
-      public Parser<Long> newParser(HttpSession session, RequestMethod method) {
+      public APIJSONParser<Long, JSONObject, JSONArray> newParser(HttpSession session, RequestMethod method) {
           return super.newParser(session, method).setNeedVerify(false);
       }
 
@@ -385,7 +379,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         try {
             request = URLDecoder.decode(request, StringUtil.UTF_8);
         } catch (Exception e) {
-            // Parser 会报错
+            // Parser<T, M, L> 会报错
         }
 
         if (! Log.DEBUG) { // 一般情况这样简单使用
@@ -397,7 +391,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         try {
             String url = getRequestURL();
 
-            String query = StringUtil.getTrimedString(httpServletRequest.getQueryString());
+            String query = StringUtil.trim(httpServletRequest.getQueryString());
             if (StringUtil.isNotEmpty(query)) {
                 try {
                     query = "?" + URLEncoder.encode(query, StringUtil.UTF_8);
@@ -543,16 +537,16 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             phone = requestObject.getString(PHONE);
             verify = requestObject.getString(VERIFY);
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
 
         JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));
         response = response.getJSONResponse(VERIFY_);
         if (JSONResponse.isExist(response) == false) {
-            return DemoParser.extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
+            return new DemoParser().extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
         }
 
-        JSONObject result = DemoParser.newSuccessResult();
+        JSONObject result = new DemoParser().newSuccessResult();
 
         boolean reloadAll = StringUtil.isEmpty(type, true) || "ALL".equals(type);
 
@@ -561,7 +555,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 result.put(ACCESS_, DemoVerifier.initAccess(false, null, value));
             } catch (ServerException e) {
                 e.printStackTrace();
-                result.put(ACCESS_, DemoParser.newErrorResult(e));
+                result.put(ACCESS_, new DemoParser().newErrorResult(e));
             }
         }
 
@@ -570,7 +564,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 result.put(FUNCTION_, DemoFunctionParser.init(false, null, value));
             } catch (ServerException e) {
                 e.printStackTrace();
-                result.put(FUNCTION_, DemoParser.newErrorResult(e));
+                result.put(FUNCTION_, new DemoParser().newErrorResult(e));
             }
         }
 
@@ -579,7 +573,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 result.put(REQUEST_, DemoVerifier.initRequest(false, null, value));
             } catch (ServerException e) {
                 e.printStackTrace();
-                result.put(REQUEST_, DemoParser.newErrorResult(e));
+                result.put(REQUEST_, new DemoParser().newErrorResult(e));
             }
         }
 
@@ -606,7 +600,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
 
         new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone, null));
@@ -617,7 +611,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
 
         if (JSONResponse.isSuccess(response) == false) {
-            new DemoParser(DELETE, false).parseResponse(new JSONRequest(new Verify(type, phone)));
+            new DemoParser(DELETE, false).parseResponse((JSONObject) JSON.parseObject(new Verify(type, phone)));
             return response;
         }
 
@@ -648,7 +642,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
         return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone, null));
     }
@@ -676,7 +670,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             phone = requestObject.getString(PHONE);
             verify = requestObject.getString(VERIFY);
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
         return headVerify(type, phone, verify);
     }
@@ -689,17 +683,17 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      * @return
      */
     public JSONObject headVerify(int type, String phone, String code) {
-        JSONResponse response = new JSONResponse(
+        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(
                 new DemoParser(GETS, false).parseResponse(
-                        new JSONRequest(
+                        (JSONObject) JSON.createJSONObject(new JSONRequest(
                                 new Verify(type, phone)
                                         .setVerify(code)
-                        ).setTag(VERIFY_)
+                        ).setTag(VERIFY_))
                 )
         );
         Verify verify = response.getObject(Verify.class);
         if (verify == null) {
-            return DemoParser.newErrorResult(StringUtil.isEmpty(code, true)
+            return new DemoParser().newErrorResult(StringUtil.isEmpty(code, true)
                     ? new NotExistException("验证码不存在！") : new ConditionErrorException("手机号或验证码错误！"));
         }
 
@@ -708,16 +702,22 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         long now = System.currentTimeMillis();
         if (now > 60*1000 + time) {
             new DemoParser(DELETE, false).parseResponse(
-                    new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
+                    (JSONObject) JSON.createJSONObject(
+                            new JSONRequest(
+                                new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
+                            )
+                    )
             );
-            return DemoParser.newErrorResult(new TimeoutException("验证码已过期！"));
+            return new DemoParser().newErrorResult(new TimeoutException("验证码已过期！"));
         }
 
-        return new JSONResponse(
+        return new JSONResponse<JSONObject, JSONArray>(
                 new DemoParser(HEADS, false).parseResponse(
-                        new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
+                        (JSONObject) JSON.createJSONObject(new JSONRequest(
+                            new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
+                        )
                 )
-        );
+        )).toObject(JSONObject.class);
     }
 
 
@@ -727,8 +727,12 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      * @param verify
      * @return
      */
-    private apijson.JSONRequest newVerifyRequest(int type, String phone, String verify) {
-        return new JSONRequest(new Verify(type, phone).setVerify(verify)).setTag(VERIFY_).setFormat(true);
+    private JSONObject newVerifyRequest(int type, String phone, String verify) {
+        return JSON.createJSONObject(
+                new JSONRequest(
+                        new Verify(type, phone).setVerify(verify)
+                ).setTag(VERIFY_).setFormat(true)
+        );
     }
 
 
@@ -752,7 +756,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     }
      * </pre>
      */
-    @PostMapping(LOGIN)  //TODO 改 SQLConfig 里的 dbAccount, dbPassword，直接用数据库鉴权
+    @PostMapping(LOGIN)  //TODO 改 SQLConfig<T, M, L> 里的 dbAccount, dbPassword，直接用数据库鉴权
     public JSONObject login(@RequestBody String request, HttpSession session) {
         JSONObject requestObject = null;
         boolean isPassword;
@@ -794,31 +798,33 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             requestObject.remove(REMEMBER);
             requestObject.remove(DEFAULTS);
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
 
 
         //手机号是否已注册
         JSONObject phoneResponse = new DemoParser(HEADS, false).parseResponse(
-                new JSONRequest(
-                        new Privacy().setPhone(phone)
+                (JSONObject) JSON.createJSONObject(
+                        new JSONRequest(new Privacy().setPhone(phone))
                 )
         );
         if (JSONResponse.isSuccess(phoneResponse) == false) {
-            return DemoParser.newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), phoneResponse.getString(JSONResponse.KEY_MSG));
+            return new DemoParser().newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), getString(phoneResponse, JSONResponse.KEY_MSG));
         }
-        JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
+        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<JSONObject, JSONArray>(phoneResponse).getJSONResponse(PRIVACY_);
         if(JSONResponse.isExist(response) == false) {
-            return DemoParser.newErrorResult(new NotExistException("手机号未注册"));
+            return new DemoParser().newErrorResult(new NotExistException("手机号未注册"));
         }
 
         //根据phone获取User
         JSONObject privacyResponse = new DemoParser(GETS, false).parseResponse(
-                new JSONRequest(
-                        new Privacy().setPhone(phone)
-                ).setFormat(true)
+                (JSONObject) JSON.createJSONObject(
+                    new JSONRequest(
+                            new Privacy().setPhone(phone)
+                    ).setFormat(true)
+                )
         );
-        response = new JSONResponse(privacyResponse);
+        response = new JSONResponse<>(privacyResponse);
 
         Privacy privacy = response == null ? null : response.getObject(Privacy.class);
         long userId = privacy == null ? 0 : BaseModel.value(privacy.getId());
@@ -828,35 +834,39 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
         //校验凭证
         if (isPassword) { //password 密码登录
-            response = new JSONResponse(
+            response = new JSONResponse<>(
                     new DemoParser(HEADS, false).parseResponse(
-                            new JSONRequest(new Privacy(userId).setPassword(password))
+                            (JSONObject) JSON.createJSONObject(
+                                new JSONRequest(new Privacy(userId).setPassword(password))
+                            )
                     )
             );
         } else {//verify手机验证码登录
-            response = new JSONResponse(headVerify(Verify.TYPE_LOGIN, phone, password));
+            response = new JSONResponse<>(headVerify(Verify.TYPE_LOGIN, phone, password));
         }
         if (JSONResponse.isSuccess(response) == false) {
-            return response;
+            return response.toObject(JSONObject.class);
         }
         response = response.getJSONResponse(isPassword ? PRIVACY_ : VERIFY_);
         if (JSONResponse.isExist(response) == false) {
-            return DemoParser.newErrorResult(new ConditionErrorException("账号或密码错误"));
+            return new DemoParser().newErrorResult(new ConditionErrorException("账号或密码错误"));
         }
 
-        response = new JSONResponse(
+        response = new JSONResponse<>(
                 new DemoParser(GETS, false).parseResponse(
-                        new JSONRequest(  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
-                                USER_,  // User 里在 setContactIdList(List<Long>) 后加 setContactIdList(String) 没用
-                                new apijson.JSONObject(  // fastjson 查到一个就不继续了，所以只能加到前面或者只有这一个，但这样反过来不兼容 5.7+
-                                        new User(userId)  // 所以就用 @json 来强制转为 JSONArray，保证有效
-                                ).setJson("contactIdList,pictureList")
-                        ).setFormat(true)
+                        (JSONObject) JSON.createJSONObject(
+                            new JSONRequest(  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
+                                    USER_,  // User 里在 setContactIdList(List<Long>) 后加 setContactIdList(String) 没用
+                                    new apijson.JSONObject(  // fastjson 查到一个就不继续了，所以只能加到前面或者只有这一个，但这样反过来不兼容 5.7+
+                                            new User(userId)  // 所以就用 @json 来强制转为 JSONArray，保证有效
+                                    ).setJson("contactIdList,pictureList")
+                            ).setFormat(true)
+                        )
                 )
         );
         User user = response.getObject(User.class);
         if (user == null || BaseModel.value(user.getId()) != userId) {
-            return DemoParser.newErrorResult(new NullPointerException("服务器内部错误"));
+            return new DemoParser().newErrorResult(new NullPointerException("服务器内部错误"));
         }
 
         //登录状态保存至session
@@ -871,7 +881,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
         response.put(REMEMBER, remember);
         response.put(DEFAULTS, defaults);
-        return response;
+        return JSON.createJSONObject(response);
     }
 
     /**退出登录，清空session
@@ -889,11 +899,11 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             Log.d(TAG, "logout  userId = " + userId + "; session.getId() = " + (session == null ? null : session.getId()));
             super.logout(session);
         } catch (Exception e) {
-            return DemoParser.newErrorResult(e);
+            return new DemoParser().newErrorResult(e);
         }
 
-        JSONObject result = DemoParser.newSuccessResult();
-        JSONObject user = DemoParser.newSuccessResult();
+        JSONObject result = new DemoParser().newSuccessResult();
+        JSONObject user = new DemoParser().newSuccessResult();
         user.put(ID, userId);
         user.put(COUNT, 1);
         result.put(StringUtil.firstCase(USER_), user);
@@ -933,7 +943,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             requestObject = DemoParser.parseRequest(request);
             privacyObj = requestObject.getJSONObject(PRIVACY_);
 
-            phone = StringUtil.getString(privacyObj.getString(PHONE));
+            phone = StringUtil.get(privacyObj.getString(PHONE));
             verify = requestObject.getString(VERIFY);
             password = privacyObj.getString(_PASSWORD);
 
@@ -947,17 +957,17 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 return newIllegalArgumentResult(requestObject, VERIFY);
             }
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
 
 
-        JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_REGISTER, phone, verify));
+        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(headVerify(Verify.TYPE_REGISTER, phone, verify));
         if (JSONResponse.isSuccess(response) == false) {
-            return response;
+            return JSON.createJSONObject(response);
         }
         //手机号或验证码错误
         if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-            return DemoParser.extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
+            return new DemoParser().extendErrorResult(JSON.createJSONObject(response), new ConditionErrorException("手机号或验证码错误！"));
         }
 
 
@@ -983,14 +993,14 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
         if (e != null) { //出现错误，回退
             new DemoParser(DELETE, false).parseResponse(
-                    new JSONRequest(new User(userId))
+                    (JSONObject) apijson.JSON.parseObject(new User(userId))
             );
             new DemoParser(DELETE, false).parseResponse(
-                    new JSONRequest(new Privacy(userId2))
+                    (JSONObject) apijson.JSON.parseObject(new Privacy(userId2))
             );
         }
 
-        return response;
+        return JSON.createJSONObject(response);
     }
 
 
@@ -1009,8 +1019,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
      * @return
      */
     public static JSONObject newIllegalArgumentResult(JSONObject requestObject, String key, String msg) {
-        return DemoParser.extendErrorResult(requestObject
-                , new IllegalArgumentException(key + ":value 中value不合法！" + StringUtil.getString(msg)));
+        return new DemoParser().extendErrorResult(requestObject
+                , new IllegalArgumentException(key + ":value 中value不合法！" + StringUtil.get(msg)));
     }
 
 
@@ -1051,8 +1061,8 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         String password;
         try {
             requestObject = DemoParser.parseRequest(request);
-            oldPassword = StringUtil.getString(requestObject.getString(OLD_PASSWORD));
-            verify = StringUtil.getString(requestObject.getString(VERIFY));
+            oldPassword = StringUtil.get(requestObject.getString(OLD_PASSWORD));
+            verify = StringUtil.get(requestObject.getString(VERIFY));
 
             requestObject.remove(OLD_PASSWORD);
             requestObject.remove(VERIFY);
@@ -1077,16 +1087,16 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 }
             }
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
 
 
         if (StringUtil.isPassword(oldPassword)) {
             if (userId <= 0) { //手机号+验证码不需要userId
-                return DemoParser.extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！"));
+                return new DemoParser().extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！"));
             }
             if (oldPassword.equals(password)) {
-                return DemoParser.extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！"));
+                return new DemoParser().extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！"));
             }
 
             //验证旧密码
@@ -1098,24 +1108,24 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             }
             JSONResponse response = new JSONResponse(
                     new DemoParser(HEAD, false).parseResponse(
-                            new JSONRequest(privacy).setFormat(true)
+                            (JSONObject) JSON.createJSONObject(new JSONRequest(privacy).setFormat(true))
                     )
             );
             if (JSONResponse.isExist(response.getJSONResponse(PRIVACY_)) == false) {
-                return DemoParser.extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！"));
+                return new DemoParser().extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！"));
             }
         }
         else if (StringUtil.isPhone(phone) && StringUtil.isVerify(verify)) {
-            JSONResponse response = new JSONResponse(headVerify(type, phone, verify));
+            JSONResponse<JSONObject, JSONArray> response = new JSONResponse(headVerify(type, phone, verify));
             if (JSONResponse.isSuccess(response) == false) {
-                return response;
+                return JSON.createJSONObject(response);
             }
             if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-                return DemoParser.extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
+                return new DemoParser().extendErrorResult(JSON.createJSONObject(response), new ConditionErrorException("手机号或验证码错误！"));
             }
-            response = new JSONResponse(
+            response = new JSONResponse<>(
                     new DemoParser(GET, false).parseResponse(
-                            new JSONRequest(
+                            (JSONObject) JSON.parseObject(
                                     new Privacy().setPhone(phone)
                             )
                     )
@@ -1127,7 +1137,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
             requestObject.put(PRIVACY_, privacyObj);
         } else {
-            return DemoParser.extendErrorResult(requestObject, new IllegalArgumentException("请输入合法的 旧密码 或 手机号+验证码 ！"));
+            return new DemoParser().extendErrorResult(requestObject, new IllegalArgumentException("请输入合法的 旧密码 或 手机号+验证码 ！"));
         }
         //TODO 上线版加上   password = MD5Util.MD5(password);
 
@@ -1181,20 +1191,20 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 throw new IllegalArgumentException(PRIVACY_ + "." + _PAY_PASSWORD + ":value 中value不合法！");
             }
         } catch (Exception e) {
-            return DemoParser.extendErrorResult(requestObject, e);
+            return new DemoParser().extendErrorResult(requestObject, e);
         }
 
         //验证密码<<<<<<<<<<<<<<<<<<<<<<<
 
         privacyObj.remove("balance+");
-        JSONResponse response = new JSONResponse(
+        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(
                 new DemoParser(HEADS, false).setSession(session).parseResponse(
-                        new JSONRequest(PRIVACY_, privacyObj)
+                        (JSONObject) JSON.createJSONObject(PRIVACY_, privacyObj)
                 )
         );
         response = response.getJSONResponse(PRIVACY_);
         if (JSONResponse.isExist(response) == false) {
-            return DemoParser.extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！"));
+            return new DemoParser().extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！"));
         }
 
         //验证密码>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1203,30 +1213,30 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
         //验证金额范围<<<<<<<<<<<<<<<<<<<<<<<
 
         if (change == 0) {
-            return DemoParser.extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！"));
+            return new DemoParser().extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！"));
         }
         if (Math.abs(change) > 10000) {
-            return DemoParser.extendErrorResult(requestObject, new OutOfRangeException("单次 充值/提现 的金额不能超过10000元！"));
+            return new DemoParser().extendErrorResult(requestObject, new OutOfRangeException("单次 充值/提现 的金额不能超过10000元！"));
         }
 
         //验证金额范围>>>>>>>>>>>>>>>>>>>>>>>>
 
         if (change < 0) {//提现
-            response = new JSONResponse(
+            response = new JSONResponse<>(
                     new DemoParser(GETS, false).parseResponse(
-                            new JSONRequest(
+                            (JSONObject) JSON.parseObject(
                                     new Privacy(userId)
                             )
                     )
             );
-            Privacy privacy = response == null ? null : response.getObject(Privacy.class);
+            Privacy privacy = response.getObject(Privacy.class);
             long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
             if (id != userId) {
-                return DemoParser.extendErrorResult(requestObject, new Exception("服务器内部错误！"));
+                return new DemoParser().extendErrorResult(requestObject, new Exception("服务器内部错误！"));
             }
 
             if (BaseModel.value(privacy.getBalance()) < -change) {
-                return DemoParser.extendErrorResult(requestObject, new OutOfRangeException("余额不足！"));
+                return new DemoParser().extendErrorResult(requestObject, new OutOfRangeException("余额不足！"));
             }
         }
 
@@ -1304,7 +1314,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
             HttpMethod method, HttpSession session
     ) {
         if (Log.DEBUG == false) {
-            return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")).toJSONString();
+            return new DemoParser().newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")).toJSONString();
         }
 
         int recordType = record != null ? record : (REQUEST_RECORD_TYPE != null ? REQUEST_RECORD_TYPE : 0);
@@ -1424,10 +1434,10 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                                 hm.put(name, h);
 
                                 try {
-                                    com.alibaba.fastjson.JSON.parse(h);
+                                    JSON.parseJSON(h);
                                 } catch (Throwable e) {
                                     Log.e(TAG, "delegate  try {\n" +
-                                            "                                JSON.parse(h);\n" +
+                                            "                                parseJSON(h);\n" +
                                             "                            } catch (Throwable e) = " + e.getMessage());
                                     hs += "\n" + name + ": " + "\"" + h.replaceAll("\"", "\\\"") + "\"";
                                     continue;
@@ -1466,11 +1476,11 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                                 hm.put(name, h);
 
                                 try {
-                                    com.alibaba.fastjson.JSON.parse(h);
+                                    parseJSON(h);
                                 }
                                 catch (Throwable e) {
                                     Log.e(TAG, "delegate  try {\n" +
-                                            "                                JSON.parse(h);\n" +
+                                            "                                parseJSON(h);\n" +
                                             "                            } catch (Throwable e) = " + e.getMessage());
                                     hs += "\n" + name + ": " + "\"" + h.replaceAll("\"", "\\\"") + "\"";
                                     continue;
@@ -1537,7 +1547,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 for (Entry<String, String[]> e : set) {
                     if (e != null) {
                         String[] vals = e.getValue();
-                        url += ((first ? "" : "&") + e.getKey() + "=" + ( vals == null || vals.length <= 0 ? "" : StringUtil.getString(vals[0]) ));
+                        url += ((first ? "" : "&") + e.getKey() + "=" + ( vals == null || vals.length <= 0 ? "" : StringUtil.get(vals[0]) ));
                         first = false;
                     }
                 }
@@ -1572,7 +1582,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         : (MediaType.MULTIPART_FORM_DATA.equals(contentType) ? "DATA" : "JSON"))) // FIXME 考虑 XML, PNG 等格式？
                 ) : "JSON";
 
-                String sql = isSQL ? StringUtil.getTrimedString(req.getString("sql")) : null;
+                String sql = isSQL ? StringUtil.trim(req.getString("sql")) : null;
                 String newSql = "";
 //                String[] lines = sql.split(" \\? "); // StringUtil.split(sql, " \\? ", false);
 //                int len = lines == null ? 0 : lines.length;
@@ -1637,7 +1647,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                     sql = newSql.trim();
                 }
 
-                JSONRequest existReq = new JSONRequest();
+                JSONObject existReq = new JSONObject(true);
                 if (isUnit) {
                     if (req != null) {
                         // Method <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -1656,7 +1666,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         mthd.put(MethodUtil.KEY_METHOD, req.getString(MethodUtil.KEY_METHOD));
                         mthd.put(MethodUtil.KEY_METHOD_ARGS, req.getString(MethodUtil.KEY_METHOD_ARGS));
                         // mthd.put("header", StringUtil.isEmpty(hs, true) ? null : hs.trim());
-                        existReq.put("Method", mthd);
+                        existReq.put("Method", JSON.createJSONObject(mthd));
                         // Method >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
                 }
@@ -1673,12 +1683,12 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                     if (isSQL) {
                         document.put("sqlauto", sql);
                     }
-                    existReq.put("Document", document);
+                    existReq.put("Document", JSON.createJSONObject(document));
                     // Document >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 }
 
                 JSONObject existRsp = newParser(session, GET).parseResponse(existReq);
-                JSONResponse existRsp2 = new JSONResponse(existRsp).getJSONResponse("Document");
+                JSONResponse<JSONObject, JSONArray> existRsp2 = new JSONResponse<JSONObject, JSONArray>(existRsp).getJSONResponse("Document");
                 long documentId = existRsp2 == null ? 0 : existRsp2.getId();
 
                 JSONRequest request = new JSONRequest();
@@ -1703,7 +1713,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         mthd.put(MethodUtil.KEY_METHOD_ARGS, req.getString(MethodUtil.KEY_METHOD_ARGS));
                         mthd.put("genericMethodArgs", req.getString(MethodUtil.KEY_METHOD_ARGS));
                         mthd.put("request", body);
-                        request.put("Method", mthd);
+                        request.put("Method", JSON.createJSONObject(mthd));
                         // Method >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
                     else if (recordType > 0) {
@@ -1730,7 +1740,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                             document.put("sqlauto", sql);
                         }
                         // document.put("detail", "");
-                        request.put("Document", document);
+                        request.put("Document", JSON.createJSONObject(document));
                         // Document >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
                     else {
@@ -1752,7 +1762,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         random.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         random.put("name", "[Record] " + new java.util.Date().toLocaleString());
 
-                        request.put("Random", random);
+                        request.put("Random", JSON.createJSONObject(random));
                         request.setTag("Random");
                     } else {
                         //  testRecord.setColumn("id,response,header");
@@ -1765,11 +1775,11 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         }
                         else {
                             try {
-                                Object reqObj = JSON.parse(reqStr);
+                                Object reqObj = parseJSON(reqStr);
                                 isDefault = Objects.equals(reqObj, req);
                             }
                             catch (Throwable e) {
-                                Log.w(TAG, "delegate  try { Object reqObj = JSON.parse(reqStr); ..." +
+                                Log.w(TAG, "delegate  try { Object reqObj = parseJSON(reqStr); ..." +
                                         " } catch (Throwable e) = " + e.getMessage());
                             }
                         }
@@ -1780,7 +1790,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                         else {
                             long randomId = 0;
                             try {
-                                apijson.JSONRequest randomReq = new apijson.JSONRequest();
+                                JSONObject randomReq = new JSONObject(true);
                                 randomReq.put("Random", random);
 
                                 JSONObject rsp = newParser(session, GET).parseResponse(randomReq);
@@ -1810,14 +1820,16 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                     testRecord.put("response", rspBody); // 用 JSONRequest.put 会转为 JSONObject
                 }   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                request.put("TestRecord", testRecord);
-                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST).parseResponse(request);
+                request.put("TestRecord", JSON.createJSONObject(testRecord));
+                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST).parseResponse(
+                        (JSONObject) JSON.createJSONObject(request)
+                );
                 if (recordType < 0) {
                     JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("TestRecord");
                     String response = rsp2 == null ? null : rsp2.getString("response");
                     if (StringUtil.isNotEmpty(response, true)) {
                         String header = rsp2.getString("header");
-                        String[] lines = StringUtil.split(StringUtil.getTrimedString(header), "\n");
+                        String[] lines = StringUtil.split(StringUtil.trim(header), "\n");
 
                         if (lines != null) {
                             for (String line : lines) {
@@ -2000,7 +2012,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
     public String execute(@RequestBody String request, HttpSession session) {
         try {
             if (Log.DEBUG == false) {
-                return DemoParser.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /sql/execute ！")).toJSONString();
+                return new DemoParser().newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /sql/execute ！")).toJSONString();
             }
 
 //            DemoVerifier.verifyLogin(session);
@@ -2160,7 +2172,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                     //        }
                 }
 
-                JSONObject result = DemoParser.newSuccessResult();
+                JSONObject result = new DemoParser().newSuccessResult();
                 result.put("sql", sql);
                 result.put("args", arg);
                 if (isWrite) {
@@ -2178,7 +2190,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
                 return result.toJSONString();
             } catch (Exception e) {
-                JSONObject result = DemoParser.newErrorResult(e);
+                JSONObject result = new DemoParser().newErrorResult(e);
                 result.put("throw", e.getClass().getName());
                 result.put("trace:stack", e.getStackTrace());
 
@@ -2189,7 +2201,7 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
                 return result.toJSONString();
             }
         } catch (Exception e) {
-            JSONObject result = DemoParser.newErrorResult(e);
+            JSONObject result = new DemoParser().newErrorResult(e);
             result.put("throw", e.getClass().getName());
             result.put("trace:stack", e.getStackTrace());
             return result.toJSONString();
@@ -2664,15 +2676,15 @@ public class DemoController extends APIJSONRouterController<Long> {  // APIJSONC
 
     // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
-    @PostMapping("method/list")
-    public JSONObject listMethod(@RequestBody String request) {
-        return super.listMethod(request);
-    }
-
-    @PostMapping("method/invoke")
-    public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
-        super.invokeMethod(request, servletRequest);
-    }
+    //@PostMapping("method/list")
+    //public JSONObject listMethod(@RequestBody String request) {
+    //    return super.listMethod(request);
+    //}
+    //
+    //@PostMapping("method/invoke")
+    //public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
+    //    super.invokeMethod(request, servletRequest);
+    //}
 
     // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

@@ -14,6 +14,9 @@ limitations under the License.*/
 
 package apijson.demo;
 
+import apijson.JSONResponse;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.HashMap;
@@ -36,7 +39,7 @@ import apijson.orm.SQLConfig;
  * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
-public class DemoParser extends APIJSONParser<Long> {
+public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
 
     public static final Map<String, HttpSession> KEY_MAP;
     static {
@@ -53,34 +56,47 @@ public class DemoParser extends APIJSONParser<Long> {
         super(method, needVerify);
     }
 
-//    //	可重写来设置分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
+    public static JSONObject parseRequest(String request) {
+        try {
+            return JSON.parseObject(request);
+        } catch (Exception e) {
+            return new DemoParser().newResult(JSONResponse.CODE_ILLEGAL_ARGUMENT, "JSON 格式不合法！" + request);
+        }
+    }
+
+    @Override
+    public DemoParser setNeedVerify(boolean needVerify) {
+        super.setNeedVerify(needVerify);
+        return this;
+    }
+
+    //    //	可重写来设置分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
 //    @Override
 //    public boolean isStartFrom1() {
 //        return true;
 //    }
 
     private int maxQueryCount = 2000;
-//    //	可重写来设置最大查询数量
-//    @Override
-//    public int getMaxQueryCount() {
-//      return maxQueryCount;
-//    }
-//
-//    @Override
-//    public int getMaxUpdateCount() {
-//        return 2000;
-//    }
-//
-//    @Override
-//    public int getMaxObjectCount() {
-//        return getMaxUpdateCount();
-//    }
-//
-//    @Override
-//    public int getMaxSQLCount() {
-//        return getMaxUpdateCount();
-//    }
+    //	可重写来设置最大查询数量
+    @Override
+    public int getMaxQueryCount() {
+      return maxQueryCount;
+    }
 
+    @Override
+    public int getMaxUpdateCount() {
+        return 2000;
+    }
+
+    @Override
+    public int getMaxObjectCount() {
+        return getMaxUpdateCount();
+    }
+
+    @Override
+    public int getMaxSQLCount() {
+        return getMaxUpdateCount();
+    }
 
     @Override
     public JSONObject parseResponse(JSONObject request) {
@@ -96,8 +112,10 @@ public class DemoParser extends APIJSONParser<Long> {
         return super.parseResponse(request);
     }
 
+
     @Override
-    public APIJSONObjectParser<Long> createObjectParser(JSONObject request, String parentPath, SQLConfig<Long> arrayConfig
+    public APIJSONObjectParser<Long, JSONObject, JSONArray> createObjectParser(JSONObject request, String parentPath
+            , SQLConfig<Long, JSONObject, JSONArray> arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
                 , isSubquery, isTable, isArrayMainTable).setMethod(getMethod()).setParser(this);
@@ -108,7 +126,7 @@ public class DemoParser extends APIJSONParser<Long> {
     private String dbAccount;
     private String dbPassword;
     @Override
-    public APIJSONParser<Long> setSession(HttpSession session) {
+    public APIJSONParser<Long, JSONObject, JSONArray> setSession(HttpSession session) {
         Boolean asDBAccount = (Boolean) session.getAttribute(DemoController.AS_DB_ACCOUNT);
         this.asDBAccount = asDBAccount != null && asDBAccount;
         if (this.asDBAccount) {
@@ -123,13 +141,13 @@ public class DemoParser extends APIJSONParser<Long> {
     }
 
     @Override
-    public JSONObject executeSQL(SQLConfig<Long> config, boolean isSubquery) throws Exception {
+    public JSONObject executeSQL(SQLConfig<Long, JSONObject, JSONArray> config, boolean isSubquery) throws Exception {
         if (asDBAccount && config instanceof DemoSQLConfig) {
           DemoSQLConfig cfg = (DemoSQLConfig) config;
-          if (StringUtil.isEmpty(cfg.getDBAccount())) {
+          if (StringUtil.isEmpty(cfg.gainDBAccount())) {
             cfg.setDBAccount(dbAccount);
           }
-          if (StringUtil.isEmpty(cfg.getDBPassword())) {
+          if (StringUtil.isEmpty(cfg.gainDBPassword())) {
             cfg.setDBPassword(dbPassword);
           }
         }

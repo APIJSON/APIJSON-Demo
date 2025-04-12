@@ -581,7 +581,7 @@ var JSONResponse = {
     }
 
     if (right instanceof Object) {
-      var m = JSON.parse(JSON.stringify(left));
+      var m = parseJSON(JSON.stringify(left));
       for (var k in right) {
         m[k] = JSONResponse.deepMerge(m[k], right[k]);
       }

@@ -37,7 +37,7 @@ import apijson.orm.Visitor;
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
+public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, JSONArray> {
 	public static final String TAG = "DemoFunctionParser";
 
 	static {
@@ -148,10 +148,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 			return 0;
 		}
 
-		JSONRequest request = new JSONRequest();
+		JSONObject request = new JSONObject(true);
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest comment = new JSONRequest();
+		JSONObject comment = new JSONObject(true);
 		comment.put("momentId", mid);
 
 		request.put("Comment", comment);
@@ -177,10 +177,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 
 		//递归获取到全部子评论id
 
-		JSONRequest request = new JSONRequest();
+		JSONObject request = new JSONObject(true);
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONRequest comment = new JSONRequest();
+		JSONObject comment = new JSONObject();
 		comment.put("id{}", getChildCommentIdList(tid));
 
 		request.put("Comment", comment);
@@ -196,7 +196,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 	private JSONArray getChildCommentIdList(long tid) {
 		JSONArray arr = new JSONArray();
 
-		JSONRequest request = new JSONRequest();
+		JSONObject request = apijson.JSON.createJSONObject();
 
 		//Comment-id[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONRequest idItem = new JSONRequest();
@@ -205,10 +205,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 		JSONRequest comment = new JSONRequest();
 		comment.put("toId", tid);
 		comment.setColumn("id");
-		idItem.put("Comment", comment);
+		idItem.put("Comment", apijson.JSON.createJSONObject(comment));
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		request.putAll(idItem.toArray(0, 0, "Comment-id"));
+		request.putAll(apijson.JSON.createJSONObject(idItem.toArray(0, 0, "Comment-id")));
 		//Comment-id[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		JSONObject rp = new DemoParser().setNeedVerify(false).parseResponse(request);

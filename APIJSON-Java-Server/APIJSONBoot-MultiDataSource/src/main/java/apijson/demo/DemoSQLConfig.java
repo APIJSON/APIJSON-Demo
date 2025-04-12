@@ -22,16 +22,19 @@ import static apijson.framework.APIJSONConstant.USER_ID;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import apijson.*;
 //import apijson.influxdb.InfluxDBUtil;
 //import apijson.iotdb.IoTDBUtil;
+import apijson.RequestMethod;
+import apijson.StringUtil;
 import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Parser;
 //import apijson.surrealdb.SurrealDBUtil;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
-import apijson.column.ColumnUtil;
+import apijson.framework.ColumnUtil;
 import apijson.framework.APIJSONSQLConfig;
 import apijson.orm.Join;
 import apijson.orm.Join.On;
@@ -44,7 +47,7 @@ import apijson.orm.Join.On;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray> {
 
 	public DemoSQLConfig() {
 		super();
@@ -70,10 +73,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
 		// 主键名映射
-		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
+		SIMPLE_CALLBACK = new SimpleCallback<Long, JSONObject, JSONArray>() {
 
 			@Override
-			public AbstractSQLConfig<Long> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
+			public AbstractSQLConfig<Long, JSONObject, JSONArray> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
@@ -147,7 +150,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	// 如果 DemoSQLExecutor.getConnection 能拿到连接池的有效 Connection，则这里不需要配置 dbVersion, dbUri, dbAccount, dbPassword
 
 	@Override
-	public String getDBVersion() {
+	public String gainDBVersion() {
 		if (isMySQL()) {
 //			return "5.7.22"; //
             return "8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
@@ -203,9 +206,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		this.dbUri = dbUri;
 		return this;
 	}
-	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
-	public String getDBUri() {
+	public String gainDBUri() {
 		if (StringUtil.isNotEmpty(dbUri)) {
 			return dbUri;
 		}
@@ -219,10 +221,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) { // PG JDBC 必须在 URI 传 catalog
 			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
 		}
-		//  if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
-		//		return "jdbc:postgresql://localhost:26257/movr?sslmode=require"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach && cockroach demo
-		//		// return "jdbc:postgresql://localhost:26258/postgres?sslmode=disable"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach # && start 3 nodes and init cluster
-		//  }
+		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	return "jdbc:postgresql://localhost:26257/movr?sslmode=require"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach && cockroach demo
+		//	// return "jdbc:postgresql://localhost:26258/postgres?sslmode=disable"; //TODO 改成你自己的 brew install cockroachdb/tap/cockroach # && start 3 nodes and init cluster
+		//}
 		if (isSQLServer()) {
 			return "jdbc:jtds:sqlserver://localhost:1433/pubs;instance=SQLEXPRESS"; //TODO 改成你自己的
 		}
@@ -242,41 +244,41 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			//      return "jdbc:TAOS://localhost:6030"; //TODO 改成你自己的
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
-		//  if (isTimescaleDB()) { // PG JDBC 必须在 URI 传 catalog
-		//  	return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
-		//  }
-		// if (isQuestDB()) { // PG JDBC 必须在 URI 传 catalog
-		//	 return "jdbc:postgresql://localhost:8812/qdb"; //TODO 改成你自己的
-		// }
+		if (isTimescaleDB()) { // PG JDBC 必须在 URI 传 catalog
+		  	return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
+		}
+		if (isQuestDB()) { // PG JDBC 必须在 URI 传 catalog
+			return "jdbc:postgresql://localhost:8812/qdb"; //TODO 改成你自己的
+		}
 		if (isInfluxDB()) {
 			return "http://203.189.6.3:8086"; //TODO 改成你自己的
 		}
 		if (isMilvus()) {
 			return "http://localhost:19530"; //TODO 改成你自己的
 		}
-		//  if (isManticore()) {
-		//		return "jdbc:mysql://localhost:9306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
-		//  }
-		//	if (isIoTDB()) {
-		//		return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
-		//	}
+		//if (isManticore()) {
+		//	return "jdbc:mysql://localhost:9306?characterEncoding=utf8&maxAllowedPacket=512000"; //TODO 改成你自己的
+		//}
+		//if (isIoTDB()) {
+		//	return "jdbc:iotdb://localhost:6667"; // ?charset=GB18030 加参数会报错 URI 格式错误 //TODO 改成你自己的
+		//}
 		if (isMongoDB()) {
 			return "jdbc:mongodb://atlas-sql-6593c65c296c5865121e6ebe-xxskv.a.query.mongodb.net/myVirtualDatabase?ssl=true&authSource=admin"; //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "http://localhost:7001"; //TODO 改成你自己的
 		}
-		//	if (isDuckDB()) {
-		//		return "jdbc:duckdb:/Users/tommylemon/my_database.duckdb"; //TODO 改成你自己的
-		//	}
-		//	if (isSurrealDB()) {
-		//		//	return "memory"; //TODO 改成你自己的
-		//		//	return "surrealkv://localhost:8000"; //TODO 改成你自己的
-		//		return "ws://localhost:8000"; //TODO 改成你自己的
-		//	}
-		//  if (isOpenGauss()) {
-		//	    return "jdbc:opengauss://127.0.0.1:5432/postgres?currentSchema=" + DEFAULT_SCHEMA; //TODO 改成你自己的
-		//  }
+		//if (isDuckDB()) {
+		//	return "jdbc:duckdb:/Users/tommylemon/my_database.duckdb"; //TODO 改成你自己的
+		//}
+		//if (isSurrealDB()) {
+		//	//	return "memory"; //TODO 改成你自己的
+		//	//	return "surrealkv://localhost:8000"; //TODO 改成你自己的
+		//	return "ws://localhost:8000"; //TODO 改成你自己的
+		//}
+		//if (isOpenGauss()) {
+		//	return "jdbc:opengauss://127.0.0.1:5432/postgres?currentSchema=" + DEFAULT_SCHEMA; //TODO 改成你自己的
+		//}
 
 		return null;
 	}
@@ -286,9 +288,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		this.dbAccount = dbAccount;
 		return this;
 	}
-	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
-	public String getDBAccount() {
+	public String gainDBAccount() {
 		if (StringUtil.isNotEmpty(dbAccount)) {
 			return dbAccount;
 		}
@@ -299,10 +300,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) {
 			return "postgres";  //TODO 改成你自己的
 		}
-		//  if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
-		//		return "demo"; //TODO 改成你自己的
-		//		//return "postgres"; //TODO 改成你自己的
-		//  }
+		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	return "demo"; //TODO 改成你自己的
+		//	//return "postgres"; //TODO 改成你自己的
+		//}
 		if (isSQLServer()) {
 			return "sa";  //TODO 改成你自己的
 		}
@@ -321,40 +322,40 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isTDengine()) {
 			return "root"; //TODO 改成你自己的
 		}
-		//  if (isTimescaleDB()) {
-		//		return "postgres";  //TODO 改成你自己的
-		//  }
-		// if (isQuestDB()) {
-		//	 return "admin";  //TODO 改成你自己的
-		// }
+		//if (isTimescaleDB()) {
+		//	return "postgres";  //TODO 改成你自己的
+		//}
+		if (isQuestDB()) {
+			return "admin";  //TODO 改成你自己的
+		}
 		if (isInfluxDB()) {
 			return "iotos";
 		}
 		if (isMilvus()) {
 			return "root";
 		}
-		//  if (isManticore()) {
-		//		return null; // "root";
-		//  }
-		//	if (isIoTDB()) {
-		//		return "root";
-		//	}
+		//if (isManticore()) {
+		//	return null; // "root";
+		//}
+		//if (isIoTDB()) {
+		//	return "root";
+		//}
 		if (isMongoDB()) {
 			return "root"; //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "root"; //TODO 改成你自己的
 		}
-		//	if (isDuckDB()) {
-		//		return "root"; //TODO 改成你自己的
-		//	}
-		//	if (isSurrealDB()) {
-		//		return "root"; //TODO 改成你自己的
-		//	}
-		//  if (isOpenGauss()) {
-		//      return "postgres"; //TODO 改成你自己的
-		// 	    // 不允许用初始账号，需要 CREATE USER 创建新账号并 GRANT 授权 return "opengauss"; //TODO 改成你自己的
-		//  }
+		//if (isDuckDB()) {
+		//	return "root"; //TODO 改成你自己的
+		//}
+		//if (isSurrealDB()) {
+		//	return "root"; //TODO 改成你自己的
+		//}
+		//if (isOpenGauss()) {
+		//	return "postgres"; //TODO 改成你自己的
+		//	// 不允许用初始账号，需要 CREATE USER 创建新账号并 GRANT 授权 return "opengauss"; //TODO 改成你自己的
+		//}
 
 		return null;
 	}
@@ -364,9 +365,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		this.dbPassword = dbPassword;
 		return this;
 	}
-	@JSONField(serialize = false)  // 不在日志打印 账号/密码 等敏感信息，用了 UnitAuto 则一定要加
 	@Override
-	public String getDBPassword() {
+	public String gainDBPassword() {
 		if (StringUtil.isNotEmpty(dbPassword)) {
 			return dbPassword;
 		}
@@ -377,10 +377,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isPostgreSQL()) {
 			return null;  //TODO 改成你自己的
 		}
-		//  if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
-		//		return "demo39865";  //TODO 改成你自己的
-		//		// return null;  //TODO 改成你自己的
-		//  }
+		//if (isCockroachDB()) { // PG JDBC 必须在 URI 传 catalog
+		//	return "demo39865";  //TODO 改成你自己的
+		//	// return null;  //TODO 改成你自己的
+		//}
 		if (isSQLServer()) {
 			return "apijson@123";  //TODO 改成你自己的
 		}
@@ -399,53 +399,53 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		if (isTDengine()) {
 			return "taosdata"; //TODO 改成你自己的
 		}
-		//  if (isTimescaleDB()) {
-		//		return "password";  //TODO 改成你自己的
-		//  }
-		// if (isQuestDB()) {
-		// 	 return "quest";  //TODO 改成你自己的
-		// }
+		if (isTimescaleDB()) {
+			return "password";  //TODO 改成你自己的
+		}
+		if (isQuestDB()) {
+			return "quest";  //TODO 改成你自己的
+		}
 		if (isInfluxDB()) {
 			return "apijson@123"; //TODO 改成你自己的
 		}
 		if (isMilvus()) {
 			return "apijson"; //TODO 改成你自己的
 		}
-		//  if (isManticore()) {
-		//		return null;
-		//  }
-		//	if (isIoTDB()) {
-		//		return "root";
-		//	}
+		//if (isManticore()) {
+		//	return null;
+		//}
+		//if (isIoTDB()) {
+		//	return "root";
+		//}
 		if (isMongoDB()) {
 			return "apijson";  //TODO 改成你自己的
 		}
 		if (isCassandra()) {
 			return "apijson";  //TODO 改成你自己的
 		}
-		//	if (isDuckDB()) {
-		//		return ""; //TODO 改成你自己的
-		//	}
-		//	if (isSurrealDB()) {
-		//		return "root"; //TODO 改成你自己的
-		//	}
-		//  if (isOpenGauss()) {
-		// 	    return "openGauss@123"; //TODO 改成你自己的
-		//  }
+		//if (isDuckDB()) {
+		//	return ""; //TODO 改成你自己的
+		//}
+		//if (isSurrealDB()) {
+		//	return "root"; //TODO 改成你自己的
+		//}
+		//if (isOpenGauss()) {
+		//	return "openGauss@123"; //TODO 改成你自己的
+		//}
 
 		return null;
 	}
 
 	private String sql;
-	public String getSQL() throws Exception {
-		return getSQL(isPrepared());
+	public String gainSQL() throws Exception {
+		return gainSQL(isPrepared());
 	}
 	@Override
-	public String getSQL(boolean prepared) throws Exception {
+	public String gainSQL(boolean prepared) throws Exception {
 		if (StringUtil.isNotEmpty(sql)) {
 			return sql;
 		}
-		return super.getSQL(prepared);
+		return super.gainSQL(prepared);
 	}
 
 	public void setSql(String sql) {
@@ -517,15 +517,15 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 
 	@Override
-	protected void onGetCrossJoinString(Join join) throws UnsupportedOperationException {
+	protected void onGainCrossJoinString(Join<Long, JSONObject, JSONArray> join) throws UnsupportedOperationException {
 		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(join);
 	}
 	@Override
-	protected void onJoinNotRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+	protected void onJoinNotRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> join, String table, List<On> onList, On on) {
 		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, join, table, onList, on);
 	}
 	@Override
-	protected void onJoinComplexRelation(String sql, String quote, Join join, String table, List<On> onList, On on) {
+	protected void onJoinComplexRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> join, String table, List<On> onList, On on) {
 		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, join, table, onList, on);
 	}
 
@@ -561,8 +561,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	//	}
 
 	@Override
-	public String getSQLTable() {
-		String t = super.getSQLTable();
+	public String gainSQLTable() {
+		String t = super.gainSQLTable();
 		return isInfluxDB() ? t.toLowerCase() : t;
 		//return isInfluxDB() || isManticore() ? t.toLowerCase() : t;
 		//	return isInfluxDB() || isIoTDB() ? t.toLowerCase() : t;

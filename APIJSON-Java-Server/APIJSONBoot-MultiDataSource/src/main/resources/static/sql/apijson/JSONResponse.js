@@ -646,7 +646,7 @@ var JSONResponse = {
     }
 
     if (right instanceof Object) {
-      var m = JSON.parse(JSON.stringify(left));
+      var m = parseJSON(JSON.stringify(left));
       for (var k in right) {
         m[k] = JSONResponse.deepMerge(m[k], right[k]);
       }
@@ -1035,7 +1035,7 @@ var JSONResponse = {
     delete currentResponse.code; //code必须一致
     delete currentResponse.throw; //throw必须一致
 
-    var rsp = JSON.parse(JSON.stringify(currentResponse || {}))
+    var rsp = parseJSON(JSON.stringify(currentResponse || {}))
     rsp = JSONResponse.array2object(rsp, 'args', ['args'], true)
 
     var find = false;

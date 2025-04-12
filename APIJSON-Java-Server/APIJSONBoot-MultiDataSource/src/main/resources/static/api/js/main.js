@@ -210,7 +210,7 @@
                 var vi = val[i]
 
                 if (JSONResponse.isObject(vi) && JSONObject.isTableKey(firstKey || '', vi, isRestful)) {
-                  // var newVal = JSON.parse(JSON.stringify(val[i]))
+                  // var newVal = parseJSON(JSON.stringify(val[i]))
                   if (vi == null) {
                     continue
                   }
@@ -231,7 +231,7 @@
                           var tr = cri.TestRecord || {};
                           var d = cri.Document || {};
                           var standard = App.isMLEnabled ? tr.standard : tr.response;
-                          var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
+                          var standardObj = StringUtil.isEmpty(standard, true) ? null : parseJSON(standard);
                           var tests = App.tests[String(App.currentAccountIndex)] || {};
                           var responseObj = (tests[d.id] || {})[0]
 
@@ -272,7 +272,7 @@
             var aliaIndex = key == null ? -1 : key.indexOf(':');
             var objName = aliaIndex < 0 ? key : key.substring(0, aliaIndex);
 
-            // var newVal = JSON.parse(JSON.stringify(val))
+            // var newVal = parseJSON(JSON.stringify(val))
 
             var curPath = (StringUtil.isEmpty(path, false) ? '' : path + '/') + key;
             var curTable = JSONObject.isTableKey(objName, val, isRestful) ? objName : null;
@@ -290,7 +290,7 @@
                     var tr = cri.TestRecord || {};
                     var d = cri.Document || {};
                     var standard = App.isMLEnabled ? tr.standard : tr.response;
-                    var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
+                    var standardObj = StringUtil.isEmpty(standard, true) ? null : parseJSON(standard);
                     var tests = App.tests[String(App.currentAccountIndex)] || {};
                     var responseObj = (tests[d.id] || {})[0]
 
@@ -376,7 +376,7 @@
           var standardObj = null;
           try {
             var currentItem = App.isTestCaseShow ? App.remotes[App.currentDocIndex] : App.currentRemoteItem;
-            standardObj = JSON.parse(((currentItem || {}).TestRecord || {}).standard);
+            standardObj = parseJSON(((currentItem || {}).TestRecord || {}).standard);
           } catch (e3) {
             log(e3)
           }
@@ -403,7 +403,7 @@
               if (i >= 0 && i2 >= 0 && i2 < i) {
                 valString = valString.substring(i2 + 1, i + 1)
                 // alert('valString = ' + valString)
-                var _$_this_$_ = JSON.parse(valString) || {}
+                var _$_this_$_ = parseJSON(valString) || {}
                 path = _$_this_$_._$_path_$_
                 table = _$_this_$_._$_table_$_
               }
@@ -435,7 +435,7 @@
               if (i >= 0 && i2 >= 0 && i2 < i) {
                 valString = valString.substring(i2 + 1, i + 1)
                 // alert('valString = ' + valString)
-                var _$_this_$_ = JSON.parse(valString) || {}
+                var _$_this_$_ = parseJSON(valString) || {}
                 path = _$_this_$_ == null ? '' : _$_this_$_._$_path_$_
                 table = _$_this_$_ == null ? '' : _$_this_$_._$_table_$_
               }
@@ -473,7 +473,7 @@
                       var tr = App.currentRemoteItem.TestRecord || {};
                       var d = App.currentRemoteItem.Document || {};
                       var standard = App.isMLEnabled ? tr.standard : tr.response;
-                      var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
+                      var standardObj = StringUtil.isEmpty(standard, true) ? null : parseJSON(standard);
                       var tests = App.tests[String(App.currentAccountIndex)] || {};
                       var responseObj = (tests[d.id] || {})[0]
 
@@ -519,7 +519,7 @@
               var tr = App.currentRemoteItem.TestRecord || {};
               var d = App.currentRemoteItem.Document || {};
               var standard = App.isMLEnabled ? tr.standard : tr.response;
-              var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
+              var standardObj = StringUtil.isEmpty(standard, true) ? null : parseJSON(standard);
               var tests = App.tests[String(App.currentAccountIndex)] || {};
               var responseObj = (tests[d.id] || {})[0]
 
@@ -707,7 +707,7 @@ https://github.com/Tencent/APIJSON/issues
       var v = decodeURIComponent(part.substring(ind+1));
       if (tryParse == true) {
         try {
-          v = JSON.parse(v)
+          v = parseJSON(v)
         }
         catch (e) {
           console.log(e)
@@ -1559,7 +1559,7 @@ https://github.com/Tencent/APIJSON/issues
                               var tr = cri.TestRecord || {};
                               var d = cri.Document || {};
                               var standard = this.isMLEnabled ? tr.standard : tr.response;
-                              var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
+                              var standardObj = StringUtil.isEmpty(standard, true) ? null : parseJSON(standard);
                               var tests = this.tests[String(this.currentAccountIndex)] || {};
                               var responseObj = (tests[d.id] || {})[0]
 
@@ -1607,7 +1607,7 @@ https://github.com/Tencent/APIJSON/issues
                         var tr = cri.TestRecord || {};
                         var d = cri.Document || {};
                         var standard = this.isMLEnabled ? tr.standard : tr.response;
-                        var standardObj = StringUtil.isEmpty(standard, true) ? null : JSON.parse(standard);
+                        var standardObj = StringUtil.isEmpty(standard, true) ? null : parseJSON(standard);
                         var tests = this.tests[String(this.currentAccountIndex)] || {};
                         var responseObj = (tests[d.id] || {})[0]
 
@@ -1901,7 +1901,7 @@ https://github.com/Tencent/APIJSON/issues
         var jsonStr = json == null ? null : (typeof json == 'string' ? json : JSON.stringify(json))
         if (this.isTestCaseShow != true && jsonStr == null) { // StringUtil.isEmpty(jsonStr)
           try {
-            jsonStr = JSON.stringify(encode(JSON.parse(vInput.value)))
+            jsonStr = JSON.stringify(encode(parseJSON(vInput.value)))
           } catch (e) {  // 可能包含注释
             log(e)
             jsonStr = encode(StringUtil.trim(vInput.value))
@@ -2222,7 +2222,7 @@ https://github.com/Tencent/APIJSON/issues
                       apiMap[url] = {
                         name: name,
                         request: typeAndParam.param,
-                        response: api.res_body == null ? null : JSON.parse(api.res_body),
+                        response: api.res_body == null ? null : parseJSON(api.res_body),
                         detail: name
                         + '\n' + (api.up_time == null ? '' : (typeof api.up_time != 'number' ? api.up_time : new Date(1000*api.up_time).toLocaleString()))
                         + '\nhttp://apijson.cn/yapi/project/1/interface/api/' + api._id
@@ -2877,7 +2877,7 @@ https://github.com/Tencent/APIJSON/issues
             saveTextAs(txt, clazz)
           }
           else {
-            var res = JSON.parse(this.jsoncon)
+            var res = parseJSON(this.jsoncon)
             res = this.removeDebugInfo(res)
 
             var s = ''
@@ -3032,7 +3032,7 @@ https://github.com/Tencent/APIJSON/issues
 
           this.isTestCaseShow = false
 
-          const currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(JSON.parse(this.jsoncon));
+          const currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(parseJSON(this.jsoncon));
 
           const after = isSingle ? this.switchQuote(inputted) : inputted;  // this.toDoubleJSON(inputted);
           const inputObj = this.getRequest(after, {});
@@ -3043,7 +3043,7 @@ https://github.com/Tencent/APIJSON/issues
           if (isExportRandom != true) {
             var commentStddObj = null
             try {
-              commentStddObj = JSON.parse(isEditResponse ? tr.standard : doc.standard);
+              commentStddObj = parseJSON(isEditResponse ? tr.standard : doc.standard);
             }
             catch(e) {
               log(e)
@@ -3155,7 +3155,7 @@ https://github.com/Tencent/APIJSON/issues
             //       var k = cfgLine.substring(0, ind).replaceAll('/', '.'); // .trim();
             //       var v = cfgLine.substring(ind + 1).trim();
             //       try {
-            //         v = JSON.parse(v);
+            //         v = parseJSON(v);
             //       }
             //       catch (e) {
             //         log(e)
@@ -3877,7 +3877,7 @@ https://github.com/Tencent/APIJSON/issues
 
         var jsonData = null
         try {
-          jsonData = JSON.parse(docUrl)
+          jsonData = parseJSON(docUrl)
         }
         catch (e) {}
 
@@ -4194,7 +4194,7 @@ https://github.com/Tencent/APIJSON/issues
             break
           default:
             type = REQUEST_TYPE_JSON
-            parameters = api.req_body_other == null ? null : JSON.parse(api.req_body_other)
+            parameters = api.req_body_other == null ? null : parseJSON(api.req_body_other)
 
             var params = parameters.properties || {}
             var required = parameters.required || []
@@ -5580,9 +5580,9 @@ https://github.com/Tencent/APIJSON/issues
       getCache: function (url, key, defaultValue) {
         var cache = localStorage.getItem('APIAuto:' + url)
         try {
-          cache = JSON.parse(cache)
+          cache = parseJSON(cache)
         } catch(e) {
-          this.log('login  this.send >> try { cache = JSON.parse(cache) } catch(e) {\n' + e.message)
+          this.log('login  this.send >> try { cache = parseJSON(cache) } catch(e) {\n' + e.message)
         }
         cache = cache || {}
         var val = key == null ? cache : cache[key]
@@ -6294,14 +6294,14 @@ https://github.com/Tencent/APIJSON/issues
           try {
             var standardObj = null;
             try {
-              standardObj = JSON.parse(currentItem.standard);
+              standardObj = parseJSON(currentItem.standard);
             } catch (e3) {
               log(e3)
             }
 
             var isAPIJSONRouter = false;
             try {
-              var apijson = JSON.parse(currentItem.apijson);
+              var apijson = parseJSON(currentItem.apijson);
               isAPIJSONRouter = JSONResponse.isObject(apijson)
             } catch (e3) {
               log(e3)
@@ -7923,16 +7923,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           case CodeUtil.LANGUAGE_KOTLIN:
             s += '\n#### <= Android-Kotlin: 空对象用 HashMap&lt;String, Any&gt;()，空数组用 ArrayList&lt;Any&gt;()\n'
               + '```kotlin \n'
-              + CodeUtil.parseKotlinRequest(null, JSON.parse(rq), 0, isSingle, false, false, this.type, this.getBaseUrl(), '/' + this.getMethod(), this.urlComment)
+              + CodeUtil.parseKotlinRequest(null, parseJSON(rq), 0, isSingle, false, false, this.type, this.getBaseUrl(), '/' + this.getMethod(), this.urlComment)
               + '\n ``` \n注：对象 {} 用 mapOf("key": value)，数组 [] 用 listOf(value0, value1)\n';
             break;
           case CodeUtil.LANGUAGE_JAVA:
             s += '\n#### <= Android-Java: 同名变量需要重命名'
               + ' \n ```java \n'
-              + StringUtil.trim(CodeUtil.parseJavaRequest(null, JSON.parse(rq), 0, isSingle, false, false, this.type, '/' + this.getMethod(), this.urlComment))
+              + StringUtil.trim(CodeUtil.parseJavaRequest(null, parseJSON(rq), 0, isSingle, false, false, this.type, '/' + this.getMethod(), this.urlComment))
               + '\n ``` \n注：' + (isSingle ? '用了 APIJSON 的 JSONRequest, JSONResponse 类，也可使用其它类封装，只要 JSON 有序就行\n' : 'LinkedHashMap&lt;&gt;() 可替换为 fastjson 的 JSONObject(true) 等有序JSON构造方法\n');
 
-            var serverCode = CodeUtil.parseJavaServer(this.type, '/' + this.getMethod(), this.database, this.schema, JSON.parse(rq), isSingle);
+            var serverCode = CodeUtil.parseJavaServer(this.type, '/' + this.getMethod(), this.database, this.schema, parseJSON(rq), isSingle);
             if (StringUtil.isEmpty(serverCode, true) != true) {
               s += '\n#### <= Server-Java: RESTful 等非 APIJSON 规范的 API'
                 + ' \n ```java \n'
@@ -7943,46 +7943,46 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           case CodeUtil.LANGUAGE_C_SHARP:
             s += '\n#### <= Unity3D-C\#: 键值对用 {"key", value}' +
               '\n ```csharp \n'
-              + CodeUtil.parseCSharpRequest(null, JSON.parse(rq), 0)
+              + CodeUtil.parseCSharpRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 new JObject{{"key", value}}，数组 [] 用 new JArray{value0, value1}\n';
             break;
 
           case CodeUtil.LANGUAGE_SWIFT:
             s += '\n#### <= iOS-Swift: 空对象用 [ : ]'
               + '\n ```swift \n'
-              + CodeUtil.parseSwiftRequest(null, JSON.parse(rq), 0)
+              + CodeUtil.parseSwiftRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 ["key": value]，数组 [] 用 [value0, value1]\n';
             break;
 //          case CodeUtil.LANGUAGE_OBJECTIVE_C:
 //            s += '\n#### <= iOS-Objective-C \n ```objective-c \n'
-//              + CodeUtil.parseObjectiveCRequest(null, JSON.parse(rq))
+//              + CodeUtil.parseObjectiveCRequest(null, parseJSON(rq))
 //              + '\n ```  \n';
 //            break;
 
           case CodeUtil.LANGUAGE_GO:
             s += '\n#### <= Web-Go: 对象 key: value 会被强制排序，每个 key: value 最后都要加逗号 ","'
               + ' \n ```go \n'
-              + CodeUtil.parseGoRequest(null, JSON.parse(rq), 0)
+              + CodeUtil.parseGoRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 map[string]interface{} {"key": value}，数组 [] 用 []interface{} {value0, value1}\n';
             break;
           case CodeUtil.LANGUAGE_C_PLUS_PLUS:
             s += '\n#### <= Web-C++: 使用 RapidJSON'
               + ' \n ```cpp \n'
-              + StringUtil.trim(CodeUtil.parseCppRequest(null, JSON.parse(rq), 0, isSingle))
+              + StringUtil.trim(CodeUtil.parseCppRequest(null, parseJSON(rq), 0, isSingle))
               + '\n ``` \n注：std::string 类型值需要判断 RAPIDJSON_HAS_STDSTRING\n';
             break;
 
           case CodeUtil.LANGUAGE_PHP:
             s += '\n#### <= Web-PHP: 空对象用 (object) ' + (isSingle ? '[]' : 'array()')
               + ' \n ```php \n'
-              + CodeUtil.parsePHPRequest(null, JSON.parse(rq), 0, isSingle)
+              + CodeUtil.parsePHPRequest(null, parseJSON(rq), 0, isSingle)
               + '\n ``` \n注：对象 {} 用 ' + (isSingle ? '[\'key\' => value]' : 'array("key" => value)') + '，数组 [] 用 ' + (isSingle ? '[value0, value1]\n' : 'array(value0, value1)\n');
             break;
 
           case CodeUtil.LANGUAGE_PYTHON:
             s += '\n#### <= Web-Python: 注释符用 \'\#\''
               + ' \n ```python \n'
-              + CodeUtil.parsePythonRequest(null, JSON.parse(rq), 0, isSingle, vInput.value)
+              + CodeUtil.parsePythonRequest(null, parseJSON(rq), 0, isSingle, vInput.value)
               + '\n ``` \n注：关键词转换 null: None, false: False, true: True';
             break;
 
@@ -8259,7 +8259,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             map[StringUtil.toLowerCase(item.schema) + '.' + StringUtil.toLowerCase(item.name)] = item
 
             function getShowString(method, lineItemCount) {
-              var roles = item[method] == null ? null : JSON.parse(item[method])
+              var roles = item[method] == null ? null : parseJSON(item[method])
               var rs = []
               if (roles != null) {
                 var schemaStr = StringUtil.isEmpty(item.schema) ? 'null' : "'" + item.schema + "'"
@@ -9407,7 +9407,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var header = this.getHeader(vHeader.value)
           var callback = null
 
-          var data = isPre ? undefined : (this.jsoncon == null ? null : JSON.parse(this.jsoncon))
+          var data = isPre ? undefined : (this.jsoncon == null ? null : parseJSON(this.jsoncon))
           var res = isPre ? undefined : {
             data: data
           }
@@ -9592,14 +9592,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var random = item.Random = item.Random || {}
         var subs = item['[]'] || []
         var existCount = subs.length
-        subs = existCount <= 0 ? subs : JSON.parse(JSON.stringify(subs))
+        subs = existCount <= 0 ? subs : parseJSON(JSON.stringify(subs))
 
         var count = random.count || 0
         var respCount = 0;
 
         for (var i = 0; i < count; i ++) {
           // var constConfig = i < existCount ? ((subs[i] || {}).Random || {}).config : this.getRandomConstConfig(random.config, random.id) //第1遍，把 key : expression 改为 key : value
-          // var constJson = this.getRandomJSON(JSON.parse(JSON.stringify(json)), constConfig, random.id) //第2遍，用新的 random config 来修改原 json
+          // var constJson = this.getRandomJSON(parseJSON(JSON.stringify(json)), constConfig, random.id) //第2遍，用新的 random config 来修改原 json
 
           const which = i;
           var rawConfig = testSubList && i < existCount ? ((subs[i] || {}).Random || {}).config : random.config
@@ -9615,7 +9615,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           try {
             this.parseRandom(
-              JSON.parse(JSON.stringify(json)), rawConfig, random.id
+              parseJSON(JSON.stringify(json)), rawConfig, random.id
               , ! testSubList, testSubList && i >= existCount, testSubList && i >= existCount
               , function (randomName, constConfig, constJson) {
 
@@ -10731,7 +10731,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             stdd = stdd || ((this.currentRemoteItem || {}).TestRecord || {})[standardKey]
           }
 
-          var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : JSON.parse(stdd))
+          var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : parseJSON(stdd))
           tr.compare = JSONResponse.compareResponse(res, standard, this.removeDebugInfo(response) || {}, '', isML, null, null, ignoreTrend) || {}
           tr.compare.duration = it.durationHint
         }
@@ -11298,7 +11298,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         saveTextAs(
           '# APIJSON自动化回归测试-前\n主页: https://github.com/Tencent/APIJSON'
           + '\n\n接口名称: \n' + (document.version > 0 ? 'V' + document.version : 'V*') + ' ' + document.name
-          + '\n返回结果: \n' + JSON.stringify(JSON.parse(testRecord.response || '{}'), null, '    ')
+          + '\n返回结果: \n' + JSON.stringify(parseJSON(testRecord.response || '{}'), null, '    ')
           , '测试：' + document.name + '-前.txt'
         )
 
@@ -11324,7 +11324,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 '# APIJSON自动化回归测试-标准\n主页: https://github.com/Tencent/APIJSON'
                 + '\n\n接口名称: \n' + (document.version > 0 ? 'V' + document.version : 'V*') + ' ' + document.name
                 + '\n测试结果: \n' + JSON.stringify(testRecord.compare || '{}', null, '    ')
-                + '\n测试标准: \n' + JSON.stringify(JSON.parse(testRecord.standard || '{}'), null, '    ')
+                + '\n测试标准: \n' + JSON.stringify(parseJSON(testRecord.standard || '{}'), null, '    ')
                 , '测试：' + document.name + '-标准.txt'
               )
             }, 5000)
@@ -11377,7 +11377,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         ]
 
         if (pathKeys.length > 0) {
-          var curRsp = StringUtil.isEmpty(testRecord.response) ? {} : JSON.parse(testRecord.response);
+          var curRsp = StringUtil.isEmpty(testRecord.response) ? {} : parseJSON(testRecord.response);
           JSONResponse.setValByPath(curRsp, pathKeys, JSONResponse.getValByPath(currentResponse, pathKeys));
           currentResponse = curRsp;
         }
@@ -11443,7 +11443,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 item.TestRecord = null
               }
 
-              App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : JSON.parse(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+              App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
             })
           }
           else { //上传新的校验标准
@@ -11489,11 +11489,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
             }
             else {
-              standard = (StringUtil.isEmpty(testRecord.standard, true) ? null : JSON.parse(testRecord.standard)) || {}
+              standard = (StringUtil.isEmpty(testRecord.standard, true) ? null : parseJSON(testRecord.standard)) || {}
               if (pathKeys.length <= 0) {
-                stddObj = JSONResponse.updateFullStandard(standard, rawRspStr == null ? null : JSON.parse(rawRspStr), isML)
+                stddObj = JSONResponse.updateFullStandard(standard, rawRspStr == null ? null : parseJSON(rawRspStr), isML)
               } else if (isML) {
-                stddObj = JSONResponse.updateStandardByPath(standard, pathNames, lastKey, rawRspStr == null ? null : JSON.parse(rawRspStr))
+                stddObj = JSONResponse.updateStandardByPath(standard, pathNames, lastKey, rawRspStr == null ? null : parseJSON(rawRspStr))
               }
             }
 
@@ -11614,7 +11614,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 //   }
                 // }
 
-                App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : JSON.parse(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+                App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
               }
 
             })
@@ -11705,7 +11705,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               )
             )) {
               setTimeout(function () {
-                window.open(vUrl.value + "/" + encodeURIComponent(JSON.stringify(encode(JSON.parse(vInput.value)))))
+                window.open(vUrl.value + "/" + encodeURIComponent(JSON.stringify(encode(parseJSON(vInput.value)))))
               }, 2000)
             }
           }, Math.max(2000, delayTime))
@@ -11732,7 +11732,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
 
         if (setting == null) {
-          setting = StringUtil.isEmpty(rawReq.setting, true) ? null : JSON.parse(StringUtil.trim(rawReq.setting, true))
+          setting = StringUtil.isEmpty(rawReq.setting, true) ? null : parseJSON(StringUtil.trim(rawReq.setting, true))
         }
 
         if (setting == null) {
@@ -12020,13 +12020,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var standardObj = null;
               try {
                 var currentItem = App.isTestCaseShow ? App.remotes[App.currentDocIndex] : App.currentRemoteItem;
-                standardObj = JSON.parse(((currentItem || {})[isReq ? 'Document' : 'TestRecord'] || {}).standard);
+                standardObj = parseJSON(((currentItem || {})[isReq ? 'Document' : 'TestRecord'] || {}).standard);
               } catch (e3) {
                 log(e3)
               }
               if (standardObj == null) {
                 standardObj = JSONResponse.updateStandard({},
-                  isReq ? App.getRequest(vInput.value) : App.jsoncon == null ? null : JSON.parse(App.jsoncon)
+                  isReq ? App.getRequest(vInput.value) : App.jsoncon == null ? null : parseJSON(App.jsoncon)
                 )
               }
 
@@ -13006,7 +13006,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           if (StringUtil.isNotEmpty(rawReq.setting, true)) {
             var save = rawReq.save == 'true'
             try {
-              var setting = JSON.parse(StringUtil.trim(rawReq.setting, true)) || {}
+              var setting = parseJSON(StringUtil.trim(rawReq.setting, true)) || {}
 
               if ((setting.count != null && setting.count != App.count)
                 || (setting.page != null && setting.page != App.page)

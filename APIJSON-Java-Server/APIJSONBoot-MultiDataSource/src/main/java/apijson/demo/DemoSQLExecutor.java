@@ -26,6 +26,7 @@ import apijson.orm.SQLConfig;
 //import apijson.surrealdb.SurrealDBUtil;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.JSONArray;
 //import org.duckdb.JsonNode;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -55,7 +56,7 @@ import static apijson.framework.APIJSONConstant.USER_;
  *
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long, JSONObject, JSONArray> {
     public static final String TAG = "DemoSQLExecutor";
 
     // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
@@ -76,7 +77,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     //  可重写以下方法，支持 Redis 等单机全局缓存或分布式缓存
     @Override
-    public List<JSONObject> getCache(String sql, SQLConfig<Long> config) {
+    public List<JSONObject> getCache(String sql, SQLConfig<Long, JSONObject, JSONArray> config) {
         List<JSONObject> list = super.getCache(sql, config);
         if (list == null) {
             try {
@@ -89,7 +90,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig<Long> config) {
+    public synchronized void putCache(String sql, List<JSONObject> list, SQLConfig<Long, JSONObject, JSONArray> config) {
         super.putCache(sql, list, config);
 
         String table = config != null && config.isMain() ? config.getTable() : null;
@@ -107,7 +108,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public synchronized void removeCache(String sql, SQLConfig<Long> config) {
+    public synchronized void removeCache(String sql, SQLConfig<Long, JSONObject, JSONArray> config) {
         super.removeCache(sql, config);
         try {
             if (config.getMethod() == RequestMethod.DELETE) { // 避免缓存击穿
@@ -123,9 +124,9 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
+    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long, JSONObject, JSONArray> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
-    public Connection getConnection(SQLConfig<Long> config) throws Exception {
+    public Connection getConnection(SQLConfig<Long, JSONObject, JSONArray> config) throws Exception {
         String datasource = config.getDatasource();
         Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
 
@@ -173,7 +174,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     }
 
     @Override
-    public JSONObject execute(@NotNull SQLConfig<Long> config, boolean unknownType) throws Exception {
+    public JSONObject execute(@NotNull SQLConfig<Long, JSONObject, JSONArray> config, boolean unknownType) throws Exception {
         boolean isMilvus = config.isMilvus(); // DATABASE_MILVUS.equals(config.getDatabase()); // APIJSON 6.4.0+ 可用 config.isMilvus();
         boolean isCassandra = config.isCassandra(); // DemoSQLConfig.DATABASE_CASSANDRA.equals(config.getDatabase());
         boolean isInfluxDB = config.isInfluxDB(); // DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase());
@@ -182,7 +183,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
         if (isMilvus || isCassandra || isInfluxDB) { // || isIoTDB || isSurrealDB) {
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
-            String sql = config.getSQL(false); // config.isPrepared());
+            String sql = config.gainSQL(false); // config.isPrepared());
             if (sql != null && config.getMethod() == null) {
                 String trimmedSQL = sql.trim();
                 String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
@@ -273,14 +274,14 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
     // 不需要隐藏字段这个功能时，取消注释来提升性能
     //	@Override
-    //	protected boolean isHideColumn(SQLConfig<Long> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+    //	protected boolean isHideColumn(SQLConfig<Long, JSONObject, JSONArray> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
     //			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
     //		return false;
     //	}
 
     // 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
     //    @Override
-    //    protected String getKey(SQLConfig<Long> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+    //    protected String getKey(SQLConfig<Long, JSONObject, JSONArray> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
     //        String key = super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
     //        String tbl = StringUtil.firstCase(JSONResponse.formatUnderline(rsmd.getTableName(columnIndex), true), true);
     //        if (DemoVerifier.SYSTEM_ACCESS_MAP.containsKey(tbl)) {
@@ -290,13 +291,15 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     //    }
 
 
-//    @Override
-//    protected Object getValue(SQLConfig<Long> config, ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, String lable, Map<String, JSONObject> childMap) throws Exception {
-//        Object v = super.getValue(config, rs, rsmd, tablePosition, table, columnIndex, lable, childMap);
-////        if (v instanceof JsonNode) { // DuckDB json 类型需要转换
-////            JsonNode jn = (JsonNode) v;
-////            v = jn.isNull() ? null : JSON.parse(jn.toString());
-////        }
-//        return v; // MongoUtil.getValue(v);
-//    }
+    @Override
+    protected Object getValue(
+            SQLConfig<Long, JSONObject, JSONArray> config, ResultSet rs, ResultSetMetaData rsmd, int row, JSONObject table, int columnIndex
+            , String label, Map<String, JSONObject> childMap, Map<String, String> keyMap) throws Exception {
+        Object v = super.getValue(config, rs, rsmd, row, table, columnIndex, label, childMap, keyMap);
+//        if (v instanceof JsonNode) { // DuckDB json 类型需要转换
+//            JsonNode jn = (JsonNode) v;
+//            v = jn.isNull() ? null : parseJSON(jn.toString());
+//        }
+        return v; // MongoUtil.getValue(v);
+    }
 }

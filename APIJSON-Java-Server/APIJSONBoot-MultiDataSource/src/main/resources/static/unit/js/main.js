@@ -213,7 +213,7 @@
                 var vi = val[i]
 
                 if (JSONObject.isTableKey(firstKey, val, isRestful)) {
-                  // var newVal = JSON.parse(JSON.stringify(val[i]))
+                  // var newVal = parseJSON(JSON.stringify(val[i]))
                   if (vi == null) {
                     continue
                   }
@@ -246,7 +246,7 @@
             var aliaIndex = key.indexOf(':');
             var objName = aliaIndex < 0 ? key : key.substring(0, aliaIndex);
 
-            // var newVal = JSON.parse(JSON.stringify(val))
+            // var newVal = parseJSON(JSON.stringify(val))
 
             var newVal = {}
             for (var k in val) {
@@ -320,7 +320,7 @@
           var standardObj = null;
           try {
             var currentItem = App.isTestCaseShow ? App.remotes[App.currentDocIndex] : App.currentRemoteItem;
-            standardObj = JSON.parse(((currentItem || {}).TestRecord || {}).standard);
+            standardObj = parseJSON(((currentItem || {}).TestRecord || {}).standard);
           } catch (e3) {
             log(e3)
           }
@@ -346,7 +346,7 @@
               if (i >= 0) {
                 valString = valString.substring(0, i + 1)
                 // alert('valString = ' + valString)
-                var _$_this_$_ = JSON.parse(valString) || {}
+                var _$_this_$_ = parseJSON(valString) || {}
                 path = _$_this_$_.path
                 table = _$_this_$_.table
               }
@@ -378,7 +378,7 @@
               if (i >= 0) {
                 valString = valString.substring(0, i + 1)
                 // alert('valString = ' + valString)
-                var _$_this_$_ = JSON.parse(valString) || {}
+                var _$_this_$_ = parseJSON(valString) || {}
                 path = _$_this_$_ == null ? '' : _$_this_$_.path
                 table = _$_this_$_ == null ? '' : _$_this_$_.table
               }
@@ -525,7 +525,7 @@ https://github.com/Tencent/APIJSON/issues
       var v = decodeURIComponent(part.substring(ind+1));
       if (tryParse == true) {
         try {
-          v = JSON.parse(v)
+          v = parseJSON(v)
         }
         catch (e) {
           console.log(e)
@@ -1556,7 +1556,7 @@ https://github.com/Tencent/APIJSON/issues
         var jsonStr = json == null ? null : (typeof json == 'string' ? json : JSON.stringify(json))
         if (this.isTestCaseShow != true && jsonStr == null) { // StringUtil.isEmpty(jsonStr)
           try {
-            jsonStr = JSON.stringify(encode(JSON.parse(vInput.value)))
+            jsonStr = JSON.stringify(encode(parseJSON(vInput.value)))
           } catch (e) {  // 可能包含注释
             log(e)
             jsonStr = encode(StringUtil.trim(vInput.value))
@@ -2306,7 +2306,7 @@ https://github.com/Tencent/APIJSON/issues
             saveTextAs(txt, clazz)
           }
           else {
-            var res = JSON.parse(this.jsoncon)
+            var res = parseJSON(this.jsoncon)
             res = this.removeDebugInfo(res)
 
             var s = ''
@@ -2453,7 +2453,7 @@ https://github.com/Tencent/APIJSON/issues
 
           this.isTestCaseShow = false
 
-          const currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(JSON.parse(this.jsoncon));
+          const currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(parseJSON(this.jsoncon));
 
           const after = isSingle ? this.switchQuote(inputted) : inputted;  // this.toDoubleJSON(inputted);
           const inputObj = this.getRequest(after, {});
@@ -2465,7 +2465,7 @@ https://github.com/Tencent/APIJSON/issues
             var m = this.getMethod();
             var commentStddObj = null
             try {
-              commentStddObj = JSON.parse(isEditResponse ? tr.standard : doc.standard);
+              commentStddObj = parseJSON(isEditResponse ? tr.standard : doc.standard);
             }
             catch(e) {
               log(e)
@@ -2488,7 +2488,7 @@ https://github.com/Tencent/APIJSON/issues
           
           const isML = this.isMLEnabled;
 
-          var rsp = JSON.parse(JSON.stringify(currentResponse || {}))
+          var rsp = parseJSON(JSON.stringify(currentResponse || {}))
           rsp = JSONResponse.array2object(rsp, 'methodArgs', ['methodArgs'], true)
           rsp = JSONResponse.array2object(rsp, 'return', ['return'], true)
           rsp = JSONResponse.array2object(rsp, 'type', ['type'], true)
@@ -2580,7 +2580,7 @@ https://github.com/Tencent/APIJSON/issues
             //       var k = cfgLine.substring(0, ind).replaceAll('/', '.'); // .trim();
             //       var v = cfgLine.substring(ind + 1).trim();
             //       try {
-            //         v = JSON.parse(v);
+            //         v = parseJSON(v);
             //       }
             //       catch (e) {
             //         log(e)
@@ -4107,9 +4107,9 @@ https://github.com/Tencent/APIJSON/issues
       getCache: function (url, key, defaultValue) {
         var cache = localStorage.getItem('UnitAuto:' + url)
         try {
-          cache = JSON.parse(cache)
+          cache = parseJSON(cache)
         } catch(e) {
-          this.log('login  this.send >> try { cache = JSON.parse(cache) } catch(e) {\n' + e.message)
+          this.log('login  this.send >> try { cache = parseJSON(cache) } catch(e) {\n' + e.message)
         }
         cache = cache || {}
         var val = key == null ? cache : cache[key]
@@ -4766,14 +4766,14 @@ https://github.com/Tencent/APIJSON/issues
           try {
             var standardObj = null;
             try {
-              standardObj = JSON.parse(currentItem.standard);
+              standardObj = parseJSON(currentItem.standard);
             } catch (e3) {
               log(e3)
             }
 
             var isAPIJSONRouter = false;
             // try {
-              // var apijson = JSON.parse(currentItem.apijson);
+              // var apijson = parseJSON(currentItem.apijson);
               // isAPIJSONRouter = JSONResponse.isObject(apijson)
             // } catch (e3) {
               // log(e3)
@@ -6092,16 +6092,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           case CodeUtil.LANGUAGE_KOTLIN:
             s += '\n#### <= Android-Kotlin: 空对象用 HashMap&lt;String, Any&gt;()，空数组用 ArrayList&lt;Any&gt;()\n'
               + '```kotlin \n'
-              + CodeUtil.parseKotlinRequest(null, JSON.parse(rq), 0, isSingle, false, false, this.type, this.getBaseUrl(), '/' + this.getMethod(), this.urlComment)
+              + CodeUtil.parseKotlinRequest(null, parseJSON(rq), 0, isSingle, false, false, this.type, this.getBaseUrl(), '/' + this.getMethod(), this.urlComment)
               + '\n ``` \n注：对象 {} 用 mapOf("key": value)，数组 [] 用 listOf(value0, value1)\n';
             break;
           case CodeUtil.LANGUAGE_JAVA:
             s += '\n#### <= Android-Java: 同名变量需要重命名'
               + ' \n ```java \n'
-              + StringUtil.trim(CodeUtil.parseJavaRequest(null, JSON.parse(rq), 0, isSingle, false, false, this.type, '/' + this.getMethod(), this.urlComment))
+              + StringUtil.trim(CodeUtil.parseJavaRequest(null, parseJSON(rq), 0, isSingle, false, false, this.type, '/' + this.getMethod(), this.urlComment))
               + '\n ``` \n注：' + (isSingle ? '用了 APIJSON 的 JSONRequest, JSONResponse 类，也可使用其它类封装，只要 JSON 有序就行\n' : 'LinkedHashMap&lt;&gt;() 可替换为 fastjson 的 JSONObject(true) 等有序JSON构造方法\n');
 
-            var serverCode = CodeUtil.parseJavaServer(this.type, '/' + this.getMethod(), this.database, this.schema, JSON.parse(rq), isSingle);
+            var serverCode = CodeUtil.parseJavaServer(this.type, '/' + this.getMethod(), this.database, this.schema, parseJSON(rq), isSingle);
             if (StringUtil.isEmpty(serverCode, true) != true) {
               s += '\n#### <= Server-Java: RESTful 等非 APIJSON 规范的 API'
                 + ' \n ```java \n'
@@ -6112,46 +6112,46 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           case CodeUtil.LANGUAGE_C_SHARP:
             s += '\n#### <= Unity3D-C\#: 键值对用 {"key", value}' +
               '\n ```csharp \n'
-              + CodeUtil.parseCSharpRequest(null, JSON.parse(rq), 0)
+              + CodeUtil.parseCSharpRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 new JObject{{"key", value}}，数组 [] 用 new JArray{value0, value1}\n';
             break;
 
           case CodeUtil.LANGUAGE_SWIFT:
             s += '\n#### <= iOS-Swift: 空对象用 [ : ]'
               + '\n ```swift \n'
-              + CodeUtil.parseSwiftRequest(null, JSON.parse(rq), 0)
+              + CodeUtil.parseSwiftRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 ["key": value]，数组 [] 用 [value0, value1]\n';
             break;
           case CodeUtil.LANGUAGE_OBJECTIVE_C:
             s += '\n#### <= iOS-Objective-C \n ```objective-c \n'
-              + CodeUtil.parseObjectiveCRequest(null, JSON.parse(rq))
+              + CodeUtil.parseObjectiveCRequest(null, parseJSON(rq))
               + '\n ```  \n';
             break;
 
           case CodeUtil.LANGUAGE_GO:
             s += '\n#### <= Web-Go: 对象 key: value 会被强制排序，每个 key: value 最后都要加逗号 ","'
               + ' \n ```go \n'
-              + CodeUtil.parseGoRequest(null, JSON.parse(rq), 0)
+              + CodeUtil.parseGoRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 map[string]interface{} {"key": value}，数组 [] 用 []interface{} {value0, value1}\n';
             break;
           case CodeUtil.LANGUAGE_C_PLUS_PLUS:
             s += '\n#### <= Web-C++: 使用 RapidJSON'
               + ' \n ```cpp \n'
-              + StringUtil.trim(CodeUtil.parseCppRequest(null, JSON.parse(rq), 0, isSingle))
+              + StringUtil.trim(CodeUtil.parseCppRequest(null, parseJSON(rq), 0, isSingle))
               + '\n ``` \n注：std::string 类型值需要判断 RAPIDJSON_HAS_STDSTRING\n';
             break;
 
           case CodeUtil.LANGUAGE_PHP:
             s += '\n#### <= Web-PHP: 空对象用 (object) ' + (isSingle ? '[]' : 'array()')
               + ' \n ```php \n'
-              + CodeUtil.parsePHPRequest(null, JSON.parse(rq), 0, isSingle)
+              + CodeUtil.parsePHPRequest(null, parseJSON(rq), 0, isSingle)
               + '\n ``` \n注：对象 {} 用 ' + (isSingle ? '[\'key\' => value]' : 'array("key" => value)') + '，数组 [] 用 ' + (isSingle ? '[value0, value1]\n' : 'array(value0, value1)\n');
             break;
 
           case CodeUtil.LANGUAGE_PYTHON:
             s += '\n#### <= Web-Python: 注释符用 \'\#\''
               + ' \n ```python \n'
-              + CodeUtil.parsePythonRequest(null, JSON.parse(rq), 0, isSingle, vInput.value)
+              + CodeUtil.parsePythonRequest(null, parseJSON(rq), 0, isSingle, vInput.value)
               + '\n ``` \n注：关键词转换 null: None, false: False, true: True';
             break;
 
@@ -7464,7 +7464,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var header = this.getHeader(vHeader.value)
           var callback = null
 
-          var data = isPre ? undefined : (this.jsoncon == null ? null : JSON.parse(this.jsoncon))
+          var data = isPre ? undefined : (this.jsoncon == null ? null : parseJSON(this.jsoncon))
           var res = isPre ? undefined : {
             data: data
           }
@@ -7646,14 +7646,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var random = item.Random = item.Random || {}
         var subs = item['[]'] || []
         var existCount = subs.length
-        subs = existCount <= 0 ? subs : JSON.parse(JSON.stringify(subs))
+        subs = existCount <= 0 ? subs : parseJSON(JSON.stringify(subs))
 
         var count = random.count || 0
         var respCount = 0;
 
         for (var i = 0; i < count; i ++) {
           // var constConfig = i < existCount ? ((subs[i] || {}).Random || {}).config : this.getRandomConstConfig(random.config, random.id) //第1遍，把 key : expression 改为 key : value
-          // var constJson = this.getRandomJSON(JSON.parse(JSON.stringify(json)), constConfig, random.id) //第2遍，用新的 random config 来修改原 json
+          // var constJson = this.getRandomJSON(parseJSON(JSON.stringify(json)), constConfig, random.id) //第2遍，用新的 random config 来修改原 json
 
           const which = i;
           var rawConfig = testSubList && i < existCount ? ((subs[i] || {}).Random || {}).config : random.config
@@ -7669,7 +7669,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   
           try {
             this.parseRandom(
-              JSON.parse(JSON.stringify(json)), rawConfig, random.id
+              parseJSON(JSON.stringify(json)), rawConfig, random.id
               , ! testSubList, testSubList && i >= existCount, testSubList && i >= existCount
               , function (randomName, constConfig, constJson) {
 
@@ -8714,9 +8714,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             stdd = stdd || ((this.currentRemoteItem || {}).TestRecord || {})[standardKey]
           }
           
-          var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : JSON.parse(stdd))
+          var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : parseJSON(stdd))
 
-          var rsp = JSON.parse(JSON.stringify(this.removeDebugInfo(response) || {}))
+          var rsp = parseJSON(JSON.stringify(this.removeDebugInfo(response) || {}))
           if (isML) {
             rsp = JSONResponse.array2object(rsp, 'methodArgs', ['methodArgs'], true)
             rsp = JSONResponse.array2object(rsp, 'return', ['return'], true)
@@ -9274,7 +9274,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         saveTextAs(
           '# APIJSON自动化回归测试-前\n主页: https://github.com/Tencent/APIJSON'
           + '\n\n方法名称: \n' + document.method
-          + '\n返回结果: \n' + JSON.stringify(JSON.parse(testRecord.response || '{}'), null, '    ')
+          + '\n返回结果: \n' + JSON.stringify(parseJSON(testRecord.response || '{}'), null, '    ')
           , '测试：' + document.method + '-前.txt'
         )
 
@@ -9300,7 +9300,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 '# APIJSON自动化回归测试-标准\n主页: https://github.com/Tencent/APIJSON'
                 + '\n\n方法名称: \n' + document.method
                 + '\n测试结果: \n' + JSON.stringify(testRecord.compare || '{}', null, '    ')
-                + '\n测试标准: \n' + JSON.stringify(JSON.parse(testRecord.standard || '{}'), null, '    ')
+                + '\n测试标准: \n' + JSON.stringify(parseJSON(testRecord.standard || '{}'), null, '    ')
                 , '测试：' + document.method + '-标准.txt'
               )
             }, 5000)
@@ -9407,7 +9407,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 item.TestRecord = null
               }
 
-              App.updateTestRecord(0, list, index, item, JSON.parse(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+              App.updateTestRecord(0, list, index, item, parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
             })
           }
           else { //上传新的校验标准
@@ -9453,8 +9453,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
             }
             else {
-              standard = (StringUtil.isEmpty(testRecord.standard, true) ? null : JSON.parse(testRecord.standard)) || {}
-              stddObj = JSONResponse.updateFullStandard(standard, JSON.parse(rawRspStr), isML)
+              standard = (StringUtil.isEmpty(testRecord.standard, true) ? null : parseJSON(testRecord.standard)) || {}
+              stddObj = JSONResponse.updateFullStandard(standard, parseJSON(rawRspStr), isML)
             }
 
             const isNewRandom = isRandom && random.id <= 0
@@ -9563,7 +9563,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 //   }
                 // }
 
-                App.updateTestRecord(0, list, index, item, JSON.parse(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+                App.updateTestRecord(0, list, index, item, parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
               }
 
             })
@@ -9639,7 +9639,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
                 if (t != '' && t != 'string' && t != 'str') {
                   try {
-                    val = JSON.parse(val);
+                    val = parseJSON(val);
                   } catch (e) {
                     log(e)
                   }
@@ -9692,7 +9692,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               )
             )) {
               setTimeout(function () {
-                window.open(vUrl.value + "/" + encodeURIComponent(JSON.stringify(encode(JSON.parse(vInput.value)))))
+                window.open(vUrl.value + "/" + encodeURIComponent(JSON.stringify(encode(parseJSON(vInput.value)))))
               }, 2000)
             }
           }, Math.max(2000, delayTime))
@@ -9719,7 +9719,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
 
         if (setting == null) {
-          setting = StringUtil.isEmpty(rawReq.setting, true) ? null : JSON.parse(StringUtil.trim(rawReq.setting, true))
+          setting = StringUtil.isEmpty(rawReq.setting, true) ? null : parseJSON(StringUtil.trim(rawReq.setting, true))
         }
 
         if (setting == null) {
@@ -10007,13 +10007,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var standardObj = null;
               try {
                 var currentItem = App.isTestCaseShow ? App.remotes[App.currentDocIndex] : App.currentRemoteItem;
-                standardObj = JSON.parse(((currentItem || {})[isReq ? 'Method' : 'TestRecord'] || {}).standard);
+                standardObj = parseJSON(((currentItem || {})[isReq ? 'Method' : 'TestRecord'] || {}).standard);
               } catch (e3) {
                 log(e3)
               }
               if (standardObj == null) {
                 standardObj = JSONResponse.updateStandard({},
-                  isReq ? App.getRequest(vInput.value) : App.jsoncon == null ? null : JSON.parse(App.jsoncon)
+                  isReq ? App.getRequest(vInput.value) : App.jsoncon == null ? null : parseJSON(App.jsoncon)
                   , ['@time']
                 )
               }
@@ -10625,7 +10625,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           if (StringUtil.isEmpty(rawReq.setting, true) == false) {
             var save = rawReq.save == 'true'
             try {
-              var setting = JSON.parse(StringUtil.trim(rawReq.setting, true)) || {}
+              var setting = parseJSON(StringUtil.trim(rawReq.setting, true)) || {}
 
               if ((setting.count != null && setting.count != App.count)
                 || (setting.page != null && setting.page != App.page)

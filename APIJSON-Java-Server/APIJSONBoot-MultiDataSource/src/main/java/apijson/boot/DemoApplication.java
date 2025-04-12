@@ -14,9 +14,12 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import apijson.JSONParser;
 import apijson.framework.APIJSONSQLConfig;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.parser.Feature;
 import com.alibaba.fastjson.serializer.PropertyFilter;
 
 import org.springframework.boot.SpringApplication;
@@ -54,11 +57,11 @@ import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
 import apijson.orm.Verifier;
 import apijson.router.APIJSONRouterApplication;
-import unitauto.MethodUtil;
-import unitauto.MethodUtil.Argument;
-import unitauto.MethodUtil.InstanceGetter;
-import unitauto.MethodUtil.JSONCallback;
-import unitauto.jar.UnitAutoApp;
+//import unitauto.MethodUtil;
+//import unitauto.MethodUtil.Argument;
+//import unitauto.MethodUtil.InstanceGetter;
+//import unitauto.MethodUtil.JSONCallback;
+//import unitauto.jar.UnitAutoApp;
 
 
 /**
@@ -91,12 +94,13 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
         // FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
         // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
-        unitauto.Log.DEBUG = Log.DEBUG = true; // 是否开启调试模式（打印详细日志、返回详细调试信息等）
+        //unitauto.Log.DEBUG = true;
+        Log.DEBUG = true; // 是否开启调试模式（打印详细日志、返回详细调试信息等）
         APIJSONParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
 //        APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
 //        APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
-        APIJSONApplication.init();
-        APIJSONRouterApplication.init();
+        APIJSONApplication.init(false);
+        APIJSONRouterApplication.init(false);
         System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");
     }
 
@@ -122,6 +126,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         };
     }
 
+    private static final JSONParser<JSONObject, JSONArray> DEFAULT_JSON_PARSER;
     static {
         // 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
         //		try { //加载驱动程序
@@ -239,31 +244,80 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
         COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 
-        // 使用本项目的自定义处理类
-        APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
+        // 使用 fastjson
+        apijson.JSON.JSON_OBJECT_CLASS = JSONObject.class;
+        apijson.JSON.JSON_ARRAY_CLASS = JSONArray.class;
+
+        final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.UseBigDecimal};
+        apijson.JSON.DEFAULT_JSON_PARSER = DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
 
             @Override
-            public Parser<Long> createParser() {
+            public JSONObject createJSONObject() {
+                return new JSONObject(true);
+            }
+
+            @Override
+            public JSONArray createJSONArray() {
+                return new JSONArray();
+            }
+
+            @Override
+            public String toJSONString(Object obj, boolean format) {
+                return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
+            }
+
+            @Override
+            public Object parseJSON(Object json) {
+                return JSON.parse(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+            }
+
+            @Override
+            public JSONObject parseObject(Object json) {
+                return JSON.parseObject(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
+            }
+
+            @Override
+            public <T> T parseObject(Object json, Class<T> clazz) {
+                return JSON.parseObject(toJSONString(json), clazz, DEFAULT_FASTJSON_FEATURES);
+            }
+
+            @Override
+            public JSONArray parseArray(Object json) {
+                return JSON.parseArray(toJSONString(json));
+            }
+
+            @Override
+            public <T> List<T> parseArray(Object json, Class<T> clazz) {
+                return JSON.parseArray(toJSONString(json), clazz);
+            }
+
+        };
+
+        // 使用本项目的自定义处理类
+        APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long, JSONObject, JSONArray>() {
+
+            @Override
+            public DemoParser createParser() {
                 return new DemoParser();
             }
 
             @Override
-            public FunctionParser createFunctionParser() {
+            public DemoFunctionParser createFunctionParser() {
                 return new DemoFunctionParser();
             }
 
             @Override
-            public Verifier<Long> createVerifier() {
+            public DemoVerifier createVerifier() {
                 return new DemoVerifier();
             }
 
             @Override
-            public SQLConfig createSQLConfig() {
+            public DemoSQLConfig createSQLConfig() {
                 return new DemoSQLConfig();
             }
 
             @Override
-            public SQLExecutor createSQLExecutor() {
+            public DemoSQLExecutor createSQLExecutor() {
                 return new DemoSQLExecutor();
             }
 
@@ -274,96 +328,96 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
 
         // UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
         // FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
-        UnitAutoApp.init();
+        //UnitAutoApp.init();
 
         // 适配 Spring 注入的类及 Context 等环境相关的类
-        final InstanceGetter ig = MethodUtil.INSTANCE_GETTER;
-        MethodUtil.INSTANCE_GETTER = new InstanceGetter() {
-
-            @Override
-            public Object getInstance(@NotNull Class<?> clazz, List<Argument> classArgs, Boolean reuse) throws Exception {
-                if (APPLICATION_CONTEXT != null && ApplicationContext.class.isAssignableFrom(clazz) && clazz.isAssignableFrom(APPLICATION_CONTEXT.getClass())) {
-                    return APPLICATION_CONTEXT;
-                }
-
-                if (reuse != null && reuse && (classArgs == null || classArgs.isEmpty())) {
-                    return APPLICATION_CONTEXT.getBean(clazz);
-                }
-
-                return ig.getInstance(clazz, classArgs, reuse);
-            }
-        };
-
-        // 排除转换 JSON 异常的类，一般是 Context 等环境相关的类
-        final JSONCallback jc = MethodUtil.JSON_CALLBACK;
-        MethodUtil.JSON_CALLBACK = new JSONCallback() {
-
-            @Override
-            public JSONObject newSuccessResult() {
-                return jc.newSuccessResult();
-            }
-
-            @Override
-            public JSONObject newErrorResult(Throwable e) {
-                return jc.newErrorResult(e);
-            }
-
-            @Override
-            public JSONObject parseJSON(String type, Object value) {
-                if (value == null || unitauto.JSON.isBooleanOrNumberOrString(value) || value instanceof JSON || value instanceof Enum) {
-                    return jc.parseJSON(type, value);
-                }
-
-                if (value instanceof ApplicationContext
-                        || value instanceof Context
-                        || value instanceof org.apache.catalina.Context
-                    // SpringBoot 2.6.7 已移除  || value instanceof ch.qos.logback.core.Context
-                ) {
-                    value = value.toString();
-                } else {
-                    try {
-                        value = JSON.parse(JSON.toJSONString(value, new PropertyFilter() {
-                            @Override
-                            public boolean apply(Object object, String name, Object value) {
-                                if (value == null) {
-                                    return true;
-                                }
-
-                                if (value instanceof ApplicationContext
-                                        || value instanceof Context
-                                        || value instanceof org.apache.catalina.Context
-                                    // SpringBoot 2.6.7 已移除  || value instanceof ch.qos.logback.core.Context
-                                ) {
-                                    return false;
-                                }
-
-                                // 防止通过 UnitAuto 远程执行 getDBPassword 等方法来查到敏感信息，但如果直接调用 public String getDBUri 这里没法拦截，仍然会返回敏感信息
-                                //	if (object instanceof SQLConfig) {
-                                //		// 这个类部分方法不序列化返回
-                                //		if ("dBUri".equalsIgnoreCase(name) || "dBPassword".equalsIgnoreCase(name) || "dBAccount".equalsIgnoreCase(name)) {
-                                //			return false;
-                                //		}
-                                //		return false;  // 这个类所有方法都不序列化返回
-                                //	}
-
-                                // 所有类中的方法只要包含关键词就不序列化返回
-                                String n = StringUtil.toLowerCase(name);
-                                if (n.contains("database") || n.contains("schema") || n.contains("dburi") || n.contains("password") || n.contains("account")) {
-                                    return false;
-                                }
-
-                                return Modifier.isPublic(value.getClass().getModifiers());
-                            }
-                        }));
-                    } catch (Exception e) {
-                        Log.e(TAG, "toJSONString  catch \n" + e.getMessage());
-                    }
-                }
-
-                return jc.parseJSON(type, value);
-            }
-
-        };
+        //final InstanceGetter ig = MethodUtil.INSTANCE_GETTER;
+        //MethodUtil.INSTANCE_GETTER = new InstanceGetter() {
+        //
+        //    @Override
+        //    public Object getInstance(@NotNull Class<?> clazz, List<Argument> classArgs, Boolean reuse) throws Exception {
+        //        if (APPLICATION_CONTEXT != null && ApplicationContext.class.isAssignableFrom(clazz) && clazz.isAssignableFrom(APPLICATION_CONTEXT.getClass())) {
+        //            return APPLICATION_CONTEXT;
+        //        }
+        //
+        //        if (reuse != null && reuse && (classArgs == null || classArgs.isEmpty())) {
+        //            return APPLICATION_CONTEXT.getBean(clazz);
+        //        }
+        //
+        //        return ig.getInstance(clazz, classArgs, reuse);
+        //    }
+        //};
+        //
+        //// 排除转换 JSON 异常的类，一般是 Context 等环境相关的类
+        //final JSONCallback jc = MethodUtil.JSON_CALLBACK;
+        //MethodUtil.JSON_CALLBACK = new JSONCallback() {
+        //
+        //    @Override
+        //    public JSONObject newSuccessResult() {
+        //        return jc.newSuccessResult();
+        //    }
+        //
+        //    @Override
+        //    public JSONObject newErrorResult(Throwable e) {
+        //        return jc.newErrorResult(e);
+        //    }
+        //
+        //    @Override
+        //    public JSONObject parseJSON(String type, Object value) {
+        //        if (value == null || unitauto.JSON.isBooleanOrNumberOrString(value) || value instanceof JSON || value instanceof Enum) {
+        //            return jc.parseJSON(type, value);
+        //        }
+        //
+        //        if (value instanceof ApplicationContext
+        //                || value instanceof Context
+        //                || value instanceof org.apache.catalina.Context
+        //            // SpringBoot 2.6.7 已移除  || value instanceof ch.qos.logback.core.Context
+        //        ) {
+        //            value = value.toString();
+        //        } else {
+        //            try {
+        //                value = parseJSON(JSON.toJSONString(value, new PropertyFilter() {
+        //                    @Override
+        //                    public boolean apply(Object object, String name, Object value) {
+        //                        if (value == null) {
+        //                            return true;
+        //                        }
+        //
+        //                        if (value instanceof ApplicationContext
+        //                                || value instanceof Context
+        //                                || value instanceof org.apache.catalina.Context
+        //                            // SpringBoot 2.6.7 已移除  || value instanceof ch.qos.logback.core.Context
+        //                        ) {
+        //                            return false;
+        //                        }
+        //
+        //                        // 防止通过 UnitAuto 远程执行 getDBPassword 等方法来查到敏感信息，但如果直接调用 public String getDBUri 这里没法拦截，仍然会返回敏感信息
+        //                        //	if (object instanceof SQLConfig) {
+        //                        //		// 这个类部分方法不序列化返回
+        //                        //		if ("dBUri".equalsIgnoreCase(name) || "dBPassword".equalsIgnoreCase(name) || "dBAccount".equalsIgnoreCase(name)) {
+        //                        //			return false;
+        //                        //		}
+        //                        //		return false;  // 这个类所有方法都不序列化返回
+        //                        //	}
+        //
+        //                        // 所有类中的方法只要包含关键词就不序列化返回
+        //                        String n = StringUtil.toLowerCase(name);
+        //                        if (n.contains("database") || n.contains("schema") || n.contains("dburi") || n.contains("password") || n.contains("account")) {
+        //                            return false;
+        //                        }
+        //
+        //                        return Modifier.isPublic(value.getClass().getModifiers());
+        //                    }
+        //                }));
+        //            } catch (Exception e) {
+        //                Log.e(TAG, "toJSONString  catch \n" + e.getMessage());
+        //            }
+        //        }
+        //
+        //        return jc.parseJSON(type, value);
+        //    }
+        //
+        //};
 
         // UnitAuto 单元测试配置  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 

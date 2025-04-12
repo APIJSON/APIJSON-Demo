@@ -1,6 +1,6 @@
 const Koa = require('koa');
 //const cors = require('koa2-cors');
-//const bodyParser = require('koa-bodyparser');
+//const bodyParser<T, M, L> = require('koa-bodyparser');
 
 // const Vue = require('vue');
 const {getRequestFromURL, App} = require('./main');
@@ -184,14 +184,14 @@ app.use(async ctx => {
   		console.log(json);
 //  	})
 
-        var body = JSON.parse(json) || ctx.body || ctx.req.body || ctx.request.body || {};
+        var body = parseJSON(json) || ctx.body || ctx.req.body || ctx.request.body || {};
         console.log(body);
         var isML = ctx.path == '/test/ml' || body.isML;
         var res = body.response;
         var stdd = body.standard;
 
-        var response = typeof res != 'string' ? res : (StringUtil.isEmpty(res, true) ? null : JSON.parse(res));
-        var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : JSON.parse(stdd));
+        var response = typeof res != 'string' ? res : (StringUtil.isEmpty(res, true) ? null : parseJSON(res));
+        var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : parseJSON(stdd));
 
         console.log('\n\nresponse = ' + JSON.stringify(response));
         console.log('\n\nstdd = ' + JSON.stringify(stdd));

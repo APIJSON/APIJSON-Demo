@@ -56,26 +56,44 @@
 
 
         <!-- 可使用 libs 目录的 apijson-orm.jar, apijson-framework.jar, apijson-column.jar 来替代，两种方式二选一 <<<<<<<<<< -->
-        <dependency>
-            <groupId>com.github.Tencent</groupId>
-            <artifactId>APIJSON</artifactId>
-            <version>7.5.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-framework</artifactId>
-            <version>7.1.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-column</artifactId>
-            <version>2.1.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-router</artifactId>
-            <version>2.1.7</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.Tencent</groupId>-->
+<!--            <artifactId>APIJSON</artifactId>-->
+<!--            <version>8.0.0.0.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-framework</artifactId>-->
+<!--            <version>7.2.0.0</version>-->
+<!--&lt;!&ndash;            <exclusions>&ndash;&gt;-->
+<!--&lt;!&ndash;                <exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <groupId>com.github.Tencent</groupId>&ndash;&gt;-->
+<!--&lt;!&ndash;                    <artifactId>APIJSON</artifactId>&ndash;&gt;-->
+<!--&lt;!&ndash;                </exclusion>&ndash;&gt;-->
+<!--&lt;!&ndash;            </exclusions>&ndash;&gt;-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-column</artifactId>-->
+<!--            <version>2.1.5</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.github.Tencent</groupId>-->
+<!--                    <artifactId>APIJSON</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-router</artifactId>-->
+<!--            <version>2.1.7</version>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.github.Tencent</groupId>-->
+<!--                    <artifactId>APIJSON</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>com.surrealdb</groupId>-->
 <!--            <artifactId>surrealdb</artifactId>-->
@@ -167,7 +185,7 @@
         <dependency>
             <groupId>com.mysql</groupId>
             <artifactId>mysql-connector-j</artifactId>
-            <version>8.4.0</version>
+            <version>9.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>

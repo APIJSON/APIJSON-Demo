@@ -51,7 +51,7 @@ name: 'Test ' + new Date().toLocaleTimeString()  // 通过代码自定义
 <br />
 
 **后端需要部署 APIJSON-Demo 5.2.5+ 的 APIJSONBoot-MultiDataSource** <br /> 
-DemoSQLConfig 改下 getDBAccount, getDBUri 等返回值，具体见 <br /> 
+DemoSQLConfig<T, M, L> 改下 getDBAccount, getDBUri 等返回值，具体见 <br /> 
 https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server
 
 <br />

@@ -773,7 +773,7 @@ var JSONResponse = {
     }
 
     if (right instanceof Object) {
-      var m = JSON.parse(JSON.stringify(left));
+      var m = parseJSON(JSON.stringify(left));
       for (var k in right) {
         m[k] = JSONResponse.deepMerge(m[k], right[k]);
       }
@@ -974,7 +974,7 @@ var JSONResponse = {
         }
         else if (format instanceof Array == false && format instanceof Object) {
           try {
-            var realObj = JSON.parse(real);
+            var realObj = parseJSON(real);
             var result = JSONResponse.compareWithStandard(format, realObj, folder, exceptKeys, ignoreTrend);
             if (guess == true) {
               result.code -= 1;
@@ -1208,7 +1208,7 @@ var JSONResponse = {
     delete currentResponse.code; //code必须一致
     delete currentResponse.throw; //throw必须一致
 
-    var rsp = JSON.parse(JSON.stringify(currentResponse || {}))
+    var rsp = parseJSON(JSON.stringify(currentResponse || {}))
     rsp = JSONResponse.array2object(rsp, 'methodArgs', ['methodArgs'], true)
     rsp = JSONResponse.array2object(rsp, 'return', ['return'], true)
     rsp = JSONResponse.array2object(rsp, 'type', ['type'], true)
@@ -1524,7 +1524,7 @@ var JSONResponse = {
         } catch (e) {
           log(e)
           try {
-            var realObj = JSON.parse(real);
+            var realObj = parseJSON(real);
             var format2 = JSONResponse.updateStandard(target.format, realObj, exceptKeys, ignoreTrend, key);
             if (format2 != null) {
               target.format = format2;

@@ -78,7 +78,7 @@ public class FileController {
 	public JSONObject files() {
 		JSONObject res = new JSONObject();
 		res.put("data", fileRepository);
-		return DemoParser.extendSuccessResult(res);	
+		return new DemoParser().extendSuccessResult(res);
 	}
 
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -96,11 +96,11 @@ public class FileController {
 			JSONObject res = new JSONObject();
 			res.put("path", file.getOriginalFilename());
 			res.put("size", file.getBytes().length);
-			return DemoParser.extendSuccessResult(res);
+			return new DemoParser().extendSuccessResult(res);
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
-			return DemoParser.newErrorResult(e);
+			return new DemoParser().newErrorResult(e);
 		}
 	}
 
