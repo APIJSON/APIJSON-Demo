@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import apijson.framework.APIJSONController;
 import apijson.framework.APIJSONParser;
 import apijson.orm.exception.*;
 import com.alibaba.fastjson.JSONArray;
@@ -59,7 +60,6 @@ import apijson.demo.model.User;
 import apijson.demo.model.Verify;
 import apijson.framework.BaseModel;
 import apijson.orm.JSONRequest;
-import apijson.router.APIJSONRouterController;
 import unitauto.MethodUtil;
 
 import static apijson.JSON.getString;
@@ -97,7 +97,7 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONRouterController<Long, JSONObject, JSONArray> {  // APIJSONController<Long, JSONObject, JSONArray> {
+public class DemoController extends APIJSONController<Long, JSONObject, JSONArray> {
     private static final String TAG = "DemoController";
 
     public String getRequestBaseURL() {

@@ -127,12 +127,12 @@ public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
     private String dbPassword;
     @Override
     public APIJSONParser<Long, JSONObject, JSONArray> setSession(HttpSession session) {
-        Boolean asDBAccount = (Boolean) session.getAttribute(DemoController.AS_DB_ACCOUNT);
+        Boolean asDBAccount = session == null ? null : (Boolean) session.getAttribute(DemoController.AS_DB_ACCOUNT);
         this.asDBAccount = asDBAccount != null && asDBAccount;
         if (this.asDBAccount) {
           // User user = (User) session.getAttribute(DemoController.USER_);
           // this.dbAccount = user.getName();
-          Privacy privacy = (Privacy) session.getAttribute(DemoController.PRIVACY_);
+          Privacy privacy = session == null ? null : (Privacy) session.getAttribute(DemoController.PRIVACY_);
           this.dbAccount = privacy.getPhone();
           this.dbPassword = privacy.get__password();
         }

@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.router.APIJSONRouterVerifier;
+import apijson.framework.APIJSONVerifier;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
  * 具体见 https://github.com/Tencent/APIJSON/issues/12
  * @author Lemon
  */
-public class DemoVerifier extends APIJSONRouterVerifier<Long, JSONObject, JSONArray> {  // APIJSONVerifier<Long, JSONObject, JSONArray> {
+public class DemoVerifier extends APIJSONVerifier<Long, JSONObject, JSONArray> {
 	public static final String TAG = "DemoVerifier";
 	
 	static { 

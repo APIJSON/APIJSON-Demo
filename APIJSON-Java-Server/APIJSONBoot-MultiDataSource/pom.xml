@@ -61,16 +61,16 @@
             <artifactId>APIJSON</artifactId>
             <version>8.0.0.1</version>
         </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-framework</artifactId>
-            <version>7.2.0.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.APIJSON</groupId>
-            <artifactId>apijson-router</artifactId>
-            <version>2.2.0.1</version>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-framework</artifactId>-->
+<!--            <version>7.2.0.1</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-router</artifactId>-->
+<!--            <version>2.2.0.1</version>-->
+<!--        </dependency>-->
 
 <!--        7.9.0 及以下需要依赖 apijson-column -->
 <!--        <dependency>-->

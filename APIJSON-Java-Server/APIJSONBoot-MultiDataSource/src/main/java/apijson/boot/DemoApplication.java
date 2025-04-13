@@ -15,7 +15,7 @@ limitations under the License.*/
 package apijson.boot;
 
 import apijson.JSONParser;
-import apijson.framework.APIJSONSQLConfig;
+import apijson.framework.*;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -47,16 +47,12 @@ import apijson.demo.DemoParser;
 import apijson.demo.DemoSQLConfig;
 import apijson.demo.DemoSQLExecutor;
 import apijson.demo.DemoVerifier;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONCreator;
-import apijson.framework.APIJSONParser;
 import apijson.orm.AbstractVerifier;
 import apijson.orm.FunctionParser;
 import apijson.orm.Parser;
 import apijson.orm.SQLConfig;
 import apijson.orm.SQLExecutor;
 import apijson.orm.Verifier;
-import apijson.router.APIJSONRouterApplication;
 //import unitauto.MethodUtil;
 //import unitauto.MethodUtil.Argument;
 //import unitauto.MethodUtil.InstanceGetter;
@@ -97,10 +93,10 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         //unitauto.Log.DEBUG = true;
         Log.DEBUG = true; // 是否开启调试模式（打印详细日志、返回详细调试信息等）
         APIJSONParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
-//        APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
-//        APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
+        APIJSONVerifier.ENABLE_APIJSON_ROUTER = true; // 是否开启 接口路由 模式，支持简单接口转为 APIJSON JSON
+        //APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
+        //APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
         APIJSONApplication.init(false);
-        APIJSONRouterApplication.init(false);
         System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");
     }
 
