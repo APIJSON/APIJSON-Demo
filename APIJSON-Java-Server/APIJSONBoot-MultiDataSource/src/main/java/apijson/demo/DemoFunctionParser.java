@@ -280,4 +280,51 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 			throw new IllegalArgumentException(urlLike + "必须以包含有效 URL 字符！");
 		}
 	}
+
+	// 必须重写以下方法，否则启动自检报错方法不存在
+	@Override
+	public int countArray(JSONObject curObj, String array) {
+		return super.countArray(curObj, array);
+	}
+
+	@Override
+	public int countObject(JSONObject curObj, String object) {
+		return super.countObject(curObj, object);
+	}
+
+	@Override
+	public boolean isContainKey(JSONObject curObj, String object, String key) {
+		return super.isContainKey(curObj, object, key);
+	}
+
+	@Override
+	public boolean isContainValue(JSONObject curObj, String object, String value) {
+		return super.isContainValue(curObj, object, value);
+	}
+
+	@Override
+	public Object getFromArray(JSONObject curObj, String array, String position) {
+		return super.getFromArray(curObj, array, position);
+	}
+
+	@Override
+	public Object getFromObject(JSONObject curObj, String object, String key) {
+		return super.getFromObject(curObj, object, key);
+	}
+
+	@Override
+	public JSONObject getFunctionDemo(JSONObject curObj) {
+		return super.getFunctionDemo(curObj);
+	}
+
+	@Override
+	public Object getWithDefault(JSONObject curObj, String value, String defaultValue) {
+		return super.getWithDefault(curObj, value, defaultValue);
+	}
+
+	@Override
+	public String getFunctionDetail(JSONObject curObj) {
+		return super.getFunctionDetail(curObj);
+	}
+
 }
