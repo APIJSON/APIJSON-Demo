@@ -279,8 +279,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray>
 		//if (isOpenGauss()) {
 		//	return "jdbc:opengauss://127.0.0.1:5432/postgres?currentSchema=" + DEFAULT_SCHEMA; //TODO 改成你自己的
 		//}
+		//if (isDoris()) {
+		//  return "jdbc:mysql://localhost:9030"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+		//}
 
-		return null;
+		return super.gainDBUri();
 	}
 
 	private String dbAccount;
@@ -356,8 +359,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray>
 		//	return "postgres"; //TODO 改成你自己的
 		//	// 不允许用初始账号，需要 CREATE USER 创建新账号并 GRANT 授权 return "opengauss"; //TODO 改成你自己的
 		//}
+		//if (isDoris()) {
+		//	return "root";
+		//}
 
-		return null;
+		return super.gainDBAccount();
 	}
 
 	private String dbPassword;
@@ -432,8 +438,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray>
 		//if (isOpenGauss()) {
 		//	return "openGauss@123"; //TODO 改成你自己的
 		//}
+		//if (isDoris()) {
+		//	return "apijson";
+		//}
 
-		return null;
+		return super.gainDBPassword();
 	}
 
 	private String sql;
