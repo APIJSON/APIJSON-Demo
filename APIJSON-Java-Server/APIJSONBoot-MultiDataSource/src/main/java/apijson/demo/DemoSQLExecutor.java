@@ -17,7 +17,7 @@ package apijson.demo;
 import apijson.*;
 import apijson.boot.DemoApplication;
 //import apijson.cassandra.CassandraUtil;
-import apijson.framework.APIJSONSQLExecutor;
+import apijson.fastjson2.APIJSONSQLExecutor;
 //import apijson.influxdb.InfluxDBUtil;
 //import apijson.milvus.MilvusUtil;
 //import apijson.mongodb.MongoUtil;
@@ -25,8 +25,8 @@ import apijson.framework.APIJSONSQLExecutor;
 import apijson.orm.SQLConfig;
 //import apijson.surrealdb.SurrealDBUtil;
 import com.alibaba.druid.pool.DruidDataSource;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
 //import org.duckdb.JsonNode;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
@@ -56,7 +56,7 @@ import static apijson.framework.APIJSONConstant.USER_;
  *
  * @author Lemon
  */
-public class DemoSQLExecutor extends APIJSONSQLExecutor<Long, JSONObject, JSONArray> {
+public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     public static final String TAG = "DemoSQLExecutor";
 
     // Redis 缓存 <<<<<<<<<<<<<<<<<<<<<<<
@@ -68,7 +68,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long, JSONObject, JSONAr
             REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
             REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
             REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
-            //    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONObject>>(List.class));
+            //    REDIS_TEMPLATE.setValueSerializer(new FastJsonRedisSerializer<List<JSONMap>>(List.class));
             REDIS_TEMPLATE.afterPropertiesSet();
         } catch (Throwable e) {
             e.printStackTrace();
@@ -124,7 +124,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long, JSONObject, JSONAr
     // Redis 缓存 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
-    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long, JSONObject, JSONArray> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
+    // 适配连接池，如果这里能拿到连接池的有效 Connection，则 SQLConfig<Long, JSONMap, JSONList> 不需要配置 dbVersion, dbUri, dbAccount, dbPassword
     @Override
     public Connection getConnection(SQLConfig<Long, JSONObject, JSONArray> config) throws Exception {
         String datasource = config.getDatasource();
@@ -274,14 +274,14 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long, JSONObject, JSONAr
 
     // 不需要隐藏字段这个功能时，取消注释来提升性能
     //	@Override
-    //	protected boolean isHideColumn(SQLConfig<Long, JSONObject, JSONArray> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
-    //			JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws SQLException {
+    //	protected boolean isHideColumn(SQLConfig<Long, JSONMap, JSONList> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition,
+    //			JSONMap table, int columnIndex, Map<String, JSONMap> childMap) throws SQLException {
     //		return false;
     //	}
 
     // 取消注释可将前端传参驼峰命名转为蛇形命名 aBCdEfg => upper ? A_B_CD_EFG : a_b_cd_efg
     //    @Override
-    //    protected String getKey(SQLConfig<Long, JSONObject, JSONArray> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONObject table, int columnIndex, Map<String, JSONObject> childMap) throws Exception {
+    //    protected String getKey(SQLConfig<Long, JSONMap, JSONList> config, java.sql.ResultSet rs, ResultSetMetaData rsmd, int tablePosition, JSONMap table, int columnIndex, Map<String, JSONMap> childMap) throws Exception {
     //        String key = super.getKey(config, rs, rsmd, tablePosition, table, columnIndex, childMap);
     //        String tbl = StringUtil.firstCase(JSONResponse.formatUnderline(rsmd.getTableName(columnIndex), true), true);
     //        if (DemoVerifier.SYSTEM_ACCESS_MAP.containsKey(tbl)) {

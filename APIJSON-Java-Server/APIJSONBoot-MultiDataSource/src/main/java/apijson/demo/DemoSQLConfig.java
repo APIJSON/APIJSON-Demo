@@ -30,12 +30,12 @@ import apijson.orm.AbstractParser;
 import apijson.orm.AbstractSQLConfig;
 import apijson.orm.Parser;
 //import apijson.surrealdb.SurrealDBUtil;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.framework.ColumnUtil;
-import apijson.framework.APIJSONSQLConfig;
+import apijson.fastjson2.APIJSONSQLConfig;
 import apijson.orm.Join;
 import apijson.orm.Join.On;
 //import org.influxdb.InfluxDB;
@@ -47,7 +47,7 @@ import apijson.orm.Join.On;
  * https://github.com/Tencent/APIJSON/blob/master/%E8%AF%A6%E7%BB%86%E7%9A%84%E8%AF%B4%E6%98%8E%E6%96%87%E6%A1%A3.md#c-1-1%E4%BF%AE%E6%94%B9%E6%95%B0%E6%8D%AE%E5%BA%93%E9%93%BE%E6%8E%A5
  * @author Lemon
  */
-public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray> {
+public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 	public DemoSQLConfig() {
 		super();
@@ -73,10 +73,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray>
 		//		TABLE_KEY_MAP.put(Privacy.class.getSimpleName(), "apijson_privacy");
 
 		// 主键名映射
-		SIMPLE_CALLBACK = new SimpleCallback<Long, JSONObject, JSONArray>() {
+		SIMPLE_CALLBACK = new SimpleCallback<Long>() {
 
 			@Override
-			public AbstractSQLConfig<Long, JSONObject, JSONArray> getSQLConfig(RequestMethod method, String database, String schema, String datasource, String table) {
+			public AbstractSQLConfig<Long, JSONObject, JSONArray> getSQLConfig(
+					RequestMethod method, String database, String schema, String datasource, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
@@ -101,7 +102,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long, JSONObject, JSONArray>
 			//			}
 
 			//			@Override
-			//			public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
+			//			public void onMissingKey4Combine(String name, JSONMap request, String combine, String item, String key) throws Exception {
 			////				super.onMissingKey4Combine(name, request, combine, item, key);
 			//			}
 		};

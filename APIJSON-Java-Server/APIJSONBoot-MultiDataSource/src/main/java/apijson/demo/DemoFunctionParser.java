@@ -16,20 +16,20 @@ package apijson.demo;
 
 import java.util.*;
 
-import jakarta.servlet.http.HttpSession;
-
-import apijson.orm.script.JavaScriptExecutor;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import apijson.JSONResponse;
 import apijson.NotNull;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.framework.APIJSONFunctionParser;
+import apijson.fastjson2.JSON;
+import apijson.fastjson2.JSONRequest;
+import apijson.fastjson2.JSONResponse;
+import jakarta.servlet.http.HttpSession;
+
+import apijson.orm.script.JavaScriptExecutor;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
+
+import apijson.fastjson2.APIJSONFunctionParser;
 import apijson.orm.AbstractVerifier;
-import apijson.orm.JSONRequest;
 import apijson.orm.Visitor;
 
 
@@ -37,11 +37,11 @@ import apijson.orm.Visitor;
  * 具体见 https://github.com/Tencent/APIJSON/issues/101
  * @author Lemon
  */
-public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, JSONArray> {
+public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 	public static final String TAG = "DemoFunctionParser";
 
 	static {
-		SCRIPT_EXECUTOR_MAP.put("js", new JavaScriptExecutor());
+		SCRIPT_EXECUTOR_MAP.put("js", new JavaScriptExecutor<Long, JSONObject, JSONArray>());
 	}
 
 	public DemoFunctionParser() {
@@ -100,13 +100,6 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 		}
 	}
 
-	@Override
-	public boolean isContain(JSONObject curObj, String array, String value) {
-		List<String> list = apijson.JSON.parseArray(getArgStr(array), String.class);
-		Object val = getArgVal(value);
-		return list != null && list.contains(val == null ? null : String.valueOf(val));
-	}
-
 	/**
 	 * @param curObj
 	 * @param urlList
@@ -148,10 +141,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 			return 0;
 		}
 
-		JSONObject request = new JSONObject(true);
+		JSONObject request = JSON.newJSONObject();
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONObject comment = new JSONObject(true);
+		JSONObject comment = JSON.newJSONObject();
 		comment.put("momentId", mid);
 
 		request.put("Comment", comment);
@@ -177,10 +170,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 
 		//递归获取到全部子评论id
 
-		JSONObject request = new JSONObject(true);
+		JSONObject request = JSON.newJSONObject();
 
 		//Comment<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-		JSONObject comment = new JSONObject();
+		JSONObject comment = JSON.newJSONObject();;
 		comment.put("id{}", getChildCommentIdList(tid));
 
 		request.put("Comment", comment);
@@ -196,7 +189,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 	private JSONArray getChildCommentIdList(long tid) {
 		JSONArray arr = new JSONArray();
 
-		JSONObject request = apijson.JSON.createJSONObject();
+		JSONObject request = JSON.newJSONObject();
 
 		//Comment-id[]<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 		JSONRequest idItem = new JSONRequest();
@@ -205,10 +198,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 		JSONRequest comment = new JSONRequest();
 		comment.put("toId", tid);
 		comment.setColumn("id");
-		idItem.put("Comment", apijson.JSON.createJSONObject(comment));
+		idItem.put("Comment", JSON.newJSONObject(comment));
 		//Comment>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-		request.putAll(apijson.JSON.createJSONObject(idItem.toArray(0, 0, "Comment-id")));
+		request.putAll(JSON.newJSONObject(idItem.toArray(0, 0, "Comment-id")));
 		//Comment-id[]>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 		JSONObject rp = new DemoParser().setNeedVerify(false).parseResponse(request);
@@ -217,10 +210,9 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 		if (a != null) {
 			arr.addAll(a);
 
-			JSONArray a2;
 			for (int i = 0; i < a.size(); i++) {
 
-				a2 = getChildCommentIdList(a.getLongValue(i));
+				JSONArray a2 = getChildCommentIdList(a.getLongValue(i));
 				if (a2 != null) {
 					arr.addAll(a2);
 				}
@@ -233,8 +225,7 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 
 	/**TODO 仅用来测试 "key-()":"getIdList()" 和 "key()":"getIdList()"
 	 * @param curObj
-	 * @return JSONArray 只能用JSONArray，用long[]会在SQLConfig解析崩溃
-	 * @throws Exception
+	 * @return JSONList 只能用JSONArray，用long[]会在SQLConfig解析崩溃
 	 */
 	public JSONArray getIdList(@NotNull JSONObject curObj) {
 		return new JSONArray(new ArrayList<Object>(Arrays.asList(12, 15, 301, 82001, 82002, 38710)));
@@ -256,10 +247,10 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 	}
 
 	// apijson-framework 5.4.0 以下取消注释，兼容 Function 表中 name = getMethodDefinition 的记录（或者删除这条记录，如果使用 UnitAuto，则版本要在 2.7.2 以下）
-	//		public String getMethodDefinition(JSONObject request) throws IllegalArgumentException, ClassNotFoundException, IOException {
+	//		public String getMethodDefinition(JSONMap request) throws IllegalArgumentException, ClassNotFoundException, IOException {
 	//			return super.getMethodDefination(request);
 	//		}
-	//		public String getMethodDefinition(JSONObject request, String method, String arguments, String type, String exceptions, String language) throws IllegalArgumentException, ClassNotFoundException, IOException {
+	//		public String getMethodDefinition(JSONMap request, String method, String arguments, String type, String exceptions, String language) throws IllegalArgumentException, ClassNotFoundException, IOException {
 	//			return super.getMethodDefination(request, method, arguments, type, exceptions, language);
 	//		}
 
@@ -279,52 +270,6 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long, JSONObject, 
 		if (StringUtil.isEmpty(rest)) {
 			throw new IllegalArgumentException(urlLike + "必须以包含有效 URL 字符！");
 		}
-	}
-
-	// 必须重写以下方法，否则启动自检报错方法不存在
-	@Override
-	public int countArray(JSONObject curObj, String array) {
-		return super.countArray(curObj, array);
-	}
-
-	@Override
-	public int countObject(JSONObject curObj, String object) {
-		return super.countObject(curObj, object);
-	}
-
-	@Override
-	public boolean isContainKey(JSONObject curObj, String object, String key) {
-		return super.isContainKey(curObj, object, key);
-	}
-
-	@Override
-	public boolean isContainValue(JSONObject curObj, String object, String value) {
-		return super.isContainValue(curObj, object, value);
-	}
-
-	@Override
-	public Object getFromArray(JSONObject curObj, String array, String position) {
-		return super.getFromArray(curObj, array, position);
-	}
-
-	@Override
-	public Object getFromObject(JSONObject curObj, String object, String key) {
-		return super.getFromObject(curObj, object, key);
-	}
-
-	@Override
-	public JSONObject getFunctionDemo(JSONObject curObj) {
-		return super.getFunctionDemo(curObj);
-	}
-
-	@Override
-	public Object getWithDefault(JSONObject curObj, String value, String defaultValue) {
-		return super.getWithDefault(curObj, value, defaultValue);
-	}
-
-	@Override
-	public String getFunctionDetail(JSONObject curObj) {
-		return super.getFunctionDetail(curObj);
 	}
 
 }

@@ -14,11 +14,12 @@ limitations under the License.*/
 
 package apijson.boot;
 
-import apijson.framework.APIJSONController;
-import apijson.framework.APIJSONParser;
+import apijson.fastjson2.APIJSONController;
+import apijson.fastjson2.APIJSONParser;
+import apijson.fastjson2.JSONRequest;
 import apijson.orm.exception.*;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.databind.util.LRUMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,8 +46,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-import apijson.JSON;
-import apijson.JSONResponse;
+import apijson.fastjson2.JSON;
+import apijson.fastjson2.JSONResponse;
 import apijson.Log;
 import apijson.RequestMethod;
 import apijson.StringUtil;
@@ -59,11 +60,9 @@ import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
 import apijson.demo.model.Verify;
 import apijson.framework.BaseModel;
-import apijson.orm.JSONRequest;
 import unitauto.MethodUtil;
 
 import static apijson.JSON.getString;
-import static apijson.JSON.parseJSON;
 import static apijson.RequestMethod.DELETE;
 import static apijson.RequestMethod.GET;
 import static apijson.RequestMethod.GETS;
@@ -97,7 +96,7 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @Service
 @RestController
 @RequestMapping("")
-public class DemoController extends APIJSONController<Long, JSONObject, JSONArray> {
+public class DemoController extends APIJSONController<Long> {
     private static final String TAG = "DemoController";
 
     public String getRequestBaseURL() {
@@ -131,9 +130,10 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
     }
 
       @Override
-      public APIJSONParser<Long, JSONObject, JSONArray> newParser(HttpSession session, RequestMethod method) {
+      public APIJSONParser<Long> newParser(HttpSession session, RequestMethod method) {
           return super.newParser(session, method).setNeedVerify(false);
       }
+
 
     /**增删改查统一的类 RESTful API 入口，牺牲一点路由解析性能来提升一些开发效率
      * @param method
@@ -537,16 +537,16 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             phone = requestObject.getString(PHONE);
             verify = requestObject.getString(VERIFY);
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
 
         JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));
         response = response.getJSONResponse(VERIFY_);
         if (JSONResponse.isExist(response) == false) {
-            return new DemoParser().extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
+            return extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
         }
 
-        JSONObject result = new DemoParser().newSuccessResult();
+        JSONObject result = newSuccessResult();
 
         boolean reloadAll = StringUtil.isEmpty(type, true) || "ALL".equals(type);
 
@@ -555,7 +555,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 result.put(ACCESS_, DemoVerifier.initAccess(false, null, value));
             } catch (ServerException e) {
                 e.printStackTrace();
-                result.put(ACCESS_, new DemoParser().newErrorResult(e));
+                result.put(ACCESS_, newErrorResult(e));
             }
         }
 
@@ -564,7 +564,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 result.put(FUNCTION_, DemoFunctionParser.init(false, null, value));
             } catch (ServerException e) {
                 e.printStackTrace();
-                result.put(FUNCTION_, new DemoParser().newErrorResult(e));
+                result.put(FUNCTION_, newErrorResult(e));
             }
         }
 
@@ -573,7 +573,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 result.put(REQUEST_, DemoVerifier.initRequest(false, null, value));
             } catch (ServerException e) {
                 e.printStackTrace();
-                result.put(REQUEST_, new DemoParser().newErrorResult(e));
+                result.put(REQUEST_, newErrorResult(e));
             }
         }
 
@@ -600,10 +600,10 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
 
-        new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone, null));
+        new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone));
 
         JSONObject response = new DemoParser(POST, false).parseResponse(
                 newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
@@ -611,7 +611,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
 
         if (JSONResponse.isSuccess(response) == false) {
-            new DemoParser(DELETE, false).parseResponse((JSONObject) JSON.parseObject(new Verify(type, phone)));
+            new DemoParser(DELETE, false).parseResponse(newVerifyRequest(type, phone));
             return response;
         }
 
@@ -642,9 +642,9 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
-        return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone, null));
+        return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone));
     }
 
     /**校验验证码
@@ -670,7 +670,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             phone = requestObject.getString(PHONE);
             verify = requestObject.getString(VERIFY);
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
         return headVerify(type, phone, verify);
     }
@@ -683,17 +683,14 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
      * @return
      */
     public JSONObject headVerify(int type, String phone, String code) {
-        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(
+        JSONResponse response = new JSONResponse(
                 new DemoParser(GETS, false).parseResponse(
-                        (JSONObject) JSON.createJSONObject(new JSONRequest(
-                                new Verify(type, phone)
-                                        .setVerify(code)
-                        ).setTag(VERIFY_))
+                        newVerifyRequest(type, phone, code)
                 )
         );
         Verify verify = response.getObject(Verify.class);
         if (verify == null) {
-            return new DemoParser().newErrorResult(StringUtil.isEmpty(code, true)
+            return newErrorResult(StringUtil.isEmpty(code, true)
                     ? new NotExistException("验证码不存在！") : new ConditionErrorException("手机号或验证码错误！"));
         }
 
@@ -702,37 +699,38 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
         long now = System.currentTimeMillis();
         if (now > 60*1000 + time) {
             new DemoParser(DELETE, false).parseResponse(
-                    (JSONObject) JSON.createJSONObject(
-                            new JSONRequest(
-                                new JSONRequest(new Verify(type, phone)).setTag(VERIFY_)
-                            )
-                    )
+                    newVerifyRequest(type, phone)
             );
-            return new DemoParser().newErrorResult(new TimeoutException("验证码已过期！"));
+            return newErrorResult(new TimeoutException("验证码已过期！"));
         }
 
-        return new JSONResponse<JSONObject, JSONArray>(
+        return new JSONResponse(
                 new DemoParser(HEADS, false).parseResponse(
-                        (JSONObject) JSON.createJSONObject(new JSONRequest(
-                            new JSONRequest(new Verify(type, phone).setVerify(code)).setFormat(true)
-                        )
+                        newVerifyRequest(type, phone, code)
                 )
-        )).toObject(JSONObject.class);
+        );
     }
 
 
 
     /**新建一个验证码请求
      * @param phone
+     * @param phone
+     * @return
+     */
+    public static JSONObject newVerifyRequest(int type, String phone) {
+        return newVerifyRequest(type, phone, null);
+    }
+    /**新建一个验证码请求
+     * @param type
+     * @param phone
      * @param verify
      * @return
      */
-    private JSONObject newVerifyRequest(int type, String phone, String verify) {
-        return JSON.createJSONObject(
-                new JSONRequest(
+    public static JSONObject newVerifyRequest(int type, String phone, String verify) {
+        return new JSONRequest(
                         new Verify(type, phone).setVerify(verify)
-                ).setTag(VERIFY_).setFormat(true)
-        );
+                ).setTag(VERIFY_).setFormat(true);
     }
 
 
@@ -798,33 +796,29 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             requestObject.remove(REMEMBER);
             requestObject.remove(DEFAULTS);
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
 
 
         //手机号是否已注册
         JSONObject phoneResponse = new DemoParser(HEADS, false).parseResponse(
-                (JSONObject) JSON.createJSONObject(
-                        new JSONRequest(new Privacy().setPhone(phone))
-                )
+                new JSONRequest(new Privacy().setPhone(phone))
         );
         if (JSONResponse.isSuccess(phoneResponse) == false) {
-            return new DemoParser().newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), getString(phoneResponse, JSONResponse.KEY_MSG));
+            return newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), getString(phoneResponse, JSONResponse.KEY_MSG));
         }
-        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<JSONObject, JSONArray>(phoneResponse).getJSONResponse(PRIVACY_);
+        JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
         if(JSONResponse.isExist(response) == false) {
-            return new DemoParser().newErrorResult(new NotExistException("手机号未注册"));
+            return newErrorResult(new NotExistException("手机号未注册"));
         }
 
         //根据phone获取User
         JSONObject privacyResponse = new DemoParser(GETS, false).parseResponse(
-                (JSONObject) JSON.createJSONObject(
-                    new JSONRequest(
-                            new Privacy().setPhone(phone)
-                    ).setFormat(true)
-                )
+                new JSONRequest(
+                        new Privacy().setPhone(phone)
+                ).setFormat(true)
         );
-        response = new JSONResponse<>(privacyResponse);
+        response = new JSONResponse(privacyResponse);
 
         Privacy privacy = response == null ? null : response.getObject(Privacy.class);
         long userId = privacy == null ? 0 : BaseModel.value(privacy.getId());
@@ -834,39 +828,34 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
         //校验凭证
         if (isPassword) { //password 密码登录
-            response = new JSONResponse<>(
+            response = new JSONResponse(
                     new DemoParser(HEADS, false).parseResponse(
-                            (JSONObject) JSON.createJSONObject(
-                                new JSONRequest(new Privacy(userId).setPassword(password))
-                            )
+                            new JSONRequest(new Privacy(userId).setPassword(password))
                     )
             );
         } else {//verify手机验证码登录
-            response = new JSONResponse<>(headVerify(Verify.TYPE_LOGIN, phone, password));
+            response = new JSONResponse(headVerify(Verify.TYPE_LOGIN, phone, password));
         }
         if (JSONResponse.isSuccess(response) == false) {
             return response.toObject(JSONObject.class);
         }
         response = response.getJSONResponse(isPassword ? PRIVACY_ : VERIFY_);
         if (JSONResponse.isExist(response) == false) {
-            return new DemoParser().newErrorResult(new ConditionErrorException("账号或密码错误"));
+            return newErrorResult(new ConditionErrorException("账号或密码错误"));
         }
 
-        response = new JSONResponse<>(
+        response = new JSONResponse(
                 new DemoParser(GETS, false).parseResponse(
-                        (JSONObject) JSON.createJSONObject(
                             new JSONRequest(  // 兼容 MySQL 5.6 及以下等不支持 json 类型的数据库
                                     USER_,  // User 里在 setContactIdList(List<Long>) 后加 setContactIdList(String) 没用
-                                    new apijson.JSONObject(  // fastjson 查到一个就不继续了，所以只能加到前面或者只有这一个，但这样反过来不兼容 5.7+
-                                            new User(userId)  // 所以就用 @json 来强制转为 JSONArray，保证有效
-                                    ).setJson("contactIdList,pictureList")
-                            ).setFormat(true)
-                        )
+                                    JSONRequest.setJson(JSON.parseObject(new User(userId)),"contactIdList,pictureList")
+                            )
+                            .setFormat(true)
                 )
         );
         User user = response.getObject(User.class);
         if (user == null || BaseModel.value(user.getId()) != userId) {
-            return new DemoParser().newErrorResult(new NullPointerException("服务器内部错误"));
+            return newErrorResult(new NullPointerException("服务器内部错误"));
         }
 
         //登录状态保存至session
@@ -881,7 +870,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
         response.put(REMEMBER, remember);
         response.put(DEFAULTS, defaults);
-        return JSON.createJSONObject(response);
+        return response;
     }
 
     /**退出登录，清空session
@@ -891,7 +880,9 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
     @PostMapping("logout")
     @Override
     public JSONObject logout(HttpSession session) {
-        SESSION_MAP.remove(session.getId());
+        if (session != null) {
+            SESSION_MAP.remove(session.getId());
+        }
 
         Long userId;
         try {
@@ -899,11 +890,11 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             Log.d(TAG, "logout  userId = " + userId + "; session.getId() = " + (session == null ? null : session.getId()));
             super.logout(session);
         } catch (Exception e) {
-            return new DemoParser().newErrorResult(e);
+            return newErrorResult(e);
         }
 
-        JSONObject result = new DemoParser().newSuccessResult();
-        JSONObject user = new DemoParser().newSuccessResult();
+        JSONObject result = newSuccessResult();
+        JSONObject user = newSuccessResult();
         user.put(ID, userId);
         user.put(COUNT, 1);
         result.put(StringUtil.firstCase(USER_), user);
@@ -957,17 +948,17 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 return newIllegalArgumentResult(requestObject, VERIFY);
             }
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
 
 
-        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(headVerify(Verify.TYPE_REGISTER, phone, verify));
+        JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_REGISTER, phone, verify));
         if (JSONResponse.isSuccess(response) == false) {
-            return JSON.createJSONObject(response);
+            return response;
         }
         //手机号或验证码错误
         if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-            return new DemoParser().extendErrorResult(JSON.createJSONObject(response), new ConditionErrorException("手机号或验证码错误！"));
+            return extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
         }
 
 
@@ -993,14 +984,14 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
         if (e != null) { //出现错误，回退
             new DemoParser(DELETE, false).parseResponse(
-                    (JSONObject) apijson.JSON.parseObject(new User(userId))
+                    new JSONRequest(new User(userId))
             );
             new DemoParser(DELETE, false).parseResponse(
-                    (JSONObject) apijson.JSON.parseObject(new Privacy(userId2))
+                    new JSONRequest(new Privacy(userId2))
             );
         }
 
-        return JSON.createJSONObject(response);
+        return response;
     }
 
 
@@ -1087,16 +1078,16 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 }
             }
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
 
 
         if (StringUtil.isPassword(oldPassword)) {
             if (userId <= 0) { //手机号+验证码不需要userId
-                return new DemoParser().extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！"));
+                return extendErrorResult(requestObject, new IllegalArgumentException(ID + ":value 中value不合法！"));
             }
             if (oldPassword.equals(password)) {
-                return new DemoParser().extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！"));
+                return extendErrorResult(requestObject, new ConflictException("新旧密码不能一样！"));
             }
 
             //验证旧密码
@@ -1108,24 +1099,24 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             }
             JSONResponse response = new JSONResponse(
                     new DemoParser(HEAD, false).parseResponse(
-                            (JSONObject) JSON.createJSONObject(new JSONRequest(privacy).setFormat(true))
+                            new JSONRequest(privacy).setFormat(true)
                     )
             );
             if (JSONResponse.isExist(response.getJSONResponse(PRIVACY_)) == false) {
-                return new DemoParser().extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！"));
+                return extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！"));
             }
         }
         else if (StringUtil.isPhone(phone) && StringUtil.isVerify(verify)) {
-            JSONResponse<JSONObject, JSONArray> response = new JSONResponse(headVerify(type, phone, verify));
+            JSONResponse response = new JSONResponse(headVerify(type, phone, verify));
             if (JSONResponse.isSuccess(response) == false) {
-                return JSON.createJSONObject(response);
+                return response;
             }
             if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-                return new DemoParser().extendErrorResult(JSON.createJSONObject(response), new ConditionErrorException("手机号或验证码错误！"));
+                return extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
             }
-            response = new JSONResponse<>(
+            response = new JSONResponse(
                     new DemoParser(GET, false).parseResponse(
-                            (JSONObject) JSON.parseObject(
+                            new JSONRequest(
                                     new Privacy().setPhone(phone)
                             )
                     )
@@ -1137,7 +1128,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
             requestObject.put(PRIVACY_, privacyObj);
         } else {
-            return new DemoParser().extendErrorResult(requestObject, new IllegalArgumentException("请输入合法的 旧密码 或 手机号+验证码 ！"));
+            return extendErrorResult(requestObject, new IllegalArgumentException("请输入合法的 旧密码 或 手机号+验证码 ！"));
         }
         //TODO 上线版加上   password = MD5Util.MD5(password);
 
@@ -1191,20 +1182,20 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 throw new IllegalArgumentException(PRIVACY_ + "." + _PAY_PASSWORD + ":value 中value不合法！");
             }
         } catch (Exception e) {
-            return new DemoParser().extendErrorResult(requestObject, e);
+            return extendErrorResult(requestObject, e);
         }
 
         //验证密码<<<<<<<<<<<<<<<<<<<<<<<
 
         privacyObj.remove("balance+");
-        JSONResponse<JSONObject, JSONArray> response = new JSONResponse<>(
+        JSONResponse response = new JSONResponse(
                 new DemoParser(HEADS, false).setSession(session).parseResponse(
-                        (JSONObject) JSON.createJSONObject(PRIVACY_, privacyObj)
+                        new JSONRequest(PRIVACY_, privacyObj)
                 )
         );
         response = response.getJSONResponse(PRIVACY_);
         if (JSONResponse.isExist(response) == false) {
-            return new DemoParser().extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！"));
+            return extendErrorResult(requestObject, new ConditionErrorException("支付密码错误！"));
         }
 
         //验证密码>>>>>>>>>>>>>>>>>>>>>>>>
@@ -1213,30 +1204,28 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
         //验证金额范围<<<<<<<<<<<<<<<<<<<<<<<
 
         if (change == 0) {
-            return new DemoParser().extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！"));
+            return extendErrorResult(requestObject, new OutOfRangeException("balance+的值不能为0！"));
         }
         if (Math.abs(change) > 10000) {
-            return new DemoParser().extendErrorResult(requestObject, new OutOfRangeException("单次 充值/提现 的金额不能超过10000元！"));
+            return extendErrorResult(requestObject, new OutOfRangeException("单次 充值/提现 的金额不能超过10000元！"));
         }
 
         //验证金额范围>>>>>>>>>>>>>>>>>>>>>>>>
 
         if (change < 0) {//提现
-            response = new JSONResponse<>(
+            response = new JSONResponse(
                     new DemoParser(GETS, false).parseResponse(
-                            (JSONObject) JSON.parseObject(
-                                    new Privacy(userId)
-                            )
+                            new JSONRequest(new Privacy(userId))
                     )
             );
             Privacy privacy = response.getObject(Privacy.class);
             long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
             if (id != userId) {
-                return new DemoParser().extendErrorResult(requestObject, new Exception("服务器内部错误！"));
+                return extendErrorResult(requestObject, new Exception("服务器内部错误！"));
             }
 
             if (BaseModel.value(privacy.getBalance()) < -change) {
-                return new DemoParser().extendErrorResult(requestObject, new OutOfRangeException("余额不足！"));
+                return extendErrorResult(requestObject, new OutOfRangeException("余额不足！"));
             }
         }
 
@@ -1314,7 +1303,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             HttpMethod method, HttpSession session
     ) {
         if (Log.DEBUG == false) {
-            return new DemoParser().newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")).toJSONString();
+            return JSON.toJSONString(newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")));
         }
 
         int recordType = record != null ? record : (REQUEST_RECORD_TYPE != null ? REQUEST_RECORD_TYPE : 0);
@@ -1333,7 +1322,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
             JSONObject obj = JSON.parseObject(body);
             if (obj == null) {
-                obj = new JSONObject(true);
+                obj = JSON.newJSONObject();
             }
             if (obj.get("endpoint") == null) {
                 endpoint = index < 0 ? endpoint : endpoint.substring(0, index);
@@ -1434,7 +1423,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                                 hm.put(name, h);
 
                                 try {
-                                    JSON.parseJSON(h);
+                                    JSON.parse(h);
                                 } catch (Throwable e) {
                                     Log.e(TAG, "delegate  try {\n" +
                                             "                                parseJSON(h);\n" +
@@ -1476,7 +1465,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                                 hm.put(name, h);
 
                                 try {
-                                    parseJSON(h);
+                                    JSON.parse(h);
                                 }
                                 catch (Throwable e) {
                                     Log.e(TAG, "delegate  try {\n" +
@@ -1587,7 +1576,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 //                String[] lines = sql.split(" \\? "); // StringUtil.split(sql, " \\? ", false);
 //                int len = lines == null ? 0 : lines.length;
 //                if (len > 0) {
-//                    JSONArray args = req.getJSONArray("args");
+//                    JSONList args = req.getJSONArray("args");
 //                    Set<String> set = hm.keySet();
 //                    Iterator<String> iterator = set.iterator();
 //
@@ -1647,11 +1636,11 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                     sql = newSql.trim();
                 }
 
-                JSONObject existReq = new JSONObject(true);
+                JSONObject existReq = JSON.newJSONObject();
                 if (isUnit) {
                     if (req != null) {
                         // Method <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        apijson.JSONRequest mthd = new apijson.JSONRequest();
+                        JSONRequest mthd = new JSONRequest();
                         if (recordType > 0) {
                             mthd.setColumn("id");
                         }
@@ -1666,13 +1655,13 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                         mthd.put(MethodUtil.KEY_METHOD, req.getString(MethodUtil.KEY_METHOD));
                         mthd.put(MethodUtil.KEY_METHOD_ARGS, req.getString(MethodUtil.KEY_METHOD_ARGS));
                         // mthd.put("header", StringUtil.isEmpty(hs, true) ? null : hs.trim());
-                        existReq.put("Method", JSON.createJSONObject(mthd));
+                        existReq.put("Method", mthd);
                         // Method >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
                 }
                 else {
                     // Document <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    apijson.JSONRequest document = new apijson.JSONRequest();
+                    JSONRequest document = new JSONRequest();
                     if (recordType > 0) {
                         document.setColumn("id");
                     }
@@ -1683,22 +1672,22 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                     if (isSQL) {
                         document.put("sqlauto", sql);
                     }
-                    existReq.put("Document", JSON.createJSONObject(document));
+                    existReq.put("Document", document);
                     // Document >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 }
 
                 JSONObject existRsp = newParser(session, GET).parseResponse(existReq);
-                JSONResponse<JSONObject, JSONArray> existRsp2 = new JSONResponse<JSONObject, JSONArray>(existRsp).getJSONResponse("Document");
+                JSONResponse existRsp2 = new JSONResponse(existRsp).getJSONResponse("Document");
                 long documentId = existRsp2 == null ? 0 : existRsp2.getId();
 
                 JSONRequest request = new JSONRequest();
-                apijson.JSONRequest testRecord = new apijson.JSONRequest();
+                JSONRequest testRecord = new JSONRequest();
 
                 if (documentId <= 0) {
                     if (isUnit) {
                         request.setTag("Method");
                         // Method <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        apijson.JSONRequest mthd = new apijson.JSONRequest();
+                        JSONRequest mthd = new JSONRequest();
                         mthd.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         mthd.put("language", req.getString("language"));
                         mthd.put(MethodUtil.KEY_UI, req.getInteger(MethodUtil.KEY_UI));
@@ -1713,13 +1702,13 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                         mthd.put(MethodUtil.KEY_METHOD_ARGS, req.getString(MethodUtil.KEY_METHOD_ARGS));
                         mthd.put("genericMethodArgs", req.getString(MethodUtil.KEY_METHOD_ARGS));
                         mthd.put("request", body);
-                        request.put("Method", JSON.createJSONObject(mthd));
+                        request.put("Method", mthd);
                         // Method >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
                     else if (recordType > 0) {
                         request.setTag("Document");
                         // Document <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                        JSONObject document = new JSONObject(true);
+                        JSONObject document = JSON.newJSONObject();
                         document.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         document.put("name", "[Record] " + new java.util.Date().toLocaleString());
                         document.put("type", reqType);
@@ -1728,7 +1717,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                         document.put("request", isSQL ? "{}" : (isBodyEmpty ? JSON.toJSONString(map) : body));
                         if (isSQL) {
                             // 没有名称，除非 args 传对象而不是数组
-                            // JSONArray args = req.getJSONArray("args");
+                            // JSONList args = req.getJSONArray("args");
                             // String argStr = "";
                             // if (args != null) {
                             //    for (int i = 0; i < args.size(); i++) {
@@ -1740,7 +1729,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                             document.put("sqlauto", sql);
                         }
                         // document.put("detail", "");
-                        request.put("Document", JSON.createJSONObject(document));
+                        request.put("Document", document);
                         // Document >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                     }
                     else {
@@ -1752,7 +1741,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                     Map<String, ?> m = isSQL ? null : (isBodyEmpty ? map : JSON.parseObject(body));
                     String config = isSQL ? hs : parseRandomConfig("", m);
 
-                    JSONObject random = new JSONObject(true);
+                    JSONObject random = JSON.newJSONObject();
                     random.put("count", 1);
                     random.put("documentId", documentId);
                     random.put("config", config.trim());
@@ -1762,7 +1751,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                         random.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         random.put("name", "[Record] " + new java.util.Date().toLocaleString());
 
-                        request.put("Random", JSON.createJSONObject(random));
+                        request.put("Random", random);
                         request.setTag("Random");
                     } else {
                         //  testRecord.setColumn("id,response,header");
@@ -1775,7 +1764,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                         }
                         else {
                             try {
-                                Object reqObj = parseJSON(reqStr);
+                                Object reqObj = JSON.parse(reqStr);
                                 isDefault = Objects.equals(reqObj, req);
                             }
                             catch (Throwable e) {
@@ -1790,7 +1779,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                         else {
                             long randomId = 0;
                             try {
-                                JSONObject randomReq = new JSONObject(true);
+                                JSONObject randomReq = JSON.newJSONObject();
                                 randomReq.put("Random", random);
 
                                 JSONObject rsp = newParser(session, GET).parseResponse(randomReq);
@@ -1798,7 +1787,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                                 randomId = rsp2 == null ? 0 : rsp2.getLongValue("id");
                             }
                             catch (Throwable e) {
-                                Log.w(TAG, "delegate  try { apijson.JSONRequest randomReq = new apijson.JSONRequest(); ..." +
+                                Log.w(TAG, "delegate  try { JSONMap randomReq = JSON.newJSONObject(); ..." +
                                         " } catch (Throwable e) = " + e.getMessage());
                             }
 
@@ -1817,13 +1806,11 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 else {   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     testRecord.put("from", 2); // 0-接口工具，1-CI/CD，2-流量录制
                     testRecord.put("host", host);
-                    testRecord.put("response", rspBody); // 用 JSONRequest.put 会转为 JSONObject
+                    testRecord.put("response", rspBody); // 用 JSONRequest.put 会转为 JSONMap
                 }   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-                request.put("TestRecord", JSON.createJSONObject(testRecord));
-                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST).parseResponse(
-                        (JSONObject) JSON.createJSONObject(request)
-                );
+                request.put("TestRecord", testRecord);
+                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST).parseResponse(request);
                 if (recordType < 0) {
                     JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("TestRecord");
                     String response = rsp2 == null ? null : rsp2.getString("response");
@@ -1944,7 +1931,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
             Map m = (Map) obj;
             Set<? extends Entry<?, ?>> s = m == null ? null : m.entrySet();
             if (s != null) {
-                //  TODO APIAuto 得先支持空 key        config += "\n" + path + ": {}"; // 避免默认 JSON 中这个数组为 null 导致后面生成的是 JSONArray
+                //  TODO APIAuto 得先支持空 key        config += "\n" + path + ": {}"; // 避免默认 JSON 中这个数组为 null 导致后面生成的是 JSONList
 
                 for (Entry<?, ?> e : s) {
                     Object k = e == null ? null : e.getKey();
@@ -1962,7 +1949,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
         if (obj instanceof Collection) {
             Collection c = (Collection) obj;
             if (c != null) {
-                config += "\n" + path + ": []"; // 避免默认 JSON 中这个数组为 null 导致后面生成的是 JSONObject
+                config += "\n" + path + ": []"; // 避免默认 JSON 中这个数组为 null 导致后面生成的是 JSONMap
 
                 int i = -1;
                 for (Object v : c) {
@@ -1977,7 +1964,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
         if (obj instanceof Array) {
             Array a = (Array) obj;
             if (a != null) {
-                config += "\n" + path + ": []"; // 避免默认 JSON 中这个数组为 null 导致后面生成的是 JSONObject
+                config += "\n" + path + ": []"; // 避免默认 JSON 中这个数组为 null 导致后面生成的是 JSONMap
 
                 int len = Array.getLength(a);
                 for (int i = 0; i < len; i++) {
@@ -2012,7 +1999,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
     public String execute(@RequestBody String request, HttpSession session) {
         try {
             if (Log.DEBUG == false) {
-                return new DemoParser().newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /sql/execute ！")).toJSONString();
+                return JSON.toJSONString(newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许调用 /sql/execute ！")));
             }
 
 //            DemoVerifier.verifyLogin(session);
@@ -2152,7 +2139,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                     while (rs != null && rs.next()) {
                         cursorDuration += System.currentTimeMillis() - cursorStartTime;
 
-                        JSONObject obj = new JSONObject(true);
+                        JSONObject obj = JSON.newJSONObject();
                         for (int i = 1; i <= length; i++) {
                             long sqlStartTime = System.currentTimeMillis();
                             String name = rsmd.getColumnName(i);  // rsmd.getColumnLable(i);
@@ -2172,7 +2159,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                     //        }
                 }
 
-                JSONObject result = new DemoParser().newSuccessResult();
+                JSONObject result = newSuccessResult();
                 result.put("sql", sql);
                 result.put("args", arg);
                 if (isWrite) {
@@ -2190,7 +2177,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
 
                 return result.toJSONString();
             } catch (Exception e) {
-                JSONObject result = new DemoParser().newErrorResult(e);
+                JSONObject result = newErrorResult(e);
                 result.put("throw", e.getClass().getName());
                 result.put("trace:stack", e.getStackTrace());
 
@@ -2201,7 +2188,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
                 return result.toJSONString();
             }
         } catch (Exception e) {
-            JSONObject result = new DemoParser().newErrorResult(e);
+            JSONObject result = newErrorResult(e);
             result.put("throw", e.getClass().getName());
             result.put("trace:stack", e.getStackTrace());
             return result.toJSONString();
@@ -2677,7 +2664,7 @@ public class DemoController extends APIJSONController<Long, JSONObject, JSONArra
     // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  <<<<<<<<<<<<<<<<<<<<<<<<<<<
 
     //@PostMapping("method/list")
-    //public JSONObject listMethod(@RequestBody String request) {
+    //public JSONMap listMethod(@RequestBody String request) {
     //    return super.listMethod(request);
     //}
     //

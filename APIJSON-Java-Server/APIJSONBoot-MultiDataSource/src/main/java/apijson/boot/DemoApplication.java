@@ -14,14 +14,11 @@ limitations under the License.*/
 
 package apijson.boot;
 
-import apijson.JSONParser;
-import apijson.framework.*;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-import com.alibaba.fastjson.parser.Feature;
-import com.alibaba.fastjson.serializer.PropertyFilter;
-
+import apijson.fastjson2.APIJSONApplication;
+import apijson.fastjson2.APIJSONCreator;
+import apijson.fastjson2.APIJSONVerifier;
+import apijson.orm.AbstractParser;
+import apijson.orm.AbstractVerifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.server.WebServerFactoryCustomizer;
@@ -32,8 +29,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.lang.reflect.Modifier;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -47,11 +42,6 @@ import apijson.demo.DemoParser;
 import apijson.demo.DemoSQLConfig;
 import apijson.demo.DemoSQLExecutor;
 import apijson.demo.DemoVerifier;
-import apijson.orm.AbstractVerifier;
-import apijson.orm.FunctionParser;
-import apijson.orm.Parser;
-import apijson.orm.SQLConfig;
-import apijson.orm.SQLExecutor;
 import apijson.orm.Verifier;
 //import unitauto.MethodUtil;
 //import unitauto.MethodUtil.Argument;
@@ -92,7 +82,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
         //unitauto.Log.DEBUG = true;
         Log.DEBUG = true; // 是否开启调试模式（打印详细日志、返回详细调试信息等）
-        APIJSONParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
+        AbstractParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
         APIJSONVerifier.ENABLE_APIJSON_ROUTER = true; // 是否开启 接口路由 模式，支持简单接口转为 APIJSON JSON
         //APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
         //APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
@@ -122,7 +112,6 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         };
     }
 
-    private static final JSONParser<JSONObject, JSONArray> DEFAULT_JSON_PARSER;
     static {
         // 把以下需要用到的数据库驱动取消注释即可，如果这里没有可以自己新增
         //		try { //加载驱动程序
@@ -240,57 +229,8 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         COMPILE_MAP.put("EMAIL", StringUtil.PATTERN_EMAIL);
         COMPILE_MAP.put("ID_CARD", StringUtil.PATTERN_ID_CARD);
 
-        // 使用 fastjson
-        apijson.JSON.JSON_OBJECT_CLASS = JSONObject.class;
-        apijson.JSON.JSON_ARRAY_CLASS = JSONArray.class;
-
-        final Feature[] DEFAULT_FASTJSON_FEATURES = {Feature.OrderedField, Feature.UseBigDecimal};
-        apijson.JSON.DEFAULT_JSON_PARSER = DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
-
-            @Override
-            public JSONObject createJSONObject() {
-                return new JSONObject(true);
-            }
-
-            @Override
-            public JSONArray createJSONArray() {
-                return new JSONArray();
-            }
-
-            @Override
-            public String toJSONString(Object obj, boolean format) {
-                return obj == null || obj instanceof String ? (String) obj : JSON.toJSONString(obj);
-            }
-
-            @Override
-            public Object parseJSON(Object json) {
-                return JSON.parse(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
-            }
-
-            @Override
-            public JSONObject parseObject(Object json) {
-                return JSON.parseObject(toJSONString(json), DEFAULT_FASTJSON_FEATURES);
-            }
-
-            @Override
-            public <T> T parseObject(Object json, Class<T> clazz) {
-                return JSON.parseObject(toJSONString(json), clazz, DEFAULT_FASTJSON_FEATURES);
-            }
-
-            @Override
-            public JSONArray parseArray(Object json) {
-                return JSON.parseArray(toJSONString(json));
-            }
-
-            @Override
-            public <T> List<T> parseArray(Object json, Class<T> clazz) {
-                return JSON.parseArray(toJSONString(json), clazz);
-            }
-
-        };
-
         // 使用本项目的自定义处理类
-        APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long, JSONObject, JSONArray>() {
+        APIJSONApplication.DEFAULT_APIJSON_CREATOR = new APIJSONCreator<Long>() {
 
             @Override
             public DemoParser createParser() {

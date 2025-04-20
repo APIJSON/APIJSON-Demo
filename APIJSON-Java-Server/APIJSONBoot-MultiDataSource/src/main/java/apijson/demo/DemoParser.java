@@ -14,10 +14,9 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.JSONResponse;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,10 +27,8 @@ import apijson.RequestMethod;
 import apijson.StringUtil;
 import apijson.boot.DemoController;
 import apijson.demo.model.Privacy;
-import apijson.demo.model.User;
-import apijson.framework.APIJSONObjectParser;
-import apijson.framework.APIJSONParser;
-import apijson.framework.APIJSONVerifier;
+import apijson.fastjson2.APIJSONObjectParser;
+import apijson.fastjson2.APIJSONParser;
 import apijson.orm.SQLConfig;
 
 
@@ -39,7 +36,7 @@ import apijson.orm.SQLConfig;
  * 具体见 https://github.com/Tencent/APIJSON/issues/38
  * @author Lemon
  */
-public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
+public class DemoParser extends APIJSONParser<Long> {
 
     public static final Map<String, HttpSession> KEY_MAP;
     static {
@@ -56,13 +53,6 @@ public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
         super(method, needVerify);
     }
 
-    public static JSONObject parseRequest(String request) {
-        try {
-            return JSON.parseObject(request);
-        } catch (Exception e) {
-            return new DemoParser().newResult(JSONResponse.CODE_ILLEGAL_ARGUMENT, "JSON 格式不合法！" + request);
-        }
-    }
 
     @Override
     public DemoParser setNeedVerify(boolean needVerify) {
@@ -114,7 +104,7 @@ public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
 
 
     @Override
-    public APIJSONObjectParser<Long, JSONObject, JSONArray> createObjectParser(JSONObject request, String parentPath
+    public APIJSONObjectParser<Long> createObjectParser(JSONObject request, String parentPath
             , SQLConfig<Long, JSONObject, JSONArray> arrayConfig
             , boolean isSubquery, boolean isTable, boolean isArrayMainTable) throws Exception {
         return new DemoObjectParser(getSession(), request, parentPath, arrayConfig
@@ -126,7 +116,7 @@ public class DemoParser extends APIJSONParser<Long, JSONObject, JSONArray> {
     private String dbAccount;
     private String dbPassword;
     @Override
-    public APIJSONParser<Long, JSONObject, JSONArray> setSession(HttpSession session) {
+    public APIJSONParser<Long> setSession(HttpSession session) {
         Boolean asDBAccount = session == null ? null : (Boolean) session.getAttribute(DemoController.AS_DB_ACCOUNT);
         this.asDBAccount = asDBAccount != null && asDBAccount;
         if (this.asDBAccount) {

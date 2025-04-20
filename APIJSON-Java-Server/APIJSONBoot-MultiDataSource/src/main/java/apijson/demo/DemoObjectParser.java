@@ -14,8 +14,8 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
 import java.util.List;
 
@@ -23,7 +23,7 @@ import jakarta.servlet.http.HttpSession;
 
 import apijson.NotNull;
 import apijson.RequestMethod;
-import apijson.framework.APIJSONObjectParser;
+import apijson.fastjson2.APIJSONObjectParser;
 import apijson.orm.Join;
 import apijson.orm.SQLConfig;
 
@@ -31,7 +31,7 @@ import apijson.orm.SQLConfig;
 /**对象解析器，用来简化 Parser
  * @author Lemon
  */
-public class DemoObjectParser extends APIJSONObjectParser<Long, JSONObject, JSONArray> {
+public class DemoObjectParser extends APIJSONObjectParser<Long> {
 
     public DemoObjectParser(HttpSession session, @NotNull JSONObject request, String parentPath
             , SQLConfig<Long, JSONObject, JSONArray> arrayConfig

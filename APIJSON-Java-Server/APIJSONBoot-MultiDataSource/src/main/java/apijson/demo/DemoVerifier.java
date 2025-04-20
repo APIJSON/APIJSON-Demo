@@ -14,9 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.framework.APIJSONVerifier;
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
+import apijson.fastjson2.APIJSONVerifier;
 
 import java.util.regex.Pattern;
 
@@ -25,7 +23,7 @@ import java.util.regex.Pattern;
  * 具体见 https://github.com/Tencent/APIJSON/issues/12
  * @author Lemon
  */
-public class DemoVerifier extends APIJSONVerifier<Long, JSONObject, JSONArray> {
+public class DemoVerifier extends APIJSONVerifier<Long> {
 	public static final String TAG = "DemoVerifier";
 	
 	static { 
@@ -41,7 +39,7 @@ public class DemoVerifier extends APIJSONVerifier<Long, JSONObject, JSONArray> {
 
 	// 重写方法来自定义字段名等	
 	//	@Override
-	//	public String getVisitorIdKey(SQLConfig<Long, JSONObject, JSONArray> config) {
+	//	public String getVisitorIdKey(SQLConfig<Long, JSONMap, JSONList> config) {
 	//		return super.getVisitorIdKey(config);  // return "userid"; // return "uid" 等自定义的字段名
 	//	}
 
