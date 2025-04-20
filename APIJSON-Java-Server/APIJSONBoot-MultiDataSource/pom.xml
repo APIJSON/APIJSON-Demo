@@ -23,10 +23,15 @@
 
     <dependencies>
         <!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
+<!--        <dependency>-->
+<!--            <groupId>com.alibaba</groupId>-->
+<!--            <artifactId>fastjson</artifactId>-->
+<!--            <version>1.2.83</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>com.alibaba</groupId>
-            <artifactId>fastjson</artifactId>
-            <version>1.2.83</version>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>2.0.57</version>
         </dependency>
 
         <!-- apijson-framework 需要用的依赖库，6.0.0 以上 -->
@@ -59,18 +64,18 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>8.0.0.1</version>
+            <version>8.0.0.3</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.github.APIJSON</groupId>-->
-<!--            <artifactId>apijson-framework</artifactId>-->
-<!--            <version>7.2.0.1</version>-->
-<!--        </dependency>-->
-<!--        <dependency>-->
-<!--            <groupId>com.github.APIJSON</groupId>-->
-<!--            <artifactId>apijson-router</artifactId>-->
-<!--            <version>2.2.0.1</version>-->
-<!--        </dependency>-->
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-framework</artifactId>
+            <version>7.2.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.APIJSON</groupId>
+            <artifactId>apijson-fastjson2</artifactId>
+            <version>1.0.0.3</version>
+        </dependency>
 
 <!--        7.9.0 及以下需要依赖 apijson-column -->
 <!--        <dependency>-->
