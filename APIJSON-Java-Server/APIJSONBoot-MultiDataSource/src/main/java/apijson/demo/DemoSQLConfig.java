@@ -145,6 +145,32 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `url`", "");  // UnitAuto 获取分组
 		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `groupUrl`", "");  // UnitAuto 获取分组
 		RAW_MAP.put("(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END):groupUrl", "(CASE WHEN package LIKE '*%' THEN substr(package,2) ELSE package END) `groupUrl`");  // UnitAuto 获取分组
+
+		// 反选字段配置
+		Map<String, List<String>> tableColumnMap = new HashMap<>();
+		tableColumnMap.put("User", Arrays.asList(StringUtil.split("id,sex,name,tag,head,contactIdList,pictureList,date")));
+		// 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputColumn(column, getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
+		tableColumnMap.put("MYSQL-sys-Privacy", Arrays.asList(StringUtil.split("id,certified,phone,balance,_password,_payPassword")));
+		ColumnUtil.VERSIONED_TABLE_COLUMN_MAP.put(null, tableColumnMap);
+
+		// 字段名映射配置 <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+		Map<String, Map<String, String>> tableKeyColumnMap = new HashMap<>();
+
+		Map<String, String> userKeyColumnMap = new HashMap<>();
+		userKeyColumnMap.put("gender", "sex");
+		userKeyColumnMap.put("createTime", "date");
+		tableKeyColumnMap.put("User", userKeyColumnMap);
+
+		Map<String, String> privacyKeyColumnMap = new HashMap<>();
+		privacyKeyColumnMap.put("rest", "balance");
+		// 需要对应方法传参也是这样拼接才行，例如 ColumnUtil.compatInputKey(super.getKey(key), getSQLDatabase() + "-" + getSQLSchema() + "-" + getTable(), getMethod());
+		tableKeyColumnMap.put("MYSQL-sys-Privacy", privacyKeyColumnMap);
+
+		ColumnUtil.VERSIONED_KEY_COLUMN_MAP.put(null, tableKeyColumnMap);
+		// 字段名映射配置 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+		ColumnUtil.init();
+
 	}
 
 
