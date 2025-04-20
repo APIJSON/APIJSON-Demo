@@ -131,7 +131,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
         Log.d(TAG, "getConnection  config.getDatasource() = " + datasource);
 
         String key = datasource + "-" + config.getDatabase();
-        Connection c = connectionMap.get(key);
+        Connection c = getConnection(key);
         if (datasource != null && (c == null || c.isClosed())) {
             try {
                 DataSource ds;
@@ -160,7 +160,7 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
                         break;
                 }
 
-                connectionMap.put(key, ds == null ? null : ds.getConnection());
+                putConnection(key, ds == null ? null : ds.getConnection());
             } catch (Exception e) {
                 Log.e(TAG, "getConnection   try { "
                         + "DataSource ds = DemoApplication.getApplicationContext().getBean(DataSource.class); .."

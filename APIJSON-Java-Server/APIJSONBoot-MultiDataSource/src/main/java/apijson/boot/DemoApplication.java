@@ -86,7 +86,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
         AbstractParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
         APIJSONVerifier.ENABLE_APIJSON_ROUTER = true; // apijson-framework 已集成字段插件 apijson-router，是否开启 接口路由 模式，支持简单接口转为 APIJSON JSON
         //APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
-        APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = true; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
+        APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = false; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
         APIJSONApplication.init();
         System.out.println("\n\n<<<<<<<<< 本 Demo 在 resources/static 内置了 APIAuto，Chrome/Firefox 打开 http://localhost:8080 即可调试(端口号根据项目配置而定) ^_^ >>>>>>>>>\n");
     }

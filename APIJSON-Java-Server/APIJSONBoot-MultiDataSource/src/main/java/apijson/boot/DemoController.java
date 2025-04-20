@@ -704,10 +704,8 @@ public class DemoController extends APIJSONController<Long> {
             return newErrorResult(new TimeoutException("验证码已过期！"));
         }
 
-        return new JSONResponse(
-                new DemoParser(HEADS, false).parseResponse(
-                        newVerifyRequest(type, phone, code)
-                )
+        return new DemoParser(HEADS, false).parseResponse(
+                newVerifyRequest(type, phone, code)
         );
     }
 
@@ -960,8 +958,6 @@ public class DemoController extends APIJSONController<Long> {
         if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
             return extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
         }
-
-
 
         //生成User和Privacy
         if (StringUtil.isEmpty(requestObject.getString(JSONRequest.KEY_TAG), true)) {
