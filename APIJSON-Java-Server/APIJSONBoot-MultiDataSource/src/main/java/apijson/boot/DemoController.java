@@ -161,7 +161,7 @@ public class DemoController extends APIJSONController<Long> {
     @PostMapping(value = "crud")  // 直接 {method} 或 apijson/{method} 会和内置网页的路由有冲突
     // @Override
     public String crudAll(@RequestBody String request, HttpSession session) {
-        return newParser(session, RequestMethod.CRUD).parse(request);
+        return super.crudAll(request, session);
     }
     /**增删改查统一入口，这个一个方法可替代以下 7 个方法，牺牲一点路由解析性能来提升一些开发效率
      * @param method
