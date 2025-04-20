@@ -131,7 +131,7 @@ public class DemoController extends APIJSONController<Long> {
 
       @Override
       public APIJSONParser<Long> newParser(HttpSession session, RequestMethod method) {
-          return super.newParser(session, method).setNeedVerify(false);
+          return super.newParser(session, method); // .setNeedVerify(false);
       }
 
 
