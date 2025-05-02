@@ -743,14 +743,18 @@ fun(true, 1, 'a'..);
 
                 <div class="right-main" id="vHtml" v-show="view == 'html'"></div>
                 <div class="right-main" id="vMarkdown" v-show="view == 'markdown'"></div>
-                <div v-show="view == 'markdown'" style="bottom: -6px; text-align: right; position: absolute; width: 100%; padding: 4px 20px 0px 4px; background-color: white;">
-                    <input id="vSearch" v-model="search" style="min-width: 60px; display: inline-flex; text-align: center" @keyup="doOnKeyUp(event, 'document', true)" placeholder="搜索" />
-                    <button @click="pageDown('document')">上页 < </button>
-                    <input id="vPage"  v-model="page" style="width: 30px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'document', true)" placeholder="页码" />
-                    <button @click="pageUp('document')"> > 下页</button>
-                    <a >每页</a>
-                    <input id="vCount" v-model="count" style="width: 30px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'document', true)" placeholder="条数" />
-                    <a >条</a>
+                <div style="bottom: -6px; text-align: right; position: absolute; width: 100%; padding: 4px 20px 0px 4px; background-color: white;">
+<!--                <div style="float: right" >-->
+                        <input v-show="view == 'markdown'" id="vSearch" v-model="search" style="min-width: 60px; display: inline-flex; text-align: center" @keyup="doOnKeyUp(event, 'document', true)" placeholder="搜索文档" />
+                        <button v-show="view == 'markdown'" @click="pageDown('document')">上页 < </button>
+                        <input v-show="view == 'markdown'" id="vPage"  v-model="page" style="width: 30px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'document', true)" placeholder="页码" />
+                        <button v-show="view == 'markdown'" @click="pageUp('document')"> > 下页</button>
+                        <a v-show="view == 'markdown'" >每页</a>
+                        <input v-show="view == 'markdown'" id="vCount" v-model="count" style="width: 30px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'document', true)" placeholder="条数" />
+                        <a v-show="view == 'markdown'" >条</a>
+                    <!--                    </div>-->
+                    <input id="vAskAI" style="min-width: 60px; display: inline-flex; padding: 0px 4px 0px 4px" @keyup="doOnKeyUp(event, 'ask', true)"  placeholder="Ask AI" :style="{'width': view == 'markdown' ? 'auto' : '82%', 'text-align': view == 'markdown' ? 'center' : 'left'}" />
+                    <label style="float: right; margin-left: 8px; height: 100%; text-align: center"><input id="vDeepSearch" type="checkbox" style="height: 100%; text-align: center; bottom: 4px" name="Deep Search" />Deep Search</label>
                 </div>
 
                 <ul class="dropdown-menu" id="vOption" style="display: block; left: 0px; top: 0px; max-height: 100%; max-width: 100%; overflow: scroll; overflow-x: scroll; overflow-y:scroll;" v-show="options != null && options.length > 0">

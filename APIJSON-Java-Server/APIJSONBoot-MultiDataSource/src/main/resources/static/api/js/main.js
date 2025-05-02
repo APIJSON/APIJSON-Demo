@@ -7503,6 +7503,69 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       doOnKeyUp: function (event, type, isFilter, item) {
         var keyCode = event.keyCode ? event.keyCode : (event.which ? event.which : event.charCode);
         var isEnter = keyCode == 13
+
+        if (type == 'ask') {
+          if (isEnter) {
+            const user_query = StringUtil.trim(vAskAI.value);
+            const uuid = crypto.randomUUID();
+            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
+              "engine_id": "multihop",
+              "user_query": "<relevant_context>This query was sent from the wiki page: Overview.</relevant_context>" + user_query,
+              "keywords": [],
+              "repo_names": [
+                "Tencent/APIJSON"
+              ],
+              "additional_context": "",
+              "query_id": uuid,
+              "use_notes": false,
+              "generate_summary": false
+            }, {}, function (url, res, err) {
+              App.onResponse(url, res, err)
+              var data = res.data || {}
+              var isOk = JSONResponse.isSuccess(data)
+
+              var msg = isOk ? '' : ('\nmsg: ' + StringUtil.get(data.msg))
+              if (err != null) {
+                msg += '\nerr: ' + err.msg
+                vOutput.value = err.msg
+                this.view = 'error';
+                return
+              }
+
+              App.request(true, REQUEST_TYPE_GET, REQUEST_TYPE_PARAM, 'https://api.devin.ai/ada/query/' + uuid, {}, {}, function (url, res, err) {
+                App.onResponse(url, res, err)
+                var data = res.data || {}
+                var isOk = JSONResponse.isSuccess(data)
+
+                var msg = isOk ? '' : ('\nmsg: ' + StringUtil.get(data.msg))
+                if (err != null) {
+                  msg += '\nerr: ' + err.msg
+                  vOutput.value = err.msg
+                  this.view = 'error';
+                  return
+                }
+
+                var queries = data.queries || []
+                var last = queries[queries.length - 1]
+                var query = last.user_query || user_query
+                var response = last.response || []
+                var answer = '### Ask\n' + query + '\n### Answer\n';
+                for (var i = 0; i < response.length; i ++) {
+                  var item = response[i] || {};
+                  if (item.type != 'file_contents') {
+                    continue;
+                  }
+                  answer += '\n' + StringUtil.trim(typeof data == 'string' ? data : (data instanceof Array ? data.join() : JSON.stringify(data)));
+                }
+
+                vOutput.value += answer;
+                App.view = 'markdown';
+              })
+            })
+          }
+          return
+        }
+
         if (type == 'option') {
           if (isEnter) {
             this.selectInput(item);
