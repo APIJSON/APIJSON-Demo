@@ -7507,7 +7507,21 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (type == 'ask') {
           if (isEnter) {
+            var isRes = false;
+            if (StringUtil.isEmpty(vAskAI.value) && StringUtil.isNotEmpty(this.jsoncon, true) ) {
+              var res = JSON.parse(this.jsoncon);
+//              res = this.removeDebugInfo(res);
+              delete res['trace:stack']
+              delete res['debug:info|help']
+              vAskAI.value = JSON.stringify(res)
+              isRes = true;
+            }
+
             const user_query = StringUtil.trim(vAskAI.value);
+            if (StringUtil.isEmpty(user_query)) {
+              return;
+            }
+
             function onMessage(item) {
               var data2 = item == null ? null : item.data
               if (data2 == null || item.type != 'chunk') {
@@ -7554,6 +7568,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     vOutput.value = answer;
                     markdownToHTML(answer); // vOutput.value)
                 })
+
+                App.uuid = null; // 解决第一次后的都不生效
+                vAskAI.value = '';
             }
 
             function askAI() {
@@ -7605,7 +7622,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             this.uuid = crypto.randomUUID();
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
               "engine_id": "multihop",
-              "user_query": "<relevant_context>This query was sent from the wiki page: Overview.</relevant_context>" + user_query,
+              "user_query": "<relevant_context>" + (isRes ? "这是用 HTTP 接口工具 TommyLemon/APIAuto 发请求后的响应结果，分析并" : "") + "用中文回答：</relevant_context>" + user_query,
               "keywords": [],
               "repo_names": [
                 "Tencent/APIJSON"
