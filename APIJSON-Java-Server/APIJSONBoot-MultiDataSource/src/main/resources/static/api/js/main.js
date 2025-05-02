@@ -7508,7 +7508,101 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (type == 'ask') {
           if (isEnter) {
             const user_query = StringUtil.trim(vAskAI.value);
-            const uuid = crypto.randomUUID();
+            function onMessage(item) {
+              var data2 = item == null ? null : item.data
+              if (data2 == null || item.type != 'chunk') {
+                return;
+              }
+
+              var answer = StringUtil.trim(typeof data2 == 'string' ? data2 : (data instanceof Array ? data2.join() : JSON.stringify(data2)));
+              App.view = 'markdown';
+              vOutput.value += answer;
+              markdownToHTML(vOutput.value)
+            }
+
+            function queryResult() {
+                App.request(true, REQUEST_TYPE_GET, REQUEST_TYPE_PARAM, 'https://api.devin.ai/ada/query/' + App.uuid, {}, {}, function (url, res, err) {
+//                    App.onResponse(url, res, err)
+                    var data = res.data || {}
+//                    var isOk = JSONResponse.isSuccess(data)
+
+                    var msg = ''; // isOk ? '' : ('\nmsg: ' + StringUtil.get(data.msg))
+                    if (err != null) {
+                        msg += '\nerr: ' + err.message
+                        vOutput.value = err.message
+                        App.view = 'error';
+                        return
+                    }
+
+                    var queries = data.queries || []
+                    var last = queries[queries.length - 1] || {}
+                    var query = last.user_query || user_query
+                    var response = last.response || []
+                    var answer = '#### ' + query + '\n<br/>';
+                    for (var i = 0; i < response.length; i ++) {
+                      //                      onMessage(response[i])
+                      var item = response[i];
+                      var data2 = item == null ? null : item.data;
+                      if (data2 == null || item.type != 'chunk') {
+                          continue;
+                      }
+
+                      answer += '\n' + StringUtil.trim(typeof data2 == 'string' ? data2 : (data2 instanceof Array ? data2.join() : JSON.stringify(data2)));
+                    }
+
+                    App.view = 'markdown';
+                    vOutput.value = answer;
+                    markdownToHTML(answer); // vOutput.value)
+                })
+            }
+
+            function askAI() {
+              vOutput.value = '#### ' + user_query + '\n<br/>';
+              App.loadingCount ++;
+              const ws = new WebSocket('wss://api.devin.ai/ada/ws/query/' + App.uuid);
+
+              // 连接成功
+              ws.onopen = () => {
+                console.log('WebSocket connected');
+                // 这里通常不需要主动发送内容，除非协议需要
+              };
+
+              // 收到消息
+              ws.onmessage = (event) => {
+                try {
+                  const data = JSON.parse(event.data);
+                  console.log('Message:', data);
+                  onMessage(data)
+
+                  if (data.type === 'chunk') {
+                    console.log('Chunk Data:', data.data);
+                  }
+                } catch (err) {
+                  console.error('Failed to parse message:', event.data);
+                }
+              };
+
+              // 连接关闭
+              ws.onclose = () => {
+                console.log('WebSocket closed');
+                App.loadingCount --;
+                queryResult();
+              };
+
+              // 错误处理
+              ws.onerror = (err) => {
+                console.error('WebSocket error:', err);
+                queryResult();
+              };
+
+            }
+
+            if (StringUtil.isNotEmpty(this.uuid, true)) {
+              askAI();
+              return;
+            }
+
+            this.uuid = crypto.randomUUID();
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
               "engine_id": "multihop",
               "user_query": "<relevant_context>This query was sent from the wiki page: Overview.</relevant_context>" + user_query,
@@ -7517,51 +7611,23 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 "Tencent/APIJSON"
               ],
               "additional_context": "",
-              "query_id": uuid,
+              "query_id": this.uuid,
               "use_notes": false,
               "generate_summary": false
             }, {}, function (url, res, err) {
               App.onResponse(url, res, err)
               var data = res.data || {}
-              var isOk = JSONResponse.isSuccess(data)
+//              var isOk = JSONResponse.isSuccess(data)
 
-              var msg = isOk ? '' : ('\nmsg: ' + StringUtil.get(data.msg))
+              var msg = ''; // isOk ? '' : ('\nmsg: ' + StringUtil.get(data.msg))
               if (err != null) {
-                msg += '\nerr: ' + err.msg
-                vOutput.value = err.msg
-                this.view = 'error';
+                msg += '\nerr: ' + err.message
+                vOutput.value = err.message
+                App.view = 'error';
                 return
               }
 
-              App.request(true, REQUEST_TYPE_GET, REQUEST_TYPE_PARAM, 'https://api.devin.ai/ada/query/' + uuid, {}, {}, function (url, res, err) {
-                App.onResponse(url, res, err)
-                var data = res.data || {}
-                var isOk = JSONResponse.isSuccess(data)
-
-                var msg = isOk ? '' : ('\nmsg: ' + StringUtil.get(data.msg))
-                if (err != null) {
-                  msg += '\nerr: ' + err.msg
-                  vOutput.value = err.msg
-                  this.view = 'error';
-                  return
-                }
-
-                var queries = data.queries || []
-                var last = queries[queries.length - 1]
-                var query = last.user_query || user_query
-                var response = last.response || []
-                var answer = '### Ask\n' + query + '\n### Answer\n';
-                for (var i = 0; i < response.length; i ++) {
-                  var item = response[i] || {};
-                  if (item.type != 'file_contents') {
-                    continue;
-                  }
-                  answer += '\n' + StringUtil.trim(typeof data == 'string' ? data : (data instanceof Array ? data.join() : JSON.stringify(data)));
-                }
-
-                vOutput.value += answer;
-                App.view = 'markdown';
-              })
+              askAI();
             })
           }
           return
@@ -8005,7 +8071,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
             break;
           case CodeUtil.LANGUAGE_C_SHARP:
-            s += '\n#### <= Unity3D-C\#: 键值对用 {"key", value}' +
+            s += '\n#### <= Unity3D-C\\#: 键值对用 {"key", value}' +
               '\n ```csharp \n'
               + CodeUtil.parseCSharpRequest(null, parseJSON(rq), 0)
               + '\n ``` \n注：对象 {} 用 new JObject{{"key", value}}，数组 [] 用 new JArray{value0, value1}\n';
@@ -13116,7 +13182,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         // alert(event.key) 小写字母 i 而不是 KeyI
 
         var target = event.target;
-        if (target == vSearch || target == vTestCaseSearch || target == vCaseGroupSearch || target == vChainGroupSearch || target == vChainGroupAdd || target == vChainAdd) {
+        if (target == vAskAI || target == vSearch || target == vTestCaseSearch || target == vCaseGroupSearch
+          || target == vChainGroupSearch || target == vChainGroupAdd || target == vChainAdd) {
           return
         }
 
