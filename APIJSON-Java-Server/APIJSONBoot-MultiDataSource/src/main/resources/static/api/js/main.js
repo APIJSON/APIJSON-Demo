@@ -7124,7 +7124,8 @@ https://github.com/Tencent/APIJSON/issues
           url = (isAdminOperation ? this.server : this.getBaseUrl()) + url
         }
 
-        var isDelegate = (isAdminOperation == false && this.isDelegateEnabled) || (isAdminOperation && url.indexOf('://apijson.cn:9090') > 0)
+        var isDelegate = (isAdminOperation == false && this.isDelegateEnabled)
+         || (isAdminOperation && (url.indexOf('://apijson.cn:9090') > 0 || url.indexOf('.devin.ai') > 0))
 
         if (header != null && header.Cookie != null) {
           if (isDelegate) {
