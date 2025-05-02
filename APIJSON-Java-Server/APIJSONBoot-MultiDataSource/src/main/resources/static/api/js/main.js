@@ -7514,7 +7514,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 return;
               }
 
-              var answer = StringUtil.trim(typeof data2 == 'string' ? data2 : (data instanceof Array ? data2.join() : JSON.stringify(data2)));
+              var answer = StringUtil.get(typeof data2 == 'string' ? data2 : (data instanceof Array ? data2.join() : JSON.stringify(data2)));
               App.view = 'markdown';
               vOutput.value += answer;
               markdownToHTML(vOutput.value)
