@@ -266,7 +266,7 @@ function parseJSON(s) {
     return null;
   }
   try {
-  return parseJSON(s);
+    return JSON.parse(s);
   } catch (e) {
     return JSON5.parse(s)
   }

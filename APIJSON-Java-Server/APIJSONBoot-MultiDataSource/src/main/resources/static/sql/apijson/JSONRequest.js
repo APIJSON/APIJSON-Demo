@@ -266,7 +266,7 @@ function parseJSON(s) {
   }
   // alertOfDebug("parseJSON  s = \n" + s);
 
-  return parseJSON(s);
+  return JSON.parse(s);
 }
 
 /**测试用的提示
