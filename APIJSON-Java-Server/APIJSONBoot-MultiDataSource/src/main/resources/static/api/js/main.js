@@ -7528,7 +7528,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 return;
               }
 
-              var answer = StringUtil.get(typeof data2 == 'string' ? data2 : (data instanceof Array ? data2.join() : JSON.stringify(data2)));
+              var answer = StringUtil.get(typeof data2 == 'string' ? data2 : (data instanceof Array ? data2.join() : JSON.stringify(data2)))
+                .replaceAll('/wiki/Tencent/APIJSON#', 'https://deepwiki.com/Tencent/APIJSON/').replaceAll('/wiki/TommyLemon/APIAuto#', 'https://deepwiki.com/TommyLemon/APIAuto/');
               App.view = 'markdown';
               vOutput.value += answer;
               markdownToHTML(vOutput.value)
@@ -7561,8 +7562,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                           continue;
                       }
 
-                      answer += '\n' + StringUtil.trim(typeof data2 == 'string' ? data2 : (data2 instanceof Array ? data2.join() : JSON.stringify(data2)));
+                      answer += '\n' + StringUtil.trim(typeof data2 == 'string' ? data2 : (data2 instanceof Array ? data2.join() : JSON.stringify(data2)))
+                        .replaceAll('/wiki/Tencent/APIJSON#', 'https://deepwiki.com/Tencent/APIJSON/').replaceAll('/wiki/TommyLemon/APIAuto#', 'https://deepwiki.com/TommyLemon/APIAuto/');
                     }
+
+                    answer += '\n<br/>\n';
 
                     App.view = 'markdown';
                     vOutput.value = answer;
