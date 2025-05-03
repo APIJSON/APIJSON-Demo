@@ -972,13 +972,13 @@ var CodeUtil = {
 
           s += '\n\n//回调实体类'
             + '\n@Keep'
-            + '\nopen class ' + responseType + '<T, M, L> : BaseResponse<T, M, L> {'
+            + '\nopen class ' + responseType + '<T> : BaseResponse<T> {'
             + '\n' + nextPadding + '@Transient'
             + '\n' + nextPadding + 'open var ' + varName + ': ' + dataType + CodeUtil.initEmptyValue4Type(dataType, true, true) + '\n'
             + '\n}\n'
             + '\n//通用 HTTP 解析实体基类，全局存一份'
             + '\n@Keep'
-            + '\nopen class BaseResponse<T, M, L> {'
+            + '\nopen class BaseResponse<T> {'
             + '\n' + nextPadding + '@Transient'
             + '\n' + nextPadding + 'open var code: Int' + CodeUtil.initEmptyValue4Type('Int', true, true) + '\n'
             + '\n' + nextPadding + '@Transient'
@@ -1166,40 +1166,40 @@ var CodeUtil = {
           }
 
           s += '\n\n' +
-            'public class ' + responseType + '<T, M, L> extends Response<T, M, L> {\n' +
+            'public class ' + responseType + '<T> extends Response<T> {\n' +
             nextPrefix + 'private ' + dataType + ' ' + varName + ';\n\n' +
             nextPrefix + 'public '+ dataType + ' get' + modelName + '() {\n' +
             nextNextPrefix + 'return ' + varName + ';\n' +
             nextPrefix + '}\n' +
-            nextPrefix + 'public ' + responseType + '<T, M, L> set' + modelName + '(' + dataType + ' ' + varName + ') {\n' +
+            nextPrefix + 'public ' + responseType + '<T> set' + modelName + '(' + dataType + ' ' + varName + ') {\n' +
             nextNextPrefix + 'this.' + varName + ' = ' + varName + ';\n' +
             nextNextPrefix + 'return this;\n' +
             nextPrefix + '}\n' +
             '}';
 
           s += '\n\n' +
-            'public class Response<T, M, L> {\n' +
+            'public class Response<T> {\n' +
             nextPrefix + 'private int code;\n' +
             nextPrefix + 'private String msg;\n' +
             nextPrefix + 'private T data;\n\n' +
             nextPrefix + 'public int getCode() {\n' +
             nextNextPrefix + 'return code;\n' +
             nextPrefix + '}\n' +
-            nextPrefix + 'public Response<T, M, L> setCode(int code) {\n' +
+            nextPrefix + 'public Response<T> setCode(int code) {\n' +
             nextNextPrefix + 'this.code = code;\n' +
             nextNextPrefix + 'return this;\n' +
             nextPrefix + '}\n\n' +
             nextPrefix + 'public String getMsg() {\n' +
             nextNextPrefix + 'return msg;\n' +
             nextPrefix + '}\n' +
-            nextPrefix + 'public Response<T, M, L> setMsg(String msg) {\n' +
+            nextPrefix + 'public Response<T> setMsg(String msg) {\n' +
             nextNextPrefix + 'this.msg = msg;\n' +
             nextNextPrefix + 'return this;\n' +
             nextPrefix + '}\n\n' +
             nextPrefix + 'public T getData() {\n' +
             nextNextPrefix + 'return data;\n' +
             nextPrefix + '}\n' +
-            nextPrefix + 'public Response<T, M, L> setData(T data) {\n' +
+            nextPrefix + 'public Response<T> setData(T data) {\n' +
             nextNextPrefix + 'this.data = data;\n' +
             nextNextPrefix + 'return this;\n' +
             nextPrefix + '}\n' +
@@ -6783,7 +6783,7 @@ res_data = rep.json()
     var typeOfValue = CodeUtil.getType4Request(value);
     var isValueNotArray = typeOfValue != 'array';
     var isValueNotObject = typeOfValue != 'object';
-    
+
     if (standardObj != null) {
       var parentObj = pathKeys == null || pathKeys.length <= 0 ? null : JSONResponse.getStandardByPath(standardObj, pathKeys.slice(0, pathKeys.length - 1));
       var targetValues = parentObj == null ? null : parentObj.values;
