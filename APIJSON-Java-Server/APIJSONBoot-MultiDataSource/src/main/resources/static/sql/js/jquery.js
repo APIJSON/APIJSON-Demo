@@ -521,7 +521,7 @@ jQuery.extend({
 	parseJSON: function( data ) {
 		// Attempt to parse using the native JSON parser first
 		if ( window.JSON && window.JSON.parse ) {
-			return window.parseJSON( data );
+			return window.JSON.parse( data );
 		}
 
 		if ( data === null ) {
@@ -555,7 +555,7 @@ jQuery.extend({
 			return null;
 		}
 		try {
-			if ( window.DOMParser<T, M, L> ) { // Standard
+			if ( window.DOMParser ) { // Standard
 				tmp = new DOMParser();
 				xml = tmp.parseFromString( data , "text/xml" );
 			} else { // IE
