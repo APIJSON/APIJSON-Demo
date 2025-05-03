@@ -7573,7 +7573,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     markdownToHTML(answer); // vOutput.value)
                 })
 
-                App.uuid = null; // 解决第一次后的都不生效
+//                App.uuid = null; // 解决第一次后的都不生效
                 vAskAI.value = '';
             }
 
@@ -7618,12 +7618,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             }
 
-            if (StringUtil.isNotEmpty(this.uuid, true)) {
-              askAI();
-              return;
-            }
+            // 可能少调用了 https://api2.amplitude.com/2/httpapi 导致不能同一个会话二次请求
+//            if (StringUtil.isEmpty(this.uuid, true)) {
+              this.uuid = crypto.randomUUID();
+//            }
 
-            this.uuid = crypto.randomUUID();
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
               "engine_id": "multihop",
               "user_query": "<relevant_context>" + (isRes ? "这是用 HTTP 接口工具 TommyLemon/APIAuto 发请求后的响应结果，分析并" : "") + "用中文回答：</relevant_context>" + user_query,
