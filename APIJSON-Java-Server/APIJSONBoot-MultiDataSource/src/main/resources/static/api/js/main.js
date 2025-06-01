@@ -7637,7 +7637,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               "user_query": "<relevant_context>" + (isRes ? "这是用 HTTP 接口工具 TommyLemon/APIAuto 发请求后的响应结果，分析并" : "") + "用中文回答：</relevant_context>" + user_query,
               "keywords": [],
               "repo_names": [
-                "Tencent/APIJSON"
+                "Tencent/APIJSON", "TommyLemon/APIAuto"
               ],
               "additional_context": "",
               "query_id": this.uuid,
