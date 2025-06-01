@@ -7507,6 +7507,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (type == 'ask') {
           if (isEnter) {
+            event.preventDefault();
+
+            if (event.shiftKey) {
+              vAskAI.value = StringUtil.trim(vAskAI.value) + '\n'
+              return
+            }
+
+            vAskAI.value = StringUtil.trim(vAskAI.value)
+
             var isRes = false;
             if (StringUtil.isEmpty(vAskAI.value) && StringUtil.isNotEmpty(this.jsoncon, true) ) {
               var res = JSON.parse(this.jsoncon);
@@ -7624,7 +7633,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 //            }
 
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
-              "engine_id": "multihop",
+              "engine_id": vDeepSearch.checked ? "agent" : "multihop",
               "user_query": "<relevant_context>" + (isRes ? "这是用 HTTP 接口工具 TommyLemon/APIAuto 发请求后的响应结果，分析并" : "") + "用中文回答：</relevant_context>" + user_query,
               "keywords": [],
               "repo_names": [
