@@ -16,13 +16,14 @@
 
 ---
 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释。<br />
-集 文档、测试、Mock、调试、管理 于一体的一站式体验，还有一键 格式化、注释/取消注释 等高效易用的快捷键。<br />
+集合 文档、测试、Mock、调试、管理 的一站式体验，还有 **AI 问答** 和一键 格式化、注释/取消注释 等高效快捷键。<br />
 在常用功能上远超 Postman, Swagger, YApi 等各种 开源、商业 的 API 文档/测试 工具，并能一键导入用例和文档。<br />
 支持 GET, POST, PUT, PATCH, DELETE, HEAD 等各种 HTTP Method 及 Content-Type, URL /{Path}/{Variable}。<br />
 不仅适用于 RESTful、类 RESTful、GRPC 的 API，还是腾讯 [APIJSON](https://github.com/Tencent/APIJSON) 官方建议的文档与测试工具。<br />
 腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 的多个部门及团队， <br />
 外部用户包含 华为、工商银行某地分行、500 强上市公司传音、跨境电商巨头 SHEIN、行业领头羊社保科技 等。
 
+![image](https://github.com/user-attachments/assets/24460af3-0001-46e7-aa2a-df28b711a8cf)
 ![](https://user-images.githubusercontent.com/5738175/145665502-94231804-5ea8-4784-b30d-d5558aad0f8d.jpeg)
 
 <h3 align="center" style="text-align:center;">
@@ -115,7 +116,9 @@ Bilibili：https://search.bilibili.com/all?keyword=APIAuto
 
 
 ### 相关推荐
-[别再生成测试代码了！](https://mp.weixin.qq.com/s/G1GVNhhFbSX5GoyRU6GURg)
+[别再生成测试代码了！](https://mp.weixin.qq.com/s/G1GVNhhFbSX5GoyRU6GURg) <br />
+[APIAuto: 最先进的HTTP接口工具](https://blog.csdn.net/Nifc666/article/details/141966487)
+
 
 ### 百度、搜狗、抖音公网接口调用演示<br />
 因为这些接口不支持 CORS 跨域，所以需要开启托管服务代理。<br />
@@ -249,6 +252,24 @@ https://github.com/TommyLemon/APIAuto/issues/13
 
 更多问题及解答 <br />
 https://github.com/TommyLemon/APIAuto/issues
+
+<br />
+
+### Roadmap 路线图
+1.Translate document to English/Italian/Franch/Spanish... <br />
+
+2.新增功能 <br />
+1) 断言结果 新增按钮 变-\{原因}，点击后右侧展示 JSON diff view； <br />
+2) 右下角列表展示具体每个断言有问题的字段，点击后 JSON view 只显示该字段对应值 <br />
+其他待补充... <br />
+<br />
+3.完善自动断言，支持更多格式的匹配 <br />
+<br />
+4.解决 bug <br />
+<br />
+5.提升性能 <br />
+<br />
+6.其他待补充... <br />
 
 <br />
 
