@@ -7660,7 +7660,18 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             // 可能少调用了 https://api2.amplitude.com/2/httpapi 导致不能同一个会话二次请求
 //            if (StringUtil.isEmpty(this.uuid, true)) {
-              this.uuid = crypto.randomUUID();
+               try {
+                 this.uuid = crypto.randomUUID();
+               } catch (e) {
+                 console.error('Failed to generate UUID:', e);
+               }
+
+              if (StringUtil.isEmpty(this.uuid, true)) {
+                this.uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                  var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+                  return v.toString(16);
+                });
+              }
 //            }
 
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
