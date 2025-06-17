@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>7.2.0</version>
+    <version>7.2.2</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -64,17 +64,17 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>8.0.0</version>
+            <version>8.0.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-framework</artifactId>
-            <version>7.2.1</version>
+            <version>7.2.2</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-fastjson2</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
         </dependency>
 
 <!--        7.9.0 及以下需要依赖 apijson-column -->
