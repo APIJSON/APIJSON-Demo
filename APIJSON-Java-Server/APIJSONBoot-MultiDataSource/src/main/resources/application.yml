@@ -1,4 +1,8 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 # If using flyway-core dependency, either comment this out or use @FlywayDatasource in DemoDataSourceConfig
 #  flyway:
 #    url: ${spring.datasource.hikari.jdbc-url}
