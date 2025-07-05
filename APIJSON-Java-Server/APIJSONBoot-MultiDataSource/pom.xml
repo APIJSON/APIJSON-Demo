@@ -76,6 +76,11 @@
             <artifactId>apijson-fastjson2</artifactId>
             <version>1.0.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.databend</groupId>
+            <artifactId>databend-jdbc</artifactId>
+            <version>0.3.9</version>
+        </dependency>
 
 <!--        7.9.0 及以下需要依赖 apijson-column -->
 <!--        <dependency>-->

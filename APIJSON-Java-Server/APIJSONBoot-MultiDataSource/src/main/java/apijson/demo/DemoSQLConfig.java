@@ -309,6 +309,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//if (isDoris()) {
 		//  return "jdbc:mysql://localhost:9030"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		//}
+		//if (isDatabend()) {
+		//	return "jdbc:databend://localhost:8000?disable_session_token=true"; //TODO 改成你自己的
+		//}
 
 		return super.gainDBUri();
 	}
@@ -389,6 +392,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//if (isDoris()) {
 		//	return "root";
 		//}
+		//if (isDatabend()) {
+		//	return "root"; //TODO 改成你自己的
+		//}
 
 		return super.gainDBAccount();
 	}
@@ -467,6 +473,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//}
 		//if (isDoris()) {
 		//	return "apijson";
+		//}
+		//if (isDatabend()) {
+		//	return null; //TODO 改成你自己的
 		//}
 
 		return super.gainDBPassword();
