@@ -94,7 +94,7 @@ public class FileController {
 			fileRepository.add(file.getOriginalFilename());
 
 			JSONObject res = new JSONObject();
-			res.put("path", file.getOriginalFilename());
+			res.put("path", "/download/" + file.getOriginalFilename());
 			res.put("size", file.getBytes().length);
 			return new DemoParser().extendSuccessResult(res);
 		} 
