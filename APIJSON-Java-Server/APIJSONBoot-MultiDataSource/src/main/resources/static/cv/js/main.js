@@ -2266,7 +2266,7 @@ https://github.com/Tencent/APIJSON/issues
                         for (var i = 0; i < apis.length; i++) {
                           var item = apis[i]
                           var req = item == null ? null : item.request
-                          var urlObj = req.url || {}
+                          var urlObj = (req == null ? null : req.url) || {}
                           var path = urlObj.path
                           var url = path instanceof Array ? '/' + path.join('/') : (typeof urlObj == 'string' ? urlObj : urlObj.raw)
                           if (StringUtil.isEmpty(url, true)) {
@@ -5665,6 +5665,7 @@ https://github.com/Tencent/APIJSON/issues
           // }
 
           //App.onChange(false)
+          App.summary()
         }
       },
 
@@ -7038,7 +7039,11 @@ https://github.com/Tencent/APIJSON/issues
           detection[stage + 'PrecisionStr'] = (100*precision).toFixed(0) + '%';
           detection[stage + 'F1Str'] = (100*f1).toFixed(0) + '%';
         })
+      },
 
+      summary: function() {
+        const detection = this.detection || {};
+        var total = detection.total;
         if (total <= 0) {
           detection.total = total = detection.afterCorrect || detection.beforeCorrect;
         }
@@ -7220,7 +7225,7 @@ https://github.com/Tencent/APIJSON/issues
             .replaceAll(/'new'/ig, '').replaceAll('测试', '')
             .replaceAll('未命名', '').replaceAll('未知', '')
             .replaceAll('示例', '').replaceAll('新建', '')
-            .replaceAll('图片', '');
+            .replaceAll('图片', '').replaceAll('照片', '').replaceAll('相片', '');
 
         var dotInd = file.lastIndexOf('.');
         file = dotInd >= 0 ? file.substring(0, dotInd).trim() : file.trim();
@@ -7305,13 +7310,13 @@ https://github.com/Tencent/APIJSON/issues
         });
 
         // 如果需要也展示 before 中 unmatched 的box，可遍历 beforeBoxes 进行差异补充
-        var diff = this.detection.diff || {};
+        var diff = detection.diff || {};
         diff.bboxes = diffBoxes;
-        this.$set(this.detection, 'diff', { bboxes: diffBoxes });
-        this.$set(this.detection, 'after', { bboxes: afterBoxes });  // 确保 after 被更新到 Vue
+        detection.diff = diff;
+        this.detection = detection;
+
         this.drawAll();
         this.compute();
-        this.detection.diff = diff;
         return diff;
       },
 
@@ -7348,24 +7353,41 @@ https://github.com/Tencent/APIJSON/issues
         const img = this.imgMap[stage];
         const canvas = this.canvasMap[stage];
         const [x, y] = this.getCanvasXY(stage, event);
+
+        const height = canvas.height || (img || {}).height;
+        const width = canvas.width || (img || {}).width;
+        const nw = img == null ? 0 : (img.naturalWidth || 0);
+        const nh = img == null ? 0 : (img.naturalHeight || 0);
+        const xRate = nw < 1 ? 1 : width/nw;
+        const yRate = nh < 1 ? 1 : height/nh;
+
         let found = null;
         var bboxes = JSONResponse.getBboxes(this.detection[stage]) || []
         let len = bboxes.length;
-        var range = ((canvas || {}).height || (img || {}).height || 240) * (len <= 1 ? 0.5 : (len <= 5 ? 0.1/len : 0.02));
-        for (const item of bboxes) {
-          var bbox = JSONResponse.getXYWHD(JSONResponse.getBbox(item));
-          if (JSONResponse.isOnBorder(x, y, bbox, range)) {
-            found = item.id;
+        var range = (height || 240) * (len <= 1 ? 0.5 : (len <= 5 ? 0.1/len : 0.02));
+        for (var i = 0; i < len; i++) {
+          const item = bboxes[i];
+          if (item == null) {
+            continue;
+          }
+
+          var [bx, by, bw, bh, bd] = JSONResponse.getXYWHD(JSONResponse.getBbox(item));
+          const isRate = Math.abs(bx) < 1 && Math.abs(by) < 1 && Math.abs(bw) < 1 && Math.abs(bh) < 1;
+          bx = isRate ? bx*width : bx*xRate;
+          by = isRate ? by*height : by*yRate;
+          bw = isRate ? bw*width : bw*xRate;
+          bh = isRate ? bh*height : bh*yRate;
+          if (JSONResponse.isOnBorder(x, y, [bx, by, bw, bh, bd], range)) {
+            found = i;
             break;
           }
         }
 
-        if (found == null || found == this.hoverIds[stage]) {
+        if (found == this.hoverIds[stage]) {
           return
         }
 
         this.hoverIds[stage] = found;
-        this.$set(this.hoverIds, stage, found);
         this.draw(stage);
       },
       onClickFullScreen: function(event) {
@@ -7388,6 +7410,14 @@ https://github.com/Tencent/APIJSON/issues
         const img = this.imgMap[stage];
         const canvas = this.canvasMap[stage];
         const [x, y] = this.getCanvasXY(stage, event);
+
+        const height = canvas.height || (img || {}).height;
+        const width = canvas.width || (img || {}).width;
+        const nw = img == null ? 0 : (img.naturalWidth || 0);
+        const nh = img == null ? 0 : (img.naturalHeight || 0);
+        const xRate = nw < 1 ? 1 : width/nw;
+        const yRate = nh < 1 ? 1 : height/nh;
+
         const corrects = detection.corrects = detection.corrects || [];
         const wrongs = detection.wrongs = detection.wrongs || [];
 
@@ -7400,7 +7430,12 @@ https://github.com/Tencent/APIJSON/issues
             continue;
           }
 
-          const [bx, by, bw, bh, d] = JSONResponse.getXYWHD(JSONResponse.getBbox(item));
+          var [bx, by, bw, bh, bd] = JSONResponse.getXYWHD(JSONResponse.getBbox(item));
+          const isRate = Math.abs(bx) < 1 && Math.abs(by) < 1 && Math.abs(bw) < 1 && Math.abs(bh) < 1;
+          bx = isRate ? bx*width : bx*xRate;
+          by = isRate ? by*height : by*yRate;
+          bw = isRate ? bw*width : bw*xRate;
+          bh = isRate ? bh*height : bh*yRate;
 
           // 无效
           // const labelX = bx + bw + 4; // 和 drawDetections 中计算按钮位置保持一致
@@ -10404,9 +10439,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       getDoc4TestCase: function () {
         var list = this.remotes || []
         var doc = ''
-        var item
         for (var i = 0; i < list.length; i ++) {
-          item = list[i] == null ? null : list[i].Document
+          var item = list[i] == null ? null : list[i].Document
           if (item == null || item.name == null) {
             continue
           }
@@ -12818,6 +12852,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 // }
 
                 App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+                App.summary()
               }
 
             })

@@ -262,9 +262,9 @@
                     <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
                         <li v-for="(item, index) in testCases" :id="'docItem' + index" >
                             <div style="display: inline-table">
-                                <button class="hint--right" :data-hint="item.Document.url" v-show="isShowMethod()" style="width: 60px; margin-right: 0px;padding: 0px;" id="vDocMethod" @click="restoreRemoteAndTest(index, item)">{{ getMethodName(item.Document.method, item.Document.type) }}</button>
-                                <button class="hint--right" :data-hint="item.Document.request" v-show="isShowType()" style="width: 48px;margin-right: 6px;padding: 0px" id="vDocType" @click="restoreRemoteAndTest(index, item)">{{ getTypeName(item.Document.type, item.Document.method) }}</button>
-                                <a class="hint--rounded hint--no-animate" ref="testCaseTexts" @mouseover="setRequestHint(index, item)" href="javascript:void(0)" @click="restoreRemote(index, item)" :style="{ color: index == currentDocIndex ? 'black' : 'gray' }"> {{(item.Document.version > 0 ? 'V' + item.Document.version : 'V*') + ' ' + item.Document.name  + '    ' + item.Document.url}}</a>
+                                <button class="hint--right" :data-hint="(item.Document || {}).url" v-show="isShowMethod()" style="width: 60px; margin-right: 0px;padding: 0px;" id="vDocMethod" @click="restoreRemoteAndTest(index, item)">{{ getMethodName((item.Document || {}).method, (item.Document || {}).type) }}</button>
+                                <button class="hint--right" :data-hint="(item.Document || {}).request" v-show="isShowType()" style="width: 48px;margin-right: 6px;padding: 0px" id="vDocType" @click="restoreRemoteAndTest(index, item)">{{ getTypeName((item.Document || {}).type, (item.Document || {}).method) }}</button>
+                                <a class="hint--rounded hint--no-animate" ref="testCaseTexts" @mouseover="setRequestHint(index, item)" href="javascript:void(0)" @click="restoreRemote(index, item)" :style="{ color: index == currentDocIndex ? 'black' : 'gray' }"> {{(((item.Document || {}).version || 0) > 0 ? 'V' + item.Document.version : 'V*') + ' ' + (item.Document || {}).name  + '    ' + (item.Document || {}).url}}</a>
                                 <div v-show="isStatisticsEnabled" style="position: absolute; right: 31px; top: 9px; display: inline-flex">
                                     <div v-show="(item.totalCount || 0) > 0" style="background: lightgray; padding: 1px; margin-right: 2px; display: inline-block; position: relative" @click="restoreRemote(index, item, null, true)" >
                                         <!-- 只能写成一行来消除间隙，不能换行、空格 -->
@@ -411,9 +411,9 @@ Ctrl + S 或 Command + S 保存当前用例；
                 </div>
                 <div id="vRequestMarkdown" v-show="isPreviewEnabled" style="width: 100%;height: 100%;position: relative;"></div>
 
-                <div id="vContainer" v-show="isRandomShow && isRandomListShow && currentRandomIndex >= 0 && view === 'code'" style="width: 100%; height: 100%; padding-bottom: 36px; position: absolute; z-index: 100; background-color: white; display: flex; flex-direction: column; overflow: scroll">
+                <div id="vContainer" v-show="isRandomListShow && currentRandomIndex >= 0 && view === 'code'" style="width: 100%; height: 100%; padding-bottom: 36px; position: absolute; z-index: 100; background-color: white; display: flex; flex-direction: column; overflow: scroll">
                     <div style="min-width: 240px; position: relative" :style="{'height': isFullScreen ? '80%' : '30%' }">
-                        <div id="vAfterTitle" style="padding: 0px 13px 0px 6px; position: absolute; width: 100%; z-index: 100" >
+                        <div id="vAfterTitle" style="padding: 0px 13px 0px 6px; position: absolute; z-index: 100" >
                             <a style="font-weight: bold; color: black">本次: </a><a>置信度 </a><input id="vAfterThreshold" v-model="detection.afterThreshold" style="width: 24px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'afterThreshold', true)" placeholder="阈值" />
                             <a style="margin-left: -6px">% {{ detection.isShowNum ? '正确数 ' + detection.afterCorrect + ' 误报数 ' + detection.afterWrong + ' 漏检数 ' + detection.afterMiss : '召回率 ' + detection.afterRecallStr + ' 精确率 ' + detection.afterPrecisionStr + ' F1 ' + detection.afterF1Str }} </a>
                             <a style="height: 25px; color: black; font-weight: bold; padding: 0" href="javascript:void(0)" @click="onClickFullScreen($event)" > 全屏 </a>
@@ -424,7 +424,7 @@ Ctrl + S 或 Command + S 保存当前用例；
                         </div>
                     </div>
                     <div style="min-width: 240px; position: relative; top: 25px" :style="{'height': isFullScreen ? '80%' : '30%' }">
-                        <div id="vDiffTitle" style="padding: 0px 13px 0px 6px; position: absolute; width: 100%; height: 25px; z-index: 100" >
+                        <div id="vDiffTitle" style="padding: 0px 13px 0px 6px; position: absolute; height: 25px; z-index: 100" >
                             <a style="font-weight: bold; color: black">差异: </a><a>重合度 </a><input id="vDiffThreshold" v-model="detection.diffThreshold" style="width: 24px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'diffThreshold', true)" placeholder="阈值" />
                             <a style="margin-left: -6px">% {{ detection.isShowNum ? '正确数 '  + detection.diffCorrectStr + ' 误报数 ' + detection.diffWrongStr + ' 漏检数 ' + detection.diffMissStr : '召回率 ' + detection.diffRecallStr + ' 精确率 ' + detection.diffPrecisionStr + ' F1 ' + detection.diffF1Str }} </a>
                         </div>
@@ -434,7 +434,7 @@ Ctrl + S 或 Command + S 保存当前用例；
                         </div>
                     </div>
                     <div style="min-width: 240px; position: relative; top: 50px" :style="{'height': isFullScreen ? '80%' : '30%' }">
-                        <div id="vBeforeTitle" style="padding: 0px 13px 0px 6px; position: absolute; width: 100%; z-index: 100" >
+                        <div id="vBeforeTitle" style="padding: 0px 13px 0px 6px; position: absolute; z-index: 100" >
                             <a style="font-weight: bold; color: black">之前: </a><a>置信度 </a><input id="vBeforeThreshold" v-model="detection.beforeThreshold" style="width: 24px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'beforeThreshold', true)" placeholder="阈值" disabled />
                             <a style="margin-left: -6px">% {{ detection.isShowNum ? '正确数 ' + detection.beforeCorrect + ' 误报数 ' + detection.beforeWrong + ' 漏检数 ' + detection.beforeMiss : '召回率 ' + detection.beforeRecallStr + ' 精确率 ' + detection.beforePrecisionStr + ' F1 ' + detection.beforeF1Str }} </a>
                             <a > 实际 </a><input id="vAfterTotal" v-model="detection.total" style="width: 36px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'afterTotal', true)" placeholder="总数" />
