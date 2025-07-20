@@ -2643,6 +2643,16 @@ public class DemoController extends APIJSONController<Long> {
         return "forward:/ui/index.html"; // 加载不了完整网页 return new ModelAndView("forward:/sql/index.html");
     }
 
+    @GetMapping("cv")
+    public String cv() {
+        try {
+            httpServletResponse.sendRedirect("/cv/index.html");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "forward:/cv/index.html"; // 两者都无效 "redirect:/cv/index.html";
+    }
+
     @GetMapping("ui")
     public String ui() {
         try {
@@ -2709,6 +2719,20 @@ public class DemoController extends APIJSONController<Long> {
     public String getSQLTestStatus(@RequestParam("key") String key, HttpSession session) {
         DemoParser.KEY_MAP.remove(key);
         return delegate("http://localhost:3002/test/status", null, null, null, null, null, null, HttpMethod.GET, session);
+    }
+
+    @GetMapping("cv/test/start")
+    public String startCvTest(HttpSession session) {
+        //response.sendRedirect("http://localhost:3003/test/start");
+        long id = 100000 + Math.round(899999*Math.random());
+        DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
+        return delegate("http://localhost:3003/test/start?key=" + id, null, null, null, null, null, null, HttpMethod.GET, session);
+    }
+    @GetMapping("cv/test/status")
+    public String getCvTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
+        //response.sendRedirect("http://localhost:3003/test/status");
+        DemoParser.KEY_MAP.remove(key);
+        return delegate("http://localhost:3003/test/status", null, null, null, null, null, null, HttpMethod.GET, session);
     }
 
     // 为 APIAuto, UnitAuto, SQLAuto 提供的后台 Headless 无 UI 测试转发接口  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
