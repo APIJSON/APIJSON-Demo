@@ -7154,9 +7154,9 @@ https://github.com/Tencent/APIJSON/issues
                 detection['diff' + type + 'CorrectStr'] = (correct >= 0 ? '+' : '') + correct;
                 detection['diff' + type + 'WrongStr'] = (wrong >= 0 ? '+' : '') + wrong;
                 detection['diff' + type + 'MissStr'] = (miss >= 0 ? '+' : '') + miss;
-                detection['diff' + type + 'RecallStr'] = (recall >= 0 ? '+' : '') + recall;
-                detection['diff' + type + 'PrecisionStr'] = (precision >= 0 ? '+' : '') + precision;
-                detection['diff' + type + 'F1Str'] = (f1 >= 0 ? '+' : '') + f1;
+                detection['diff' + type + 'RecallStr'] = (recall >= 0 ? '+' : '') + (100 * recall).toFixed(0);
+                detection['diff' + type + 'PrecisionStr'] = (precision >= 0 ? '+' : '') + (100 * precision).toFixed(0);
+                detection['diff' + type + 'F1Str'] = (f1 >= 0 ? '+' : '') + (100 * f1).toFixed(0);
               });
             } else {
               var imgTotal = detection[stage + 'ImgTotal'] = curTr.imgTotal || curTr.imgCorrect || 0;
