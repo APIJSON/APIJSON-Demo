@@ -1,11 +1,10 @@
 package apijson.boot;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 //import javax.annotation.PostConstruct;
 
@@ -33,32 +32,28 @@ import apijson.demo.DemoParser;
 @Controller
 public class FileController {
 
+	public static final String HOME_DIR = System.getProperty("user.home");
+
+	private static final String WINDOWS_DIR = HOME_DIR+ "\\upload\\";
+
+	private static final String MAC_DIR = HOME_DIR + "/upload/";
+
+	private static final String LINUX_DIR = HOME_DIR + "/upload/";
+
 	private static String fileUploadRootDir = null;
 
-	//    @Value"${file.upload.root.dir.windows}")
-	String fileUploadRootDirWindows = "C:/work/upload/";
-
-	//    @Value"${file.upload.root.dir.mac}")
-	String fileUploadRootDirMac = "/Users/Tommy/upload/";
-
-	//    @Value"${file.upload.root.dir.linux}")
-	String fileUploadRootDirLinux = "~/upload/";
-
-	private static List<String> fileRepository = new ArrayList<>();
-
-//	@PostConstruct
-	public void initFileRepository(){
+    static {
 		// 判断文件夹是否存在，不存在就创建
 		String osName = System.getProperty("os.name");
 		if (osName.startsWith("Mac OS")) {
 			// 苹果
-			fileUploadRootDir = fileUploadRootDirMac;
+			fileUploadRootDir = MAC_DIR;
 		} else if (osName.startsWith("Windows")) {
 			// windows
-			fileUploadRootDir = fileUploadRootDirWindows;
+			fileUploadRootDir = WINDOWS_DIR;
 		} else {
 			// unix or linux
-			fileUploadRootDir = fileUploadRootDirLinux;
+			fileUploadRootDir = LINUX_DIR;
 		}
 
 		File directories = new File(fileUploadRootDir);
@@ -73,11 +68,33 @@ public class FileController {
 		}
 	}
 
+	public static final List<String> IMG_SUFFIXES = Arrays.asList("jpg", "jpeg", "png");
+	private static List<String> fileNames = null;
 	@GetMapping("/files")
 	@ResponseBody
 	public JSONObject files() {
+		File dir = new File(fileUploadRootDir);
+		if (fileNames == null || fileNames.isEmpty()) {
+			List<String> names = new ArrayList<>();
+			File[] files = dir.listFiles(new FileFilter() {
+				@Override
+				public boolean accept(File file) {
+					String name = file == null ? null : file.getName();
+					int ind = name == null ? -1 : name.lastIndexOf(".");
+					String suffix = ind < 0 ? null : name.substring(ind + 1);
+					boolean isImg = suffix != null && IMG_SUFFIXES.contains(suffix.toLowerCase());
+					if (isImg) {
+						names.add(name);
+					}
+					return isImg;
+				}
+			});
+
+			fileNames = names;
+		}
+
 		JSONObject res = new JSONObject();
-		res.put("data", fileRepository);
+		res.put("data", fileNames);
 		return new DemoParser().extendSuccessResult(res);
 	}
 
@@ -91,7 +108,7 @@ public class FileController {
 			fileOutputStream.write(file.getBytes());
 			fileOutputStream.close();
 
-			fileRepository.add(file.getOriginalFilename());
+			fileNames.add(file.getOriginalFilename());
 
 			JSONObject res = new JSONObject();
 			res.put("path", "/download/" + file.getOriginalFilename());
