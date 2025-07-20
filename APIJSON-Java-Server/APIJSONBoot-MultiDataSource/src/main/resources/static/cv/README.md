@@ -214,7 +214,7 @@ https://github.com/TommyLemon/APIAuto/issues
 
 
 ### 持续更新
-https://github.com/TommyLemon/CVAuto/commits/master
+https://github.com/TommyLemon/CVAuto/commits
 
 
 ### 我要赞赏
