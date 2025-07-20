@@ -108,7 +108,9 @@ public class FileController {
 			fileOutputStream.write(file.getBytes());
 			fileOutputStream.close();
 
-			fileNames.add(file.getOriginalFilename());
+			if (fileNames != null && ! fileNames.isEmpty()) {
+				fileNames.add(file.getOriginalFilename());
+			}
 
 			JSONObject res = new JSONObject();
 			res.put("path", "/download/" + file.getOriginalFilename());
