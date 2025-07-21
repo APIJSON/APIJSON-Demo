@@ -1212,6 +1212,7 @@ https://github.com/Tencent/APIJSON/issues
       allowMultiple: true,
       isFullScreen: false,
       hoverIds: { before: null, diff: null, after: null },
+      sameRandomIds: [],
       compareRandomIds: null, // [],
       detection: {
         isShowNum: false,
@@ -6794,7 +6795,7 @@ https://github.com/Tencent/APIJSON/issues
               Random: {
                 id: -(index || 0) - 1, //表示未上传
                 toId: random.id,
-                userId: random.userId || doc.userId,
+                // userId: random.userId || doc.userId,
                 documentId: random.documentId || doc.id,
                 count: 1,
                 name: '分析位于 ' + index + ' 的这张图片',
@@ -7122,6 +7123,10 @@ https://github.com/Tencent/APIJSON/issues
         detection.beforeAllF1Str = (100*allF1).toFixed(0);
 
         this.detection = detection;
+        var compareRandomIds = this.compareRandomIds;
+        if (compareRandomIds instanceof Array) {
+          compareRandomIds = [...new Set([...compareRandomIds, ...this.sameRandomIds])];
+        }
 
         this.adminRequest('/get', {
           "TestRecord[]": {
@@ -7135,7 +7140,7 @@ https://github.com/Tencent/APIJSON/issues
               "total>=": 0,
               "wrong>=": 0,
               "correct>=": 0,
-              'randomId{}': this.compareRandomIds,
+              'randomId{}': compareRandomIds,
               // "@explain": true
             }
           }
@@ -11908,6 +11913,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           default:
             it.compareColor = 'white'
             it.hintMessage = '结果正确'
+            if (isRandom && tr.randomId != null) {
+              var sameRandomIds = this.sameRandomIds || [];
+              if (! compareRandomIds.includes(tr.randomId)) {
+                sameRandomIds.push(tr.randomId);
+                this.sameRandomIds = sameRandomIds;
+              }
+            }
             break;
         }
 
