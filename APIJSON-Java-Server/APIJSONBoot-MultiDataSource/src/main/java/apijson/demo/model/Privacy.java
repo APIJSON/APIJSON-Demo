@@ -18,7 +18,7 @@ import static apijson.orm.AbstractVerifier.ADMIN;
 import static apijson.orm.AbstractVerifier.OWNER;
 import static apijson.orm.AbstractVerifier.UNKNOWN;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.alibaba.fastjson2.annotation.JSONField;
 
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;

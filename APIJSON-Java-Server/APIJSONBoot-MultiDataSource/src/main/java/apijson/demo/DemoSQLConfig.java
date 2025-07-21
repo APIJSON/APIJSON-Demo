@@ -32,7 +32,6 @@ import apijson.orm.Parser;
 //import apijson.surrealdb.SurrealDBUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
-import com.alibaba.fastjson.annotation.JSONField;
 
 import apijson.framework.ColumnUtil;
 import apijson.fastjson2.APIJSONSQLConfig;
