@@ -11916,7 +11916,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             it.hintMessage = '结果正确'
             if (isRandom && tr.randomId != null) {
               var sameRandomIds = this.sameRandomIds || [];
-              if (! compareRandomIds.includes(tr.randomId)) {
+              if (! sameRandomIds.includes(tr.randomId)) {
                 sameRandomIds.push(tr.randomId);
                 this.sameRandomIds = sameRandomIds;
               }
