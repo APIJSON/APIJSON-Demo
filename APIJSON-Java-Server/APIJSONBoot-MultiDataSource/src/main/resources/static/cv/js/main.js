@@ -6795,7 +6795,7 @@ https://github.com/Tencent/APIJSON/issues
               Random: {
                 id: -(index || 0) - 1, //表示未上传
                 toId: random.id,
-                // userId: random.userId || doc.userId,
+                userId: random.userId || doc.userId,
                 documentId: random.documentId || doc.id,
                 count: 1,
                 name: '分析位于 ' + index + ' 的这张图片',
@@ -6926,6 +6926,7 @@ https://github.com/Tencent/APIJSON/issues
         if (isPost) {
           r.id = undefined
         }
+        r.userId = undefined
 
         this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + (isPost ? '/post' : '/put'), {
           Random: r,
