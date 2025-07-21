@@ -2462,7 +2462,7 @@ var JSONResponse = {
     return item.bbox || item.box || item
   },
   getScore: function (item) {
-    return item.score || item.probability || item.possibility || item.feasibility || item.eventuality || item.odds || item.prob || item.possib || item.feasib || item.eventual;
+    return item.score || item.confidence || item.probability || item.possibility || item.feasibility || item.eventuality || item.odds || item.conf || item.prob || item.possib || item.feasib || item.eventual;
   },
 
   drawDetections: function(canvas, detection, options, img, ctx) {
@@ -2485,11 +2485,11 @@ var JSONResponse = {
     ctx.textBaseline = 'top';
 
     const placedLabels = [];
-    const rotateBoxes = options.rotateBoxes || false;
-    const rotateText = options.rotateText || false;
-    const showLabelBackground = options.labelBackground || false;
-    const hoverBoxId = options.hoverBoxId || null;
-    const visiblePaths = options.visiblePaths || null;
+    const rotateBoxes = options.rotateBoxes;
+    const rotateText = options.rotateText;
+    const showLabelBackground = options.labelBackground;
+    const hoverBoxId = options.hoverBoxId;
+    const visiblePaths = options.visiblePaths;
     const stage = options.stage;
     const isDiff = stage === 'diff';
     const markable = options.markable || stage !== 'before';
@@ -2504,7 +2504,7 @@ var JSONResponse = {
     // Draw bboxes
     var bboxes = JSONResponse.getBboxes(detection) || []
     bboxes?.forEach((item, index) => {
-      const isHovered = item.id === hoverBoxId;
+      const isHovered = index === hoverBoxId;
       const visible = ! visiblePaths || visiblePaths.length <= 0 || visiblePaths.includes(item.path || item.id);
       if (! visible) {
         return;
@@ -2527,9 +2527,9 @@ var JSONResponse = {
       }
 
       const [r, g, b, a] = color || [0, 255, 0, 255];
-      const rgba = `rgba(${r}, ${g}, ${b}, ${Math.min(0.5, a / 255)})`;
+      const rgba = `rgba(${r}, ${g}, ${b}, ${hoverBoxId != null || ! isHovered ? 0.3 : Math.min(0.5, a < 1 ? a : a / 255)})`;
 
-      const reversedRgba = `rgba(${255 - r}, ${255 - g}, ${255 - b}`; // , 0.2`; // ${1 - a/255})`;
+      const reversedRgba = `rgba(${255 - r}, ${255 - g}, ${255 - b}`, ${isHovered || hoverBoxId == null ? 1 : 0.3})`;
       // const luma = 0.299 * r + 0.587 * g + 0.114 * b;
       const backgroundFill = rgba; // 还是有些看不清 luma > 186 ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)';
 
@@ -2546,6 +2546,10 @@ var JSONResponse = {
         ctx.rotate((angle * Math.PI) / 180);
         ctx.strokeRect(-w / 2, -h / 2, w, h);
         ctx.restore();
+      }
+
+      if (hoverBoxId != null && ! isHovered) {
+        return
       }
 
       // Label
@@ -2618,7 +2622,11 @@ var JSONResponse = {
     // Draw lines
     var lines = JSONResponse.getLines(detection);
     if (lines instanceof Array) {
-      lines?.forEach((item) => {
+      lines?.forEach((item, index) => {
+        if (isRoot && hoverBoxId != null && index != hoverBoxId) {
+          return;
+        }
+
         var [x, y, w, h, d] = JSONResponse.getXYWHD(item);
         const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) < 1 && Math.abs(h) < 1;
         x = isRate ? x*width : x*xRate;
@@ -2651,7 +2659,11 @@ var JSONResponse = {
     // Draw points
     var points = JSONResponse.getPoints(detection);
     if (points instanceof Array) {
-      points?.forEach((item) => {
+      points?.forEach((item, index) => {
+        if (isRoot && hoverBoxId != null && index != hoverBoxId) {
+          return;
+        }
+
         var [x, y, w, h, d] = JSONResponse.getXYWHD(item);
         const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) < 1 && Math.abs(h) < 1;
         x = isRate ? x*width : x*xRate;
@@ -2681,10 +2693,19 @@ var JSONResponse = {
     // Draw polygons
     var polygons = JSONResponse.getPolygons(detection);
     if (polygons instanceof Array) {
-      polygons.forEach((item, i) => {
+      polygons.forEach((item, index) => {
+        if (isRoot && hoverBoxId != null && index != hoverBoxId) {
+          return;
+        }
+
         var points = JSONResponse.getPoints(item) || item;
         if (points instanceof Array) {
           const color = item.color || detection.color || detection.bbox?.color;
+          if (color != null && color.length >= 3) {
+            var alpha = color[3] || 0.5;
+            color[3] = alpha <= 1 ? alpha : alpha/255;
+          }
+
           const rgba = color == null || color.length < 3 ? null : `rgba(${color.join(',')})`;
           if (rgba != null) {
             ctx.fillStyle = rgba;

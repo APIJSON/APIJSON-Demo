@@ -2640,7 +2640,11 @@ https://github.com/Tencent/APIJSON/issues
       },
       // 根据测试用例/历史记录恢复数据
       restoreRemote: function (index, item, test, showRandom) {
-        this.currentDocIndex = index
+        if (this.currentDocIndex != index) {
+          this.currentDocIndex = index
+          this.currentRandomIndex = -1
+        }
+
         this.currentRemoteItem = item
         if (showRandom != null) {
            this.isRandomShow = showRandom
@@ -4887,7 +4891,7 @@ https://github.com/Tencent/APIJSON/issues
 //                'reportId': reportId <= 0 ? null : reportId,
 //                'invalid': reportId == null ? 0 : null,
                 '@order': 'date-',
-                '@column': 'id,userId,documentId,testAccountId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,response' + (this.isStatisticsEnabled ? ',compare' : '')+ (isMLEnabled ? ',standard' : ''),
+                '@column': 'id,userId,documentId,testAccountId,reportId,duration,minDuration,maxDuration,response' + (this.isStatisticsEnabled ? ',compare' : '')+ (isMLEnabled ? ',standard' : ''),
                 'standard{}': isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
               },
               'Script:pre': {
@@ -6972,7 +6976,13 @@ https://github.com/Tencent/APIJSON/issues
         const img = this.imgMap[stage];
         const canvas = this.canvasMap[stage];
         const det = detection[stage];
+        const isBefore = stage === 'before';
         const isDiff = stage === 'diff';
+
+        const cri = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
+        const tr = (isBefore ? cri.TestRecord : detection) || [];
+        const corrects = tr.corrects || [];
+        const wrongs = tr.wrongs || [];
 
         JSONResponse.drawDetections(canvas, det, {
           hoverBoxId: this.hoverIds[stage],
@@ -6981,9 +6991,8 @@ https://github.com/Tencent/APIJSON/issues
           rotateBoxes: true,
           rotateText: false,
           stage: stage,
-          // markable: stage == 'after', // 'diff',
-          corrects: detection.corrects,
-          wrongs: detection.wrongs,
+          corrects: corrects,
+          wrongs: wrongs,
           styleOverride: isDiff ? (box, isBefore) => {
             if (! box.color) { // 防止空色
               box.color = [255, 255, 255, 128]
@@ -7000,7 +7009,7 @@ https://github.com/Tencent/APIJSON/issues
       compute: function() {
         const detection = this.detection || {};
         var total = detection.total;
-        const cri = this.currentRandomItem = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
+        const cri = this.currentRandomItem = this.randoms[this.currentRandomIndex] || {};
         const random = cri.Random = cri.Random || {};
         const tr = cri.TestRecord = cri.TestRecord || {};
         const corrects = tr.corrects = tr.corrects || [];
@@ -7039,11 +7048,7 @@ https://github.com/Tencent/APIJSON/issues
           detection[stage + 'PrecisionStr'] = (100*precision).toFixed(0) + '%';
           detection[stage + 'F1Str'] = (100*f1).toFixed(0) + '%';
         })
-      },
 
-      summary: function() {
-        const detection = this.detection || {};
-        var total = detection.total;
         if (total <= 0) {
           detection.total = total = detection.afterCorrect || detection.beforeCorrect;
         }
@@ -7060,6 +7065,10 @@ https://github.com/Tencent/APIJSON/issues
         detection.diffRecallStr = (diffRecall >= 0 ? '+' : '') + (100*diffRecall).toFixed(0) + '%';
         detection.diffPrecisionStr = (diffPrecision >= 0 ? '+' : '') + (100*diffPrecision).toFixed(0) + '%';
         detection.diffF1Str = (diffF1 >= 0 ? '+' : '') + (100*diffF1).toFixed(0) + '%';
+      },
+
+      summary: function() {
+        const detection = this.detection || {};
 
         var allImgTotal = 0;
         var allImgCorrect = 0;
@@ -7135,12 +7144,9 @@ https://github.com/Tencent/APIJSON/issues
 
           var data = res.data || {}
           var trs = data['TestRecord[]'] || []
-          var len = trs.length;
-          var afterTr = trs[len - 1] || {};
-          var beforeTr = trs[len - 2] || {};
-          ['after', 'before', 'diff'].forEach(stage => {
+          ['after', 'before', 'diff'].forEach((stage, i) => {
             var isDiff = stage == 'diff';
-            var curTr = stage == 'after' ? afterTr : (stage == 'before' ? beforeTr : {});
+            var curTr = trs[i] || {};
 
             if (isDiff) {
               ['Img', 'All'].forEach(type => {
@@ -7192,11 +7198,14 @@ https://github.com/Tencent/APIJSON/issues
       },
       processDiffAndAutoMark: function() {
         var detection = this.detection || {};
-        const cri = this.currentRandomItem = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
+        const cri = this.currentRandomItem = this.randoms[this.currentRandomIndex] || {};
         const random = cri.Random = cri.Random || {};
         const tr = cri.TestRecord = cri.TestRecord || {};
         const corrects = tr.corrects = tr.corrects || [];
         const wrongs = tr.wrongs = tr.wrongs || [];
+
+        this.img = random.img;
+        this.file = random.file;
 
         // var tests = this.tests[String(this.currentAccountIndex)] || {}
         // var currentResponse = (tests[random.documentId] || {})[
@@ -7224,7 +7233,7 @@ https://github.com/Tencent/APIJSON/issues
             .replaceAll(/'examples'/ig, '').replaceAll(/'example'/ig, '')
             .replaceAll(/'new'/ig, '').replaceAll('测试', '')
             .replaceAll('未命名', '').replaceAll('未知', '')
-            .replaceAll('示例', '').replaceAll('新建', '')
+            .replaceAll('示例', '').replaceAll('新建', '').replaceAll('下载', '')
             .replaceAll('图片', '').replaceAll('照片', '').replaceAll('相片', '');
 
         var dotInd = file.lastIndexOf('.');
@@ -12454,8 +12463,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         const random = item.Random = item.Random || {}
         var document;
         if (isRandom) {
+          this.currentRandomIndex = index;
+          this.currentRandomItem = item;
           if ((random.count || 0) > 1) {
-            this.currentRandomIndex = index
             // this.currentRandomSubIndex = -1
             this.restoreRandom(index, item)
             this.randomSubs = (item.subs || item['[]']) || []
@@ -12568,16 +12578,18 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             };
 
             const detection = this.detection || {};
-            var currentRandomItem = this.currentRandomItem = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
+            // var currentRandomItem = this.currentRandomItem = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
             if (testRecord.total != null && testRecord.total > 0) {
-              currentRandomItem.total = detection.total = testRecord.total;
+              detection.total = testRecord.total;
             } else {
-              testRecord.total = currentRandomItem.total || detection.total;
+              testRecord.total = detection.total;
             }
 
-            detection.beforeCorrect = testRecord.correct;
-            detection.beforeWrong = testRecord.wrong;
-            detection.beforeMiss = testRecord.miss;
+            detection.beforeCorrect = testRecord.correct || 0;
+            detection.beforeWrong = testRecord.wrong || 0;
+            detection.beforeMiss = testRecord.miss || (testRecord.total || 0) - detection.beforeCorrect;
+            detection.corrects = [];
+            detection.wrongs = [];
 
             if (testRecord.score != null && testRecord.score > 0) {
               detection.afterThreshold = detection.beforeThreshold = testRecord.score;
@@ -12768,6 +12780,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 recall: detection.afterRecall,
                 precision: detection.afterPrecision,
                 f1: detection.afterF1,
+                corrects: detection.corrects,
+                wrongs: detection.wrongs,
                 compare: JSON.stringify(testRecord.compare || {}),
                 response: rawRspStr,
                 standard: isML ? JSON.stringify(stddObj) : null
@@ -12852,7 +12866,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 // }
 
                 App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
-                App.summary()
+                App.summary();
               }
 
             })
@@ -12873,7 +12887,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'invalid': 0,
             'host': this.getBaseUrl(),
             '@order': 'date-',
-            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,response' + (this.isMLEnabled ? ',standard' : ''),
+            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,corrects,wrongs,response' + (this.isMLEnabled ? ',standard' : ''),
             'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
           }
         }, {}, function (url, res, err) {
