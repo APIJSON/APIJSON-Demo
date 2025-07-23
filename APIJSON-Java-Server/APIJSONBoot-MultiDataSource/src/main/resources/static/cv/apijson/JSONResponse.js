@@ -2284,10 +2284,28 @@ var JSONResponse = {
 
     var x = bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x || 0;
     var y = bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y || 0;
-    var w = bbox.w || bbox.width || ((bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || 0) - x);
-    var h = bbox.h || bbox.height || ((bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || 0) - y);
+    var w = bbox.width || bbox.w || ((bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || 0) - x);
+    var h = bbox.height || bbox.h || ((bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || 0) - y);
     var d = bbox.degree || bbox.angle || bbox.rotate || bbox.perspective || bbox.d || bbox.r || bbox.p || bbox.a;
     return [+ (x || 0), + (y || 0), + (w || 0), + (h || 0), + (d || 0)];
+  },
+  getXYXYD: function (bbox) {
+    if (bbox == null) {
+      return null;
+    }
+    if (JSONResponse.isString(bbox)) {
+      bbox = StringUtil.split(bbox, ',', true);
+    }
+    if (bbox instanceof Array) {
+      return [+ (bbox[0] || 0), + (bbox[1] || 0), + (bbox[2] || 0), + (bbox[3] || 0), + (bbox[4] || 0)];
+    }
+
+    var x = bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x || 0;
+    var y = bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y || 0;
+    var x2 = bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || ((bbox.width || bbox.w || 0) + x);
+    var y2 = bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || ((bbox.height || bbox.h || 0) + y);
+    var d = bbox.degree || bbox.angle || bbox.rotate || bbox.perspective || bbox.d || bbox.r || bbox.p || bbox.a;
+    return [+ (x || 0), + (y || 0), + (x2 || 0), + (y2 || 0), + (d || 0)];
   },
   /**
    * 计算两个 bbox（[x, y, w, h, r]）的 IoU
@@ -2528,7 +2546,7 @@ var JSONResponse = {
           }
 
           const [r, g, b, a] = color || [0, 255, 0, 255];
-          const rgba = `rgba(${r}, ${g}, ${b}, ${hoverBoxId != null || ! isHovered ? 0.3 : Math.min(0.5, a < 1 ? a : a / 255)})`;
+          const rgba = `rgba(${r}, ${g}, ${b}, ${hoverBoxId != null && ! isHovered ? 0.3 : Math.min(0.5, a < 1 ? a : a / 255)})`;
 
           const reversedRgba = `rgba(${255 - r}, ${255 - g}, ${255 - b}, ${isHovered || hoverBoxId == null ? 1 : 0.3})`;
           // const luma = 0.299 * r + 0.587 * g + 0.114 * b;
@@ -2553,8 +2571,16 @@ var JSONResponse = {
             return
           }
 
+          is_before = item['@before'];
+          mark = '';
+          if (markable && is_before != true) {
+            const isWrong = wrongs.indexOf(isDiff ? item['@index'] : index) >= 0; // item.correct === false;
+            // 绘制 √ 和 ×
+            mark = isWrong ? '× ' : '✓ ';
+          }
+
           // Label
-          const label = (isDiff ? (item['@before'] ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}-${item.id || ''} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
+          const label = mark + (isDiff ? (is_before ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}-${item.id || ''} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
           // ctx.font = 'bold 36px';
           // const size = ctx.measureText(label);
           // const textHeight = size.height || height*0.1; // Math.max(height*0.1, size.height);
@@ -2606,17 +2632,6 @@ var JSONResponse = {
           ctx.fillText(label, labelX, labelY);
           ctx.restore();
 
-          if (markable && item['@before'] != true) {
-            const isWrong = wrongs.indexOf(isDiff ? item['@index'] : index) >= 0; // item.correct === false;
-            // 绘制 √ 和 ×
-            ctx.font = `bold ${fontSize}px sans-serif`;
-            // ctx.fillStyle = isWrong ? 'red' : 'green';
-            ctx.fillStyle = isWrong ? 'red' : 'green';
-            const checkX = labelX + textWidth + 4;
-            const checkY = labelY;
-            ctx.fillText(isWrong ? '×' : '√', checkX, checkY);
-          }
-
           JSONResponse.drawDetections(canvas, item, options, img, ctx);
         });
     }
@@ -2629,12 +2644,12 @@ var JSONResponse = {
           return;
         }
 
-        var [x, y, w, h, d] = JSONResponse.getXYWHD(item);
-        const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) < 1 && Math.abs(h) < 1;
+        var [x, y, x2, y2, d] = JSONResponse.getXYXYD(item);
+        const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(x2) < 1 && Math.abs(y2) < 1;
         x = isRate ? x*width : x*xRate;
         y = isRate ? y*height : y*yRate;
-        w = isRate ? w*width : w*xRate;
-        h = isRate ? h*height : h*yRate;
+        x2 = isRate ? x2*width : x2*xRate;
+        y2 = isRate ? y2*height : y2*yRate;
 
         const color = item.color || detection.color || detection.bbox?.color;
         const rgba = color == null || color.length <= 0 ? null : `rgba(${color.join(',')})`;
@@ -2645,7 +2660,7 @@ var JSONResponse = {
 
         ctx.beginPath();
         ctx.moveTo(x, y);
-        ctx.lineTo(x + w, y + h);
+        ctx.lineTo(x2, y2);
         ctx.stroke();
 
         if (isRoot) {
