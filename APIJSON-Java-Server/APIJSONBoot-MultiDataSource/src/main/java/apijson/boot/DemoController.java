@@ -22,6 +22,8 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import com.fasterxml.jackson.databind.util.LRUMap;
 
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -31,6 +33,7 @@ import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.Array;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.rmi.ServerException;
@@ -2678,6 +2681,65 @@ public class DemoController extends APIJSONController<Long> {
     //public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
     //    super.invokeMethod(request, servletRequest);
     //}
+
+    @PostMapping("method/list")
+    public Map<String, Object> listMethod(@RequestBody String request) {
+        if (Log.DEBUG == false) {
+            return MethodUtil.JSON_CALLBACK.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用 UnitAuto 单元测试！"));
+        }
+        return MethodUtil.listMethod(request);
+    }
+
+    @PostMapping("method/invoke")
+    public void invokeMethod(@RequestBody String request, HttpServletRequest servletRequest) {
+        AsyncContext asyncContext = servletRequest.startAsync();
+
+        final boolean[] called = new boolean[] { false };
+        MethodUtil.Listener<com.alibaba.fastjson.JSONObject> listener = new MethodUtil.Listener<com.alibaba.fastjson.JSONObject>() {
+
+            @Override
+            public void complete(com.alibaba.fastjson.JSONObject data, Method method, MethodUtil.InterfaceProxy proxy, Object... extras) throws Exception {
+
+                ServletResponse servletResponse = called[0] ? null : asyncContext.getResponse();
+                if (servletResponse == null) {  //  || servletResponse.isCommitted()) {  // isCommitted 在高并发时可能不准，导致写入多次
+                    Log.w(TAG, "invokeMethod  listener.complete  servletResponse == null || servletResponse.isCommitted() >> return;");
+                    return;
+                }
+                called[0] = true;
+
+                servletResponse.setCharacterEncoding(servletRequest.getCharacterEncoding());
+                servletResponse.setContentType(servletRequest.getContentType());
+                servletResponse.getWriter().println(data);
+                asyncContext.complete();
+            }
+        };
+
+        if (Log.DEBUG == false) {
+            try {
+                listener.complete(MethodUtil.JSON_CALLBACK.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用 UnitAuto 单元测试！")));
+            }
+            catch (Exception e1) {
+                e1.printStackTrace();
+                asyncContext.complete();
+            }
+
+            return;
+        }
+
+        try {
+            MethodUtil.invokeMethod(request, null, listener);
+        }
+        catch (Exception e) {
+            Log.e(TAG, "invokeMethod  try { JSONObject req = JSON.parseObject(request); ... } catch (Exception e) { \n" + e.getMessage());
+            try {
+                listener.complete(MethodUtil.JSON_CALLBACK.newErrorResult(e));
+            }
+            catch (Exception e1) {
+                e1.printStackTrace();
+                asyncContext.complete();
+            }
+        }
+    }
 
     // 为 UnitAuto 提供的单元测试接口  https://github.com/TommyLemon/UnitAuto  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
