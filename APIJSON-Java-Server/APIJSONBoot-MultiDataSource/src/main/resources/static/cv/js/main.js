@@ -1319,15 +1319,15 @@ https://github.com/Tencent/APIJSON/issues
       testCases: [],
       randoms: [],
       randomSubs: [],
-      account: '13000082001',
+      account: '13000082005',
       password: '123456',
       logoutSummary: {},
       accounts: [
         {
           'id': 82001,
           'isLoggedIn': false,
-          'name': '测试账号1',
-          'phone': '13000082001',
+          'name': '测试账号5',
+          'phone': '13000082005',
           'password': '123456'
         },
         {
@@ -1465,13 +1465,14 @@ https://github.com/Tencent/APIJSON/issues
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
       schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
       otherEnv: 'http://localhost:8080',  // 其它环境服务地址，用来对比当前的
-      server: 'http://apijson.cn:9090', // 'http://localhost:8080', //  Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了
+      server: 'http://apijson.cn:8080', // 'http://localhost:8080', //  Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了
       // server: 'http://47.74.39.68:9090',  // apijson.org
       projectHost: {host: 'http://apijson.cn:8080', project: 'APIJSON.cn'},  // apijson.cn
       thirdParty: 'SWAGGER /v2/api-docs',  //apijson.cn
       // thirdParty: 'RAP /repository/joined /repository/get',
       // thirdParty: 'YAPI /api/interface/list_menu /api/interface/get',
       projectHosts: [
+         {host: 'http://localhost:5000', project: 'Localhost'},
          {host: 'http://localhost:8080', project: 'Localhost'},
          {host: 'http://apijson.cn:8080', project: 'APIJSON.cn'},
          {host: 'http://apijson.cn:9090', project: 'APIJSON.cn:9090'}
@@ -1479,7 +1480,7 @@ https://github.com/Tencent/APIJSON/issues
       language: CodeUtil.LANGUAGE_KOTLIN,
       header: {},
       page: 0,
-      count: 50,
+      count: 20,
       search: '',
       chainGroupPage: 0,
       chainGroupPages: {},
@@ -1495,15 +1496,15 @@ https://github.com/Tencent/APIJSON/issues
       caseGroupSearches: {},
       testCasePage: 0,
       testCasePages: {},
-      testCaseCount: 50,
+      testCaseCount: 20,
       testCaseCounts: {},
       testCaseSearch: '',
       testCaseSearches: {},
       randomPage: 0,
-      randomCount: 50,
+      randomCount: 10,
       randomSearch: '',
       randomSubPage: 0,
-      randomSubCount: 50,
+      randomSubCount: 10,
       randomSubSearch: '',
       doneCount: 0,
       allCount: 0,
@@ -5687,10 +5688,10 @@ https://github.com/Tencent/APIJSON/issues
       saveCache: function (url, key, value) {
         var cache = this.getCache(url);
         cache[key] = value
-        localStorage.setItem('APIAuto:' + url, JSON.stringify(cache))
+        localStorage.setItem('CVAuto:' + url, JSON.stringify(cache))
       },
       getCache: function (url, key, defaultValue) {
-        var cache = localStorage.getItem('APIAuto:' + url)
+        var cache = localStorage.getItem('CVAuto:' + url)
         try {
           cache = parseJSON(cache)
         } catch(e) {
@@ -5846,7 +5847,7 @@ https://github.com/Tencent/APIJSON/issues
 
         if (user == null || StringUtil.isEmpty(user.phone, true)) {
           user = {
-            phone: '13000082001',
+            phone: '13000082005',
             password: '123456'
           }
         }
@@ -8442,7 +8443,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
 
               var answer = StringUtil.get(typeof data2 == 'string' ? data2 : (data instanceof Array ? data2.join() : JSON.stringify(data2)))
-                .replaceAll('/wiki/Tencent/APIJSON#', 'https://deepwiki.com/Tencent/APIJSON/').replaceAll('/wiki/TommyLemon/APIAuto#', 'https://deepwiki.com/TommyLemon/APIAuto/');
+                .replaceAll('/wiki/Tencent/APIJSON#', 'https://deepwiki.com/Tencent/APIJSON/').replaceAll('/wiki/TommyLemon/CVAuto#', 'https://deepwiki.com/TommyLemon/CVAuto/');
               App.view = 'markdown';
               vOutput.value += answer;
               markdownToHTML(vOutput.value)
@@ -8476,7 +8477,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                       }
 
                       answer += '\n' + StringUtil.trim(typeof data2 == 'string' ? data2 : (data2 instanceof Array ? data2.join() : JSON.stringify(data2)))
-                        .replaceAll('/wiki/Tencent/APIJSON#', 'https://deepwiki.com/Tencent/APIJSON/').replaceAll('/wiki/TommyLemon/APIAuto#', 'https://deepwiki.com/TommyLemon/APIAuto/');
+                        .replaceAll('/wiki/Tencent/APIJSON#', 'https://deepwiki.com/Tencent/APIJSON/').replaceAll('/wiki/TommyLemon/CVAuto#', 'https://deepwiki.com/TommyLemon/CVAuto/');
                     }
 
                     answer += '\n<br/>\n';
@@ -8550,11 +8551,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, 'https://api.devin.ai/ada/query', {
               "engine_id": vDeepSearch.checked ? "agent" : "multihop",
-              "user_query": "<relevant_context>" + (isRes ? "这是用 HTTP 接口工具 TommyLemon/APIAuto 发请求后的响应结果，分析并" : "") + "用中文回答：</relevant_context><br/>\n" + user_query,
+              "user_query": "<relevant_context>" + (isRes ? "这是用 HTTP 接口工具 TommyLemon/CVAuto 发请求后的响应结果，分析并" : "") + "用中文回答：</relevant_context><br/>\n" + user_query,
               "keywords": [],
               "repo_names": JSONObject.isAPIJSONPath(this.getMethod()) ? [
-                "Tencent/APIJSON", "TommyLemon/APIAuto"
-              ] : ["TommyLemon/APIAuto"],
+                "Tencent/APIJSON", "TommyLemon/CVAuto"
+              ] : ["TommyLemon/CVAuto"],
               "additional_context": "",
               "query_id": this.uuid,
               "use_notes": false,
