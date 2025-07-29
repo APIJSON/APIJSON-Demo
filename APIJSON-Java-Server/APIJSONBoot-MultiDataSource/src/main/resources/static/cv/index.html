@@ -95,8 +95,8 @@
 
         <!--只用60%避免拦截左右两侧View的触摸事件-->
         <div style="width: 40%;height: 100%;left: 30%;display: inline-block;text-align: center;position: fixed;padding-top: 10px">
-            <a style="font-size: large;margin-left: 10px;margin-right: 10px;color: silver" href="https://github.com/Tencent/APIJSON/blob/master/Document.md" target="_blank" >文档</a>
-            <a style="font-size: large;margin-left: 10px;margin-right: 10px;color: silver" href="https://search.bilibili.com/all?keyword=APIJSON" target="_blank" >视频</a>
+            <a style="font-size: large;margin-left: 10px;margin-right: 10px;color: silver" href="https://github.com/TommyLemon/CVAuto?tab=readme-ov-file#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B" target="_blank" >文档</a>
+            <a style="font-size: large;margin-left: 10px;margin-right: 10px;color: silver" href="https://search.bilibili.com/all?keyword=APIAuto&order=click" target="_blank" >视频</a>
             <a style="font-size: large;margin-left: 10px;margin-right: 10px;color: silver" href="https://github.com/search?o=desc&q=apijson&s=stars&type=Repositories" target="_blank" >生态</a>
         </div>
 
@@ -370,14 +370,8 @@ Ctrl + S 或 Command + S 保存当前用例；
 
 " >
 {
-    "User": {
-        "id": "82001"
-    }, // 以上查一个对象，以下查一个数组，Comment.userId = User.id。在键值对后按 Enter 回车键自动智能生成补全提示
-    "[]": {
-         Comment : {
-            'userId@': "User/id"
-        }
-    }
+    "conf": 0.3, // 置信度阈值
+    "image": "http://apijson.cn/images/APIJSON_QECon_small.jpg" // 图片 URL/Base64
 }
 
 /*
@@ -1130,7 +1124,7 @@ fun(true, 1, 'a'..);
   var vVerify = document.getElementById("vVerify");
   var vRemember = document.getElementById("vRemember");
 
-  vUrl.value = StringUtil.get(URL_BASE + '/get'); //main.js里访问不到，可能是script引用顺序问题
+  vUrl.value = StringUtil.get(URL_BASE + '/predict'); //main.js里访问不到，可能是script引用顺序问题
 
   var vRequestMarkdown = document.getElementById('vRequestMarkdown');
   var vMarkdown = document.getElementById('vMarkdown');

@@ -1388,7 +1388,7 @@ https://github.com/Tencent/APIJSON/issues
       isConfigShow: false,
       isDeleteShow: false,
       groupShowType: 0,
-      caseShowType: 0,
+      caseShowType: 1,
       chainShowType: 0,
       statisticsShowType: 0,
       currentHttpResponse: {},
