@@ -2,24 +2,32 @@
   CVAuto
 </h1>
  
-<p align="center">👁 零代码 CV AI 自动化测试平台 🚀 <br>零代码、自动化测试 CV 计算机视觉 AI 人工智能图像识别算法</p>
+<p align="center">👁 零代码零标注 CV AI 自动化测试平台 🚀 <br>零代码快速自动化测试 CV 计算机视觉 AI 人工智能图像识别算法</p>
 
 <p align="center" >
   <a href="https://deepwiki.com/TommyLemon/CVAuto">English</a>
   <a href="https://github.com/TommyLemon/CVAuto#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B">快速上手</a>
   <a href="https://search.bilibili.com/all?keyword=APIAuto">视频教程</a>
-  <a href="http://apijson.cn/cv">在线体验</a>
+  <a href="http://apijson.cn:8080/cv/index.html">在线体验</a>
   <a href="https://deepwiki.com/TommyLemon/CVAuto">AI 问答</a>
 </p>
 
 
 ---
 
-不用提前标注画框及标签等作为 Ground Truth 这种工作量巨大的人工手动繁琐操作， <br/>
-只需上传测试图片，通过 HTTP API 调用算法模型得到推理后返回的 JSON 响应结果， <br/>
-然后自动在图上绘制 label 标签、box 画框、line 连线、point 关键点、polygon 多边形等， <br/>
-自动断言画框是否正确，可点击边框来调整对错(√ 和 X)，一键上传可作为基准的断言结果， <br/>
-自动统计正确数、误报数、漏检数、召回率、精准率、F1 Score 等指标、自动对比前后效果。 <br/>
+**不用提前标注画框及标签**等作为 Ground Truth 这种工作量巨大的人工手动繁琐耗时操作， <br/>
+**只需上传测试图片**，一键通过 HTTP API 调用算法模型得到推理后返回的 JSON 响应结果， <br/>
+然后**自动在图上绘制** label 标签、box 画框、line 连线、point 关键点、polygon 多边形等， <br/>
+**自动断言**画框是否正确，**可点边框附近来调整 ✓ 对 X 错**，一键上传可作为基准的本次结果， <br/>
+**自动统计**正确数、误报数、漏检数、召回率、精准率、F1 Score 等指标，**自动对比前后效果**。 <br/>
+
+![CVAuto-with-AIServer](https://github.com/user-attachments/assets/847bff1c-bd7d-4ac9-ad7c-7b95f2fa9850)
+
+上图左侧是工具网页，右侧是模拟被测试的 YOLO 检测、姿态、分割 等算法模型 Python AI 推理服务；<br/>
+左侧分别有 本次、对比差异、之前 的推理后画框及标签等渲染图，差异中的 + 表示新增，- 表示减少；<br/>
+本次 所有框 和 差异所有 + 框 都可**点框附近把默认的 ✓ 改为 X 表示推理误报**，各指标会马上自动更新；<br/>
+当前图片确认无误后，**点击 \[对的，纠正] 按钮来上传本次结果**，点击 总计指标 来切换显示 数量/百分比。<br/>
+**在之前图片右上角输入实际目标数量**；中间图片列表顶部 **点右上角 + 批量上传图片**，**点左侧 ↻ 回归测试**。 <br/>
 
 ### 支持算法
 * **目标检测**：行人、车辆、异物、零部件 等
@@ -27,10 +35,10 @@
 * **文本识别**：书籍、网页、车牌、包装盒 等
 * **姿态估计**：舞蹈、体操、人机交互游戏 等
 * **图像分割**：抠图、路人消除、背景替换 等
-* **人脸识别**：根据脸部特征识别出具体是谁
-* **旋转角度**：对有直边的物体校正水平角度
+* **人脸识别**：根据脸部特征 识别出具体是谁
+* **旋转校正**：对有直边的物体 校正歪斜角度
 
-**本项目是基于 机器学习 HTTP 接口工具 APIAuto 定制，原理和使用可参考 APIAuto 的文档及视频。**
+**本项目基于 机器学习零代码自动化接口工具 APIAuto 定制，原理和使用可参考相关文档及视频** 
 
 ### 演讲稿件
 [APIAuto-机器学习 HTTP 接口工具](https://github.com/TommyLemon/StaticResources/tree/master/APIAuto/Share) <br />
@@ -80,14 +88,18 @@ https://www.bilibili.com/video/BV1JZ4y1d7c8
 可以用浏览器打开 index.html，建议用 [Chrome](https://www.google.com/intl/zh-CN/chrome) 或 [Firefox](https://www.mozilla.org/zh-CN/firefox) (Safari、Edge、IE 等可能有兼容问题)，注意此方法不显示 svg 图标。<br />
 也可以用 [IntelliJ Webstorm](https://www.jetbrains.com/webstorm/), [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](https://www.eclipse.org/) 等 IDE 来打开。<br />
 也可以部署到服务器并用 [Nginx](https://www.jianshu.com/p/11fa3a1a6d65) 或 [Node](https://segmentfault.com/a/1190000039744899) 反向代理，或者 [把源码放到 SpringBoot 项目的 resources/static 目录](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)。 <br />
-还可以直接访问官方网站 http://apijson.cn/api 或 http://apijson.cn:8080 <br />
+还可以直接访问官方网站 http://apijson.cn:8080/cv/index.html <br />
 <br />
-把左侧 URL 输入框内基地址改为你主机的地址(例如 http://localhost:8080 )，<br />
+把左侧 URL 输入框内基地址改为图片推理预测服务地址(例如 http://localhost:5000 )，<br />
 然后在右上角 设置 下拉菜单内修改 数据库类型Database、数据库模式Schema。<br />
 <br />
-右上角登录的默认管理员账号为 13000082001 密码为 123456，<br />
+右上角登录的默认管理员账号为 13000082005 密码为 123456，<br />
 右侧上方中间 3 个标签是默认的测试用户账号，点击登录/退出，左侧 - 删除，右侧 + 新增。<br />
 <br />
+
+**图片推理预测服务接口 可使用贵公司已部署的，或者在你的电脑部署本项目示例推理服务 AIServer：** <br /> 
+https://github.com/TommyLemon/CVAuto/tree/main/AIServer
+
 **自动生成文档、自动管理测试用例 这两个功能 需要部署 APIJSON 后端，建议用 APIJSONBoot 系列之一 Demo，见** <br /> 
 https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server
 
@@ -164,8 +176,8 @@ npm i xxx
 https://github.com/TommyLemon/APIAuto/issues/9
 
 如果是其它接口，则一般是以上原因或者被接口不支持 CORS 跨域，可以改为支持， <br />
-或者在 APIAuto 右上角设置开启托管服务器代理，通过后端代理访问接口， <br />
-注意默认是官网的托管服务器 http://apijson.cn:9090 ，仅支持公网， <br />
+或者在 CVAuto 右上角设置开启托管服务器代理，通过后端代理访问接口， <br />
+注意默认是官网的托管服务器 http://apijson.cn:8080 ，仅支持公网， <br />
 如果是贵公司内网，请按以上 [部署方法](https://github.com/TommyLemon/APIAuto#%E9%83%A8%E7%BD%B2%E6%96%B9%E6%B3%95) 文档来部署 APIJSON 后端到内网，并修改托管服务器地址。
 
 #### 2.没有生成文档
@@ -193,9 +205,9 @@ https://github.com/TommyLemon/APIAuto/issues
 ### 技术交流
 ##### 关于作者
 [https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
-![image](https://github.com/user-attachments/assets/c4aa8573-f8b3-4973-8c37-29677c06ac3b)
+![TommyLemon-GItHub](https://github.com/user-attachments/assets/4c2d9e75-01f7-4072-bed3-cfbd10076512)
 
-如果有什么问题或建议可以 [提 issue](https://github.com/TommyLemon/APIAuto/issues)，交流技术，分享经验。<br >
+如果有什么问题或建议可以 [去 APIAuto 提 issue](https://github.com/TommyLemon/APIAuto/issues)，交流技术，分享经验。<br >
 如果你解决了某些 bug，或者新增了一些功能，欢迎 [提 PR 贡献代码](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md)，感激不尽。
 <br />
 <br />
@@ -218,7 +230,7 @@ https://github.com/TommyLemon/CVAuto/commits
 
 
 ### 我要赞赏
-**创作不易、坚持更难，右上角点亮 ⭐Star 支持/收藏下本项目吧，谢谢 ^_^** <br />
+**创作不易、坚持更难，右上角点亮 ⭐ Star 支持/收藏下本项目吧，谢谢 ^_^** <br />
 https://github.com/TommyLemon/CVAuto
 
 

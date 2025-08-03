@@ -1207,16 +1207,20 @@ https://github.com/Tencent/APIJSON/issues
       error: {},
       requestVersion: 3,
       requestCount: 1,
-      urlComment: '一对多关联查询。可粘贴浏览器/抓包工具/接口工具 的 Network/Header/Content 等请求信息，自动填充到界面，格式为 key: value',
+      urlComment: '人车等检测图片推理预测。可粘贴浏览器/抓包工具/接口工具 的 Network/Header/Content 等请求信息，自动填充到界面，格式为 key: value',
       selectIndex: 0,
       allowMultiple: true,
       isFullScreen: false,
       hoverIds: { before: null, diff: null, after: null },
+      visiblePaths: [],
       sameRandomIds: [],
+      missTruth: {},
       compareRandomIds: null, // [],
       detection: {
         isShowNum: false,
         total: 10,
+        sameRandomIds: [],
+        missTruth: {},
 
         afterThreshold: 35,
         afterCorrect: 9,
@@ -1304,7 +1308,6 @@ https://github.com/Tencent/APIJSON/issues
       },
       img: '', // 'img/Screenshot_2020-11-07-16-35-27-473_apijson.demo.jpg',
       file: 'Screenshot_2020-11-07-16-35-27-473_apijson.demo.jpg',
-      visiblePaths: [],
       imgMap: {},
       canvasMap: {},
       options: [], // [{name:"id", type: "integer", comment:"主键"}, {name:"name", type: "string", comment:"用户名称"}],
@@ -2645,6 +2648,10 @@ https://github.com/Tencent/APIJSON/issues
         if (this.currentDocIndex != index) {
           this.currentDocIndex = index
           this.currentRandomIndex = -1
+          this.hoverIds = {}
+          this.visiblePaths = []
+          this.sameRandomIds = []
+          this.missTruth = {}
         }
 
         this.currentRemoteItem = item
@@ -5599,24 +5606,24 @@ https://github.com/Tencent/APIJSON/issues
 //                'testAccountId': this.getCurrentAccountId(),
                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
                 '@order': 'date-'
-              },
-              '[]': isSub ? null : {
-                'count': this.randomSubCount || 100,
-                'page': this.randomSubPage || 0,
-                'Random': {
-                  'toId@': '[]/Random/id',
-                  'chainId': cId,
-                  'documentId': item.id,
-                  '@order': "date-",
-                  'name$': subSearch
-                },
-                'TestRecord': {
-                  'randomId@': '/Random/id',
-//                  'testAccountId': this.getCurrentAccountId(),
-                  'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
-                  '@order': 'date-'
-                }
-              }
+              }, // 暂时不支持子项
+//               '[]': isSub ? null : {
+//                 'count': this.randomSubCount || 100,
+//                 'page': this.randomSubPage || 0,
+//                 'Random': {
+//                   'toId@': '[]/Random/id',
+//                   'chainId': cId,
+//                   'documentId': item.id,
+//                   '@order': "date-",
+//                   'name$': subSearch
+//                 },
+//                 'TestRecord': {
+//                   'randomId@': '/Random/id',
+// //                  'testAccountId': this.getCurrentAccountId(),
+//                   'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
+//                   '@order': 'date-'
+//                 }
+//               }
             },
             key: IS_NODE ? this.key : undefined  // 突破常规查询数量限制
           }
@@ -6791,7 +6798,7 @@ https://github.com/Tencent/APIJSON/issues
             // img.style.margin = '1px';
             // previewList.appendChild(img);
 
-            const index = ind != null && ind >= 0 ? ind : items.length;
+            const index = ind != null && ind >= 0 ? ind : -1; // items.length;
             var item = JSONResponse.deepMerge({
               Random: {
                 id: -(index || 0) - 1, //表示未上传
@@ -6812,7 +6819,11 @@ https://github.com/Tencent/APIJSON/issues
             r.width = file.width;
             r.height = file.height;
 
-            items[index] = item;
+            if (index < 0) { // || r.id == null || r.id <= 0) {
+              items.unshift(item);
+            } else {
+              items[index] = item;
+            }
 
             if (isSub) {
               this.randomSubs = items;
@@ -6822,7 +6833,7 @@ https://github.com/Tencent/APIJSON/issues
             }
 
             try {
-              Vue.set(items, index, item);
+              Vue.set(items, index < 0 ? 0 : index, item);
             } catch (e) {
               console.error(e)
             }
@@ -6843,10 +6854,12 @@ https://github.com/Tencent/APIJSON/issues
 
                   console.log('Upload successful:', data);
                   item.status = 'done';
-                  r.img = (path.startsWith('/') ? App.server + path : path) || r.img;
+                  if (! (App.server.includes('localhost') || App.server.includes('127.0.0.1'))) {
+                    r.img = (path.startsWith('/') ? App.server + path : path) || r.img;
+                  }
 
                   try {
-                    Vue.set(items, index, item);
+                    Vue.set(items, index < 0 ? 0 : index, item);
                   } catch (e) {
                     console.error(e)
                   }
@@ -6948,6 +6961,8 @@ https://github.com/Tencent/APIJSON/issues
           if (isPost) {
             random.id = (data.Random || {}).id
           }
+          App.isRandomShow = true
+          App.isRandomListShow = true
           App.isRandomEditable = ! isOk
         })
       },
@@ -6983,12 +6998,12 @@ https://github.com/Tencent/APIJSON/issues
         const isDiff = stage === 'diff';
 
         const cri = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
-        const tr = (isBefore ? cri.TestRecord : detection) || [];
+        const tr = (isBefore ? cri.TestRecord : detection) || {};
         const corrects = tr.corrects || [];
         const wrongs = tr.wrongs || [];
 
         JSONResponse.drawDetections(canvas, det, {
-          hoverBoxId: this.hoverIds[stage],
+          hoverId: this.hoverIds[stage],
           visiblePaths: this.visiblePaths,
           labelBackground: true,
           rotateBoxes: true,
@@ -7012,7 +7027,7 @@ https://github.com/Tencent/APIJSON/issues
       compute: function() {
         const detection = this.detection || {};
         var total = detection.total;
-        const cri = this.currentRandomItem = this.randoms[this.currentRandomIndex] || {};
+        const cri = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
         const random = cri.Random = cri.Random || {};
         const tr = cri.TestRecord = cri.TestRecord || {};
         const corrects = tr.corrects = tr.corrects || [];
@@ -7083,13 +7098,39 @@ https://github.com/Tencent/APIJSON/issues
         var allWrong = 0;
         var allMiss = 0;
 
+        var sameImgTotal = 0;
+        var sameImgCorrect = 0;
+        var sameImgWrong = 0;
+        var sameImgMiss = 0;
+
+        var sameTotal = 0;
+        var sameCorrect = 0;
+        var sameWrong = 0;
+        var sameMiss = 0;
+
+        // 之前的用完整数据，可以提醒目前还有图片未测试/提交 var beforeSameRandomIds = detection.sameRandomIds || [];
+        var sameRandomIds = this.sameRandomIds || [];
+
         var randoms = this.randoms || []
         for (let i = 0; i < randoms.length; i ++) {
-          allImgTotal ++;
           var rand = randoms[i];
-          var tr2 = rand == null ? null : rand.TestRecord;
+          if (rand == null) {
+            continue;
+          }
+
+          // var isBefore = beforeSameRandomIds.includes(rand.id);
+          var isAfter = sameRandomIds.includes(rand.id);
+          if (isAfter) {
+            sameImgTotal ++;
+          }
+
+          allImgTotal ++;
+          var tr2 = rand.TestRecord;
           if (tr2 == null) {
             allImgMiss ++;
+            if (isAfter) {
+              sameImgMiss ++;
+            }
             continue;
           }
 
@@ -7099,12 +7140,25 @@ https://github.com/Tencent/APIJSON/issues
           allTotal += total;
           allWrong += wrong;
           allCorrect += correct;
-          allImgMiss += total - correct;
+          allMiss += total - correct;
 
           if (wrong <= 0) {
             allImgCorrect ++;
           } else {
             allImgWrong ++;
+          }
+
+          if (isAfter) {
+            sameTotal += total;
+            sameWrong += wrong;
+            sameCorrect += correct;
+            sameMiss += total - correct;
+
+            if (wrong <= 0) {
+              sameImgCorrect ++;
+            } else {
+              sameImgWrong ++;
+            }
           }
         }
 
@@ -7125,9 +7179,10 @@ https://github.com/Tencent/APIJSON/issues
         detection.beforeAllF1Str = (100*allF1).toFixed(0);
 
         this.detection = detection;
-        var compareRandomIds = this.compareRandomIds;
+
+        var compareRandomIds = this.compareRandomIds || [];
         if (compareRandomIds instanceof Array) {
-          compareRandomIds = [...new Set([...compareRandomIds, ...this.sameRandomIds])];
+          compareRandomIds = [...new Set([...compareRandomIds, ...(detection.sameRandomIds || [])])];
         }
 
         this.adminRequest('/get', {
@@ -7142,7 +7197,7 @@ https://github.com/Tencent/APIJSON/issues
               "total>=": 0,
               "wrong>=": 0,
               "correct>=": 0,
-              'randomId{}': compareRandomIds,
+              'randomId{}': compareRandomIds.length <= 0 ? null : compareRandomIds,
               // "@explain": true
             }
           }
@@ -7153,7 +7208,7 @@ https://github.com/Tencent/APIJSON/issues
           var trs = data['TestRecord[]'] || []
           ['after', 'before', 'diff'].forEach((stage, i) => {
             var isDiff = stage == 'diff';
-            var curTr = trs[i] || {};
+            var tr = trs[i] || {};
 
             if (isDiff) {
               ['Img', 'All'].forEach(type => {
@@ -7172,15 +7227,15 @@ https://github.com/Tencent/APIJSON/issues
                 detection['diff' + type + 'F1Str'] = (f1 >= 0 ? '+' : '') + (100 * f1).toFixed(0);
               });
             } else {
-              var imgTotal = detection[stage + 'ImgTotal'] = curTr.imgTotal || curTr.imgCorrect || 0;
-              var imgWrong = detection[stage + 'ImgWrong'] = curTr.imgWrong || 0;
-              var imgCorrect = detection[stage + 'ImgCorrect'] = curTr.imgCorrect || imgTotal - imgWrong;
-              var imgMiss = detection[stage + 'ImgMiss'] = curTr.imgMiss || imgTotal - imgCorrect;
+              var imgTotal = detection[stage + 'ImgTotal'] = (tr.imgTotal || tr.imgCorrect || 0) + (isAfter ? sameImgTotal : 0);
+              var imgWrong = detection[stage + 'ImgWrong'] = (tr.imgWrong || 0) + (isAfter ? sameImgWrong : 0);
+              var imgCorrect = detection[stage + 'ImgCorrect'] = ((tr.imgCorrect || 0) + (isAfter ? sameImgCorrect : 0)) || (imgTotal - imgWrong);
+              var imgMiss = detection[stage + 'ImgMiss'] = ((tr.imgMiss || 0) + (isAfter ? sameImgMiss : 0)) || (imgTotal - imgCorrect);
 
-              var allTotal = detection[stage + 'AllTotal'] = curTr.allTotal || curTr.allCorrect || 0;
-              var allWrong = detection[stage + 'AllWrong'] = curTr.allWrong || 0;
-              var allCorrect = detection[stage + 'AllCorrect'] = curTr.allCorrect || allTotal - allWrong;
-              var allMiss = detection[stage + 'AllMiss'] = curTr.allMiss || allTotal - allCorrect;
+              var allTotal = detection[stage + 'AllTotal'] = (tr.allTotal || tr.allCorrect || 0) + (isAfter ? sameTotal : 0);
+              var allWrong = detection[stage + 'AllWrong'] = (tr.allWrong || 0) + (isAfter ? sameWrong : 0);
+              var allCorrect = detection[stage + 'AllCorrect'] = ((tr.allCorrect || 0) + (isAfter ? sameCorrect : 0)) || (allTotal - allWrong);
+              var allMiss = detection[stage + 'AllMiss'] = ((tr.allMiss || 0) + (isAfter ? sameMiss : 0)) || (allTotal - allCorrect);
 
               var allImgRecall = detection[stage + 'ImgRecall'] = allImgCorrect / allImgTotal;
               var allImgPrecision = detection[stage + 'ImgPrecision'] = allImgCorrect / (allImgCorrect + allImgWrong);
@@ -7205,7 +7260,7 @@ https://github.com/Tencent/APIJSON/issues
       },
       processDiffAndAutoMark: function() {
         var detection = this.detection || {};
-        const cri = this.currentRandomItem = this.randoms[this.currentRandomIndex] || {};
+        const cri = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
         const random = cri.Random = cri.Random || {};
         const tr = cri.TestRecord = cri.TestRecord || {};
         const corrects = tr.corrects = tr.corrects || [];
@@ -7222,7 +7277,12 @@ https://github.com/Tencent/APIJSON/issues
         const curCorrects = curTr.corrects = curTr.corrects || [];
         const curWrongs = curTr.wrongs = curTr.wrongs || [];
 
-        const beforeBoxes = JSONResponse.getBboxes(detection.before) || [];   // 上次参考结果
+        var beforeBoxes = JSONResponse.getBboxes(detection.before) || [];   // 上次参考结果
+        var beforeMissBboxes = this.isMLEnabled ? JSONResponse.getBboxes(detection.missTruth) : null;
+        if (beforeMissBboxes != null && beforeMissBboxes.length > 0) {
+          beforeBoxes = JSONResponse.deepMerge(beforeBoxes, beforeMissBboxes);
+        }
+
         const afterBoxes = JSONResponse.getBboxes(detection.after) || [];    // 当前检测结果
         const iouThreshold = (detection.diffThreshold || 90) / 100;
 
@@ -7239,12 +7299,14 @@ https://github.com/Tencent/APIJSON/issues
             .replaceAll(/'no name'/ig, '').replaceAll(/'Test'/ig, '')
             .replaceAll(/'examples'/ig, '').replaceAll(/'example'/ig, '')
             .replaceAll(/'new'/ig, '').replaceAll('测试', '')
-            .replaceAll('未命名', '').replaceAll('未知', '')
+            .replaceAll('未命名', '').replaceAll('未知', '').replaceAll('文件', '')
             .replaceAll('示例', '').replaceAll('新建', '').replaceAll('下载', '')
             .replaceAll('图片', '').replaceAll('照片', '').replaceAll('相片', '');
 
         var dotInd = file.lastIndexOf('.');
         file = dotInd >= 0 ? file.substring(0, dotInd).trim() : file.trim();
+        // TODO 排除 0ab3e 等哈希值及汉字、字母外的各种字符
+
         const matchMap = {};
 
         afterBoxes.forEach((curBox, curInd) => {
@@ -7314,14 +7376,46 @@ https://github.com/Tencent/APIJSON/issues
           }
         });
 
+        var missTruth = this.missTruth = this.missTruth || {};
+        var missBboxes = missTruth.bboxes || [];
+        var missPolygons = missTruth.polygons || [];
+        var missLines = missTruth.lines || [];
+        var missPoints = missTruth.points || [];
+
+        const beforePolygons = JSONResponse.getPolygons(detection.before) || [];   // 上次参考结果
+        const beforeLines = JSONResponse.getLines(detection.before) || [];   // 上次参考结果
+        const beforePoints = JSONResponse.getPoints(detection.before) || [];   // 上次参考结果
+
         beforeBoxes.forEach((refBox, refInd) => {
           var macth = refBox == null ? null : matchMap[refInd];
           if (refBox != null && (macth == null || macth <= 0)) {
-            diffBoxes.push({
+            var box = {
               ...refBox,
               // isBefore: true,
               '@before': true
-            });
+            };
+            diffBoxes.push(box);
+
+            if (curWrongs.includes(refInd)) { // || wrongs.includes(refInd)) {
+              return;
+            }
+
+            missBboxes.push(box); // 需要在渲染前合并时区分
+
+            var polygon = beforePolygons[refInd]
+            if (polygon != null) {
+              missPolygons.push(polygon)
+            }
+
+            var line = beforeLines[refInd]
+            if (line != null) {
+              missLines.push(line)
+            }
+
+            var point = beforePoints[refInd]
+            if (point != null) {
+              missPoints.push(point)
+            }
           }
         });
 
@@ -7330,6 +7424,20 @@ https://github.com/Tencent/APIJSON/issues
         diff.bboxes = diffBoxes;
         detection.diff = diff;
         this.detection = detection;
+
+        if (missBboxes.length > 0) {
+          missTruth.bboxes = missBboxes;
+        }
+        if (missPolygons.length > 0) {
+          missTruth.polygons = missPolygons;
+        }
+        if (missLines.length > 0) {
+          missTruth.lines = missLines;
+        }
+        if (missPoints.length > 0) {
+          missTruth.points = missPoints;
+        }
+        this.missTruth = missTruth;
 
         this.drawAll();
         this.compute();
@@ -7387,12 +7495,7 @@ https://github.com/Tencent/APIJSON/issues
             continue;
           }
 
-          var [bx, by, bw, bh, bd] = JSONResponse.getXYWHD(JSONResponse.getBbox(item));
-          const isRate = Math.abs(bx) < 1 && Math.abs(by) < 1 && Math.abs(bw) < 1 && Math.abs(bh) < 1;
-          bx = isRate ? bx*width : bx*xRate;
-          by = isRate ? by*height : by*yRate;
-          bw = isRate ? bw*width : bw*xRate;
-          bh = isRate ? bh*height : bh*yRate;
+          var [bx, by, bw, bh, bd] = JSONResponse.getXYWHD(JSONResponse.getBbox(item), width, height, xRate, yRate);
           if (JSONResponse.isOnBorder(x, y, [bx, by, bw, bh, bd], range)) {
             found = i;
             break;
@@ -7446,12 +7549,7 @@ https://github.com/Tencent/APIJSON/issues
             continue;
           }
 
-          var [bx, by, bw, bh, bd] = JSONResponse.getXYWHD(JSONResponse.getBbox(item));
-          const isRate = Math.abs(bx) < 1 && Math.abs(by) < 1 && Math.abs(bw) < 1 && Math.abs(bh) < 1;
-          bx = isRate ? bx*width : bx*xRate;
-          by = isRate ? by*height : by*yRate;
-          bw = isRate ? bw*width : bw*xRate;
-          bh = isRate ? bh*height : bh*yRate;
+          var [bx, by, bw, bh, bd] = JSONResponse.getXYWHD(JSONResponse.getBbox(item), width, height, xRate, yRate);
 
           // 无效
           // const labelX = bx + bw + 4; // 和 drawDetections 中计算按钮位置保持一致
@@ -12477,8 +12575,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         const random = item.Random = item.Random || {}
         var document;
         if (isRandom) {
-          this.currentRandomIndex = index;
           this.currentRandomItem = item;
+          if (this.currentRandomIndex != index) {
+            this.currentRandomIndex = index;
+            this.hoverIds = {};
+            this.visiblePaths = [];
+            this.sameRandomIds = [];
+            this.missTruth = {};
+          }
+
           if ((random.count || 0) > 1) {
             // this.currentRandomSubIndex = -1
             this.restoreRandom(index, item)
@@ -12598,6 +12703,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             } else {
               testRecord.total = detection.total;
             }
+
+            detection.sameRandomIds = testRecord.sameRandomIds || [];
+            detection.missTruth = testRecord.missTruth || {};
 
             detection.beforeCorrect = testRecord.correct || 0;
             detection.beforeWrong = testRecord.wrong || 0;
@@ -12749,6 +12857,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             const cgId = chain.groupId || 0
             const cId = chain.id || 0
             const detection = this.detection || {};
+            const missTruth = this.missTruth || {}
 
             //TODO 先检查是否有重复名称的！让用户确认！
             // if (isML != true) {
@@ -12796,6 +12905,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 f1: detection.afterF1,
                 corrects: detection.corrects,
                 wrongs: detection.wrongs,
+                sameRandomIds: this.sameRandomIds,
+                missTruth: Object.keys(missTruth).length <= 0 ? null : JSON.stringify(missTruth),
                 compare: JSON.stringify(testRecord.compare || {}),
                 response: rawRspStr,
                 standard: isML ? JSON.stringify(stddObj) : null
@@ -12901,7 +13012,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'invalid': 0,
             'host': this.getBaseUrl(),
             '@order': 'date-',
-            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,corrects,wrongs,response' + (this.isMLEnabled ? ',standard' : ''),
+            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,corrects,wrongs,sameRandomIds,response' + (this.isMLEnabled ? ',missTruth,standard' : ''),
             'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
           }
         }, {}, function (url, res, err) {

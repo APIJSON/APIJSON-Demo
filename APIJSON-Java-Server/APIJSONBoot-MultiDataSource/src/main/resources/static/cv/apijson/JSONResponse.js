@@ -2271,41 +2271,59 @@ var JSONResponse = {
     return value;
   },
 
-  getXYWHD: function (bbox) {
+  getXYWHD: function (bbox, width, height, xRate, yRate) {
     if (bbox == null) {
       return null;
     }
     if (JSONResponse.isString(bbox)) {
       bbox = StringUtil.split(bbox, ',', true);
     }
-    if (bbox instanceof Array) {
-      return [+ (bbox[0] || 0), + (bbox[1] || 0), + (bbox[2] || 0), + (bbox[3] || 0), + (bbox[4] || 0)];
-    }
 
-    var x = bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x || 0;
-    var y = bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y || 0;
-    var w = bbox.width || bbox.w || ((bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || 0) - x);
-    var h = bbox.height || bbox.h || ((bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || 0) - y);
-    var d = bbox.degree || bbox.angle || bbox.rotate || bbox.perspective || bbox.d || bbox.r || bbox.p || bbox.a;
-    return [+ (x || 0), + (y || 0), + (w || 0), + (h || 0), + (d || 0)];
+    var isArr = bbox instanceof Array;
+    var x = + ((isArr ? bbox[0] : bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x) || 0);
+    var y = + ((isArr ? bbox[1] : bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y) || 0);
+    var w = + ((isArr ? bbox[2] : bbox.width || bbox.w || ((bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || 0) - x)));
+    var h = + ((isArr ? bbox[3] : bbox.height || bbox.h || ((bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || 0) - y)));
+    var d = + (isArr ? bbox[4] : JSONResponse.getDegree(bbox) || 0);
+
+    const isRate = (width != null && width > 0) && (height != null && height > 0)
+        && Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) <= 1 && Math.abs(h) <= 1;
+    xRate = xRate || 1;
+    yRate = yRate || 1;
+
+    x = isRate ? x*width : x*xRate;
+    y = isRate ? y*height : y*yRate;
+    w = isRate ? w*width : w*xRate;
+    h = isRate ? h*height : h*yRate;
+
+    return [x, + (y || 0), + (w || 0), + (h || 0), + (d || 0)];
   },
-  getXYXYD: function (bbox) {
+  getXYXYD: function (bbox, width, height, xRate, yRate) {
     if (bbox == null) {
       return null;
     }
     if (JSONResponse.isString(bbox)) {
       bbox = StringUtil.split(bbox, ',', true);
     }
-    if (bbox instanceof Array) {
-      return [+ (bbox[0] || 0), + (bbox[1] || 0), + (bbox[2] || 0), + (bbox[3] || 0), + (bbox[4] || 0)];
-    }
 
-    var x = bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x || 0;
-    var y = bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y || 0;
-    var x2 = bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || ((bbox.width || bbox.w || 0) + x);
-    var y2 = bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || ((bbox.height || bbox.h || 0) + y);
-    var d = bbox.degree || bbox.angle || bbox.rotate || bbox.perspective || bbox.d || bbox.r || bbox.p || bbox.a;
-    return [+ (x || 0), + (y || 0), + (x2 || 0), + (y2 || 0), + (d || 0)];
+    var isArr = bbox instanceof Array;
+    var x = + ((isArr ? bbox[0] : bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x) || 0);
+    var y = + ((isArr ? bbox[1] : bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y) || 0);
+    var x2 = + ((isArr ? bbox[2] : bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || ((bbox.width || bbox.w || 0) + x)));
+    var y2 = + ((isArr ? bbox[3] : bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || ((bbox.height || bbox.h || 0) + y)));
+    var d = + (isArr ? bbox[4] : JSONResponse.getDegree(bbox) || 0);
+
+    const isRate = (width != null && width > 0) && (height != null && height > 0)
+        && Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(x2) < 1 && Math.abs(y2) < 1;
+    xRate = xRate || 1;
+    yRate = yRate || 1;
+
+    x = isRate ? x*width : x*xRate;
+    y = isRate ? y*height : y*yRate;
+    x2 = isRate ? x2*width : x2*xRate;
+    y2 = isRate ? y2*height : y2*yRate;
+
+    return [x, + (y || 0), + (x2 || 0), + (y2 || 0), + (d || 0)];
   },
   /**
    * 计算两个 bbox（[x, y, w, h, r]）的 IoU
@@ -2480,7 +2498,46 @@ var JSONResponse = {
     return item.bbox || item.box || item
   },
   getScore: function (item) {
+    if (item == null) {
+      return null;
+    }
+
     return item.score || item.confidence || item.probability || item.possibility || item.feasibility || item.eventuality || item.odds || item.conf || item.prob || item.possib || item.feasib || item.eventual;
+  },
+  getFill: function (item) {
+    if (item == null) {
+      return null;
+    }
+
+    return item.fill || item.fulfil || item.fulfill || item.solid || item.isFill || item.isFulfil || item.isFulfill || item.is_solid || item.is_fill || item.is_fulfil || item.is_fulfill || item.is_solid;
+  },
+  getColor: function (item) {
+    if (item == null) {
+      return null;
+    }
+
+    var color = JSONResponse.isObject(item) ? (item.color || item.colour || [item.red || item.r, item.green || item.g, item.blue || item.b, item.alpha || item.a || 0.5]) : null;
+    if (color == null) {
+      return null;
+    }
+    if (JSONResponse.isString(color)) {
+      color = StringUtil.split(color, ',', true);
+    }
+    if (color instanceof Array) {
+      return [+ (color[0] || 0), + (color[1] || 0), + (color[2] || 0), + (color[3] || 0.5)];
+    }
+    if (color instanceof Object) {
+      return [+ (color.red || color.r || 0), + (color.green || color.g || 0), + (color.blue || color.b || 0), + (color.alpha || color.a || 0.5)];
+    }
+
+    return null;
+  },
+  getDegree: function(item) {
+    if (item == null) {
+      return null;
+    }
+
+    return item.degree || item.rotate || item.angle || item.perspective || item.d || item.r || item.p || item.a
   },
 
   drawDetections: function(canvas, detection, options, img, ctx) {
@@ -2506,7 +2563,7 @@ var JSONResponse = {
     const rotateBoxes = options.rotateBoxes;
     const rotateText = options.rotateText;
     const showLabelBackground = options.labelBackground;
-    const hoverBoxId = options.hoverBoxId;
+    const hoverId = options.hoverId;
     const visiblePaths = options.visiblePaths;
     const stage = options.stage;
     const isDiff = stage === 'diff';
@@ -2523,21 +2580,16 @@ var JSONResponse = {
     var bboxes = JSONResponse.getBboxes(detection) || []
     if (bboxes instanceof Array) {
         bboxes?.forEach((item, index) => {
-          const isHovered = index === hoverBoxId;
+          const isHovered = index === hoverId;
           const visible = ! visiblePaths || visiblePaths.length <= 0 || visiblePaths.includes(item.path || item.id);
           if (! visible) {
             return;
           }
 
           var [x, y, w, h, d] = JSONResponse.getXYWHD(JSONResponse.getBbox(item) || []);
-          const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) < 1 && Math.abs(h) < 1;
-          x = isRate ? x*width : x*xRate;
-          y = isRate ? y*height : y*yRate;
-          w = isRate ? w*width : w*xRate;
-          h = isRate ? h*height : h*yRate;
-          const angle = item.degree || item.rotate || item.angle || item.perspective || d || 0;
+          const angle = JSONResponse.getDegree(item) || d || 0;
 
-          var color = item.color;
+          var color = JSONResponse.getColor(item) || JSONResponse.getColor(detection);
           if (options.styleOverride) {
             const override = options.styleOverride(item, item['@before']);
             if (override && override.color) {
@@ -2546,9 +2598,9 @@ var JSONResponse = {
           }
 
           const [r, g, b, a] = color || [0, 255, 0, 255];
-          const rgba = `rgba(${r}, ${g}, ${b}, ${hoverBoxId != null && ! isHovered ? 0.3 : Math.min(0.5, a < 1 ? a : a / 255)})`;
+          const rgba = `rgba(${r}, ${g}, ${b}, ${isHovered ? 0.7 : (hoverId != null ? 0.3 : Math.min(0.5, a < 1 ? a : a / 255))})`;
 
-          const reversedRgba = `rgba(${255 - r}, ${255 - g}, ${255 - b}, ${isHovered || hoverBoxId == null ? 1 : 0.3})`;
+          const reversedRgba = `rgba(${255 - r}, ${255 - g}, ${255 - b}, ${isHovered || hoverId == null ? 1 : 0.3})`;
           // const luma = 0.299 * r + 0.587 * g + 0.114 * b;
           const backgroundFill = rgba; // 还是有些看不清 luma > 186 ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)';
 
@@ -2567,7 +2619,7 @@ var JSONResponse = {
             ctx.restore();
           }
 
-          if (hoverBoxId != null && ! isHovered) {
+          if (hoverId != null && ! isHovered) {
             return
           }
 
@@ -2580,7 +2632,7 @@ var JSONResponse = {
           }
 
           // Label
-          const label = mark + (isDiff ? (is_before ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}-${item.id || ''} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
+          const label = mark + (isDiff ? (is_before ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}${item.id == null ? '' : '-' + item.id} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
           // ctx.font = 'bold 36px';
           // const size = ctx.measureText(label);
           // const textHeight = size.height || height*0.1; // Math.max(height*0.1, size.height);
@@ -2640,18 +2692,13 @@ var JSONResponse = {
     var lines = JSONResponse.getLines(detection);
     if (lines instanceof Array) {
       lines?.forEach((item, index) => {
-        if (isRoot && hoverBoxId != null && index != hoverBoxId) {
+        if (isRoot && hoverId != null && index != hoverId) {
           return;
         }
 
-        var [x, y, x2, y2, d] = JSONResponse.getXYXYD(item);
-        const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(x2) < 1 && Math.abs(y2) < 1;
-        x = isRate ? x*width : x*xRate;
-        y = isRate ? y*height : y*yRate;
-        x2 = isRate ? x2*width : x2*xRate;
-        y2 = isRate ? y2*height : y2*yRate;
+        var [x, y, x2, y2, d] = JSONResponse.getXYXYD(item, width, height, xRate, yRate);
 
-        const color = item.color || detection.color || detection.bbox?.color;
+        const color = JSONResponse.getColor(item) || JSONResponse.getColor(detection) || JSONResponse.getColor(detection.bbox);
         const rgba = color == null || color.length <= 0 ? null : `rgba(${color.join(',')})`;
         if (rgba != null) {
           ctx.fillStyle = rgba;
@@ -2677,16 +2724,13 @@ var JSONResponse = {
     var points = JSONResponse.getPoints(detection);
     if (points instanceof Array) {
       points?.forEach((item, index) => {
-        if (isRoot && hoverBoxId != null && index != hoverBoxId) {
+        if (isRoot && hoverId != null && index != hoverId) {
           return;
         }
 
-        var [x, y, w, h, d] = JSONResponse.getXYWHD(item);
-        const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) < 1 && Math.abs(h) < 1;
-        x = isRate ? x*width : x*xRate;
-        y = isRate ? y*height : y*yRate;
+        var [x, y, w, h, d] = JSONResponse.getXYWHD(item, width, height, xRate, yRate);
 
-        const color = item.color || detection.color || detection.bbox?.color;
+        const color = JSONResponse.getColor(item) || JSONResponse.getColor(detection) || JSONResponse.getColor(detection.bbox);
         const rgba = color == null || color.length <= 0 ? null : `rgba(${color.join(',')})`;
         if (rgba != null) {
           ctx.fillStyle = rgba;
@@ -2695,7 +2739,9 @@ var JSONResponse = {
 
         ctx.beginPath();
         ctx.arc(x, y, Math.max(2, height*0.005), 0, 2*Math.PI);
-        ctx.fill();
+        if (JSONResponse.getFill(item) != false) {
+          ctx.fill();
+        }
 
         if (isRoot) {
           const label = (isDiff ? (item['@before'] || detection['@before'] ? '- ' : '+ ') : '')
@@ -2711,13 +2757,13 @@ var JSONResponse = {
     var polygons = JSONResponse.getPolygons(detection);
     if (polygons instanceof Array) {
       polygons.forEach((item, index) => {
-        if (isRoot && hoverBoxId != null && index != hoverBoxId) {
+        if (isRoot && hoverId != null && index != hoverId) {
           return;
         }
 
         var points = JSONResponse.getPoints(item) || item;
         if (points instanceof Array) {
-          const color = item.color || detection.color || detection.bbox?.color;
+          const color = JSONResponse.getColor(item) || JSONResponse.getColor(detection) || JSONResponse.getColor(detection.bbox);
           if (color != null && color.length >= 3) {
             var alpha = color[3] || 0.5;
             color[3] = alpha <= 1 ? alpha : alpha/255;
@@ -2732,10 +2778,7 @@ var JSONResponse = {
 
           ctx.beginPath();
           points.forEach((item, i) => {
-            var [x, y, w, h, d] = JSONResponse.getXYWHD(item);
-            const isRate = Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) < 1 && Math.abs(h) < 1;
-            x = isRate ? x*width : x*xRate;
-            y = isRate ? y*height : y*yRate;
+            var [x, y, w, h, d] = JSONResponse.getXYWHD(item, width, height, xRate, yRate);
 
             if (i <= 0) {
               ctx.moveTo(x, y);
@@ -2745,7 +2788,9 @@ var JSONResponse = {
           });
           ctx.closePath();
           ctx.stroke();
-          ctx.fill();
+          if (JSONResponse.getFill(item)) {
+            ctx.fill();
+          }
         }
       });
     }
