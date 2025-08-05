@@ -2282,9 +2282,9 @@ var JSONResponse = {
     var isArr = bbox instanceof Array;
     var x = + ((isArr ? bbox[0] : bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x) || 0);
     var y = + ((isArr ? bbox[1] : bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y) || 0);
-    var w = + ((isArr ? bbox[2] : bbox.width || bbox.w || ((bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || 0) - x)));
-    var h = + ((isArr ? bbox[3] : bbox.height || bbox.h || ((bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || 0) - y)));
-    var d = + (isArr ? bbox[4] : JSONResponse.getDegree(bbox) || 0);
+    var w = + ((isArr ? bbox[2] : bbox.width || bbox.w || ((bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || 0) - x)) || 0);
+    var h = + ((isArr ? bbox[3] : bbox.height || bbox.h || ((bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || 0) - y)) || 0);
+    var d = + ((isArr ? bbox[4] : JSONResponse.getDegree(bbox)) || 0);
 
     const isRate = (width != null && width > 0) && (height != null && height > 0)
         && Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(w) <= 1 && Math.abs(h) <= 1;
@@ -2309,9 +2309,9 @@ var JSONResponse = {
     var isArr = bbox instanceof Array;
     var x = + ((isArr ? bbox[0] : bbox.x || bbox.x0 || bbox.x1 || bbox.startX || bbox.xStart || bbox.leftTopX || bbox.topLeftX || bbox.start_x || bbox.x_start || bbox.left_top_x || bbox.top_left_x) || 0);
     var y = + ((isArr ? bbox[1] : bbox.y || bbox.y0 || bbox.y1 || bbox.startY || bbox.yStart || bbox.leftTopY || bbox.topLeftY || bbox.start_y || bbox.y_start || bbox.left_top_y || bbox.top_left_y) || 0);
-    var x2 = + ((isArr ? bbox[2] : bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || ((bbox.width || bbox.w || 0) + x)));
-    var y2 = + ((isArr ? bbox[3] : bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || ((bbox.height || bbox.h || 0) + y)));
-    var d = + (isArr ? bbox[4] : JSONResponse.getDegree(bbox) || 0);
+    var x2 = + ((isArr ? bbox[2] : bbox.x2 || bbox.x1 || bbox.rbx || bbox.brx || bbox.endX || bbox.xEnd || bbox.rightBottomX || bbox.bottomRightX || bbox.end_x || bbox.x_end || bbox.right_bottom_x || bbox.bottom_right_x || ((bbox.width || bbox.w || 0) + x)) || 0);
+    var y2 = + ((isArr ? bbox[3] : bbox.y2 || bbox.y1 || bbox.rby || bbox.bry || bbox.endY || bbox.yEnd || bbox.rightBottomY || bbox.bottomRightY || bbox.end_y || bbox.y_end || bbox.right_bottom_y || bbox.bottom_right_y || ((bbox.height || bbox.h || 0) + y)) || 0);
+    var d = + ((isArr ? bbox[4] : JSONResponse.getDegree(bbox)) || 0);
 
     const isRate = (width != null && width > 0) && (height != null && height > 0)
         && Math.abs(x) < 1 && Math.abs(y) < 1 && Math.abs(x2) < 1 && Math.abs(y2) < 1;
@@ -2505,7 +2505,7 @@ var JSONResponse = {
     return item.score || item.confidence || item.probability || item.possibility || item.feasibility || item.eventuality || item.odds || item.conf || item.prob || item.possib || item.feasib || item.eventual;
   },
   getFill: function (item) {
-    if (item == null) {
+    if (! JSONResponse.isObject(item)) {
       return null;
     }
 
@@ -2516,8 +2516,8 @@ var JSONResponse = {
       return null;
     }
 
-    var color = JSONResponse.isObject(item) ? (item.color || item.colour || [item.red || item.r, item.green || item.g, item.blue || item.b, item.alpha || item.a || 0.5]) : null;
-    if (color == null) {
+    var color = JSONResponse.isObject(item) ? (item.color || item.colour || [item.red || item.r, item.green || item.g, item.blue || item.b, item.alpha || item.a]) : null;
+    if (color == null || (color instanceof Array && color[0] == null && color[1] == null && color[2] == null)) {
       return null;
     }
     if (JSONResponse.isString(color)) {
@@ -2533,7 +2533,7 @@ var JSONResponse = {
     return null;
   },
   getDegree: function(item) {
-    if (item == null) {
+    if (! JSONResponse.isObject(item)) {
       return null;
     }
 
@@ -2586,10 +2586,10 @@ var JSONResponse = {
             return;
           }
 
-          var [x, y, w, h, d] = JSONResponse.getXYWHD(JSONResponse.getBbox(item) || []);
-          const angle = JSONResponse.getDegree(item) || d || 0;
+          var [x, y, w, h, d] = JSONResponse.getXYWHD(JSONResponse.getBbox(item.bbox || item) || [], width, height, xRate, yRate);
+          const angle = JSONResponse.getDegree(item.bbox || item) || d || 0;
 
-          var color = JSONResponse.getColor(item) || JSONResponse.getColor(detection);
+          var color = JSONResponse.getColor(item.bbox || item) || JSONResponse.getColor(detection);
           if (options.styleOverride) {
             const override = options.styleOverride(item, item['@before']);
             if (override && override.color) {
@@ -2597,7 +2597,7 @@ var JSONResponse = {
             }
           }
 
-          const [r, g, b, a] = color || [0, 255, 0, 255];
+          const [r, g, b, a] = color || [0, 255, 0, 0.5];
           const rgba = `rgba(${r}, ${g}, ${b}, ${isHovered ? 0.7 : (hoverId != null ? 0.3 : Math.min(0.5, a < 1 ? a : a / 255))})`;
 
           const reversedRgba = `rgba(${255 - r}, ${255 - g}, ${255 - b}, ${isHovered || hoverId == null ? 1 : 0.3})`;
@@ -2623,16 +2623,16 @@ var JSONResponse = {
             return
           }
 
-          is_before = item['@before'];
-          mark = '';
-          if (markable && is_before != true) {
+          var isBefore = item['@before'];
+          var mark = '';
+          if (markable && isBefore != true) {
             const isWrong = wrongs.indexOf(isDiff ? item['@index'] : index) >= 0; // item.correct === false;
             // 绘制 √ 和 ×
             mark = isWrong ? '× ' : '✓ ';
           }
 
           // Label
-          const label = mark + (isDiff ? (is_before ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}${item.id == null ? '' : '-' + item.id} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
+          const label = mark + (isDiff ? (isBefore ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}${item.id == null ? '' : '-' + item.id} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
           // ctx.font = 'bold 36px';
           // const size = ctx.measureText(label);
           // const textHeight = size.height || height*0.1; // Math.max(height*0.1, size.height);
