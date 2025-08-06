@@ -12148,12 +12148,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var isDone = doneCount >= allCount
         if (isRandom) {
           this.testRandomProcess = isDone ? '' : ('正在测试: ' + doneCount + '/' + allCount)
-          if (isDone) {
-            App.currentRandomIndex = -1
-            App.isRandomShow = true
-            App.isRandomListShow = true
-            App.handleTest(false, 0, list[0], null, isRandom)  // , false, isCross)
-          }
         } else {
           this.testProcess = isDone ? (this.isMLEnabled ? '机器学习:已开启' : '机器学习:已关闭') : '正在测试: ' + doneCount + '/' + allCount
         }
@@ -12192,6 +12186,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (DEBUG) {
           this.log('tests = ' + JSON.stringify(tests, null, '    '))
         }
+
+        if (isDone && isRandom) {
+          App.currentRandomIndex = -1
+          App.isRandomShow = true
+          App.isRandomListShow = true
+          App.handleTest(false, 0, list[0], null, isRandom)  // , false, isCross)
+        }
+
         // this.showTestCase(true)
 
         if (singleCallback != null && singleCallback(res, allCount, list, index, response, cmp, isRandom, accountIndex, justRecoverTest, isCross)) {
