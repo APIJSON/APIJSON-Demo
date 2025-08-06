@@ -1213,13 +1213,13 @@ https://github.com/Tencent/APIJSON/issues
       isFullScreen: false,
       hoverIds: { before: null, diff: null, after: null },
       visiblePaths: [],
-      sameRandomIds: [],
+      sameIds: [],
       missTruth: {},
       compareRandomIds: null, // [],
       detection: {
         isShowNum: false,
         total: 10,
-        sameRandomIds: [],
+        sameIds: [],
         missTruth: {},
 
         afterThreshold: 35,
@@ -2650,8 +2650,8 @@ https://github.com/Tencent/APIJSON/issues
           this.currentRandomIndex = -1
           this.hoverIds = {}
           this.visiblePaths = []
-          this.sameRandomIds = []
           this.missTruth = {}
+          this.sameIds = []
         }
 
         this.currentRemoteItem = item
@@ -7088,40 +7088,34 @@ https://github.com/Tencent/APIJSON/issues
       summary: function() {
         const detection = this.detection || {};
 
-        var allImgTotal = 0;
-        var allImgCorrect = 0;
-        var allImgWrong = 0;
-        var allImgMiss = 0;
+        let allImgTotal = 0;
+        let allImgCorrect = 0;
+        let allImgWrong = 0;
+        let allImgMiss = 0;
 
-        var allTotal = 0;
-        var allCorrect = 0;
-        var allWrong = 0;
-        var allMiss = 0;
+        let allTotal = 0;
+        let allCorrect = 0;
+        let allWrong = 0;
+        let allMiss = 0;
 
-        var sameImgTotal = 0;
-        var sameImgCorrect = 0;
-        var sameImgWrong = 0;
-        var sameImgMiss = 0;
+        let sameImgTotal = 0;
+        let sameImgCorrect = 0;
+        let sameImgWrong = 0;
+        let sameImgMiss = 0;
 
-        var sameTotal = 0;
-        var sameCorrect = 0;
-        var sameWrong = 0;
-        var sameMiss = 0;
+        let sameTotal = 0;
+        let sameCorrect = 0;
+        let sameWrong = 0;
+        let sameMiss = 0;
 
-        // 之前的用完整数据，可以提醒目前还有图片未测试/提交 var beforeSameRandomIds = detection.sameRandomIds || [];
-        var sameRandomIds = this.sameRandomIds || [];
+        // 之前的用完整数据，可以提醒目前还有图片未测试/提交 var beforeSameIds = detection.sameIds || [];
+        let sameIds = this.sameIds || [];
 
-        var randoms = this.randoms || []
+        let randoms = this.randoms || []
         for (let i = 0; i < randoms.length; i ++) {
-          var rand = randoms[i];
+          let rand = randoms[i];
           if (rand == null) {
             continue;
-          }
-
-          // var isBefore = beforeSameRandomIds.includes(rand.id);
-          var isAfter = sameRandomIds.includes(rand.id);
-          if (isAfter) {
-            sameImgTotal ++;
           }
 
           allImgTotal ++;
@@ -7132,6 +7126,11 @@ https://github.com/Tencent/APIJSON/issues
               sameImgMiss ++;
             }
             continue;
+          }
+
+          var isAfter = sameIds.includes(rand.id);
+          if (isAfter) {
+            sameImgTotal ++;
           }
 
           var total = tr2.total || tr2.correct || 0;
@@ -7162,13 +7161,13 @@ https://github.com/Tencent/APIJSON/issues
           }
         }
 
-        var allImgRecall = detection.beforeImgRecall = allImgCorrect/allImgTotal;
-        var allImgPrecision = detection.beforeImgPrecision = allImgCorrect/(allImgCorrect + allImgWrong);
-        var allImgF1 = detection.beforeImgF1 = (2*allImgRecall*allImgPrecision)/(allImgRecall + allImgPrecision);
+        let allImgRecall = detection.beforeImgRecall = allImgCorrect/allImgTotal;
+        let allImgPrecision = detection.beforeImgPrecision = allImgCorrect/(allImgCorrect + allImgWrong);
+        let allImgF1 = detection.beforeImgF1 = (2*allImgRecall*allImgPrecision)/(allImgRecall + allImgPrecision);
 
-        var allRecall = detection.beforeAllRecall = allCorrect/allTotal;
-        var allPrecision = detection.beforeAllPrecision = allCorrect/(allCorrect + allWrong);
-        var allF1 = detection.beforeAllF1 = (2*allRecall*allPrecision)/(allRecall + allPrecision);
+        let allRecall = detection.beforeAllRecall = allCorrect/allTotal;
+        let allPrecision = detection.beforeAllPrecision = allCorrect/(allCorrect + allWrong);
+        let allF1 = detection.beforeAllF1 = (2*allRecall*allPrecision)/(allRecall + allPrecision);
 
         detection.beforeImgRecallStr = (100*allImgRecall).toFixed(0);
         detection.beforeImgPrecisionStr = (100*allImgPrecision).toFixed(0);
@@ -7180,27 +7179,42 @@ https://github.com/Tencent/APIJSON/issues
 
         this.detection = detection;
 
-        var compareRandomIds = this.compareRandomIds || [];
-        // var afterIds = [...new Set([...compareRandomIds, ...(this.sameRandomIds || [])])];
-        // var beforeIds = [...new Set([...compareRandomIds, ...(detection.sameRandomIds || [])])];
-        var afterIds = this.sameRandomIds || [];
-        var beforeIds = detection.sameRandomIds || [];
+        var did = ((this.currentRemoteItem || {}).Document || {}).id
+        // var compareRandomIds = this.compareRandomIds || [];
+        // var afterIds = [...new Set([...compareRandomIds, ...(this.sameIds || [])])];
+        // var beforeIds = [...new Set([...compareRandomIds, ...(detection.sameIds || [])])];
+        // var afterIds = this.sameIds || [];
+        let beforeIds = detection.sameIds || [];
+
+        const afterSame = {
+          imgTotal: sameImgTotal,
+          imgWrong: sameImgWrong,
+          imgCorrect: sameImgCorrect,
+          imgMiss: sameImgMiss,
+          allTotal: sameTotal,
+          allWrong: sameWrong,
+          allCorrect: sameCorrect,
+          allMiss: sameMiss
+        };
 
         this.adminRequest('/get', {
-          // "TestRecord[]": {
-          //   "count": 2,
-          //   "TestRecord": {
-          //     "@column": "reportId;sum(total):allTotal;sum(wrong):allWrong;sum(correct):allCorrect;count(*):imgTotal;count(wrong > 0):imgWrong;count(miss > 0):imgCorrect;count(wrong + miss <= 0):imgCorrect",
-          //     "@raw": "@column",
-          //     "@group": "reportId",
-          //     "@order": "reportId-",
-          //     "total>=": 0,
-          //     "wrong>=": 0,
-          //     "correct>=": 0,
-          //     'randomId{}': compareRandomIds.length <= 0 ? null : compareRandomIds,
-          //     // "@explain": true
-          //   },
-          // },
+          "TestRecord[]": {
+            "count": 2,
+            "TestRecord": {
+              "@column": "reportId;sum(total):allTotal;sum(correct):allCorrect;sum(wrong):allWrong;sum(miss):allMiss;count(*):imgTotal;sum(wrong + miss <= 0):imgCorrect;sum(wrong > 0):imgWrong;sum(miss > 0):imgMiss",
+              "@raw": "@column",
+              "@group": "reportId",
+              "@order": "reportId-",
+              'documentId': did,
+              "total>=": 0,
+              "wrong>=": 0,
+              "correct>=": 0,
+              "reportId>": 0,
+              "randomId>": 0,
+              // 'randomId{}': compareRandomIds.length <= 0 ? null : compareRandomIds,
+              // "@explain": true
+            },
+          },
           // 引用失败 "TestRecord-reportId[]": {
           //   "count": 2,
           //   "TestRecord": {
@@ -7212,78 +7226,79 @@ https://github.com/Tencent/APIJSON/issues
           //     "correct>=": 0
           //   }
           // },
-          "TestRecord:post": {
-            "@column": "reportId",
-            "@order": "reportId-"
-          },
-          "TestRecord:pre": {
-            "reportId<@": "TestRecord:post/reportId",
-            "@column": "reportId",
-            "@order": "reportId-"
-          },
-          "TestRecord:after": {
-            "reportId@": "TestRecord:post/reportId",
-            "@column": "reportId;sum(total):allTotal;sum(wrong):allWrong;sum(correct):allCorrect;count(*):imgTotal;count(wrong > 0):imgWrong;count(miss > 0):imgCorrect;count(wrong + miss <= 0):imgCorrect",
-            "@raw": "@column",
-            "@group": "reportId",
-            "@order": "reportId-",
-            "total>=": 0,
-            "wrong>=": 0,
-            "correct>=": 0
-          },
-          "TestRecord:before": {
-            "reportId@": "TestRecord:pre/reportId",
-            "@column": "reportId;sum(total):allTotal;sum(wrong):allWrong;sum(correct):allCorrect;count(*):imgTotal;count(wrong > 0):imgWrong;count(miss > 0):imgCorrect;count(wrong + miss <= 0):imgCorrect",
-            "@raw": "@column",
-            "@group": "reportId",
-            "@order": "reportId-",
-            "total>=": 0,
-            "wrong>=": 0,
-            "correct>=": 0
-          },
-          "TestRecord-reportId:ids2[]": {
-            "TestRecord": {
-              "reportId<@": "TestRecord:pre/reportId",
-              "@column": "max(reportId):reportId",
-              "@group": "randomId",
-              "total>=": 0,
-              "wrong>=": 0,
-              "correct>=": 0
-            }
-          },
+          // "TestRecord:post": {
+          //   "@column": "reportId",
+          //   "@order": "reportId-"
+          // },
+          // "TestRecord:pre": {
+          //   "reportId<@": "TestRecord:post/reportId",
+          //   "@column": "reportId",
+          //   "@order": "reportId-"
+          // },
+          // "TestRecord:after": {
+          //   "reportId@": "TestRecord:post/reportId",
+          //   "@column": "reportId;sum(total):allTotal;sum(correct):allCorrect;sum(wrong):allWrong;sum(miss):allMiss;count(*):imgTotal;sum(wrong + miss <= 0):imgCorrect;sum(wrong > 0):imgWrong;sum(miss > 0):imgMiss",
+          //   "@raw": "@column",
+          //   "@group": "reportId",
+          //   "@order": "reportId-",
+          //   "total>=": 0,
+          //   "wrong>=": 0,
+          //   "correct>=": 0
+          // },
+          // "TestRecord:before": {
+          //   "reportId@": "TestRecord:pre/reportId",
+          //   "@column": "reportId;sum(total):allTotal;sum(correct):allCorrect;sum(wrong):allWrong;sum(miss):allMiss;count(*):imgTotal;sum(wrong + miss <= 0):imgCorrect;sum(wrong > 0):imgWrong;sum(miss > 0):imgMiss",
+          //   "@raw": "@column",
+          //   "@group": "reportId",
+          //   "@order": "reportId-",
+          //   "total>=": 0,
+          //   "wrong>=": 0,
+          //   "correct>=": 0
+          // },
+          // "TestRecord-reportId:ids2[]": {
+          //   "TestRecord": {
+          //     "reportId<@": "TestRecord:pre/reportId",
+          //     "@column": "max(reportId):reportId",
+          //     "@group": "randomId",
+          //     "total>=": 0,
+          //     "wrong>=": 0,
+          //     "correct>=": 0
+          //   }
+          // },
           "TestRecord:beforeSame": {
-            "reportId{}@": "TestRecord-reportId:ids2[]",
-            'randomId{}': beforeIds.length <= 0 ? null : beforeIds,
-            "@column": "sum(total):allTotal;sum(wrong):allWrong;sum(correct):allCorrect;count(*):imgTotal;count(wrong > 0):imgWrong;count(miss > 0):imgCorrect;count(wrong + miss <= 0):imgCorrect",
+            // "reportId{}@": "TestRecord-reportId:ids2[]",
+            // 'randomId{}': beforeIds.length <= 0 ? null : beforeIds,
+            'id{}': beforeIds.length <= 0 ? null : beforeIds,
+            'documentId': did,
+            "@column": "sum(total):allTotal;sum(correct):allCorrect;sum(wrong):allWrong;sum(miss):allMiss;count(*):imgTotal;sum(wrong + miss <= 0):imgCorrect;sum(wrong > 0):imgWrong;sum(miss > 0):imgMiss",
             "@raw": "@column",
             "total>=": 0,
             "wrong>=": 0,
-            "correct>=": 0
+            "correct>=": 0,
+            "reportId>": 0,
+            "randomId>": 0,
           }
           // "@explain": true,
         }, {}, function (url, res, err) {
           App.onResponse(url, res, err)
 
-          var data = res.data || {}
-          var trs = data['TestRecord[]'] || [data['TestRecord:after'], data['TestRecord:before']];
-          var beforeSame = data['TestRecord:beforeSame'] || {};
-          var extras = [
-            {imgTotal: sameImgTotal, imgWrong: sameImgWrong, imgCorrect: sameImgCorrect, imgMiss: sameImgMiss},
-            beforeSame
-          ];
+          const data = res.data || {}
+          const trs = data['TestRecord[]'] || [data['TestRecord:after'], data['TestRecord:before']];
+          const beforeSame = data['TestRecord:beforeSame'] || {};
+          const extras = [afterSame, beforeSame];
 
           ['after', 'before', 'diff'].forEach((stage, i) => {
-            var isDiff = stage == 'diff';
-            var tr = trs[i] || {};
+            const isDiff = stage == 'diff';
+            const tr = trs[i] || {};
 
             if (isDiff) {
               ['Img', 'All'].forEach(type => {
-                var correct = detection['after' + type + 'Correct'] - detection['before' + type + 'Correct'];
-                var wrong = detection['after' + type + 'Wrong'] - detection['before' + type + 'Wrong'];
-                var miss = detection['after' + type + 'Miss'] - detection['before' + type + 'Miss'];
-                var recall = detection['after' + type + 'Recall'] - detection['before' + type + 'Recall'];
-                var precision = detection['after' + type + 'Precision'] - detection['before' + type + 'Precision'];
-                var f1 = detection['after' + type + 'F1'] - detection['before' + type + 'F1'];
+                const correct = +detection['after' + type + 'Correct'] - +detection['before' + type + 'Correct'];
+                const wrong = +detection['after' + type + 'Wrong'] - +detection['before' + type + 'Wrong'];
+                const miss = +detection['after' + type + 'Miss'] - +detection['before' + type + 'Miss'];
+                const recall = +detection['after' + type + 'Recall'] - +detection['before' + type + 'Recall'];
+                const precision = +detection['after' + type + 'Precision'] - +detection['before' + type + 'Precision'];
+                const f1 = +detection['after' + type + 'F1'] - +detection['before' + type + 'F1'];
 
                 detection['diff' + type + 'CorrectStr'] = (correct >= 0 ? '+' : '') + correct;
                 detection['diff' + type + 'WrongStr'] = (wrong >= 0 ? '+' : '') + wrong;
@@ -7293,28 +7308,28 @@ https://github.com/Tencent/APIJSON/issues
                 detection['diff' + type + 'F1Str'] = (f1 >= 0 ? '+' : '') + (100 * f1).toFixed(0);
               });
             } else {
-              var extra = extras[i] || {};
-              var imgTotal = detection[stage + 'ImgTotal'] = (tr.imgTotal || tr.imgCorrect || 0) + (extra.imgTotal || 0);
-              var imgWrong = detection[stage + 'ImgWrong'] = (tr.imgWrong || 0) + (extra.imgWrong || 0);
-              var imgCorrect = detection[stage + 'ImgCorrect'] = ((tr.imgCorrect || 0) + (extra.imgCorrect || 0)) || (imgTotal - imgWrong);
-              var imgMiss = detection[stage + 'ImgMiss'] = ((tr.imgMiss || 0) + (extra.imgMiss || 0)) || (imgTotal - imgCorrect);
+              const extra = extras[i] || {};
+              const imgTotal = detection[stage + 'ImgTotal'] = +(tr.imgTotal || tr.imgCorrect || 0) + +(extra.imgTotal || 0);
+              const imgWrong = detection[stage + 'ImgWrong'] = +(tr.imgWrong || 0) + +(extra.imgWrong || 0);
+              const imgCorrect = detection[stage + 'ImgCorrect'] = (+(tr.imgCorrect || 0) + +(extra.imgCorrect || 0)) || (imgTotal - imgWrong);
+              const imgMiss = detection[stage + 'ImgMiss'] = (+(tr.imgMiss || 0) + +(extra.imgMiss || 0)) || (imgTotal - imgCorrect);
 
-              var allTotal = detection[stage + 'AllTotal'] = (tr.allTotal || tr.allCorrect || 0) + (extra.sameTotal || 0);
-              var allWrong = detection[stage + 'AllWrong'] = (tr.allWrong || 0) + (extra.sameWrong || 0);
-              var allCorrect = detection[stage + 'AllCorrect'] = ((tr.allCorrect || 0) + (extra.sameCorrect || 0)) || (allTotal - allWrong);
-              var allMiss = detection[stage + 'AllMiss'] = ((tr.allMiss || 0) + (extra.sameMiss || 0)) || (allTotal - allCorrect);
+              const allTotal = detection[stage + 'AllTotal'] = +(tr.allTotal || tr.allCorrect || 0) + +(extra.allTotal || 0);
+              const allWrong = detection[stage + 'AllWrong'] = +(tr.allWrong || 0) + +(extra.allWrong || 0);
+              const allCorrect = detection[stage + 'AllCorrect'] = (+(tr.allCorrect || 0) + +(extra.allCorrect || 0)) || (allTotal - allWrong);
+              const allMiss = detection[stage + 'AllMiss'] = (+(tr.allMiss || 0) + +(extra.allMiss || 0)) || (allTotal - allCorrect);
 
-              var allImgRecall = detection[stage + 'ImgRecall'] = allImgCorrect / allImgTotal;
-              var allImgPrecision = detection[stage + 'ImgPrecision'] = allImgCorrect / (allImgCorrect + allImgWrong);
-              var allImgF1 = detection[stage + 'ImgF1'] = (2 * allImgRecall * allImgPrecision) / (allImgRecall + allImgPrecision);
+              const imgRecall = detection[stage + 'ImgRecall'] = imgCorrect / imgTotal; // allImgCorrect / allImgTotal;
+              const imgPrecision = detection[stage + 'ImgPrecision'] = imgCorrect / (imgCorrect + imgWrong); // allImgCorrect / (allImgCorrect + allImgWrong);
+              const imgF1 = detection[stage + 'ImgF1'] = (2 * imgRecall * imgPrecision) / (imgRecall + imgPrecision); // (2 * allImgRecall * allImgPrecision) / (allImgRecall + allImgPrecision);
 
-              var allRecall = detection[stage + 'AllRecall'] = allCorrect / allTotal;
-              var allPrecision = detection[stage + 'AllPrecision'] = allCorrect / (allCorrect + allWrong);
-              var allF1 = detection[stage + 'AllF1'] = (2 * allRecall * allPrecision) / (allRecall + allPrecision);
+              const allRecall = detection[stage + 'AllRecall'] = allCorrect / allTotal;
+              const allPrecision = detection[stage + 'AllPrecision'] = allCorrect / (allCorrect + allWrong);
+              const allF1 = detection[stage + 'AllF1'] = (2 * allRecall * allPrecision) / (allRecall + allPrecision);
 
-              detection[stage + 'ImgRecallStr'] = (100 * allImgRecall).toFixed(0);
-              detection[stage + 'ImgPrecisionStr'] = (100 * allImgPrecision).toFixed(0);
-              detection[stage + 'ImgF1Str'] = (100 * allImgF1).toFixed(0);
+              detection[stage + 'ImgRecallStr'] = (100 * imgRecall).toFixed(0);
+              detection[stage + 'ImgPrecisionStr'] = (100 * imgPrecision).toFixed(0);
+              detection[stage + 'ImgF1Str'] = (100 * imgF1).toFixed(0);
 
               detection[stage + 'AllRecallStr'] = (100 * allRecall).toFixed(0);
               detection[stage + 'AllPrecisionStr'] = (100 * allPrecision).toFixed(0);
@@ -7333,7 +7348,7 @@ https://github.com/Tencent/APIJSON/issues
         const corrects = tr.corrects = tr.corrects || [];
         const wrongs = tr.wrongs = tr.wrongs || [];
 
-        this.img = random.img;
+        vBefore.src = vDiff.src = vAfter.src = this.img = random.img;
         this.file = random.file;
 
         // var tests = this.tests[String(this.currentAccountIndex)] || {}
@@ -7666,6 +7681,14 @@ https://github.com/Tencent/APIJSON/issues
         this.draw('diff');
         this.draw('after');
         this.compute();
+
+        var random = this.currentRandomItem || this.randoms[this.currentRandomIndex];
+        var compareType = random == null ? null : random.compareType;
+        if (compareType == null || compareType <= JSONResponse.COMPARE_EQUAL) {
+          random.compareType = JSONResponse.COMPARE_VALUE_CHANGE;
+          random.compareColor = 'blue';
+          random.compareMessage = '画框 ✓ 对 X 错改变';
+        }
       },
 
       showAndSend: function (branchUrl, req, isAdminOperation, callback) {
@@ -10724,6 +10747,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
       testRandom: function (show, testList, testSubList, limit, isCross, isManual, callback) {
         this.isRandomEditable = false
+        this.currentRandomIndex = -1
+        this.sameIds = []
+        this.missTruth = {}
+
         if (testList != true && testSubList != true) {
           this.testRandomProcess = ''
           this.testRandomWithText(show, callback)
@@ -12080,11 +12107,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           default:
             it.compareColor = 'white'
             it.hintMessage = '结果正确'
-            if (isRandom && tr.randomId != null) {
-              var sameRandomIds = this.sameRandomIds || [];
-              if (! sameRandomIds.includes(tr.randomId)) {
-                sameRandomIds.push(tr.randomId);
-                this.sameRandomIds = sameRandomIds;
+            if (isRandom && tr.id != null) {
+              var sameIds = this.sameIds || [];
+              if (! sameIds.includes(tr.id)) {
+                sameIds.push(tr.id);
+                this.sameIds = sameIds;
               }
             }
             break;
@@ -12118,13 +12145,20 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
 
         var doneCount = isRandom ? App.randomDoneCount : App.doneCount
+        var isDone = doneCount >= allCount
         if (isRandom) {
-          this.testRandomProcess = doneCount >= allCount ? '' : ('正在测试: ' + doneCount + '/' + allCount)
+          this.testRandomProcess = isDone ? '' : ('正在测试: ' + doneCount + '/' + allCount)
+          if (isDone) {
+            App.currentRandomIndex = -1
+            App.isRandomShow = true
+            App.isRandomListShow = true
+            App.handleTest(false, 0, list[0], null, isRandom)  // , false, isCross)
+          }
         } else {
-          this.testProcess = doneCount >= allCount ? (this.isMLEnabled ? '机器学习:已开启' : '机器学习:已关闭') : '正在测试: ' + doneCount + '/' + allCount
+          this.testProcess = isDone ? (this.isMLEnabled ? '机器学习:已开启' : '机器学习:已关闭') : '正在测试: ' + doneCount + '/' + allCount
         }
 
-        if (doneCount < allCount && callback != this.autoTestCallback && typeof this.autoTestCallback == 'function') {
+        if (isDone != true && callback != this.autoTestCallback && typeof this.autoTestCallback == 'function') {
           this.autoTestCallback('正在测试')
         }
 
@@ -12212,6 +12246,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }, IS_NODE ? 200 : 1000)
             } else {
               App.testRandomProcess = ''
+
               if (isCross) {
                 if (deepDoneCount == deepAllCount) {
                   App.test(false, accInd + 1, isCross)
@@ -12647,14 +12682,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         item = item || {}
         const random = item.Random = item.Random || {}
         var document;
+        var isChanged = false;
         if (isRandom) {
           this.currentRandomItem = item;
-          if (this.currentRandomIndex != index) {
+          isChanged = this.currentRandomIndex != index;
+          if (isChanged) {
             this.currentRandomIndex = index;
             this.hoverIds = {};
             this.visiblePaths = [];
-            this.sameRandomIds = [];
             this.missTruth = {};
+            // this.sameIds = [];
           }
 
           if ((random.count || 0) > 1) {
@@ -12715,9 +12752,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           this.view = 'code'
           this.jsoncon = res || ''
 
-          if (isRandom) {
+          if (isChanged && isRandom) {
             //FIXME 仅测试用
-            var before = parseJSON(testRecord.response) || {
+            var before = parseJSON(testRecord.response) || (DEBUG ? {
               bboxes: [{
                 id: 1, label: '湘A580319X', score: 0.95, angle: 10, color: [255, 0, 70, 128], bbox: [100, 105, 400, 300]
               }, {
@@ -12739,8 +12776,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   [1920*Math.random(), 1080*Math.random()], [1920*Math.random(), 1080*Math.random()], [100, 100]
                 ]
               }]
-            };
-             var after = currentResponse || {
+            } : {});
+
+            var after = currentResponse || (DEBUG ? {
 //            var after = {
               bboxes: [{
                 id: 1, label: '湘A5883I9X', score: 0.6, angle: 11, color: [255, 0, 70, 128], bbox: [100, 105, 400, 300]
@@ -12767,7 +12805,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 [100, 100], [500, 160], [900, 200], [400, 900],
                 [1920*Math.random(), 1080*Math.random()], [1920*Math.random(), 1080*Math.random()], [100, 100]
               ]
-            };
+            } : {});
 
             const detection = this.detection || {};
             // var currentRandomItem = this.currentRandomItem = this.currentRandomItem || this.randoms[this.currentRandomIndex] || {};
@@ -12777,7 +12815,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               testRecord.total = detection.total;
             }
 
-            detection.sameRandomIds = testRecord.sameRandomIds || [];
+            detection.sameIds = testRecord.sameIds || [];
             detection.missTruth = testRecord.missTruth || {};
 
             detection.beforeCorrect = testRecord.correct || 0;
@@ -12978,7 +13016,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 f1: detection.afterF1,
                 corrects: detection.corrects,
                 wrongs: detection.wrongs,
-                sameRandomIds: this.sameRandomIds,
+                sameIds: this.sameIds,
                 missTruth: Object.keys(missTruth).length <= 0 ? null : JSON.stringify(missTruth),
                 compare: JSON.stringify(testRecord.compare || {}),
                 response: rawRspStr,
@@ -13036,9 +13074,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     item.Random = r
                   }
                   if ((data.TestRecord || {}).id != null) {
-                    testRecord.id = data.TestRecord.id
+                    var id = testRecord.id = data.TestRecord.id
                     if (r != null) {
                       testRecord.randomId = r.id
+                    }
+
+                    var sameIds = App.sameIds
+                    var ind = sameIds == null ? -1 : sameIds.indexOf(id)
+                    if (ind >= 0) {
+                      sameIds.splice(ind, 1)
                     }
                   }
 
@@ -13063,7 +13107,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 //   }
                 // }
 
-                App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+                App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross, true)
                 App.summary();
               }
 
@@ -13073,7 +13117,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
       },
 
-      updateTestRecord: function (allCount, list, index, item, response, isRandom, ignoreTrend, accountIndex, isCross) {
+      updateTestRecord: function (allCount, list, index, item, response, isRandom, ignoreTrend, accountIndex, isCross, isSummary) {
         item = item || {}
         var doc = (isRandom ? item.Random : item.Document) || {}
 
@@ -13085,7 +13129,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             'invalid': 0,
             'host': this.getBaseUrl(),
             '@order': 'date-',
-            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,corrects,wrongs,sameRandomIds,missTruth,response' + (this.isMLEnabled ? ',standard' : ''),
+            '@column': 'id,userId,testAccountId,documentId,randomId,reportId,duration,minDuration,maxDuration,total,correct,wrong,miss,score,iou,recall,precision,f1,corrects,wrongs,sameIds,response' + (this.isMLEnabled ? ',missTruth,standard' : ''),
             'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  // '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
           }
         }, {}, function (url, res, err) {
@@ -13099,6 +13143,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           item.TestRecord = data.TestRecord
           App.compareResponse(res, allCount, list, index, item, response, isRandom, accountIndex, true, err, ignoreTrend, isCross);
+
+          if (isSummary) {
+            App.summary();
+          }
         })
       },
 
