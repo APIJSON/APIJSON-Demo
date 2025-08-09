@@ -7122,13 +7122,10 @@ https://github.com/Tencent/APIJSON/issues
           var tr2 = rand.TestRecord;
           if (tr2 == null) {
             allImgMiss ++;
-            if (isAfter) {
-              sameImgMiss ++;
-            }
             continue;
           }
 
-          var isAfter = sameIds.includes(rand.id);
+          var isAfter = tr2.reportId != this.reportId && sameIds.includes(tr2.id);
           if (isAfter) {
             sameImgTotal ++;
           }
@@ -7268,7 +7265,7 @@ https://github.com/Tencent/APIJSON/issues
           "TestRecord:beforeSame": {
             // "reportId{}@": "TestRecord-reportId:ids2[]",
             // 'randomId{}': beforeIds.length <= 0 ? null : beforeIds,
-            'id{}': beforeIds.length <= 0 ? null : beforeIds,
+            'id{}': beforeIds,
             'documentId': did,
             "@column": "sum(total):allTotal;sum(correct):allCorrect;sum(wrong):allWrong;sum(miss):allMiss;count(*):imgTotal;sum(wrong + miss <= 0):imgCorrect;sum(wrong > 0):imgWrong;sum(miss > 0):imgMiss",
             "@raw": "@column",
@@ -7311,12 +7308,12 @@ https://github.com/Tencent/APIJSON/issues
               const extra = extras[i] || {};
               const imgTotal = detection[stage + 'ImgTotal'] = +(tr.imgTotal || tr.imgCorrect || 0) + +(extra.imgTotal || 0);
               const imgWrong = detection[stage + 'ImgWrong'] = +(tr.imgWrong || 0) + +(extra.imgWrong || 0);
-              const imgCorrect = detection[stage + 'ImgCorrect'] = (+(tr.imgCorrect || 0) + +(extra.imgCorrect || 0)) || (imgTotal - imgWrong);
+              const imgCorrect = detection[stage + 'ImgCorrect'] = (+(tr.imgCorrect || 0) + +(extra.imgCorrect || 0)); // 前面为 0 会导致后面的计算 || (imgTotal - imgWrong);
               const imgMiss = detection[stage + 'ImgMiss'] = (+(tr.imgMiss || 0) + +(extra.imgMiss || 0)) || (imgTotal - imgCorrect);
 
               const allTotal = detection[stage + 'AllTotal'] = +(tr.allTotal || tr.allCorrect || 0) + +(extra.allTotal || 0);
               const allWrong = detection[stage + 'AllWrong'] = +(tr.allWrong || 0) + +(extra.allWrong || 0);
-              const allCorrect = detection[stage + 'AllCorrect'] = (+(tr.allCorrect || 0) + +(extra.allCorrect || 0)) || (allTotal - allWrong);
+              const allCorrect = detection[stage + 'AllCorrect'] = (+(tr.allCorrect || 0) + +(extra.allCorrect || 0)); // 前面为 0 会导致后面的计算 || (allTotal - allWrong);
               const allMiss = detection[stage + 'AllMiss'] = (+(tr.allMiss || 0) + +(extra.allMiss || 0)) || (allTotal - allCorrect);
 
               const imgRecall = detection[stage + 'ImgRecall'] = imgCorrect / imgTotal; // allImgCorrect / allImgTotal;
@@ -12065,6 +12062,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         tr.compare = cmp
         var status = res == null ? null : res.status
 
+        var isSame = false
         it = it || {}
         var p = cmp.path
         it.compareType = cmp.code;
@@ -12107,19 +12105,28 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           default:
             it.compareColor = 'white'
             it.hintMessage = '结果正确'
-            if (isRandom && tr.id != null) {
-              var sameIds = this.sameIds || [];
-              if (! sameIds.includes(tr.id)) {
-                sameIds.push(tr.id);
-                this.sameIds = sameIds;
-              }
-            }
+            isSame = tr.reportId != this.reportId
             break;
         }
 
         if (isRandom) {
           r = r || {}
           it.Random = r
+
+          if (tr.id != null) {
+            var sameIds = this.sameIds || []
+            var ind = sameIds.indexOf(tr.id)
+            if (isSame) {
+              if (ind < 0) {
+                sameIds.push(tr.id)
+              }
+            } else {
+              if (ind >= 0) {
+                sameIds.splice(ind, 1)
+              }
+            }
+            this.sameIds = sameIds;
+          }
 
           this.updateToRandomSummary(it, 1, accountIndex)
         }
@@ -12607,7 +12614,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           delete obj["time:start|duration|end"]
           delete obj["time:start|duration|end|parse|sql"]
           delete obj["time:start|duration|end|parse|sql|model"]
-          delete obj["detect-time:start|duration|end"]
+          delete obj["det-time:start|duration|end"]
           delete obj["pose-time:start|duration|end"]
           delete obj["seg-time:start|duration|end"]
           delete obj["obb-time:start|duration|end"]
@@ -12886,12 +12893,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
               if (isRandom) {
                 App.updateToRandomSummary(item, -1, App.currentAccountIndex)
-                if (App.compareRandomIds instanceof Array) {
-                  var ind = App.compareRandomIds.indexOf(random.id);
-                  if (ind >= 0) {
-                    App.compareRandomIds.splice(ind, 1)
-                  }
-                }
+                // if (App.compareRandomIds instanceof Array) {
+                //   var ind = App.compareRandomIds.indexOf(random.id);
+                //   if (ind >= 0) {
+                //     App.compareRandomIds.splice(ind, 1)
+                //   }
+                // }
               } else {
                 App.updateToSummary(item, -1, App.currentAccountIndex)
               }
@@ -12908,7 +12915,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 item.TestRecord = null
               }
 
-              App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross)
+              App.updateTestRecord(0, list, index, item, rawRspStr == null ? null : parseJSON(rawRspStr), isRandom, true, App.currentAccountIndex, isCross, true)
+              App.summary();
             })
           }
           else { //上传新的校验标准
@@ -12981,7 +12989,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 // userId: userId,
                 chainGroupId: cgId,
                 chainId: cId,
-                documentId: random.documentId,
+                documentId: random.documentId || document.id,
                 name: random.name,
                 count: random.count,
                 config: random.config
@@ -13002,7 +13010,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 // userId: userId,
                 chainGroupId: cgId,
                 chainId: cId,
-                documentId: isNewRandom ? null : (isRandom ? random.documentId : document.id),
+                documentId: isNewRandom ? null : (isRandom ? (random.documentId || document.id) : document.id),
                 randomId: isRandom && ! isNewRandom ? random.id : null,
                 reportId: this.reportId,
                 host: baseUrl,
@@ -13088,14 +13096,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     }
                   }
 
-                  var rid = random.id || r.id || testRecord.randomId;
-                  if (rid != null && rid > 0) {
-                    if (App.compareRandomIds == null) {
-                      App.compareRandomIds = [rid]
-                    } else {
-                      App.compareRandomIds.push(rid)
-                    }
-                  }
+                  // var rid = random.id || r.id || testRecord.randomId;
+                  // if (rid != null && rid > 0) {
+                  //   if (App.compareRandomIds == null) {
+                  //     App.compareRandomIds = [rid]
+                  //   } else {
+                  //     App.compareRandomIds.push(rid)
+                  //   }
+                  // }
                 }
                 item.TestRecord = testRecord
 
