@@ -8,6 +8,7 @@ import java.util.Objects;
 
 //import javax.annotation.PostConstruct;
 
+import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -68,6 +69,7 @@ public class FileController {
 		}
 	}
 
+	public static final List<String> VIDEO_SUFFIXES = Arrays.asList("mp4");
 	public static final List<String> IMG_SUFFIXES = Arrays.asList("jpg", "jpeg", "png");
 	private static List<String> fileNames = null;
 	@GetMapping("/files")
@@ -82,7 +84,7 @@ public class FileController {
 					String name = file == null ? null : file.getName();
 					int ind = name == null ? -1 : name.lastIndexOf(".");
 					String suffix = ind < 0 ? null : name.substring(ind + 1);
-					boolean isImg = suffix != null && IMG_SUFFIXES.contains(suffix.toLowerCase());
+					boolean isImg = suffix != null;
 					if (isImg) {
 						names.add(name);
 					}
@@ -145,6 +147,33 @@ public class FileController {
 		return responseEntity;
 	}
 
+	@GetMapping("/download/report/{reportId}/cv")
+	@ResponseBody
+	public ResponseEntity<Object> downloadCVReport(@PathVariable(name = "reportId") String reportId) throws FileNotFoundException, IOException {
+		String name = "CVAuto_report_" + reportId + ".xlsx";
+		File file = new File(fileUploadRootDir + name);
+		long size = file.exists() ? file.length() : 0;
+		if (size < 10*1024) {
+			file.delete();
+		}
 
+		if ((file.exists() ? file.length() : 0) < 10*1024) {
+			String filePath = ExcelUtil.newCVAutoReportWithTemplate(fileUploadRootDir, name);
+			if (! Objects.equals(filePath, fileUploadRootDir + name)) {
+				try {
+					File sourceFile = new File(filePath);
+					File destFile = new File(fileUploadRootDir + name);
+					if (! destFile.getAbsolutePath().equals(sourceFile.getAbsolutePath())) {
+						FileUtils.copyFile(sourceFile, destFile);
+						System.out.println("文件复制完成 (Commons IO): " + filePath + " -> " + fileUploadRootDir + name);
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
+		return download(name);
+	}
 
 }

@@ -1858,20 +1858,22 @@ public class DemoController extends APIJSONController<Long> {
         return rspBody;
     }
 
+    public static final RestTemplate CLIENT = new RestTemplate();
+    static {
+        try { // 支持 PATCH 方法，需要 Maven 依赖 org.apache.httpcomponents.client5:httpclient5
+            HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            CLIENT.setRequestFactory(requestFactory);
+        }
+        catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
     protected String sendRequest(HttpSession session, HttpMethod method, String url, String body, HttpHeaders headers) {
         String rspBody = null;
         try {
-            RestTemplate client = new RestTemplate();
-            try { // 支持 PATCH 方法，需要 Maven 依赖 org.apache.httpcomponents.client5:httpclient5
-                HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
-                client.setRequestFactory(requestFactory);
-            }
-            catch (Throwable e) {
-                e.printStackTrace();
-            }
-
             HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
-            ResponseEntity<String> entity = client.exchange(url, method, requestEntity, String.class);
+            ResponseEntity<String> entity = CLIENT.exchange(url, method, requestEntity, String.class);
 
             HttpHeaders hhs = entity.getHeaders();
             if (session != null && hhs != null) {
