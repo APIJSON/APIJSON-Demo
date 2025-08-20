@@ -89,7 +89,7 @@
         </span>
         <a v-show="isDelayShow" >2s</a>
 
-        <input type="file" id="imageInput" accept="image/*" style="opacity: 0; width: 1px; display: none" :multiple="allowMultiple" @change="handleFileSelect($event)" >
+        <input type="file" id="imageInput" accept="image/*,video/*" style="opacity: 0; width: 1px; display: none" :multiple="allowMultiple" @change="handleFileSelect($event)" >
 
         <iframe v-show="User.id == null || User.id <= 0" src="https://ghbtns.com/github-btn.html?user=Tencent&amp;repo=APIJSON&amp;type=star&amp;count=true&amp;size=small" frameborder="0" scrolling="0" width="160px" height="18px"></iframe>
 
@@ -509,7 +509,7 @@ Ctrl + S 或 Command + S 保存当前用例；
                             <li style="width: 100%; background-color: white; " v-for="(item, index) in randomSubs" :id="'randomSubItem' + index" >
                                 <img id="vRandomSubImg" :src="(item.Random || {}).img || 'img/add_light.png'" style="height: 90px; min-width: 90px" @click="onClickAddRandom(currentRandomIndex, index)">
 
-                                <a class="hint--rounded hint--no-animate" ref="randomSubTexts" @mouseover="setRequestHint(index, item, true)" href="javascript:void(0)" @click="restoreRandom(index, item)" :style="{ color: index == currentRandomSubIndex ? 'black' : 'gray' }">{{ Math.round(100*((item.Random || {}).size || 0)/8/1024/1024)/100 + 'M ' + ((item.Random || {}).width || '') + "x" + ((item.Random || {}).height || '') }}</a>
+                                <a class="hint--rounded hint--no-animate" ref="randomSubTexts" @mouseover="setRequestHint(index, item, true)" href="javascript:void(0)" @click="restoreRandom(index, item)" :style="{ color: index == currentRandomSubIndex ? 'black' : 'gray' }">{{ Math.round(100*((item.Random || {}).size || 0)/1024/1024)/100 + 'M ' + ((item.Random || {}).width || '') + "x" + ((item.Random || {}).height || '') }}</a>
                                 <input style="width: 96%" v-model="(item.Random || {}).name" @keyup="doOnKeyUp(event, 'randomSub', false, item)" />
 
                                 <div :style="{ background: item.compareColor }" v-show="! isRandomEditable && item.compareType != null" style="position: absolute;top: 8px;right: 36px;display: inline-block;">
@@ -1080,6 +1080,7 @@ fun(true, 1, 'a'..);
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONRequest.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONResponse.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/CodeUtil.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/FileUtil.js" ></script>
 <!-- 必须在main.js前 TODO 可能有冲突，代码写入vue文件？ >>>>>>>>>>>>>>>> -->
 <script src="https://unpkg.com/json5@^2.0.0/dist/index.min.js"></script>
 

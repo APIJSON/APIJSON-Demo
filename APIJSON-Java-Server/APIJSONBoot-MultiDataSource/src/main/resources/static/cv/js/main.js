@@ -47,6 +47,7 @@
         var Vue = require('./vue.min'); // 某些版本不兼容 require('vue');
         var StringUtil = require('../apijson/StringUtil');
         var CodeUtil = require('../apijson/CodeUtil');
+        var FileUtil = require('../apijson/FileUtil');
         var JSONObject = require('../apijson/JSONObject');
         var JSONResponse = require('../apijson/JSONResponse');
         var JSONRequest = require('../apijson/JSONRequest');
@@ -6784,6 +6785,8 @@ https://github.com/Tencent/APIJSON/issues
         const doc = (this.currentRemoteItem || {}).Document || {}
         const random = cri.Random || {}
         const ind = isSub && this.currentRandomSubIndex != null ? this.currentRandomSubIndex : this.currentRandomIndex;
+        const index = ind != null && ind >= 0 ? ind : -1; // items.length;
+        const server = this.server
 
         var selectedFiles = Array.from(event.target.files);
         // const previewList = document.getElementById('previewList');
@@ -6791,88 +6794,153 @@ https://github.com/Tencent/APIJSON/issues
 
         selectedFiles.forEach((file, i) => {
           const reader = new FileReader();
-          reader.onload = (e) => {
+          reader.onload = (evt) => {
             // const img = document.createElement('img');
-            // img.src = e.target.result;
+            // img.src = evt.target.result;
             // img.style.height = '100%';
             // img.style.margin = '1px';
             // previewList.appendChild(img);
 
-            const index = ind != null && ind >= 0 ? ind : -1; // items.length;
-            var item = JSONResponse.deepMerge({
-              Random: {
-                id: -(index || 0) - 1, //表示未上传
-                toId: random.id,
-                userId: random.userId || doc.userId,
-                documentId: random.documentId || doc.id,
-                count: 1,
-                name: '分析位于 ' + index + ' 的这张图片',
-                img: e.target.result,
-                config: ''
+            function callback(file, img, name, size, width, height, index, rank) {
+
+              var item = JSONResponse.deepMerge({
+                Random: {
+                  id: -(index || 0) - 1, //表示未上传
+                  toId: random.id,
+                  userId: random.userId || doc.userId,
+                  documentId: random.documentId || doc.id,
+                  count: 1,
+                  name: '分析位于 ' + index + ' 的这张图片',
+                  img: img,
+                  config: ''
+                }
+              }, items[index] || {});
+              item.status = 'uploading';
+
+              const r = item.Random || {};
+              r.name = r.file = name;
+              r.size = size;
+              r.width = width;
+              r.height = height;
+              r.rank = rank;
+
+              if (index < 0) { // || r.id == null || r.id <= 0) {
+                items.unshift(item);
+              } else {
+                items[index] = item;
               }
-            }, items[index] || {});
-            item.status = 'uploading';
 
-            const r = item.Random || {};
-            r.name = r.file = file.name;
-            r.size = file.size;
-            r.width = file.width;
-            r.height = file.height;
+              if (isSub) {
+                App.randomSubs = items;
+              } else {
+                App.randoms = items;
+              }
 
-            if (index < 0) { // || r.id == null || r.id <= 0) {
-              items.unshift(item);
+              try {
+                Vue.set(items, index < 0 ? 0 : index, item);
+              } catch (e) {
+                console.error(e)
+              }
+
+              const formData = new FormData();
+              formData.append('file', file);
+
+              fetch(server + '/upload', {
+                method: 'POST',
+                body: formData
+              })
+                  .then(response => response.json())
+                  .then(data => {
+                    var path = data.path;
+                    if (StringUtil.isEmpty(path, true) || data.size == null) {
+                      throw new Error('上传失败！' + JSON.stringify(data || {}));
+                    }
+
+                    console.log('Upload successful:', data);
+                    item.status = 'done';
+                    if (!(server.includes('localhost') || server.includes('127.0.0.1'))) {
+                      r.img = (path.startsWith('/') ? server + path : path) || r.img;
+                    }
+
+                    try {
+                      Vue.set(items, index < 0 ? 0 : index, item);
+                    } catch (e) {
+                      console.error(e)
+                    }
+
+                    App.updateRandom(r)
+                  })
+                  .catch(error => {
+                    console.error('Upload failed:', error);
+                    item.status = 'failed';
+                  });
+            }
+
+            if (file.type && file.type.startsWith("video/")) {
+              // === 视频处理 ===
+              this.extractFramesAndUpload(file, 5, async (frameBlob, rank, totalFrames) => {
+                const reader2 = new FileReader();
+                reader2.onload = (evt) => { // TODO 传 toId，视频作为分组，次数作为抽取帧数
+                  var fn = file.name + '-' + rank + '.jpg'
+                  callback(new File([frameBlob], fn), reader2.result, fn, frameBlob.size, frameBlob.width, frameBlob.height, -1, rank)
+                }
+                reader2.readAsDataURL(frameBlob);
+              });
             } else {
-              items[index] = item;
+              callback(file, reader.result, file.name, file.size, file.width, file.height, index)
             }
 
-            if (isSub) {
-              this.randomSubs = items;
-            }
-            else {
-              this.randoms = items;
-            }
-
-            try {
-              Vue.set(items, index < 0 ? 0 : index, item);
-            } catch (e) {
-              console.error(e)
-            }
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            fetch(this.server + '/upload', {
-              method: 'POST',
-              body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                  var path = data.path;
-                  if (StringUtil.isEmpty(path, true) || data.size == null) {
-                    throw new Error('上传失败！' + JSON.stringify(data || {}));
-                  }
-
-                  console.log('Upload successful:', data);
-                  item.status = 'done';
-                  if (! (App.server.includes('localhost') || App.server.includes('127.0.0.1'))) {
-                    r.img = (path.startsWith('/') ? App.server + path : path) || r.img;
-                  }
-
-                  try {
-                    Vue.set(items, index < 0 ? 0 : index, item);
-                  } catch (e) {
-                    console.error(e)
-                  }
-
-                  App.updateRandom(r)
-                })
-                .catch(error => {
-                  console.error('Upload failed:', error);
-                  item.status = 'failed';
-                });
           };
           reader.readAsDataURL(file);
         });
+      },
+
+      /**
+       * 从视频抽帧（倒序），支持并发上传
+       * @param {File} file - 视频文件
+       * @param {number} concurrency - 最大并发数
+       * @param {function} onFrameReady - 回调(frameBlob, rank, totalFrames)
+       */
+      extractFramesAndUpload: function(file, concurrency, onFrameReady) {
+        const url = URL.createObjectURL(file);
+        const video = document.createElement("video");
+        video.src = url;
+        video.preload = "metadata";
+
+        video.onloadedmetadata = async () => {
+          const duration = video.duration;
+          let timestamps = [];
+
+          if (duration <= 100) {
+            for (let t = Math.floor(duration); t >= 0; t--) timestamps.push(t);
+          } else {
+            const step = duration / 100;
+            for (let i = 100; i >= 0; i--) timestamps.push(i * step);
+          }
+
+          const totalFrames = timestamps.length;
+          let index = 0;
+
+          async function worker() {
+            while (index < totalFrames) {
+              const i = index++;
+              const time = timestamps[i];
+              const frameBlob = await FileUtil.captureFrame(video, time);
+              // rank 按倒序：0 表示最新帧，totalFrames-1 表示最早帧
+              const rank = i;
+              onFrameReady(frameBlob, rank, totalFrames);
+            }
+          }
+
+          // 并发执行
+          const workers = [];
+          for (let i = 0; i < concurrency; i++) {
+            workers.push(worker());
+          }
+          await Promise.all(workers);
+
+          URL.revokeObjectURL(url);
+        };
       },
 
       uploadImage: function(randomIndex, randomSubIndex) {

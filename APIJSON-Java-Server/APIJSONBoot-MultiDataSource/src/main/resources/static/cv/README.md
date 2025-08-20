@@ -2,7 +2,7 @@
   CVAuto
 </h1>
  
-<p align="center">👁 <b>零代码零标注 CV AI 自动化测试平台</b> 🚀 <br><b>零代码快速自动化测试 CV 计算机视觉 AI 人工智能图像识别算法的功能、效果、性能</b><br>适合 算法测试 工程师/专家、AI/机器学习/算法 工程师/专家/研究员/科学家、算法 应用/开发 工程师/专家 等</p>
+<p align="center">👁 <b>零代码零标注 CV AI 自动化测试平台</b> 🚀 <br><b>零代码快速自动化测试 CV 计算机视觉 AI 人工智能图像识别算法的功能、效果、性能</b><br>适合 算法 应用/开发 工程师/专家、算法测试 工程师/专家、AI/机器学习/算法 工程师/专家/研究员/科学家 等</p>
 
 <p align="center" >
   <a href="https://deepwiki.com/TommyLemon/CVAuto">English</a>
@@ -212,27 +212,23 @@ https://github.com/TommyLemon/APIAuto/issues
 <br />
 <br />
 
-### 其它项目
+### 生态项目
 
-[APIJSON](https://github.com/Tencent/APIJSON) 🚀 腾讯零代码、全功能、强安全 ORM 库 🏆 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构
+[APIJSON](https://github.com/Tencent/APIJSON) 🏆 腾讯实时 零代码、全功能、强安全 ORM 库 🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构
 
-[APIAuto](https://github.com/TommyLemon/APIAuto) 敏捷开发最强大易用的 HTTP 接口工具，机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释，集 文档、测试、Mock、调试、管理 于一体的一站式体验
+[APIAuto](https://github.com/TommyLemon/APIAuto) ☔ 敏捷开发最强大易用的接口工具，零代码测试与 AI 问答、生成代码与静态检查、生成文档与光标悬浮注释，腾讯、华为、SHEIN、传音、工行等使用
 
-[UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性和可用性
+[UnitAuto](https://github.com/TommyLemon/UnitAuto) ☀️ 最先进、最省事、ROI 最高的单元测试，零代码、全方位、自动化 测试 方法/函数，用户包含腾讯、快手、某 500 强巨头等
 
-[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具，任意增删改查、任意 SQL 模板变量、一键批量生成参数组合、快速构造大量测试数据
+[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 数据库工具，任意增删改查、任意 SQL 模板变量、一键批量生成参数组合、快速构造大量测试数据
 
-[UIGO](https://github.com/TommyLemon/UIGO) 📱 零代码快准稳 UI 智能录制回放平台 🚀 自动兼容任意宽高比分辨率屏幕，自动精准等待网络请求，录制回放快、准、稳！
-
+[UIGO](https://github.com/TommyLemon/UIGO) 📱 零代码快准稳 UI 智能录制回放平台 🚀 3 像素内自动精准定位，2 毫秒内自动精准等待，用户包含腾讯，微信团队邀请分享
 
 ### 持续更新
 https://github.com/TommyLemon/CVAuto/commits
 
-
 ### 我要赞赏
-**创作不易、坚持更难，右上角点亮 ⭐ Star 支持/收藏下本项目吧，谢谢 ^_^** <br />
+**创作不易、坚持更难，右上角点亮 ⭐ Star 收藏/支持下本项目吧，谢谢 ^_^** <br />
 https://github.com/TommyLemon/CVAuto
-
-
 
 
