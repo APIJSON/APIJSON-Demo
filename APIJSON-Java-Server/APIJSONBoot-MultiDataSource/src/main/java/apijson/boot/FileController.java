@@ -1,13 +1,14 @@
 package apijson.boot;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.util.*;
 
 //import javax.annotation.PostConstruct;
 
+import apijson.ExcelUtil;
+import apijson.StringUtil;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson2.JSONObject;
 
 import apijson.demo.DemoParser;
+
+import static com.google.common.io.Files.getFileExtension;
 
 /**文件相关的控制器，包括上传、下载、浏览等
  * @author : ramostear
@@ -104,18 +107,21 @@ public class FileController {
 	@ResponseBody
 	public JSONObject upload(@RequestParam("file") MultipartFile file) {
 		try {
-			File convertFile = new File(fileUploadRootDir + file.getOriginalFilename());
+			String name = file.getOriginalFilename();
+			name = (StringUtil.isEmpty(name) ? DateFormat.getDateInstance().format(new Date()) : name)
+					.replaceAll("[^a-zA-Z0-9._-]", String.valueOf(Math.round(1100*Math.random())));
+			File convertFile = new File(fileUploadRootDir + name);
 			FileOutputStream fileOutputStream;
 			fileOutputStream = new FileOutputStream(convertFile);
 			fileOutputStream.write(file.getBytes());
 			fileOutputStream.close();
 
 			if (fileNames != null && ! fileNames.isEmpty()) {
-				fileNames.add(file.getOriginalFilename());
+				fileNames.add(name);
 			}
 
 			JSONObject res = new JSONObject();
-			res.put("path", "/download/" + file.getOriginalFilename());
+			res.put("path", "/download/" + name);
 			res.put("size", file.getBytes().length);
 			return new DemoParser().extendSuccessResult(res);
 		} 
@@ -132,26 +138,62 @@ public class FileController {
 		File file = new File(fileUploadRootDir + fileName);
 		InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 
+		String encodedFileName = fileName;
+		try {
+			encodedFileName = URLEncoder.encode(fileName, StringUtil.UTF_8);
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Content-Disposition", String.format("attachment;filename=\"%s", fileName));
-		headers.add("Cache-Control", "no-cache,no-store,must-revalidate");
-		headers.add("Pragma", "no-cache");
-		headers.add("Expires", "0");
+		headers.add("Content-Disposition", String.format("attachment;filename=\"%s;filename*=UTF_8''%s", fileName, encodedFileName));
+		headers.add("Cache-Control", "public, max-age=86400");
+//		headers.add("Cache-Control", "no-cache,no-store,must-revalidate");
+//		headers.add("Pragma", "no-cache");
+//		headers.add("Expires", "0");
 
 		ResponseEntity<Object> responseEntity = ResponseEntity.ok()
 				.headers(headers)
 				.contentLength(file.length())
-				.contentType(MediaType.parseMediaType("application/txt"))
+				.contentType(determineContentType(fileName))
 				.body(resource);
 
 		return responseEntity;
+	}
+
+	private MediaType determineContentType(String fileName) {
+		String extension = getFileExtension(fileName).toLowerCase();
+		switch (extension) {
+			case "jpg":
+			case "jpeg":
+				return MediaType.IMAGE_JPEG;
+			case "png":
+				return MediaType.IMAGE_PNG;
+			case "gif":
+				return MediaType.IMAGE_GIF;
+			case "pdf":
+				return MediaType.APPLICATION_PDF;
+			case "json":
+				return MediaType.APPLICATION_JSON;
+			case "xml":
+				return MediaType.APPLICATION_XML;
+			case "txt":
+				return MediaType.TEXT_PLAIN;
+			case "css":
+				return MediaType.valueOf("text/css");
+			case "js":
+				return MediaType.valueOf("application/javascript");
+			default:
+				return MediaType.APPLICATION_OCTET_STREAM;
+		}
 	}
 
 	@GetMapping("/download/report/{reportId}/cv")
 	@ResponseBody
 	public ResponseEntity<Object> downloadCVReport(@PathVariable(name = "reportId") String reportId) throws FileNotFoundException, IOException {
 		String name = "CVAuto_report_" + reportId + ".xlsx";
-		File file = new File(fileUploadRootDir + name);
+		String path = fileUploadRootDir + name;
+		File file = new File(path);
 		long size = file.exists() ? file.length() : 0;
 		if (size < 10*1024) {
 			file.delete();
@@ -159,13 +201,13 @@ public class FileController {
 
 		if ((file.exists() ? file.length() : 0) < 10*1024) {
 			String filePath = ExcelUtil.newCVAutoReportWithTemplate(fileUploadRootDir, name);
-			if (! Objects.equals(filePath, fileUploadRootDir + name)) {
+			if (! Objects.equals(filePath, path)) {
 				try {
 					File sourceFile = new File(filePath);
-					File destFile = new File(fileUploadRootDir + name);
+					File destFile = new File(path);
 					if (! destFile.getAbsolutePath().equals(sourceFile.getAbsolutePath())) {
 						FileUtils.copyFile(sourceFile, destFile);
-						System.out.println("文件复制完成 (Commons IO): " + filePath + " -> " + fileUploadRootDir + name);
+						System.out.println("文件复制完成 (Commons IO): " + filePath + " -> " + path);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();

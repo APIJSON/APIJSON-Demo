@@ -329,7 +329,7 @@ public class ExcelUtil {
             detailRow.add(item.getCorrectCount());
             detailRow.add(item.getFalsePositiveCount());
             // G-M: 公式计算列 (注意所有列号都已更新)
-            detailRow.add(createFormulaCell(String.format("D%d-E%d", currentRow, currentRow))); // G: 漏检数
+            detailRow.add(createFormulaCell(String.format("C%d-D%d", currentRow, currentRow))); // G: 漏检数
 //            detailRow.add(createFormulaCell(String.format("IFERROR(E%d/D%d,0)", currentRow, currentRow))); // H: 召回率
 //            detailRow.add(createFormulaCell(String.format("IFERROR(E%d/(E%d+F%d),0)", currentRow, currentRow, currentRow))); // I: 精准率
 //            detailRow.add(createFormulaCell(String.format("IFERROR(2*I%d*H%d/(I%d+H%d),0)", currentRow, currentRow, currentRow, currentRow))); // J: F1 Score
