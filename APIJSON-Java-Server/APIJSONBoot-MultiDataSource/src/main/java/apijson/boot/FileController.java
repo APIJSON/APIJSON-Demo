@@ -191,7 +191,7 @@ public class FileController {
 		}
 	}
 
-	@GetMapping("/download/report/{reportId}/cv")
+	@GetMapping("/download/cv/report/{reportId}")
 	@ResponseBody
 	public ResponseEntity<Object> downloadCVReport(@PathVariable(name = "reportId") String reportId) throws FileNotFoundException, IOException {
 		String name = "CVAuto_report_" + reportId + ".xlsx";
@@ -220,7 +220,7 @@ public class FileController {
 				{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject random = new JSONObject();
 					random.put("documentId@", "TestRecord/documentId");
-					random.put("@column", "id,img");
+					random.put("@column", "id,file,img");
 					random.put("@order", "date-");
 					random.put("@combine", "file[>,img[>");
 					random.put("file[>", 0);
