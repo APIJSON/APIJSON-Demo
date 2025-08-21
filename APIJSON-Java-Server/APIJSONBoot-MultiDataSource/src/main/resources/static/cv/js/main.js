@@ -2145,6 +2145,11 @@ https://github.com/Tencent/APIJSON/issues
             if (this.isTestCaseShow) { //文档
               this.exTxt.name = 'APIJSON自动化文档 ' + this.formatDateTime()
             }
+
+            else if (this.isRandomShow && this.isRandomListShow) {
+              this.exTxt.name = 'CVAuto_report_' + (this.reportId || 0) + '.xlsx'
+              window.open(this.server + '/download/cv/report/' + (this.reportId || 0))
+            }
             else if (this.view == 'markdown' || this.view == 'output') {
               var suffix
               switch (this.language) {
@@ -2939,6 +2944,9 @@ https://github.com/Tencent/APIJSON/issues
               + '\n\n\n## 测试用例(Markdown格式，可用工具预览) \n\n' + this.getDoc4TestCase()
               + '\n\n\n\n\n\n\n\n## 文档(Markdown格式，可用工具预览) \n\n' + doc
               , this.exTxt.name + '.txt')
+          }
+          else if (this.isRandomShow && this.isRandomListShow) {
+            window.open(this.server + '/download/cv/report/' + (this.reportId || 0))
           }
           else if (this.view == 'markdown' || this.view == 'output') { //model
             var clazz = StringUtil.trim(this.exTxt.name)
