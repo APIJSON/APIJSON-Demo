@@ -65,7 +65,7 @@ function update() {
     + '\nRandom & Order: ' + App.randomDoneCount + ' / ' + App.randomAllCount + ' = ' + (100*randomProgress) + '%';
 };
 
-const PORT = 3000;
+const PORT = 3003;
 
 var done = false;
 const app = new Koa();

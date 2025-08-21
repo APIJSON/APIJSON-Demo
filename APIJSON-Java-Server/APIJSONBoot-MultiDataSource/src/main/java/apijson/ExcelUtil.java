@@ -49,7 +49,7 @@ public class ExcelUtil {
 
     public static void main(String[] args) throws IOException {
         String fileName = "CVAuto_Report_Enhanced_" + System.currentTimeMillis() + ".xlsx";
-        generateCVAutoReport("", fileName);
+        generateCVAutoReport(getMockDetailData(), "", fileName);
         System.out.println("报告生成成功！文件路径: " + fileName);
     }
 
@@ -65,25 +65,25 @@ public class ExcelUtil {
     private static final int JSON_COLUMN_INDEX = 11;
 
 
-    public static String newCVAutoReportWithTemplate() throws IOException {
-        return newCVAutoReportWithTemplate(null);
+    public static String newCVAutoReportWithTemplate(List<DetailItem> list) throws IOException {
+        return newCVAutoReportWithTemplate(list, null);
     }
-    public static String newCVAutoReportWithTemplate(String dir) throws IOException {
-        return newCVAutoReportWithTemplate(dir,null);
+    public static String newCVAutoReportWithTemplate(List<DetailItem> list, String dir) throws IOException {
+        return newCVAutoReportWithTemplate(list, dir,null);
     }
-    public static String newCVAutoReportWithTemplate(String dir, String outputFile) throws IOException {
-        return newCVAutoReportWithTemplate(dir, outputFile, null);
+    public static String newCVAutoReportWithTemplate(List<DetailItem> list, String dir, String outputFile) throws IOException {
+        return newCVAutoReportWithTemplate(list, dir, outputFile, null);
     }
-    public static String newCVAutoReportWithTemplate(String dir, String outputFile, String templateFile) throws IOException {
-        try {
-            return fillCVAutoReport(dir, outputFile, templateFile);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return generateCVAutoReport(dir, outputFile);
-        }
+    public static String newCVAutoReportWithTemplate(List<DetailItem> list, String dir, String outputFile, String templateFile) throws IOException {
+//        try {
+//            return fillCVAutoReport(list, dir, outputFile, templateFile);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+            return generateCVAutoReport(list, dir, outputFile);
+//        }
     }
 
-    public static String fillCVAutoReport(String dir, String outputFile, String templateFile) throws IOException {
+    public static String fillCVAutoReport(List<DetailItem> list, String dir, String outputFile, String templateFile) throws IOException {
         if (StringUtil.isNotEmpty(dir, false) && ! dir.endsWith(File.separator)) {
             dir += File.separator;
         }
@@ -104,21 +104,21 @@ public class ExcelUtil {
         List<LinkedHashMap<String, Object>> summaryList = new ArrayList<>();
         summaryList.add(new LinkedHashMap<String, Object>() {{
             put("标签", "person");
-            put("目标数", Math.round(100*Math.random()));
-            put("正确数", Math.round(70*Math.random()));
-            put("误报数", Math.round(20*Math.random()));
+//            put("目标数", Math.round(100*Math.random()));
+//            put("正确数", Math.round(70*Math.random()));
+//            put("误报数", Math.round(20*Math.random()));
         }});
         summaryList.add(new LinkedHashMap<String, Object>() {{
             put("标签", "car");
-            put("目标数", Math.round(22*Math.random()));
-            put("正确数", Math.round(17*Math.random()));
-            put("误报数", Math.round(0*Math.random()));
+//            put("目标数", Math.round(22*Math.random()));
+//            put("正确数", Math.round(17*Math.random()));
+//            put("误报数", Math.round(0*Math.random()));
         }});
         summaryList.add(new LinkedHashMap<String, Object>() {{
             put("标签", "bike");
-            put("目标数", Math.round(50*Math.random()));
-            put("正确数", Math.round(24*Math.random()));
-            put("误报数", Math.round(13*Math.random()));
+//            put("目标数", Math.round(50*Math.random()));
+//            put("正确数", Math.round(24*Math.random()));
+//            put("误报数", Math.round(13*Math.random()));
         }});
 
         // 第二部分：图片详情
@@ -126,9 +126,9 @@ public class ExcelUtil {
         detailList.add(new LinkedHashMap<String, Object>() {{
             put("原图", "img0.jpg");
             put("渲染图", "img0_res.jpg");
-            put("目标数", Math.round(20*Math.random()));
-            put("正确数", Math.round(10*Math.random()));
-            put("误报数", Math.round(3*Math.random()));
+//            put("目标数", Math.round(20*Math.random()));
+//            put("正确数", Math.round(10*Math.random()));
+//            put("误报数", Math.round(3*Math.random()));
 //            put("漏检数", Math.round(10*Math.random()));
             put("JSON 结果", "{\"bboxes\":[{\"id\":1,\"label\":\"person\",\"score\":0.92}]}");
             put("核对", "✔");
@@ -137,9 +137,9 @@ public class ExcelUtil {
         detailList.add(new LinkedHashMap<String, Object>() {{
             put("原图", "img1.jpg");
             put("渲染图", "img1_res.jpg");
-            put("目标数", Math.round(5*Math.random()));
-            put("正确数", Math.round(4*Math.random()));
-            put("误报数", Math.round(2*Math.random()));
+//            put("目标数", Math.round(5*Math.random()));
+//            put("正确数", Math.round(4*Math.random()));
+//            put("误报数", Math.round(2*Math.random()));
 //            put("漏检数", Math.round(1*Math.random()));
             put("JSON 结果", "{\"bboxes\":[{\"id\":1,\"label\":\"person\",\"score\":0.85}]}");
             put("核对", "×");
@@ -202,7 +202,7 @@ public class ExcelUtil {
             try {
                 // 设置临时目录，避免 macOS 沙盒问题
                 System.setProperty("java.io.tmpdir", File.separator + "tmp");
-                return fillCVAutoReport(Objects.equals(dir, File.separator + "tmp") ? "" : File.separator + "tmp", outputFile, templateFile);
+                return fillCVAutoReport(list, Objects.equals(dir, File.separator + "tmp") ? "" : File.separator + "tmp", outputFile, templateFile);
             } catch (Throwable e2) {
                 e2.printStackTrace();
                 String msg2 = Objects.equals(dir, "") ? null : StringUtil.noBlank(e2.getMessage()).toLowerCase();
@@ -211,7 +211,7 @@ public class ExcelUtil {
                 }
 
                 try {
-                    return fillCVAutoReport("", outputFile, templateFile);
+                    return fillCVAutoReport(list, "", outputFile, templateFile);
                 } catch (Throwable e3) {
                     e3.printStackTrace();
                     throw new ExcelGenerateException(e.getMessage() + ";  \n" + e2.getMessage(), e3);
@@ -223,7 +223,7 @@ public class ExcelUtil {
         return outputFile;
     }
 
-    public static String generateCVAutoReport(String dir, String fileName) throws IOException {
+    public static String generateCVAutoReport(List<DetailItem> list, String dir, String fileName) throws IOException {
         if (StringUtil.isNotEmpty(dir, false) && ! dir.endsWith(File.separator)) {
             dir += File.separator;
         }
@@ -235,7 +235,7 @@ public class ExcelUtil {
         }
 
         // 模拟从数据库或服务获取的详情数据
-        List<DetailItem> detailItems = getMockDetailData();
+        List<DetailItem> detailItems = list; // getMockDetailData();
 
         // 动态计算详情区域的表头行索引
         int detailHeaderRowIndex = 1 + 6 + 10; // 标题区(1) + 统计区(标题+6行数据) + 空白行(1) = 17
@@ -259,7 +259,7 @@ public class ExcelUtil {
             try {
                 // 设置临时目录，避免 macOS 沙盒问题
                 System.setProperty("java.io.tmpdir", File.separator + "tmp");
-                return generateCVAutoReport(Objects.equals(dir, File.separator + "tmp") ? "" : File.separator + "tmp", fileName);
+                return generateCVAutoReport(list, Objects.equals(dir, File.separator + "tmp") ? "" : File.separator + "tmp", fileName);
             } catch (Throwable e2) {
                 e2.printStackTrace();
                 String msg2 = Objects.equals(dir, "") ? null : StringUtil.noBlank(e2.getMessage()).toLowerCase();
@@ -268,7 +268,7 @@ public class ExcelUtil {
                 }
 
                 try {
-                    return generateCVAutoReport("", fileName);
+                    return generateCVAutoReport(list, "", fileName);
                 } catch (Throwable e3) {
                     e3.printStackTrace();
                     throw new ExcelGenerateException(e.getMessage() + ";  \n" + e2.getMessage(), e3);
@@ -298,9 +298,9 @@ public class ExcelUtil {
         // 定义详情数据区域范围，用于统计公式
         int detailDataEndRow = detailDataStartRow + detailItems.size() - 1;
         // 注意：因为新增了“核对”列，详情数据列向右平移
-        String targetRange = String.format("D%d:D%d", detailDataStartRow, detailDataEndRow); // 目标数范围
-        String correctRange = String.format("E%d:E%d", detailDataStartRow, detailDataEndRow); // 正确数范围
-        String fpRange = String.format("F%d:F%d", detailDataStartRow, detailDataEndRow);      // 误报数范围
+        String targetRange = String.format("C%d:C%d", detailDataStartRow, detailDataEndRow); // 目标数范围
+        String correctRange = String.format("D%d:D%d", detailDataStartRow, detailDataEndRow); // 正确数范围
+        String fpRange = String.format("E%d:E%d", detailDataStartRow, detailDataEndRow);      // 误报数范围
 
         // 动态生成每一行统计数据
         list.add(createSummaryRow("总计", "SUM", 3, targetRange, correctRange, fpRange));
@@ -386,7 +386,7 @@ public class ExcelUtil {
         return list;
     }
 
-    private static class DetailItem {
+    public static class DetailItem {
         private final String imageName;
         private final String renderName;
         private final int targetCount;

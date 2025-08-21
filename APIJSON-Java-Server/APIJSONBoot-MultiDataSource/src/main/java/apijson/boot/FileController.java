@@ -8,7 +8,9 @@ import java.util.*;
 //import javax.annotation.PostConstruct;
 
 import apijson.ExcelUtil;
+import apijson.RequestMethod;
 import apijson.StringUtil;
+import com.alibaba.fastjson2.JSONArray;
 import org.apache.commons.io.FileUtils;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
@@ -146,7 +148,8 @@ public class FileController {
 		}
 
 		HttpHeaders headers = new HttpHeaders();
-		headers.add("Content-Disposition", String.format("attachment;filename=\"%s;filename*=UTF_8''%s", fileName, encodedFileName));
+//		headers.add("Content-Disposition", String.format("attachment;filename=\"%s;filename*=UTF_8''%s", fileName, encodedFileName));
+		headers.add("Content-Disposition", String.format("attachment;filename=\"%s", fileName));
 		headers.add("Cache-Control", "public, max-age=86400");
 //		headers.add("Cache-Control", "no-cache,no-store,must-revalidate");
 //		headers.add("Pragma", "no-cache");
@@ -200,7 +203,80 @@ public class FileController {
 		}
 
 		if ((file.exists() ? file.length() : 0) < 10*1024) {
-			String filePath = ExcelUtil.newCVAutoReportWithTemplate(fileUploadRootDir, name);
+			JSONObject request = new JSONObject();
+
+			{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				JSONObject testRecord = new JSONObject();
+				testRecord.put("reportId", reportId);
+				testRecord.put("@column", "documentId");
+				request.put("TestRecord", testRecord);
+			}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+			{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				JSONObject item = new JSONObject();
+				item.put("count", 3);
+				item.put("join", "&/TestRecord");
+
+				{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+					JSONObject random = new JSONObject();
+					random.put("documentId@", "TestRecord/documentId");
+					random.put("@column", "id,img");
+					random.put("@order", "date-");
+					random.put("@combine", "file[>,img[>");
+					random.put("file[>", 0);
+					random.put("img[>", 0);
+					item.put("Random", random);
+				}   // Random >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+				{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+					JSONObject testRecord = new JSONObject();
+					testRecord.put("randomId@", "/Random/id");
+					testRecord.put("@column", "id,total,correct,wrong,compare,response");
+					testRecord.put("reportId", reportId);
+					testRecord.put("total>=", 0);
+					testRecord.put("correct>=", 0);
+					testRecord.put("wrong>=", 0);
+					testRecord.put("@order", "date-");
+					item.put("TestRecord", testRecord);
+				}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+				request.put("[]", item);
+			}   // [] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+			DemoParser parser = new DemoParser(RequestMethod.GET, false);
+			JSONObject response = parser.parseResponse(request);
+			JSONArray array = response.getJSONArray("[]");
+
+			List<ExcelUtil.DetailItem> list = new ArrayList<>();
+			if (array != null) {
+				for (int i = 0; i < array.size(); i++) {
+					JSONObject item = array.getJSONObject(i);
+					JSONObject random = item == null ? null : item.getJSONObject("Random");
+					JSONObject testRecord = item == null ? null : item.getJSONObject("TestRecord");
+					if (random == null) {
+						random = new JSONObject();
+					}
+					if (testRecord == null) {
+						testRecord = new JSONObject();
+					}
+
+					String fn = random.getString("file");
+					int ind = fn.lastIndexOf(".");
+					String nfn = fn.substring(0, ind) + "_render" + fn.substring(ind);
+					list.add(new ExcelUtil.DetailItem(
+							fn,
+							nfn, // TODO 调用 JSONResponse.js 来渲染
+							testRecord.getIntValue("total"),
+							testRecord.getIntValue("correct"),
+							testRecord.getIntValue("wrong"),
+							testRecord.getString("response"),
+							"✅",
+							testRecord.getString("compare")
+					));
+				}
+			}
+
+			String filePath = ExcelUtil.newCVAutoReportWithTemplate(list, fileUploadRootDir, name);
 			if (! Objects.equals(filePath, path)) {
 				try {
 					File sourceFile = new File(filePath);
