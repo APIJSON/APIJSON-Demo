@@ -2582,8 +2582,8 @@ var JSONResponse = {
     return item.degree || item.rotate || item.angle || item.perspective || item.d || item.r || item.p || item.a
   },
 
-  drawDetections: function(canvas, detection, options, img, ctx) {
-    if (!detection || typeof detection !== 'object') {
+  drawDetections: function(canvas, detection, options, img, ctx, isClear) {
+    if (Object.keys(JSONResponse.isObject(detection) ? detection : {}) <= 0) {
       console.error('drawDetections: invalid detection input');
       return;
     }
@@ -2595,7 +2595,9 @@ var JSONResponse = {
     const isRoot = ctx == null;
     if (isRoot) {
       ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, width, height);
+      if (isClear != false) {
+        ctx.clearRect(0, 0, width, height);
+      }
     }
     ctx.lineWidth = Math.max(1, Math.min(8, height * 0.005));
     ctx.font = `bold ${fontSize}px sans-serif`;

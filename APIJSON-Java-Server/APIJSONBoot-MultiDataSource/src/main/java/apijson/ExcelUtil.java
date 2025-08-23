@@ -240,7 +240,7 @@ public class ExcelUtil {
         // 动态计算详情区域的表头行索引
         int detailHeaderRowIndex = 1 + 6 + 10; // 标题区(1) + 统计区(标题+6行数据) + 空白行(1) = 17
 
-        List<List<Object>> data = prepareData(detailItems, detailHeaderRowIndex + 2);
+        List<List<Object>> data = prepareData(detailItems, detailHeaderRowIndex + 2, dir);
 
         try {
             EasyExcel.write(fileName)
@@ -286,7 +286,7 @@ public class ExcelUtil {
      * @param detailDataStartRow 详情数据在Excel中的起始行号 (1-based)
      * @return 包含所有报告数据的列表
      */
-    private static List<List<Object>> prepareData(List<DetailItem> detailItems, int detailDataStartRow) {
+    private static List<List<Object>> prepareData(List<DetailItem> detailItems, int detailDataStartRow, String dir) {
         List<List<Object>> list = new ArrayList<>();
 
         // --- 第 1 部分：主标题 ---
@@ -322,8 +322,11 @@ public class ExcelUtil {
 
             List<Object> detailRow = new ArrayList<>();
             // A-C: 基础信息
-            detailRow.add(item.getImageName());
-            detailRow.add(item.getRenderName());
+            File imgFile = new File(item.getImageName()); // dir + item.getImageName());
+            File renderFile = new File(item.getRenderName()); // dir + item.getRenderName());
+
+            detailRow.add(imgFile.exists() ? imgFile : imgFile.getAbsolutePath());
+            detailRow.add(renderFile.exists() ? renderFile : renderFile.getAbsolutePath());
             // D-F: 手动输入数据
             detailRow.add(item.getTargetCount());
             detailRow.add(item.getCorrectCount());
@@ -378,11 +381,11 @@ public class ExcelUtil {
 
     private static List<DetailItem> getMockDetailData() {
         List<DetailItem> list = new ArrayList<>();
-        list.add(new DetailItem("image_001.jpg", "image_001_res.jpg", 5, 4, 1, "{ \"predictions\": [...] }", "✅", ""));
-        list.add(new DetailItem("image_002.jpg", "image_002_res.jpg", 3, 3, 0, "{ \"predictions\": [...] }", "✅", ""));
-        list.add(new DetailItem("image_003.jpg", "image_003_res.jpg", 8, 6, 3, "{ \"predictions\": [...] }", "❌", ""));
-        list.add(new DetailItem("image_004.jpg", "image_004_res.jpg", 1, 0, 1, "{ \"predictions\": [...] }" ,"❌", ""));
-        list.add(new DetailItem("image_005.jpg", "image_005_res.jpg", 10, 10, 0, "{ \"predictions\": [...] }", "✅", ""));
+        list.add(new DetailItem("image_001.jpg", "image_001_render.jpg", 5, 4, 1, "{ \"predictions\": [...] }", "✅", ""));
+        list.add(new DetailItem("image_002.jpg", "image_002_render.jpg", 3, 3, 0, "{ \"predictions\": [...] }", "✅", ""));
+        list.add(new DetailItem("image_003.jpg", "image_003_render.jpg", 8, 6, 3, "{ \"predictions\": [...] }", "❌", ""));
+        list.add(new DetailItem("image_004.jpg", "image_004_render.jpg", 1, 0, 1, "{ \"predictions\": [...] }" ,"❌", ""));
+        list.add(new DetailItem("image_005.jpg", "image_005_render.jpg", 10, 10, 0, "{ \"predictions\": [...] }", "✅", ""));
         return list;
     }
 

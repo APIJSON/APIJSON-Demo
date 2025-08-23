@@ -10,10 +10,15 @@ import java.util.*;
 import apijson.ExcelUtil;
 import apijson.RequestMethod;
 import apijson.StringUtil;
+import apijson.fastjson2.JSON;
+import apijson.JSONResponse;
 import com.alibaba.fastjson2.JSONArray;
+import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FileUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -27,6 +32,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.alibaba.fastjson2.JSONObject;
 
 import apijson.demo.DemoParser;
+
+import javax.imageio.ImageIO;
 
 import static com.google.common.io.Files.getFileExtension;
 
@@ -77,6 +84,7 @@ public class FileController {
 	public static final List<String> VIDEO_SUFFIXES = Arrays.asList("mp4");
 	public static final List<String> IMG_SUFFIXES = Arrays.asList("jpg", "jpeg", "png");
 	private static List<String> fileNames = null;
+
 	@GetMapping("/files")
 	@ResponseBody
 	public JSONObject files() {
@@ -126,8 +134,7 @@ public class FileController {
 			res.put("path", "/download/" + name);
 			res.put("size", file.getBytes().length);
 			return new DemoParser().extendSuccessResult(res);
-		} 
-		catch (Exception e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 			return new DemoParser().newErrorResult(e);
 		}
@@ -191,10 +198,15 @@ public class FileController {
 		}
 	}
 
-	@GetMapping("/download/cv/report/{reportId}")
+	@Autowired
+	DemoController demoController;
+
+	@GetMapping("/download/cv/report/{id}")
 	@ResponseBody
-	public ResponseEntity<Object> downloadCVReport(@PathVariable(name = "reportId") String reportId) throws FileNotFoundException, IOException {
-		String name = "CVAuto_report_" + reportId + ".xlsx";
+	public ResponseEntity<Object> downloadCVReport(@PathVariable(name = "id") String idStr, HttpSession session) throws FileNotFoundException, IOException {
+		long reportId = Long.parseLong(idStr);
+		boolean isLast = reportId <= 0;
+		String name = "CVAuto_report_" + (isLast ? "last" : reportId) + ".xlsx";
 		String path = fileUploadRootDir + name;
 		File file = new File(path);
 		long size = file.exists() ? file.length() : 0;
@@ -207,15 +219,22 @@ public class FileController {
 
 			{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONObject testRecord = new JSONObject();
-				testRecord.put("reportId", reportId);
-				testRecord.put("@column", "documentId");
+				if (isLast) {
+					testRecord.put("@order", "reportId-");
+				} else {
+					testRecord.put("reportId", reportId);
+				}
+				testRecord.put("@column", "reportId,documentId,randomId,sameIds");
+
 				request.put("TestRecord", testRecord);
 			}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 			{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONObject item = new JSONObject();
 				item.put("count", 3);
+				//item.put("count", 0);
 				item.put("join", "&/TestRecord");
+				//item.put("join", "@/TestRecord");
 
 				{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject random = new JSONObject();
@@ -225,27 +244,83 @@ public class FileController {
 					random.put("@combine", "file[>,img[>");
 					random.put("file[>", 0);
 					random.put("img[>", 0);
+
 					item.put("Random", random);
 				}   // Random >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 				{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject testRecord = new JSONObject();
-					testRecord.put("randomId@", "/Random/id");
 					testRecord.put("@column", "id,total,correct,wrong,compare,response");
-					testRecord.put("reportId", reportId);
+					testRecord.put("randomId@", "/Random/id");
+					testRecord.put("documentId@", "TestRecord/documentId");
+
+					//testRecord.put("idx{}@", "TestRecord/sameIds");
+					if (isLast) {
+						testRecord.put("reportId@", "TestRecord/reportId");
+						//testRecord.put("@combine", "idx | reportId@");
+					} else {
+						testRecord.put("reportId", reportId);
+						//testRecord.put("@combine", "idx | reportId");
+					}
+					//testRecord.put("@key", "idx:(id)");
+					//testRecord.put("@combine", "idx | reportId");
+
 					testRecord.put("total>=", 0);
 					testRecord.put("correct>=", 0);
 					testRecord.put("wrong>=", 0);
 					testRecord.put("@order", "date-");
+
 					item.put("TestRecord", testRecord);
 				}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 				request.put("[]", item);
 			}   // [] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
+			{   // TestRecord[] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				JSONObject item = new JSONObject();
+
+				{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+					JSONObject testRecord = new JSONObject();
+					testRecord.put("@column", "id,randomId,total,correct,wrong,compare,response");
+					testRecord.put("id{}@", "TestRecord/sameIds");
+					testRecord.put("documentId@", "TestRecord/documentId");
+					if (isLast) {
+						testRecord.put("reportId@", "TestRecord/reportId");
+					} else {
+						testRecord.put("reportId", reportId);
+					}
+					testRecord.put("total>=", 0);
+					testRecord.put("correct>=", 0);
+					testRecord.put("wrong>=", 0);
+					testRecord.put("@order", "date-");
+
+					item.put("TestRecord", testRecord);
+				}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+				request.put("TestRecord[]", item);
+
+			}   // TestRecord[] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
 			DemoParser parser = new DemoParser(RequestMethod.GET, false);
 			JSONObject response = parser.parseResponse(request);
+			if (! JSONResponse.isSuccess(response)) {
+				throw new IOException(JSONResponse.getMsg(response));
+			}
+
+			// JSONObject lastTr = response.getJSONObject("TestRecord");
+			// long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
+			// long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
+			if (isLast) {
+				JSONObject lastTr = response.getJSONObject("TestRecord");
+				reportId = lastTr == null ? 0 : lastTr.getLongValue("reportId");
+				if (reportId > 0) {
+					name = "CVAuto_report_" + reportId + ".xlsx";
+					path = fileUploadRootDir + name;
+				}
+			}
+
 			JSONArray array = response.getJSONArray("[]");
+			JSONArray trArr = response.getJSONArray("TestRecord[]");
 
 			List<ExcelUtil.DetailItem> list = new ArrayList<>();
 			if (array != null) {
@@ -258,19 +333,75 @@ public class FileController {
 					}
 					if (testRecord == null) {
 						testRecord = new JSONObject();
+						if (trArr != null) {
+							int found = -1;
+							for (int j = 0; j < trArr.size(); j++) {
+								JSONObject tr = trArr.getJSONObject(j);
+								long randomId = tr == null ? 0 : tr.getLongValue("randomId");
+								if (randomId <= 0 || ! Objects.equals(randomId, random.getLongValue("id"))) {
+									continue;
+								}
+
+								testRecord = tr;
+								found = j;
+								break;
+							}
+
+							if (found >= 0) {
+								trArr.remove(found);
+							}
+						}
 					}
 
 					String fn = random.getString("file");
 					int ind = fn.lastIndexOf(".");
 					String nfn = fn.substring(0, ind) + "_render" + fn.substring(ind);
+
+					String resStr = testRecord.getString("response");
+
+					String img = random.getString("img");
+					JSONObject resObj = StringUtil.isEmpty(img) ? null : JSON.parseObject(resStr);
+
+					int l = resStr == null ? 0 : resStr.length();
+					if (l > 32767) { // EasyExcel 单元格最长字符数限制
+						resStr = resStr.substring(0, 20000) + " ... " + resStr.substring(l - 12760);
+					}
+
+					boolean hasResult = resObj != null && ! resObj.isEmpty();
+					if (hasResult) {
+						try {
+							JSONObject renderReq = new JSONObject();
+							renderReq.put("img", img);
+							renderReq.put("data", resObj);
+							String body = renderReq.toJSONString();
+							HttpHeaders headers = new HttpHeaders();
+							String renderStr = demoController.sendRequest(session, HttpMethod.POST, "http://localhost:3003/cv/render", body, headers);
+							renderStr = StringUtil.trim(renderStr);
+							if (renderStr.length() > 100) {
+								File renderFile = new File(fileUploadRootDir + nfn);
+								try (FileOutputStream fos = new FileOutputStream(renderFile)) {
+									int commaInd = renderStr.startsWith("data:image/") ? -1 : renderStr.indexOf("base64,");
+									String base64 = commaInd < 0 ? renderStr : renderStr.substring(commaInd + "base64,".length());
+									byte[] bytes = Base64.getDecoder().decode(base64);
+									fos.write(bytes);
+									fos.flush();
+								} catch (Throwable e) {
+									e.printStackTrace();
+								}
+							}
+						} catch (Throwable e) {
+							e.printStackTrace();
+						}
+					}
+
 					list.add(new ExcelUtil.DetailItem(
-							fn,
-							nfn, // TODO 调用 JSONResponse.js 来渲染
+							fileUploadRootDir + fn,
+							fileUploadRootDir + nfn, // TODO 调用 JSONResponse.js 来渲染
 							testRecord.getIntValue("total"),
 							testRecord.getIntValue("correct"),
 							testRecord.getIntValue("wrong"),
-							testRecord.getString("response"),
-							"✅",
+							resStr,
+							hasResult ? "✅" : "❌",
 							testRecord.getString("compare")
 					));
 				}

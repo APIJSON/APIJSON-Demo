@@ -1,9 +1,10 @@
 const Koa = require('koa');
-//const cors = require('koa2-cors');
+const cors = require('koa2-cors');
 const bodyParser = require('koa-bodyparser');
 // const Vue = require('vue');
 const {getRequestFromURL, App} = require('./main');
 // const { createBundleRenderer } = require('vue-server-renderer')
+const { createCanvas, Image } = require("canvas");
 
 const JSONResponse = require('../apijson/JSONResponse');
 const StringUtil = require('../apijson/StringUtil');
@@ -67,9 +68,10 @@ function update() {
 
 const PORT = 3003;
 
-var done = false;
+var done = [false];
 const app = new Koa();
-// app.use(bodyParser());
+app.use(bodyParser());
+app.use(cors());
 app.use(async ctx => {
   console.log(ctx);
   var origin = ctx.get('Origin') || ctx.get('origin');
@@ -161,7 +163,7 @@ app.use(async ctx => {
     });
   }
   else if (ctx.path == '/test/compare' || ctx.path == '/test/ml') {
-    done = false;
+    done = [false];
 //    var json = '';
 //    ctx.req.addListener('data', (data) => {
 //  		json += data;
@@ -186,14 +188,73 @@ app.use(async ctx => {
 
         ctx.status = ctx.response.status = 200;
         ctx.body = ctx.response.body = compare == null ? '' : JSON.stringify(compare);
-        done = true;
+        done = [true];
 //    })
-//    while (true) {
-//        if (done) {
-//           break;
-//        }
+//    while (! done[0]) {
 //    }
   }
+    else if (ctx.path == '/cv/render') {
+      done = [false];
+  //    var json = '';
+  //    ctx.req.addListener('data', (data) => {
+  //  		json += data;
+  //  	})
+  //  	ctx.req.addListener('end', function() {
+  //  		console.log(json);
+          var body = ctx.body || ctx.req.body || ctx.request.body || {} // || JSON.parse(json) || {};
+          console.log('\n\n <<<<<<< body = ' + body);
+          console.log('\n\n <<<<<<< body = ' + JSON.stringify(body));
+          var base64 = body.img;
+          const data = typeof base64 != 'string' || base64.length < 10 ? '' : base64.replace(/^data:image\/\w+;base64,/, '');
+          if (StringUtil.isEmpty(data, true)) {
+              ctx.status = ctx.response.status = 400;
+              ctx.body = ctx.response.body = '请传有效的 img: BASE64 图片数据！';
+              done = [true];
+              return;
+          }
+
+          var det = body.data;
+          if (Object.keys(JSONResponse.isObject(det) ? det : {}) <= 0) {
+              ctx.status = ctx.response.status = 400;
+              ctx.body = ctx.response.body = '请传有效的 data: {} 图片推理数据！';
+              done = [true];
+              return;
+          }
+
+          console.log('\n await loadImage(base64) >>>');
+//          const img = await loadImage(base64);
+          const buf = Buffer.from(data, 'base64');
+          const img = new Image();
+          img.src = buf;
+
+          const w = img.width;
+          const h = img.height;
+
+          console.log('\n createCanvas(' + w + ', ' + h + ') >>>');
+          // 画布
+          const canvas = createCanvas(w, h);
+          const ctx = canvas.getContext("2d");
+          ctx.imageSmoothingEnabled = true;
+          // 背景图
+          console.log('\n ctx.drawImage(img, 0, 0, ' + w + ', ' + h + ') >>>');
+          ctx.drawImage(img, 0, 0, w, h);
+
+          console.log('\n JSONResponse.drawDetections(canvas, det, {...}, img, null, false) >>>');
+          JSONResponse.drawDetections(canvas, det, {
+              labelBackground: true,
+              rotateBoxes: true
+          }, img, null, false);
+
+          console.log('\n var render = canvas.toDataURL("image/jpeg") >>>');
+          var render = canvas.toDataURL("image/jpeg");
+          console.log('\n\n >>> render = ' + render);
+          ctx.status = ctx.response.status = StringUtil.isEmpty(render) ? 500 : 200;
+          ctx.body = ctx.response.body = render;
+          done = [true];
+  //    })
+  //    while (! done[0]) {
+  //    }
+    }
 });
 
 app.listen(PORT);

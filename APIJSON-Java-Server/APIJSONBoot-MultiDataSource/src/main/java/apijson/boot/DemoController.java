@@ -27,6 +27,7 @@ import jakarta.servlet.ServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientResponseException;
@@ -1862,7 +1863,20 @@ public class DemoController extends APIJSONController<Long> {
     static {
         try { // 支持 PATCH 方法，需要 Maven 依赖 org.apache.httpcomponents.client5:httpclient5
             HttpComponentsClientHttpRequestFactory requestFactory = new HttpComponentsClientHttpRequestFactory();
+            requestFactory.setConnectTimeout(30000);
+            //requestFactory.setReadTimeout(120000);
+            requestFactory.setConnectionRequestTimeout(30000);
+
+            //requestFactory.setBufferRequestBody(true); // spring-framework 6.1 以下启用请求体缓冲
+
             CLIENT.setRequestFactory(requestFactory);
+
+            // 添加大请求支持的消息转换器
+            CLIENT.getMessageConverters().forEach(converter -> {
+                if (converter instanceof StringHttpMessageConverter) {
+                    ((StringHttpMessageConverter) converter).setWriteAcceptCharset(false);
+                }
+            });
         }
         catch (Throwable e) {
             e.printStackTrace();
