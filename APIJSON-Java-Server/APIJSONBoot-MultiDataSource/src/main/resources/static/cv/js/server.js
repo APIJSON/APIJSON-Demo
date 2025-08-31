@@ -4,11 +4,13 @@ const bodyParser = require('koa-bodyparser');
 // const Vue = require('vue');
 const {getRequestFromURL, App} = require('./main');
 // const { createBundleRenderer } = require('vue-server-renderer')
-const { createCanvas, Image } = require("canvas");
+const { createCanvas, Image, loadImage } = require("canvas");
 
 const JSONResponse = require('../apijson/JSONResponse');
 const StringUtil = require('../apijson/StringUtil');
 
+//const DEBUG = false;
+const DEBUG = true;
 var isCrossEnabled = true; // false;
 var isLoading = false;
 var startTime = 0;
@@ -177,14 +179,18 @@ app.use(async ctx => {
         var stdd = body.standard;
         var response = typeof res != 'string' ? res : (StringUtil.isEmpty(res, true) ? null : JSON.parse(res));
         var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : JSON.parse(stdd));
-        console.log('\n\nresponse = ' + JSON.stringify(response));
-        console.log('\n\nstdd = ' + JSON.stringify(stdd));
+        if (DEBUG) {
+            console.log('\n\nresponse = ' + JSON.stringify(response));
+            console.log('\n\nstdd = ' + JSON.stringify(stdd));
+        }
         var compare = JSONResponse.compareResponse(null, standard, response || {}, '', isML, null, null, false) || {}
 
         if (body.newStandard) {
           compare.newStandard = JSONResponse.updateFullStandard(standard, response, isML)
         }
-        console.log('\n\ncompare = ' + JSON.stringify(compare));
+        if (DEBUG) {
+            console.log('\n\ncompare = ' + JSON.stringify(compare));
+        }
 
         ctx.status = ctx.response.status = 200;
         ctx.body = ctx.response.body = compare == null ? '' : JSON.stringify(compare);
@@ -194,16 +200,18 @@ app.use(async ctx => {
 //    }
   }
     else if (ctx.path == '/cv/render') {
-      done = [false];
-  //    var json = '';
-  //    ctx.req.addListener('data', (data) => {
-  //  		json += data;
-  //  	})
-  //  	ctx.req.addListener('end', function() {
-  //  		console.log(json);
-          var body = ctx.body || ctx.req.body || ctx.request.body || {} // || JSON.parse(json) || {};
-          console.log('\n\n <<<<<<< body = ' + body);
-          console.log('\n\n <<<<<<< body = ' + JSON.stringify(body));
+//      done = [false];
+//      var json = '';
+//      ctx.req.addListener('data', (data) => {
+//    		json += data;
+//    	})
+//    	ctx.req.addListener('end', function() {
+//    		console.log(json);
+          var body = ctx.body || ctx.req.body || ctx.request.body|| {}; // || JSON.parse(json) || {};
+          if (DEBUG) {
+              console.log('\n\n <<<<<<< body = ' + body);
+              console.log('\n\n <<<<<<< body = ' + JSON.stringify(body));
+          }
           var base64 = body.img;
           const data = typeof base64 != 'string' || base64.length < 10 ? '' : base64.replace(/^data:image\/\w+;base64,/, '');
           if (StringUtil.isEmpty(data, true)) {
@@ -222,10 +230,15 @@ app.use(async ctx => {
           }
 
           console.log('\n await loadImage(base64) >>>');
-//          const img = await loadImage(base64);
-          const buf = Buffer.from(data, 'base64');
-          const img = new Image();
-          img.src = buf;
+          var img;
+          if (StringUtil.isUri(data)) {
+//              img = await loadImage(data);
+              img = loadImage(data);
+          } else {
+              const buf = Buffer.from(data, 'base64');
+              img = new Image();
+              img.src = buf;
+          }
 
           const w = img.width;
           const h = img.height;
@@ -233,27 +246,31 @@ app.use(async ctx => {
           console.log('\n createCanvas(' + w + ', ' + h + ') >>>');
           // 画布
           const canvas = createCanvas(w, h);
-          const ctx = canvas.getContext("2d");
-          ctx.imageSmoothingEnabled = true;
+          const canvasCtx = canvas.getContext("2d");
+          canvasCtx.imageSmoothingEnabled = true;
           // 背景图
           console.log('\n ctx.drawImage(img, 0, 0, ' + w + ', ' + h + ') >>>');
-          ctx.drawImage(img, 0, 0, w, h);
+          canvasCtx.drawImage(img, 0, 0, w, h);
 
+          var wrongs = body.wrongs;
           console.log('\n JSONResponse.drawDetections(canvas, det, {...}, img, null, false) >>>');
           JSONResponse.drawDetections(canvas, det, {
               labelBackground: true,
-              rotateBoxes: true
+              rotateBoxes: true,
+              wrongs: wrongs
           }, img, null, false);
 
           console.log('\n var render = canvas.toDataURL("image/jpeg") >>>');
           var render = canvas.toDataURL("image/jpeg");
-          console.log('\n\n >>> render = ' + render);
+          if (DEBUG) {
+            console.log('\n\n >>> render = ' + render);
+          }
           ctx.status = ctx.response.status = StringUtil.isEmpty(render) ? 500 : 200;
           ctx.body = ctx.response.body = render;
           done = [true];
-  //    })
-  //    while (! done[0]) {
-  //    }
+//      })
+//      while (! done[0]) {
+//      }
     }
 });
 

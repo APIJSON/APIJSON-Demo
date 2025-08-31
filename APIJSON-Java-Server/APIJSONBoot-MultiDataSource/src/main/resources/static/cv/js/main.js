@@ -8060,21 +8060,25 @@ https://github.com/Tencent/APIJSON/issues
             req = newReq
           }
 
-          axios.interceptors.request.use(function (config) {
-            config.metadata = { startTime: new Date().getTime()}
-            return config;
-          }, function (error) {
-            return Promise.reject(error);
-          });
-          axios.interceptors.response.use(function (response) {
-            response.config.metadata.endTime = new Date().getTime()
-            response.duration = response.config.metadata.endTime - response.config.metadata.startTime
-            return response;
-          }, function (error) {
-            error.config.metadata.endTime = new Date().getTime();
-            error.duration = error.config.metadata.endTime - error.config.metadata.startTime;
-            return Promise.reject(error);
-          });
+          var interceptors = axios.interceptors
+          if (interceptors) {
+              interceptors.request.use(function (config) {
+                config.metadata = { startTime: new Date().getTime()}
+                return config;
+              }, function (error) {
+                return Promise.reject(error);
+              })
+
+              interceptors.response.use(function (response) {
+                response.config.metadata.endTime = new Date().getTime()
+                response.duration = response.config.metadata.endTime - response.config.metadata.startTime
+                return response;
+              }, function (error) {
+                error.config.metadata.endTime = new Date().getTime();
+                error.duration = error.config.metadata.endTime - error.config.metadata.startTime;
+                return Promise.reject(error);
+              })
+          }
 
           // axios.defaults.withcredentials = true
           axios({

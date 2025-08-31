@@ -33,8 +33,6 @@ import com.alibaba.fastjson2.JSONObject;
 
 import apijson.demo.DemoParser;
 
-import javax.imageio.ImageIO;
-
 import static com.google.common.io.Files.getFileExtension;
 
 /**文件相关的控制器，包括上传、下载、浏览等
@@ -134,7 +132,8 @@ public class FileController {
 			res.put("path", "/download/" + name);
 			res.put("size", file.getBytes().length);
 			return new DemoParser().extendSuccessResult(res);
-		} catch (Exception e) {
+		} 
+		catch (Exception e) {
 			e.printStackTrace();
 			return new DemoParser().newErrorResult(e);
 		}
@@ -204,9 +203,12 @@ public class FileController {
 	@GetMapping("/download/cv/report/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> downloadCVReport(@PathVariable(name = "id") String idStr, HttpSession session) throws FileNotFoundException, IOException {
-		long reportId = Long.parseLong(idStr);
-		boolean isLast = reportId <= 0;
-		String name = "CVAuto_report_" + (isLast ? "last" : reportId) + ".xlsx";
+		long repOrDocId = Long.parseLong(idStr);
+		if (repOrDocId <= 0) {
+			throw new IllegalArgumentException("id 必须为 > 0 的 reportId 或 documentId 有效整数！");
+		}
+
+		String name = "CVAuto_report_" + repOrDocId + ".xlsx";
 		String path = fileUploadRootDir + name;
 		File file = new File(path);
 		long size = file.exists() ? file.length() : 0;
@@ -219,22 +221,20 @@ public class FileController {
 
 			{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONObject testRecord = new JSONObject();
-				if (isLast) {
-					testRecord.put("@order", "reportId-");
-				} else {
-					testRecord.put("reportId", reportId);
-				}
+				testRecord.put("reportId", repOrDocId);
+				testRecord.put("documentId", repOrDocId);
+				testRecord.put("@combine", "reportId,documentId");
 				testRecord.put("@column", "reportId,documentId,randomId,sameIds");
+				testRecord.put("@order", "reportId-");
 
 				request.put("TestRecord", testRecord);
 			}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 			{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONObject item = new JSONObject();
-				item.put("count", 3);
-				//item.put("count", 0);
+				item.put("count", 0);
+//				item.put("count", 3);
 				item.put("join", "&/TestRecord");
-				//item.put("join", "@/TestRecord");
 
 				{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject random = new JSONObject();
@@ -250,19 +250,12 @@ public class FileController {
 
 				{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject testRecord = new JSONObject();
-					testRecord.put("@column", "id,total,correct,wrong,compare,response");
+					testRecord.put("@column", "id,total,correct,wrong,wrongs,compare,response");
 					testRecord.put("randomId@", "/Random/id");
 					testRecord.put("documentId@", "TestRecord/documentId");
+					testRecord.put("reportId@", "TestRecord/reportId");
 
 					//testRecord.put("idx{}@", "TestRecord/sameIds");
-					if (isLast) {
-						testRecord.put("reportId@", "TestRecord/reportId");
-						//testRecord.put("@combine", "idx | reportId@");
-					} else {
-						testRecord.put("reportId", reportId);
-						//testRecord.put("@combine", "idx | reportId");
-					}
-					//testRecord.put("@key", "idx:(id)");
 					//testRecord.put("@combine", "idx | reportId");
 
 					testRecord.put("total>=", 0);
@@ -281,20 +274,17 @@ public class FileController {
 
 				{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject testRecord = new JSONObject();
-					testRecord.put("@column", "id,randomId,total,correct,wrong,compare,response");
+					testRecord.put("@column", "id,randomId,total,correct,wrong,wrongs,compare,response");
 					testRecord.put("id{}@", "TestRecord/sameIds");
 					testRecord.put("documentId@", "TestRecord/documentId");
-					if (isLast) {
-						testRecord.put("reportId@", "TestRecord/reportId");
-					} else {
-						testRecord.put("reportId", reportId);
-					}
+//					testRecord.put("reportId@", "TestRecord/reportId");
 					testRecord.put("total>=", 0);
 					testRecord.put("correct>=", 0);
 					testRecord.put("wrong>=", 0);
 					testRecord.put("@order", "date-");
 
 					item.put("TestRecord", testRecord);
+					item.put("count", 0);
 				}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 				request.put("TestRecord[]", item);
@@ -307,16 +297,13 @@ public class FileController {
 				throw new IOException(JSONResponse.getMsg(response));
 			}
 
-			// JSONObject lastTr = response.getJSONObject("TestRecord");
-			// long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
-			// long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
-			if (isLast) {
-				JSONObject lastTr = response.getJSONObject("TestRecord");
-				reportId = lastTr == null ? 0 : lastTr.getLongValue("reportId");
-				if (reportId > 0) {
-					name = "CVAuto_report_" + reportId + ".xlsx";
-					path = fileUploadRootDir + name;
-				}
+			JSONObject lastTr = response.getJSONObject("TestRecord");
+			long reportId = lastTr == null ? 0 : lastTr.getLongValue("reportId");
+//			long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
+//			long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
+			if (reportId != repOrDocId) {
+				name = "CVAuto_report_" + (reportId > 0 ? reportId : repOrDocId + "_last") + ".xlsx";
+				path = fileUploadRootDir + name;
 			}
 
 			JSONArray array = response.getJSONArray("[]");
@@ -373,6 +360,7 @@ public class FileController {
 							JSONObject renderReq = new JSONObject();
 							renderReq.put("img", img);
 							renderReq.put("data", resObj);
+							renderReq.put("wrongs", testRecord.getJSONArray("wrongs"));
 							String body = renderReq.toJSONString();
 							HttpHeaders headers = new HttpHeaders();
 							String renderStr = demoController.sendRequest(session, HttpMethod.POST, "http://localhost:3003/cv/render", body, headers);
@@ -380,7 +368,7 @@ public class FileController {
 							if (renderStr.length() > 100) {
 								File renderFile = new File(fileUploadRootDir + nfn);
 								try (FileOutputStream fos = new FileOutputStream(renderFile)) {
-									int commaInd = renderStr.startsWith("data:image/") ? -1 : renderStr.indexOf("base64,");
+									int commaInd = renderStr.startsWith("data:image/") ? renderStr.indexOf("base64,") : -1;
 									String base64 = commaInd < 0 ? renderStr : renderStr.substring(commaInd + "base64,".length());
 									byte[] bytes = Base64.getDecoder().decode(base64);
 									fos.write(bytes);

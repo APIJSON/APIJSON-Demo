@@ -1,0 +1,10 @@
+{
+  "dependencies": {
+    "axios": "^1.11.0",
+    "canvas": "^3.2.0",
+    "json5": "^2.2.3",
+    "koa": "^3.0.1",
+    "koa-bodyparser": "^4.4.1",
+    "koa2-cors": "^2.0.6"
+  }
+}
