@@ -7,3 +7,8 @@
 **/.idea
 **/target
 **/.DS_Store
+/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static/cv/js/node_modules
+/APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static/cv/node_modules
+APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static/cv/js/package-lock.json
+APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static/cv/js/package.json
+APIJSON-Java-Server/APIJSONBoot-MultiDataSource/src/main/resources/static/cv/package-lock.json
