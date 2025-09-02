@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.util.LRUMap;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletResponse;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -37,6 +38,7 @@ import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -1875,6 +1877,18 @@ public class DemoController extends APIJSONController<Long> {
             CLIENT.getMessageConverters().forEach(converter -> {
                 if (converter instanceof StringHttpMessageConverter) {
                     ((StringHttpMessageConverter) converter).setWriteAcceptCharset(false);
+                    // 设置更大的缓冲区来处理大文本
+                    ((StringHttpMessageConverter) converter).setDefaultCharset(StandardCharsets.UTF_8);
+                }
+            });
+
+            // 添加自定义的消息转换器来处理大文本
+            CLIENT.getMessageConverters().add(0, new StringHttpMessageConverter(StandardCharsets.UTF_8) {
+                @NotNull
+                @Override
+                protected Long getContentLength(String s, MediaType contentType) {
+                    // 对于大文本，返回 null 让HTTP客户端自动处理分块传输
+                    return s.length() > 1024 * 1024 ? -1L : super.getContentLength(s, contentType);
                 }
             });
         }
@@ -1886,6 +1900,32 @@ public class DemoController extends APIJSONController<Long> {
     protected String sendRequest(HttpSession session, HttpMethod method, String url, String body, HttpHeaders headers) {
         String rspBody = null;
         try {
+            // 为JSON请求设置默认的Content-Type
+            if (body != null && method != HttpMethod.GET && !headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+                // 尝试解析JSON来判断内容类型
+                try {
+                    JSON.parse(body);
+                    headers.setContentType(MediaType.APPLICATION_JSON);
+                } catch (Exception e) {
+                    // 如果不是JSON，设置为普通文本
+                    headers.setContentType(MediaType.TEXT_PLAIN);
+                }
+            }
+            
+            // 设置默认的Accept header
+            if (!headers.containsKey(HttpHeaders.ACCEPT)) {
+                headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
+            }
+            
+            // 为大文本body，设置适当的Content-Type和分块传输
+            if (body != null && body.length() > 1024 * 1024) { // 超过1MB
+                if (!headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+                    headers.setContentType(MediaType.TEXT_PLAIN);
+                }
+                // 设置分块传输
+                headers.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
+            }
+            
             HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
             ResponseEntity<String> entity = CLIENT.exchange(url, method, requestEntity, String.class);
 

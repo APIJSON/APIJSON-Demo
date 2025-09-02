@@ -1,8 +1,8 @@
 spring:
   servlet:
     multipart:
-      max-file-size: 10MB
-      max-request-size: 10MB
+      max-file-size: 50MB
+      max-request-size: 50MB
       enabled: true
       file-size-threshold: 2KB
 # If using flyway-core dependency, either comment this out or use @FlywayDatasource in DemoDataSourceConfig

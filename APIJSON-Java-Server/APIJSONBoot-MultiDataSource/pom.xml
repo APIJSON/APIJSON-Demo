@@ -318,11 +318,11 @@
 
 
         <!-- DemoController /delegate 代理转发请求 HTTP PATCH 方法需要，使用 PATCH 可以取消注释 -->
-        <!--        <dependency>-->
-        <!--            <groupId>org.apache.httpcomponents.client5</groupId>-->
-        <!--            <artifactId>httpclient5</artifactId>-->
-        <!--            <version>5.3</version>-->
-        <!--        </dependency>-->
+                <dependency>
+                    <groupId>org.apache.httpcomponents.client5</groupId>
+                    <artifactId>httpclient5</artifactId>
+                    <version>5.3</version>
+                </dependency>
 
 <!--        &lt;!&ndash; 需要用的 HikariCP 数据库连接池库，3.1.0 以上 &ndash;&gt;-->
 <!--        <dependency>-->

@@ -360,9 +360,23 @@ public class FileController {
 							JSONObject renderReq = new JSONObject();
 							renderReq.put("img", img);
 							renderReq.put("data", resObj);
-							renderReq.put("wrongs", testRecord.getJSONArray("wrongs"));
+							renderReq.put("wrongs", testRecord.get("wrongs"));
 							String body = renderReq.toJSONString();
+							
+							// 设置完整的HTTP headers
 							HttpHeaders headers = new HttpHeaders();
+							headers.setContentType(MediaType.APPLICATION_JSON);
+							headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+							headers.set("User-Agent", "APIJSON-Server/1.0");
+							headers.set("X-Requested-With", "XMLHttpRequest");
+							
+							// 如果body很大，设置适当的headers来支持大文件传输
+							if (body.length() > 1024 * 1024) { // 超过1MB
+								headers.set("Transfer-Encoding", "chunked");
+							} else {
+								headers.setContentLength(body.length());
+							}
+							
 							String renderStr = demoController.sendRequest(session, HttpMethod.POST, "http://localhost:3003/cv/render", body, headers);
 							renderStr = StringUtil.trim(renderStr);
 							if (renderStr.length() > 100) {

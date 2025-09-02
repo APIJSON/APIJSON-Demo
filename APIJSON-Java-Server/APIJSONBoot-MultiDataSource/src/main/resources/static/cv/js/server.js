@@ -199,7 +199,7 @@ app.use(async ctx => {
 //    while (! done[0]) {
 //    }
   }
-    else if (ctx.path == '/cv/render') {
+  else if (ctx.path == '/cv/render') {
 //      done = [false];
 //      var json = '';
 //      ctx.req.addListener('data', (data) => {
@@ -207,7 +207,7 @@ app.use(async ctx => {
 //    	})
 //    	ctx.req.addListener('end', function() {
 //    		console.log(json);
-          var body = ctx.body || ctx.req.body || ctx.request.body|| {}; // || JSON.parse(json) || {};
+          var body = ctx.body || ctx.req.body || ctx.request.body || {}; // || JSON.parse(json) || {};
           if (DEBUG) {
               console.log('\n\n <<<<<<< body = ' + body);
               console.log('\n\n <<<<<<< body = ' + JSON.stringify(body));
