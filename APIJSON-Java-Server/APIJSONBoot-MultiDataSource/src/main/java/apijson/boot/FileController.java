@@ -21,11 +21,8 @@ import java.util.*;
 
 //import javax.annotation.PostConstruct;
 
-import apijson.ExcelUtil;
-import apijson.RequestMethod;
-import apijson.StringUtil;
+import apijson.*;
 import apijson.fastjson2.JSON;
-import apijson.JSONResponse;
 import com.alibaba.fastjson2.JSONArray;
 import jakarta.servlet.http.HttpSession;
 import org.apache.commons.io.FileUtils;
@@ -475,7 +472,7 @@ public class FileController {
 				throw new IllegalArgumentException("id 必须为 > 0 的 reportId 或 documentId 有效整数！");
 			}
 
-			String name = "CVAuto_" + dataset + "_dataset_" + repOrDocId + ".zip";
+			String name = "CVAuto_" + dataset + repOrDocId + ".zip";
 			String path = fileUploadRootDir + name;
 
 			File file = new File(path);
@@ -546,7 +543,7 @@ public class FileController {
 				//long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
 				//long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
 				if (reportId != repOrDocId) {
-					name = "CVAuto_" + dataset + "_dataset_" + (reportId > 0 ? reportId : repOrDocId + "_last") + ".zip";
+					name = "CVAuto_" + dataset + (reportId > 0 ? reportId : repOrDocId + "_last") + ".zip";
 					path = fileUploadRootDir + name;
 				}
 
@@ -585,7 +582,10 @@ public class FileController {
 				createCocoDirectoryStructure(exportDir, type);
 
 				// 生成mock数据并创建文件
-				generateCocoDatasetFromApiJson(exportDir, type, dataset, list);
+				//generateCocoDatasetFromApiJson(exportDir, type, dataset, list);
+
+				Set<DatasetUtil.TaskType> detectionTasks = new HashSet<>(Collections.singletonList(DatasetUtil.TaskType.DETECTION));
+				DatasetUtil.generate(exportDir, detectionTasks, list);
 
 				createZipFromDirectory(exportDir, path);
 

@@ -210,35 +210,35 @@ public class DatasetExporter {
      * @param baseDir 基础目录
      * @param type 数据集类型
      * @param datasetName 数据集名称
-     * @param apiJsonData APIJSON查询结果数据列表
+     * @param apijsonData APIJSON查询结果数据列表
      * @throws IOException
      */
-    public static void generateCocoDatasetFromApiJson(String baseDir, String type, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    public static void generateCocoDatasetFromApiJson(String baseDir, String type, String datasetName, List<JSONObject> apijsonData) throws IOException {
         switch (type) {
             case "detection":
-                generateDetectionDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateDetectionDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             case "classification":
-                generateClassificationDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateClassificationDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             case "segmentation":
-                generateSegmentationDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateSegmentationDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             case "keypoints":
-                generateKeypointsDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateKeypointsDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             case "face_keypoints":
-                generateFaceKeypointsDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateFaceKeypointsDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             case "rotated":
-                generateRotatedDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateRotatedDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             case "ocr":
-                generateOCRDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateOCRDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
             default:
                 // 默认使用检测格式
-                generateDetectionDatasetFromApiJson(baseDir, datasetName, apiJsonData);
+                generateDetectionDatasetFromApiJson(baseDir, datasetName, apijsonData);
                 break;
         }
     }
@@ -246,21 +246,21 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成检测数据集
      */
-    private static void generateDetectionDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateDetectionDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
         
         // 从数据中提取类别信息
-        JSONArray categories = extractCategoriesFromApiJson(apiJsonData);
+        JSONArray categories = extractCategoriesFromApiJson(apijsonData);
         root.put("categories", categories);
         
         // 转换图片信息
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
         // 转换标注信息
-        JSONArray annotations = convertApiJsonToDetectionAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToDetectionAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/instances_" + datasetName + ".json", root);
@@ -270,18 +270,18 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成分类数据集
      */
-    private static void generateClassificationDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateClassificationDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
         
-        JSONArray categories = extractCategoriesFromApiJson(apiJsonData);
+        JSONArray categories = extractCategoriesFromApiJson(apijsonData);
         root.put("categories", categories);
         
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
-        JSONArray annotations = convertApiJsonToClassificationAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToClassificationAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/instances_" + datasetName + ".json", root);
@@ -291,18 +291,18 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成分割数据集
      */
-    private static void generateSegmentationDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateSegmentationDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
         
-        JSONArray categories = extractCategoriesFromApiJson(apiJsonData);
+        JSONArray categories = extractCategoriesFromApiJson(apijsonData);
         root.put("categories", categories);
         
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
-        JSONArray annotations = convertApiJsonToSegmentationAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToSegmentationAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/instances_" + datasetName + ".json", root);
@@ -312,7 +312,7 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成关键点数据集
      */
-    private static void generateKeypointsDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateKeypointsDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
@@ -320,10 +320,10 @@ public class DatasetExporter {
         JSONArray categories = createKeypointsCategories();
         root.put("categories", categories);
         
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
-        JSONArray annotations = convertApiJsonToKeypointsAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToKeypointsAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/person_keypoints_" + datasetName + ".json", root);
@@ -333,7 +333,7 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成人脸关键点数据集
      */
-    private static void generateFaceKeypointsDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateFaceKeypointsDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
@@ -341,10 +341,10 @@ public class DatasetExporter {
         JSONArray categories = createFaceKeypointsCategories();
         root.put("categories", categories);
         
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
-        JSONArray annotations = convertApiJsonToFaceKeypointsAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToFaceKeypointsAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/face_keypoints_" + datasetName + ".json", root);
@@ -354,24 +354,24 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成旋转检测数据集
      */
-    private static void generateRotatedDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateRotatedDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
         
-        JSONArray categories = extractCategoriesFromApiJson(apiJsonData);
+        JSONArray categories = extractCategoriesFromApiJson(apijsonData);
         root.put("categories", categories);
         
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
-        JSONArray annotations = convertApiJsonToRotatedAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToRotatedAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/instances_" + datasetName + ".json", root);
         
         // 生成TXT格式的标签文件
-        generateRotatedLabelFiles(baseDir, apiJsonData);
+        generateRotatedLabelFiles(baseDir, apijsonData);
         
         createReadmeFile(baseDir, datasetName, "rotated");
     }
@@ -379,21 +379,21 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据生成OCR数据集
      */
-    private static void generateOCRDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apiJsonData) throws IOException {
+    private static void generateOCRDatasetFromApiJson(String baseDir, String datasetName, List<JSONObject> apijsonData) throws IOException {
         JSONObject root = new JSONObject();
         root.put("info", createCocoInfo(datasetName));
         root.put("licenses", new JSONArray());
         
-        JSONArray images = convertApiJsonToImages(apiJsonData);
+        JSONArray images = convertApiJsonToImages(apijsonData);
         root.put("images", images);
         
-        JSONArray annotations = convertApiJsonToOCRAnnotations(apiJsonData);
+        JSONArray annotations = convertApiJsonToOCRAnnotations(apijsonData);
         root.put("annotations", annotations);
 
         writeJsonFile(baseDir + "annotations/instances_" + datasetName + ".json", root);
         
         // 生成TXT格式的标签文件
-        generateOCRLabelFiles(baseDir, apiJsonData);
+        generateOCRLabelFiles(baseDir, apijsonData);
         
         createReadmeFile(baseDir, datasetName, "ocr");
     }
@@ -403,10 +403,10 @@ public class DatasetExporter {
     public static JSONObject createCocoInfo(String datasetName) {
         JSONObject info = new JSONObject();
         info.put("description", datasetName + " Dataset");
-        info.put("url", "https://example.com");
+        info.put("url", "https://github.com/TommyLemon/CVAuto");
         info.put("version", "1.0");
-        info.put("year", 2024);
-        info.put("contributor", "APIJSON");
+        info.put("year", 2025);
+        info.put("contributor", "TommyLemon");
         info.put("date_created", new SimpleDateFormat("yyyy-MM-dd").format(new Date()));
         return info;
     }
@@ -737,11 +737,11 @@ public class DatasetExporter {
     /**
      * 从APIJSON数据中提取类别信息
      */
-    private static JSONArray extractCategoriesFromApiJson(List<JSONObject> apiJsonData) {
+    public static JSONArray extractCategoriesFromApiJson(List<JSONObject> apijsonData) {
         JSONArray categories = new JSONArray();
         Set<String> categorySet = new HashSet<>();
         
-        for (JSONObject item : apiJsonData) {
+        for (JSONObject item : apijsonData) {
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -792,11 +792,11 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为COCO格式的images数组
      */
-    private static JSONArray convertApiJsonToImages(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToImages(List<JSONObject> apijsonData) {
         JSONArray images = new JSONArray();
         
-        for (int i = 0; i < apiJsonData.size(); i++) {
-            JSONObject item = apiJsonData.get(i);
+        for (int i = 0; i < apijsonData.size(); i++) {
+            JSONObject item = apijsonData.get(i);
             if (item == null) continue;
             
             JSONObject random = item.getJSONObject("Random");
@@ -817,12 +817,12 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为检测标注
      */
-    private static JSONArray convertApiJsonToDetectionAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToDetectionAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         int annId = 1;
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -846,7 +846,7 @@ public class DatasetExporter {
                         
                         // 查找类别ID
                         String label = bboxData.getString("label");
-                        int categoryId = findCategoryId(label, apiJsonData);
+                        int categoryId = findCategoryId(label, apijsonData);
                         ann.put("category_id", categoryId);
                         
                         // 设置bbox
@@ -875,11 +875,11 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为分类标注
      */
-    private static JSONArray convertApiJsonToClassificationAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToClassificationAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -900,7 +900,7 @@ public class DatasetExporter {
                         ann.put("image_id", imageId + 1);
                         
                         String label = bboxData.getString("label");
-                        int categoryId = findCategoryId(label, apiJsonData);
+                        int categoryId = findCategoryId(label, apijsonData);
                         ann.put("category_id", categoryId);
                         
                         annotations.add(ann);
@@ -917,12 +917,12 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为分割标注
      */
-    private static JSONArray convertApiJsonToSegmentationAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToSegmentationAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         int annId = 1;
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -946,7 +946,7 @@ public class DatasetExporter {
                         ann.put("image_id", imageId + 1);
                         
                         String label = polygonData.getString("label");
-                        int categoryId = findCategoryId(label, apiJsonData);
+                        int categoryId = findCategoryId(label, apijsonData);
                         ann.put("category_id", categoryId);
                         
                         // 设置分割多边形
@@ -980,7 +980,7 @@ public class DatasetExporter {
                             ann.put("image_id", imageId + 1);
                             
                             String label = bboxData.getString("label");
-                            int categoryId = findCategoryId(label, apiJsonData);
+                            int categoryId = findCategoryId(label, apijsonData);
                             ann.put("category_id", categoryId);
                             
                             JSONArray bbox = bboxData.getJSONArray("bbox");
@@ -1008,12 +1008,12 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为关键点标注
      */
-    private static JSONArray convertApiJsonToKeypointsAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToKeypointsAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         int annId = 1;
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -1070,12 +1070,12 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为人脸关键点标注
      */
-    private static JSONArray convertApiJsonToFaceKeypointsAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToFaceKeypointsAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         int annId = 1;
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -1132,12 +1132,12 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为旋转标注
      */
-    private static JSONArray convertApiJsonToRotatedAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToRotatedAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         int annId = 1;
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -1160,7 +1160,7 @@ public class DatasetExporter {
                         ann.put("image_id", imageId + 1);
                         
                         String label = bboxData.getString("label");
-                        int categoryId = findCategoryId(label, apiJsonData);
+                        int categoryId = findCategoryId(label, apijsonData);
                         ann.put("category_id", categoryId);
                         
                         // 旋转框格式: [cx, cy, w, h, angle]
@@ -1193,12 +1193,12 @@ public class DatasetExporter {
     /**
      * 将APIJSON数据转换为OCR标注
      */
-    private static JSONArray convertApiJsonToOCRAnnotations(List<JSONObject> apiJsonData) {
+    private static JSONArray convertApiJsonToOCRAnnotations(List<JSONObject> apijsonData) {
         JSONArray annotations = new JSONArray();
         int annId = 1;
         
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject testRecord = item.getJSONObject("TestRecord");
@@ -1257,8 +1257,8 @@ public class DatasetExporter {
     /**
      * 查找类别ID
      */
-    private static int findCategoryId(String label, List<JSONObject> apiJsonData) {
-        JSONArray categories = extractCategoriesFromApiJson(apiJsonData);
+    private static int findCategoryId(String label, List<JSONObject> apijsonData) {
+        JSONArray categories = extractCategoriesFromApiJson(apijsonData);
         for (int i = 0; i < categories.size(); i++) {
             JSONObject category = categories.getJSONObject(i);
             if (category != null && label.equals(category.getString("name"))) {
@@ -1337,9 +1337,9 @@ public class DatasetExporter {
     /**
      * 生成旋转检测的TXT标签文件
      */
-    private static void generateRotatedLabelFiles(String baseDir, List<JSONObject> apiJsonData) throws IOException {
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+    private static void generateRotatedLabelFiles(String baseDir, List<JSONObject> apijsonData) throws IOException {
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject random = item.getJSONObject("Random");
@@ -1376,7 +1376,7 @@ public class DatasetExporter {
                                     Double angle = bboxData.getDouble("angle");
                                     if (angle == null) angle = 0.0;
                                     
-                                    int categoryId = findCategoryId(bboxData.getString("label"), apiJsonData);
+                                    int categoryId = findCategoryId(bboxData.getString("label"), apijsonData);
                                     
                                     content.append(String.format("%.1f %.1f %.1f %.1f %.1f %d\n", 
                                         cx, cy, w, h, angle, categoryId));
@@ -1398,9 +1398,9 @@ public class DatasetExporter {
     /**
      * 生成OCR的TXT标签文件
      */
-    private static void generateOCRLabelFiles(String baseDir, List<JSONObject> apiJsonData) throws IOException {
-        for (int imageId = 0; imageId < apiJsonData.size(); imageId++) {
-            JSONObject item = apiJsonData.get(imageId);
+    private static void generateOCRLabelFiles(String baseDir, List<JSONObject> apijsonData) throws IOException {
+        for (int imageId = 0; imageId < apijsonData.size(); imageId++) {
+            JSONObject item = apijsonData.get(imageId);
             if (item == null) continue;
             
             JSONObject random = item.getJSONObject("Random");

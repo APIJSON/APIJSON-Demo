@@ -16,14 +16,23 @@ package apijson;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.annotations.Expose;
 
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Base64;
+
+// 添加 JSONObject 支持
+import com.alibaba.fastjson2.JSONObject;
+import com.alibaba.fastjson2.JSONArray;
 
 public class DatasetUtil {
 
@@ -56,10 +65,49 @@ public class DatasetUtil {
             Set<TaskType> combinedTasks = new HashSet<>(Arrays.asList(TaskType.DETECTION, TaskType.POSE_KEYPOINTS));
             generate("./output/combined_dataset", combinedTasks);
 
+            // 示例6：从 List<JSONObject> 数据生成数据集
+            System.out.println("\nGenerating dataset from JSONObject data...");
+            List<JSONObject> sampleData = createSampleJSONObjectData();
+            Set<TaskType> jsonTasks = new HashSet<>(Collections.singletonList(TaskType.DETECTION));
+            generate("./output/json_dataset", jsonTasks, sampleData);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 创建示例 JSONObject 数据（用于测试新方法）
+     */
+    private static List<JSONObject> createSampleJSONObjectData() {
+        List<JSONObject> data = new ArrayList<>();
+        
+        // 创建示例数据
+        JSONObject item1 = new JSONObject();
+        
+        // Random 部分
+        JSONObject random = new JSONObject();
+        random.put("id", 1756787718589L);
+        random.put("file", "APIJSONisOneOfTheGVPsIn2019-small.jpg");
+        random.put("width", 1280);
+        random.put("height", 853);
+        random.put("img", "http://apijson.cn:8080/download/APIJSONisOneOfTheGVPsIn2019-small.jpg");
+        item1.put("Random", random);
+        
+        // TestRecord 部分
+        JSONObject testRecord = new JSONObject();
+        testRecord.put("id", 1756792348548L);
+        testRecord.put("total", 13);
+        testRecord.put("wrongs", Arrays.asList(14, 13));
+        
+        // response JSON 字符串
+        String responseJson = "{\"bboxes\":[{\"id\":13,\"label\":\"person\",\"score\":0.5378538966178894,\"color\":[4,42,255],\"bbox\":[853,428,72,240],\"points\":[[871.6951293945312,451.89715576171875],[876.0582885742188,446.989501953125],[867.4796752929688,447.6239929199219],[885.4673461914062,448.6053161621094],[863.2174072265625,450.231201171875],[899.7001342773438,472.1517028808594],[857.8172607421875,474.7442626953125],[917.5662231445312,499.2178955078125],[855.7079467773438,503.6971435546875],[916.1815185546875,513.849365234375],[870.5646362304688,512.5989379882812],[897.6688842773438,536.5700073242188],[870.5701904296875,537.7681274414062],[899.3941650390625,589.7494506835938],[871.3021240234375,590.5899047851562],[901.5574951171875,640.5718994140625],[876.8245849609375,641.290283203125]],\"lines\":[]}],\"polygons\":[],\"ok\":true,\"msg\":\"success\",\"code\":200}";
+        testRecord.put("response", responseJson);
+        
+        item1.put("TestRecord", testRecord);
+        data.add(item1);
+        
+        return data;
     }
 
     /**
@@ -133,6 +181,17 @@ public class DatasetUtil {
             return this;
         }
 
+        public DatasetBuilder addImage(String fileName, int width, int height, String imgSource) {
+            ImageInfo img = new ImageInfo();
+            img.setId(imageIdCounter++);
+            img.setFile_name(fileName);
+            img.setWidth(width);
+            img.setHeight(height);
+            img.setImg(imgSource);
+            this.dataset.getImages().add(img);
+            return this;
+        }
+
         public DatasetBuilder addAnnotation(Annotation annotation) {
             // 确保设置了唯一的 ID
             annotation.setId(annotationIdCounter++);
@@ -163,6 +222,93 @@ public class DatasetUtil {
         System.out.println("Successfully generated COCO JSON file at: " + outputPath);
     }
 
+
+    /**
+     * 复制图片文件到指定目录，支持URL和base64两种格式
+     * @param images 图片信息列表
+     * @param imageDir 目标图片目录
+     * @throws IOException
+     */
+    public static void copyImagesToDirectory(List<ImageInfo> images, String imageDir) throws IOException {
+        // 创建图片目录
+        Path imageDirPath = Paths.get(imageDir);
+        if (!Files.exists(imageDirPath)) {
+            Files.createDirectories(imageDirPath);
+        }
+
+        for (ImageInfo image : images) {
+            String imgSource = image.getImg();
+            String fileName = image.getFile_name();
+            
+            if (imgSource == null || imgSource.trim().isEmpty()) {
+                System.out.println("Warning: No image source specified for " + fileName + ", skipping...");
+                continue;
+            }
+
+            Path targetPath = Paths.get(imageDir, fileName);
+            
+            try {
+                if (imgSource.startsWith("data:image/")) {
+                    // 处理base64格式
+                    copyBase64Image(imgSource, targetPath);
+                } else if (imgSource.startsWith("http://") || imgSource.startsWith("https://")) {
+                    // 处理URL格式
+                    copyUrlImage(imgSource, targetPath);
+                } else {
+                    // 处理本地文件路径
+                    copyLocalImage(imgSource, targetPath);
+                }
+                
+                System.out.println("Successfully copied image: " + fileName);
+            } catch (Exception e) {
+                System.err.println("Failed to copy image " + fileName + ": " + e.getMessage());
+            }
+        }
+    }
+
+    /**
+     * 从base64数据复制图片
+     */
+    private static void copyBase64Image(String base64Data, Path targetPath) throws IOException {
+        // 查找base64数据开始的位置
+        int commaIndex = base64Data.indexOf(",");
+        if (commaIndex < 0) {
+            throw new IllegalArgumentException("Invalid base64 image data format");
+        }
+        
+        String base64String = base64Data.substring(commaIndex + 1);
+        byte[] imageBytes = Base64.getDecoder().decode(base64String);
+        
+        try (FileOutputStream fos = new FileOutputStream(targetPath.toFile())) {
+            fos.write(imageBytes);
+        }
+    }
+
+    /**
+     * 从URL下载图片
+     */
+    private static void copyUrlImage(String imageUrl, Path targetPath) throws IOException {
+        URL url = new URL(imageUrl);
+        try (InputStream in = url.openStream();
+            FileOutputStream fos = new FileOutputStream(targetPath.toFile())) {
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = in.read(buffer)) != -1) {
+                fos.write(buffer, 0, bytesRead);
+            }
+        }
+    }
+
+    /**
+     * 复制本地图片文件
+     */
+    private static void copyLocalImage(String sourcePath, Path targetPath) throws IOException {
+        Path source = Paths.get(sourcePath);
+        Files.copy(source, targetPath);
+    }
+
+
+    
     /**
      * 主生成方法（示例）
      * 实际使用中，你需要从你的数据源（如XML, CSV）读取数据来填充这些 Annotation
@@ -182,9 +328,11 @@ public class DatasetUtil {
 
         // --- 2. 添加图片信息 ---
         // 假设我们有两张图片
-        builder.addImage("00001.jpg", 640, 480); // image_id 将是 1
-        builder.addImage("00002.jpg", 800, 600); // image_id 将是 2
-
+        // builder.addImage("00001.jpg", 640, 480); // image_id 将是 1
+        // builder.addImage("00002.jpg", 800, 600); // image_id 将是 2
+        // 假设我们有两张图片（这里是示例，你可以从数据库或配置文件中获取真实的图片信息）
+        builder.addImage("00001.jpg", 640, 480, "http://apijson.cn/images/APIJSON_QECon_small.jpg"); // URL格式
+        builder.addImage("00002.jpg", 800, 600, "data:image/jpeg;base64,iVBORw0KGgoAAAANSUhEUgAAAPkAAABGCAIAAACBsaVnAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyhpVFh0WE1MO+1snR1vta8c6NaVSmZCQkJiYmKK1e/fuAfoZGRlkjIStra29vSYSD5XiobU6derUrVvX+lZ1q/0D9v8CDADVjlUTLSL53QAAAABJRU5ErkJggg=="); // base64格式
 
         // --- 3. 根据任务类型添加标注 (核心部分) ---
         // 这是示例数据，你需要替换成你自己的真实数据加载逻辑
@@ -249,10 +397,270 @@ public class DatasetUtil {
 
         writeToFile(cocoDataset, outputJsonPath);
 
-        // 之后，你需要将图片文件（00001.jpg, 00002.jpg）复制到指定的图片目录下，
-        // 例如 outputDir/images/
+        // 复制图片文件到指定目录 outputDir/images/
+        copyImagesToDirectory(cocoDataset.getImages(), outputDir + "/images/");
+
+        System.out.println("Successfully generated dataset at: " + outputDir);
     }
 
+    
+    /**
+     * 从 List<JSONObject> 数据生成 COCO 数据集
+     * @param outputDir 输出目录
+     * @param tasks 任务类型集合
+     * @param data 包含图片和标注信息的 JSONObject 列表
+     * @throws IOException
+     */
+    public static void generate(String outputDir, Set<TaskType> tasks, List<JSONObject> data) throws IOException {
+        if (data == null || data.isEmpty()) {
+            throw new IllegalArgumentException("Data list cannot be null or empty");
+        }
+
+        // --- 1. 初始化构建器和通用信息 ---
+        DatasetBuilder builder = new DatasetBuilder()
+                .withInfo("Dataset from JSONObject", "1.0", "2025")
+                .withCategory(1, "person", "person")
+                .withCategory(2, "car", "vehicle")
+                .withCategory(3, "dog", "animal")
+                .withKeypointCategory(1, "person", "person",
+                        Arrays.asList("nose", "left_eye", "right_eye"),
+                        Arrays.asList(Arrays.asList(1, 2), Arrays.asList(1, 3))
+                );
+
+        // 用于跟踪图片ID映射
+        Map<String, Integer> fileNameToImageId = new HashMap<>();
+
+        // --- 2. 解析数据并添加图片和标注 ---
+        for (JSONObject item : data) {
+            if (item == null) continue;
+
+            // 解析 Random 部分（图片信息）
+            JSONObject randomObj = item.getJSONObject("Random");
+            if (randomObj != null) {
+                String fileName = randomObj.getString("file");
+                Integer width = randomObj.getInteger("width");
+                Integer height = randomObj.getInteger("height");
+                String imgUrl = randomObj.getString("img");
+
+                if (fileName != null && width != null && height != null) {
+                    int imageId = builder.addImage(fileName, width, height, imgUrl).dataset.getImages().size();
+                    fileNameToImageId.put(fileName, imageId);
+                }
+            }
+
+            // 解析 TestRecord.response 部分（标注信息）
+            JSONObject testRecord = item.getJSONObject("TestRecord");
+            if (testRecord != null) {
+                String responseStr = testRecord.getString("response");
+                if (responseStr != null) {
+                    try {
+                        JSONObject response = JSONObject.parseObject(responseStr);
+
+                        Map<String, Integer> categoryNameIdMap = new HashMap<>();
+
+                        // 解析 bboxes（检测标注）
+                        JSONArray bboxes = response.getJSONArray("bboxes");
+                        if (bboxes != null) {
+                            processBboxes(bboxes, builder, tasks, fileNameToImageId, randomObj, categoryNameIdMap);
+                        }
+
+                        // 解析 polygons（分割标注）
+                        JSONArray polygons = response.getJSONArray("polygons");
+                        if (polygons != null) {
+                            processPolygons(polygons, builder, tasks, fileNameToImageId, randomObj, categoryNameIdMap);
+                        }
+
+                    } catch (Exception e) {
+                        System.err.println("Failed to parse response JSON: " + responseStr);
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+
+        // --- 3. 构建并写入文件 ---
+        CocoDataset cocoDataset = builder.build();
+
+        // 为不同任务生成不同的文件名
+        String taskName = tasks.iterator().next().toString().toLowerCase();
+        String outputJsonPath = Paths.get(outputDir, "annotations", "instances_" + taskName + ".json").toString();
+
+        writeToFile(cocoDataset, outputJsonPath);
+
+        // 复制图片文件到指定目录 outputDir/images/
+        copyImagesToDirectory(cocoDataset.getImages(), outputDir + "/images/");
+
+        System.out.println("Successfully generated dataset from JSONObject data at: " + outputDir);
+    }
+
+    /**
+     * 处理 bboxes 数据
+     */
+    private static void processBboxes(
+            JSONArray bboxes, DatasetBuilder builder, Set<TaskType> tasks,
+            Map<String, Integer> fileNameToImageId, JSONObject randomObj, Map<String, Integer> categoryNameIdMap
+    ) {
+        String fileName = randomObj.getString("file");
+        Integer imageId = fileNameToImageId.get(fileName);
+        if (imageId == null) return;
+
+        for (int i = 0; i < bboxes.size(); i++) {
+            JSONObject bboxObj = bboxes.getJSONObject(i);
+            if (bboxObj == null) continue;
+
+            String label = bboxObj.getString("label");
+            Double score = bboxObj.getDouble("score");
+            JSONArray bbox = bboxObj.getJSONArray("bbox");
+            JSONArray points = bboxObj.getJSONArray("points");
+
+            if (bbox != null && bbox.size() >= 4) {
+                DetectionAnnotation detAnn = new DetectionAnnotation();
+                detAnn.setImage_id(imageId);
+                
+                // 根据标签设置类别ID
+                int categoryId = getCategoryIdByLabel(label, categoryNameIdMap);
+                detAnn.setCategory_id(categoryId);
+
+                // 设置边界框 [x, y, width, height]
+                List<Double> bboxList = new ArrayList<>();
+                for (int j = 0; j < 4; j++) {
+                    bboxList.add(bbox.getDouble(j));
+                }
+                detAnn.setBbox(bboxList);
+
+                // 计算面积
+                double width = bboxList.get(2);
+                double height = bboxList.get(3);
+                detAnn.setArea(width * height);
+
+                // 如果有分割信息，添加到 segmentation
+                if (points != null && !points.isEmpty()) {
+                    List<List<Double>> segmentation = new ArrayList<>();
+                    List<Double> pointList = new ArrayList<>();
+                    
+                    for (int j = 0; j < points.size(); j++) {
+                        JSONArray point = points.getJSONArray(j);
+                        if (point != null && point.size() >= 2) {
+                            pointList.add(point.getDouble(0));
+                            pointList.add(point.getDouble(1));
+                        }
+                    }
+                    
+                    if (!pointList.isEmpty()) {
+                        segmentation.add(pointList);
+                        detAnn.setSegmentation(segmentation);
+                    }
+                }
+
+                builder.addAnnotation(detAnn);
+            }
+        }
+    }
+
+    /**
+     * 处理 polygons 数据（用于分割任务）
+     */
+    private static void processPolygons(
+            JSONArray polygons, DatasetBuilder builder, Set<TaskType> tasks,
+            Map<String, Integer> fileNameToImageId, JSONObject randomObj, Map<String, Integer> categoryNameIdMap) {
+        // 处理多边形数据的逻辑可以在这里扩展
+        // 目前主要通过 bboxes 处理，polygons 可以作为额外信息
+    }
+
+    /**
+     * 根据标签获取类别ID
+     */
+    private static int getCategoryIdByLabel(String label, Map<String, Integer> categoryNameIdMap) {
+        //if (label == null) return 1;
+        
+        //switch (label.toLowerCase()) {
+        //    case "person":
+        //        return 1;
+        //    case "car":
+        //    case "vehicle":
+        //        return 2;
+        //    case "dog":
+        //    case "animal":
+        //        return 3;
+        //    default:
+        //        return 1; // 默认类别
+        //}
+        Integer id = categoryNameIdMap.get(label);
+        if (id == null) {
+            id = categoryNameIdMap.size() + 1;
+            categoryNameIdMap.put(label, id);
+        }
+        return id;
+        //return findCategoryId(label, apijsonData);
+    }
+    /**
+     * 查找类别ID
+     */
+    private static int findCategoryId(String label, List<JSONObject> apijsonData) {
+        JSONArray categories = extractCategoriesFromApiJson(apijsonData);
+        for (int i = 0; i < categories.size(); i++) {
+            JSONObject category = categories.getJSONObject(i);
+            if (category != null && label.equals(category.getString("name"))) {
+                return category.getIntValue("id");
+            }
+        }
+        return 1; // 默认类别ID
+    }
+
+    /**
+     * 从APIJSON数据中提取类别信息
+     */
+    public static JSONArray extractCategoriesFromApiJson(List<JSONObject> apijsonData) {
+        JSONArray categories = new JSONArray();
+        Set<String> categorySet = new HashSet<>();
+
+        for (JSONObject item : apijsonData) {
+            if (item == null) continue;
+
+            JSONObject testRecord = item.getJSONObject("TestRecord");
+            if (testRecord == null) continue;
+
+            String responseStr = testRecord.getString("response");
+            if (responseStr == null) continue;
+
+            try {
+                JSONObject responseObj = JSONObject.parseObject(responseStr);
+                JSONArray bboxes = responseObj.getJSONArray("bboxes");
+
+                if (bboxes != null) {
+                    for (int i = 0; i < bboxes.size(); i++) {
+                        JSONObject bbox = bboxes.getJSONObject(i);
+                        if (bbox != null) {
+                            String label = bbox.getString("label");
+                            if (label != null && !categorySet.contains(label)) {
+                                categorySet.add(label);
+
+                                JSONObject category = new JSONObject();
+                                category.put("id", categories.size() + 1);
+                                category.put("name", label);
+                                category.put("supercategory", "object");
+                                categories.add(category);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                // 解析失败，跳过
+                continue;
+            }
+        }
+
+        // 如果没有找到类别，使用默认类别
+        if (categories.isEmpty()) {
+            JSONObject defaultCategory = new JSONObject();
+            defaultCategory.put("id", 1);
+            defaultCategory.put("name", "object");
+            defaultCategory.put("supercategory", "object");
+            categories.add(defaultCategory);
+        }
+
+        return categories;
+    }
 
 
 
@@ -261,6 +669,8 @@ public class DatasetUtil {
         private String file_name;
         private int width;
         private int height;
+        @Expose(serialize=false)
+        private String img; // 图片来源，支持URL或base64格式
 
         public int getId() {
             return id;
@@ -292,6 +702,14 @@ public class DatasetUtil {
 
         public void setHeight(int height) {
             this.height = height;
+        }
+
+        public String getImg() {
+            return img;
+        }
+
+        public void setImg(String img) {
+            this.img = img;
         }
     }
 
