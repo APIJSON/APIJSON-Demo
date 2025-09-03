@@ -1,3 +1,17 @@
+/*Copyright ©2025 APIJSON(https://github.com/APIJSON)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.*/
+
 package apijson.boot;
 
 import java.io.*;
@@ -33,12 +47,13 @@ import com.alibaba.fastjson2.JSONObject;
 
 import apijson.demo.DemoParser;
 
+import static apijson.DatasetExporter.*;
 import static com.google.common.io.Files.getFileExtension;
 
+import java.text.SimpleDateFormat;
+
 /**文件相关的控制器，包括上传、下载、浏览等
- * @author : ramostear
- * @modifier : Lemon
- * @date : 2019/3/8 0008-15:35
+ * @author Lemon
  */
 @Controller
 public class FileController {
@@ -197,6 +212,8 @@ public class FileController {
 		}
 	}
 
+	public static final int MIN_EXCEL_SIZE = 10*1024*8;
+
 	@Autowired
 	DemoController demoController;
 
@@ -212,11 +229,11 @@ public class FileController {
 		String path = fileUploadRootDir + name;
 		File file = new File(path);
 		long size = file.exists() ? file.length() : 0;
-		if (size < 10*1024) {
+		if (size < MIN_EXCEL_SIZE) {
 			file.delete();
 		}
 
-		if ((file.exists() ? file.length() : 0) < 10*1024) {
+		if ((file.exists() ? file.length() : 0) < MIN_EXCEL_SIZE) {
 			JSONObject request = new JSONObject();
 
 			{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -233,8 +250,9 @@ public class FileController {
 			{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONObject item = new JSONObject();
 				item.put("count", 0);
-//				item.put("count", 3);
-				item.put("join", "&/TestRecord");
+				//item.put("count", 3);
+				item.put("join", "@/TestRecord");
+				//item.put("join", "&/TestRecord");
 
 				{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject random = new JSONObject();
@@ -425,6 +443,176 @@ public class FileController {
 		}
 
 		return download(name);
+	}
+
+	public static final int MIN_DATASET_SIZE = 10*1024*8;
+
+	/**
+	 * COCO数据集导出接口
+	 * 支持类型: detection, classification, segmentation, keypoints, face_keypoints, rotated, ocr
+	 * @param type 数据集类型
+	 * @param datasetName 数据集名称(可选)
+	 * @return 压缩包下载响应
+	 */
+	@GetMapping("/download/dataset/{type}/{id}")
+	@ResponseBody
+	public ResponseEntity<Object> downloadDataset(
+			@PathVariable("type") String type,
+			@PathVariable("id") String idStr,
+			@RequestParam(name = "datasetName", required = false) String datasetName
+	) throws IOException {
+		try {
+			// 参数验证
+			if (! isValidCocoType(type)) {
+				throw new IllegalArgumentException("不支持的数据集类型: " + type);
+			}
+
+			String dataset = StringUtil.isEmpty(datasetName) ? type + "_dataset" : datasetName;
+			String exportDir = fileUploadRootDir + dataset + "/";
+
+			long repOrDocId = Long.parseLong(idStr);
+			if (repOrDocId <= 0) {
+				throw new IllegalArgumentException("id 必须为 > 0 的 reportId 或 documentId 有效整数！");
+			}
+
+			String name = "CVAuto_" + dataset + "_dataset_" + repOrDocId + ".zip";
+			String path = fileUploadRootDir + name;
+
+			File file = new File(path);
+			long size = file.exists() ? file.length() : 0;
+			//if (size < MIN_DATASET_SIZE) {
+				file.delete();
+			//}
+
+			if ((file.exists() ? file.length() : 0) < MIN_DATASET_SIZE) {
+				JSONObject request = new JSONObject();
+
+				//{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+				//	JSONObject testRecord = new JSONObject();
+				//	testRecord.put("reportId", repOrDocId);
+				//	testRecord.put("documentId", repOrDocId);
+				//	testRecord.put("@combine", "reportId,documentId");
+				//	testRecord.put("@column", "reportId,documentId,randomId,sameIds");
+				//	testRecord.put("@order", "reportId-");
+				//
+				//	request.put("TestRecord", testRecord);
+				//}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+				{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+					JSONObject item = new JSONObject();
+					//item.put("count", 0);
+					item.put("count", 3);
+					item.put("join", "@/TestRecord");
+
+					{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+						JSONObject random = new JSONObject();
+						//random.put("documentId@", "TestRecord/documentId");
+						random.put("@column", "id,file,img");
+						random.put("@order", "date-");
+						random.put("@combine", "file[>,img[>");
+						random.put("file[>", 0);
+						random.put("img[>", 0);
+
+						item.put("Random", random);
+					}   // Random >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+					{   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+						JSONObject testRecord = new JSONObject();
+						testRecord.put("@column", "id,total,wrongs,missTruth,response");
+						testRecord.put("randomId@", "/Random/id");
+						//testRecord.put("documentId@", "TestRecord/documentId");
+						//testRecord.put("reportId@", "TestRecord/reportId");
+						//testRecord.put("@combine", "reportId,documentId");
+
+						testRecord.put("total>=", 0);
+						testRecord.put("correct>=", 0);
+						testRecord.put("wrong>=", 0);
+						testRecord.put("@order", "date-");
+
+						item.put("TestRecord", testRecord);
+					}   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+					request.put("[]", item);
+				}   // [] >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+				DemoParser parser = new DemoParser(RequestMethod.GET, false);
+				JSONObject response = parser.parseResponse(request);
+				if (! JSONResponse.isSuccess(response)) {
+					throw new IOException(JSONResponse.getMsg(response));
+				}
+
+				JSONObject lastTr = response.getJSONObject("TestRecord");
+				long reportId = lastTr == null ? 0 : lastTr.getLongValue("reportId");
+				//long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
+				//long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
+				if (reportId != repOrDocId) {
+					name = "CVAuto_" + dataset + "_dataset_" + (reportId > 0 ? reportId : repOrDocId + "_last") + ".zip";
+					path = fileUploadRootDir + name;
+				}
+
+				JSONArray array = response.getJSONArray("[]");
+				JSONArray trArr = response.getJSONArray("TestRecord[]");
+
+				List<JSONObject> list = new ArrayList<>();
+				if (array != null) {
+					for (int i = 0; i < array.size(); i++) {
+						JSONObject item = array.getJSONObject(i);
+						list.add(item);
+
+						//JSONObject random = item == null ? null : item.getJSONObject("Random");
+						//JSONObject testRecord = item == null ? null : item.getJSONObject("TestRecord");
+						//if (random == null) {
+						//	random = new JSONObject();
+						//}
+						//if (testRecord == null) {
+						//	testRecord = new JSONObject();
+						//}
+						//
+						//String fn = random.getString("file");
+						//int ind = fn.lastIndexOf(".");
+						//String nfn = fn.substring(0, ind) + "_render" + fn.substring(ind);
+						//
+						//String resStr = testRecord.getString("response");
+						//
+						//String img = random.getString("img");
+						//JSONObject resObj = StringUtil.isEmpty(img) ? null : JSON.parseObject(resStr);
+
+						// TODO
+					}
+				}
+
+				// 创建导出目录结构
+				createCocoDirectoryStructure(exportDir, type);
+
+				// 生成mock数据并创建文件
+				generateCocoDatasetFromApiJson(exportDir, type, dataset, list);
+
+				createZipFromDirectory(exportDir, path);
+
+				// 清理临时目录
+				deleteDirectory(new File(exportDir));
+
+				//if (! Objects.equals(filePath, path)) {
+				//	try {
+				//		File sourceFile = new File(filePath);
+				//		File destFile = new File(path);
+				//		if (! destFile.getAbsolutePath().equals(sourceFile.getAbsolutePath())) {
+				//			FileUtils.copyFile(sourceFile, destFile);
+				//			System.out.println("文件复制完成 (Commons IO): " + filePath + " -> " + path);
+				//		}
+				//	} catch (IOException e) {
+				//		e.printStackTrace();
+				//	}
+				//}
+			}
+
+			// 返回压缩包下载
+			return download(name);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw new IOException("导出 COCO 数据集失败: " + e.getMessage());
+		}
 	}
 
 }
