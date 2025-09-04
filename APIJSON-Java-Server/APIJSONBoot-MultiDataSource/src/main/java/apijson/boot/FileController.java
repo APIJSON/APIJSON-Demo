@@ -246,10 +246,8 @@ public class FileController {
 
 			{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 				JSONObject item = new JSONObject();
-				item.put("count", 0);
-				//item.put("count", 3);
-				item.put("join", "@/TestRecord");
-				//item.put("join", "&/TestRecord");
+				item.put("count", Log.DEBUG ? 10 : 0);
+				item.put("join", Log.DEBUG ? "&/TestRecord" : "@/TestRecord");
 
 				{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject random = new JSONObject();
@@ -476,8 +474,9 @@ public class FileController {
 				throw new IllegalArgumentException("测试集比例 ratio 必须为 0 ~ 100 范围内的有效整数！");
 			}
 
-			String dataset = StringUtil.isNotEmpty(datasetName) ? datasetName : "CVAuto_" + (StringUtil.isNotEmpty(type) ? type + "_" : "") + "dataset_" + repOrDocId;
-			String exportDir = fileUploadRootDir + dataset + "/";
+			String dataset = StringUtil.isNotEmpty(datasetName) ? datasetName
+					: "CVAuto_" + (StringUtil.isNotEmpty(type) ? type + "_" : "") + "dataset_" + repOrDocId;
+			String exportDir = fileUploadRootDir + dataset + File.separator;
 			String name = dataset + ".zip";
 			String path = fileUploadRootDir + name;
 
@@ -503,9 +502,8 @@ public class FileController {
 
 				{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject item = new JSONObject();
-					item.put("count", 0);
-					//item.put("count", 3);
-					item.put("join", "@/TestRecord");
+					item.put("count", Log.DEBUG ? 10 : 0);
+					item.put("join", Log.DEBUG ? "&/TestRecord" : "@/TestRecord");
 
 					{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						JSONObject random = new JSONObject();
@@ -549,7 +547,9 @@ public class FileController {
 				//long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
 				//long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
 				if (reportId != repOrDocId) {
-					dataset = StringUtil.isNotEmpty(datasetName) ? datasetName : "CVAuto_" + (StringUtil.isNotEmpty(type) ? type + "_" : "") + "dataset_" + (reportId > 0 ? reportId : repOrDocId + "_last");
+					dataset = StringUtil.isNotEmpty(datasetName) ? datasetName : "CVAuto_"
+							+ (StringUtil.isNotEmpty(type) ? type + "_" : "") + "dataset_"
+							+ (reportId > 0 ? reportId : repOrDocId + "_last");
 					exportDir = fileUploadRootDir + dataset + "/";
 					name = dataset + ".zip";
 					path = fileUploadRootDir + name;

@@ -98,9 +98,24 @@ public class DatasetUtil {
         Files.createDirectories(Paths.get(baseDir + "annotations"));
         Files.createDirectories(Paths.get(baseDir + "images"));
 
+        Files.createDirectories(Paths.get(baseDir + "train"));
+        Files.createDirectories(Paths.get(baseDir + "val"));
+        Files.createDirectories(Paths.get(baseDir + "test"));
+
+        Files.createDirectories(Paths.get(baseDir, "annotations", "train"));
+        Files.createDirectories(Paths.get(baseDir, "annotations", "val"));
+        Files.createDirectories(Paths.get(baseDir, "annotations", "test"));
+
+        Files.createDirectories(Paths.get(baseDir, "images", "train"));
+        Files.createDirectories(Paths.get(baseDir, "images", "val"));
+        Files.createDirectories(Paths.get(baseDir, "images", "test"));
+
         // 根据类型创建特定目录 detection, classification, segmentation, keypoints, face_keypoints 使用标准结构
         if (TaskType.OCR.getType().equals(type) || TaskType.ROTATED_DETECTION.getType().equals(type)) {
-            Files.createDirectories(Paths.get(baseDir + "labels"));
+            Files.createDirectories(Paths.get(baseDir, "labels"));
+            Files.createDirectories(Paths.get(baseDir, "labels", "train"));
+            Files.createDirectories(Paths.get(baseDir, "labels", "val"));
+            Files.createDirectories(Paths.get(baseDir, "labels", "test"));
         }
     }
 
@@ -526,14 +541,32 @@ public class DatasetUtil {
 
         // --- 1. 初始化构建器和通用信息 ---
         DatasetBuilder builder = new DatasetBuilder()
-                .withInfo("Dataset from JSONObject", "1.0", "2025")
-                .withCategory(1, "person", "person")
-                .withCategory(2, "car", "vehicle")
-                .withCategory(3, "dog", "animal")
-                .withKeypointCategory(1, "person", "person",
-                        Arrays.asList("nose", "left_eye", "right_eye"),
-                        Arrays.asList(Arrays.asList(1, 2), Arrays.asList(1, 3))
-                );
+                .withInfo("Dataset from JSONObject", "1.0", "2025");
+
+        // 从数据中提取实际的categories
+        JSONArray extractedCategories = extractCategoriesFromApiJson(data);
+
+        // 动态添加categories到builder
+        if (extractedCategories != null) {
+            boolean hasPose = tasks.contains(TaskType.POSE_KEYPOINTS);
+
+            for (int i = 0; i < extractedCategories.size(); i++) {
+                JSONObject categoryObj = extractedCategories.getJSONObject(i);
+                int id = categoryObj.getIntValue("id");
+                String name = categoryObj.getString("name");
+                String supercategory = categoryObj.getString("supercategory");
+
+                // 如果是关键点任务且包含person类别，添加关键点信息
+                if (hasPose && ("person".equals(name) || name.contains("人"))) {
+                    builder.withKeypointCategory(id, name, supercategory,
+                            Arrays.asList("nose", "left_eye", "right_eye"),
+                            Arrays.asList(Arrays.asList(1, 2), Arrays.asList(1, 3))
+                    );
+                } else {
+                    builder.withCategory(id, name, supercategory);
+                }
+            }
+        }
 
         // 用于跟踪图片ID映射
         Map<String, Integer> imgNameIdMap = new HashMap<>();
