@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>7.2.5</version>
+    <version>7.2.6</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -71,11 +71,19 @@
             <artifactId>apijson-framework</artifactId>
             <version>7.2.2</version>
         </dependency>
+        <!--   fastjson2, gson 等 JSON 库插件选其中一个即可 <<<<<<<<<<<<<<<     -->
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-fastjson2</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.3</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-gson</artifactId>-->
+<!--            <version>1.0.3</version>-->
+<!--        </dependency>-->
+        <!--   fastjson2, gson 等 JSON 库插件选其中一个即可 >>>>>>>>>>>>>>>     -->
+
         <dependency>
             <groupId>com.databend</groupId>
             <artifactId>databend-jdbc</artifactId>
