@@ -98,24 +98,9 @@ public class DatasetUtil {
         Files.createDirectories(Paths.get(baseDir + "annotations"));
         Files.createDirectories(Paths.get(baseDir + "images"));
 
-        Files.createDirectories(Paths.get(baseDir + "train"));
-        Files.createDirectories(Paths.get(baseDir + "val"));
-        Files.createDirectories(Paths.get(baseDir + "test"));
-
-        Files.createDirectories(Paths.get(baseDir, "annotations", "train"));
-        Files.createDirectories(Paths.get(baseDir, "annotations", "val"));
-        Files.createDirectories(Paths.get(baseDir, "annotations", "test"));
-
-        Files.createDirectories(Paths.get(baseDir, "images", "train"));
-        Files.createDirectories(Paths.get(baseDir, "images", "val"));
-        Files.createDirectories(Paths.get(baseDir, "images", "test"));
-
         // 根据类型创建特定目录 detection, classification, segmentation, keypoints, face_keypoints 使用标准结构
         if (TaskType.OCR.getType().equals(type) || TaskType.ROTATED_DETECTION.getType().equals(type)) {
-            Files.createDirectories(Paths.get(baseDir, "labels"));
-            Files.createDirectories(Paths.get(baseDir, "labels", "train"));
-            Files.createDirectories(Paths.get(baseDir, "labels", "val"));
-            Files.createDirectories(Paths.get(baseDir, "labels", "test"));
+            Files.createDirectories(Paths.get(baseDir + "labels"));
         }
     }
 
@@ -346,16 +331,50 @@ public class DatasetUtil {
 
 
     /**
-     * 复制图片文件到指定目录，支持URL和base64两种格式
+     * 复制图片文件到指定目录，按类别分目录存放，支持URL和base64两种格式
      * @param images 图片信息列表
-     * @param imageDir 目标图片目录
+     * @param imageDir 目标图片根目录
+     * @param categories 类别列表
+     * @param annotations 标注列表
      * @throws IOException
      */
-    public static void copyImagesToDirectory(List<ImageInfo> images, String imageDir) throws IOException {
-        // 创建图片目录
+    public static void copyImagesToDirectory(
+            List<ImageInfo> images, String imageDir, List<Category> categories, List<Annotation> annotations
+    ) throws IOException {
+        // 创建图片根目录
         Path imageDirPath = Paths.get(imageDir);
         if (!Files.exists(imageDirPath)) {
             Files.createDirectories(imageDirPath);
+        }
+
+        // 创建类别ID到名称的映射
+        Map<Integer, String> categoryIdToName = new HashMap<>();
+        if (categories != null) {
+            for (Category category : categories) {
+                categoryIdToName.put(category.getId(), category.getName());
+            }
+        }
+
+        // 创建类别目录
+        for (String categoryName : categoryIdToName.values()) {
+            Path categoryDir = Paths.get(imageDir, categoryName);
+            if (!Files.exists(categoryDir)) {
+                Files.createDirectories(categoryDir);
+            }
+        }
+
+        // 创建图片ID到标注类别的映射
+        Map<Integer, Set<String>> imageIdToCategories = new HashMap<>();
+        if (annotations != null) {
+            for (Annotation annotation : annotations) {
+                int imageId = annotation.getImage_id();
+                int categoryId = annotation.getCategory_id();
+                String categoryName = categoryIdToName.get(categoryId);
+                
+                if (categoryName != null) {
+                    imageIdToCategories.computeIfAbsent(imageId, k -> new HashSet<>()).add(categoryName);
+                }
+            }
         }
 
         for (ImageInfo image : images) {
@@ -367,24 +386,51 @@ public class DatasetUtil {
                 continue;
             }
 
-            Path targetPath = Paths.get(imageDir, fileName);
-            
-            try {
-                if (imgSource.startsWith("data:image/")) {
-                    // 处理base64格式
-                    copyBase64Image(imgSource, targetPath);
-                } else if (imgSource.startsWith("http://") || imgSource.startsWith("https://")) {
-                    // 处理URL格式
-                    copyUrlImage(imgSource, targetPath);
-                } else {
-                    // 处理本地文件路径
-                    copyLocalImage(imgSource, targetPath);
-                }
+            // 获取这张图片的所有相关类别
+            Set<String> imageCategories = imageIdToCategories.get(image.getId());
+            if (imageCategories == null || imageCategories.isEmpty()) {
+                // 如果没有标注信息，放到一个默认目录
+                Path targetPath = Paths.get(imageDir, fileName);
+                Files.createDirectories(targetPath.getParent());
                 
-                System.out.println("Successfully copied image: " + fileName);
-            } catch (Exception e) {
-                System.err.println("Failed to copy image " + fileName + ": " + e.getMessage());
+                try {
+                    copyImageToPath(imgSource, targetPath);
+                    System.out.println("Successfully copied unlabeled image: " + fileName);
+                } catch (Exception e) {
+                    System.err.println("Failed to copy image " + fileName + ": " + e.getMessage());
+                }
+            } else {
+                // 将图片复制到所有相关类别的目录
+                for (String categoryName : imageCategories) {
+                    Path targetPath = Paths.get(imageDir, categoryName, fileName);
+                    
+                    try {
+                        copyImageToPath(imgSource, targetPath);
+                        System.out.println("Successfully copied image " + fileName + " to category: " + categoryName);
+                    } catch (Exception e) {
+                        System.err.println("Failed to copy image " + fileName + " to category " + categoryName + ": " + e.getMessage());
+                    }
+                }
             }
+        }
+    }
+
+    /**
+     * 复制图片到指定路径的辅助方法
+     */
+    private static void copyImageToPath(String imgSource, Path targetPath) throws IOException {
+        // 确保目标目录存在
+        Files.createDirectories(targetPath.getParent());
+        
+        if (imgSource.startsWith("data:image/")) {
+            // 处理base64格式
+            copyBase64Image(imgSource, targetPath);
+        } else if (imgSource.startsWith("http://") || imgSource.startsWith("https://")) {
+            // 处理URL格式
+            copyUrlImage(imgSource, targetPath);
+        } else {
+            // 处理本地文件路径
+            copyLocalImage(imgSource, targetPath);
         }
     }
 
@@ -520,7 +566,8 @@ public class DatasetUtil {
         writeToFile(cocoDataset, outputJsonPath);
 
         // 复制图片文件到指定目录 outputDir/images/
-        copyImagesToDirectory(cocoDataset.getImages(), outputDir + "/images/");
+        copyImagesToDirectory(cocoDataset.getImages(), outputDir + "/images/", null, null);
+        copyImagesToDirectory(cocoDataset.getImages(), outputDir + "/images/", cocoDataset.getCategories(), cocoDataset.getAnnotations());
 
         System.out.println("Successfully generated dataset at: " + outputDir);
     }
@@ -647,7 +694,10 @@ public class DatasetUtil {
         writeToFile(cocoDataset, Paths.get(outputDir, taskName + ".json").toString());
 
         // 复制图片文件到指定目录 outputDir/images/ train/val
-        copyImagesToDirectory(cocoDataset.getImages(), outputDir + taskName + "/");
+        copyImagesToDirectory(cocoDataset.getImages(), outputDir + taskName + File.separator, cocoDataset.getCategories(), cocoDataset.getAnnotations());
+        //if (Log.DEBUG || tasks.contains(TaskType.CLASSIFICATION)) {
+            copyImagesToDirectory(cocoDataset.getImages(), outputDir + "images" + File.separator + taskName + File.separator, null, null);
+        //}
 
         System.out.println("Successfully generated dataset from JSONObject data at: " + outputDir);
     }
