@@ -44,7 +44,7 @@ import com.alibaba.fastjson2.JSONObject;
 
 import apijson.demo.DemoParser;
 
-import static apijson.DatasetExporter.*;
+import static apijson.DatasetUtil.*;
 import static com.google.common.io.Files.getFileExtension;
 
 import java.text.SimpleDateFormat;
@@ -451,17 +451,19 @@ public class FileController {
 	 * @param datasetName 数据集名称(可选)
 	 * @return 压缩包下载响应
 	 */
-	@GetMapping("/download/dataset/{type}/{id}")
+	@GetMapping("/download/dataset/{id}")
 	@ResponseBody
 	public ResponseEntity<Object> downloadDataset(
-			@PathVariable("type") String type,
 			@PathVariable("id") String idStr,
+			@RequestParam(name = "type", required = false) String type,
 			@RequestParam(name = "datasetName", required = false) String datasetName
 	) throws IOException {
 		try {
 			// 参数验证
-			if (! isValidCocoType(type)) {
-				throw new IllegalArgumentException("不支持的数据集类型: " + type);
+			if (StringUtil.isNotEmpty(type)) {
+				validateCocoType(type);
+			} else {
+				type = "";
 			}
 
 			String dataset = StringUtil.isEmpty(datasetName) ? type + "_dataset" : datasetName;
@@ -504,7 +506,7 @@ public class FileController {
 					{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 						JSONObject random = new JSONObject();
 						//random.put("documentId@", "TestRecord/documentId");
-						random.put("@column", "id,file,img");
+						random.put("@column", "id,file,width,height,img");
 						random.put("@order", "date-");
 						random.put("@combine", "file[>,img[>");
 						random.put("file[>", 0);
@@ -548,7 +550,6 @@ public class FileController {
 				}
 
 				JSONArray array = response.getJSONArray("[]");
-				JSONArray trArr = response.getJSONArray("TestRecord[]");
 
 				List<JSONObject> list = new ArrayList<>();
 				if (array != null) {

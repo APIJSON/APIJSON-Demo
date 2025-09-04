@@ -2147,8 +2147,9 @@ https://github.com/Tencent/APIJSON/issues
             }
 
             else if (this.isRandomShow && this.isRandomListShow) {
-              this.exTxt.name = 'CVAuto_report_' + (this.reportId || 0) + '.xlsx'
-              window.open(this.server + '/download/cv/report/' + (this.reportId || 0))
+              var id = this.reportId || this.getCurrentDocumentId()
+              this.exTxt.name = 'CVAuto_dataset_' + id + '.zip'
+              window.open(this.server + '/download/cv/report/' + id)
             }
             else if (this.view == 'markdown' || this.view == 'output') {
               var suffix
@@ -2658,6 +2659,7 @@ https://github.com/Tencent/APIJSON/issues
           this.visiblePaths = []
           this.missTruth = {}
           this.sameIds = []
+          this.reportId = null
         }
 
         this.currentRemoteItem = item
@@ -2946,7 +2948,8 @@ https://github.com/Tencent/APIJSON/issues
               , this.exTxt.name + '.txt')
           }
           else if (this.isRandomShow && this.isRandomListShow) {
-            window.open(this.server + '/download/cv/report/' + (this.reportId || 0))
+            var id = this.reportId || this.getCurrentDocumentId()
+            window.open(this.server + '/download/dataset/' + id)
           }
           else if (this.view == 'markdown' || this.view == 'output') { //model
             var clazz = StringUtil.trim(this.exTxt.name)

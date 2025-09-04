@@ -14,15 +14,14 @@ limitations under the License.*/
 
 package apijson;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -77,6 +76,89 @@ public class DatasetUtil {
     }
 
     /**
+     * 验证COCO数据集类型
+     */
+    public static void validateCocoType(String type) {
+        List<String> types = TaskType.getTypes();
+        if (! types.contains(type)) {
+            throw new IllegalArgumentException("不支持的数据集类型: " + type
+                    + ", 只能是 [" + StringUtil.get(types.toArray()) + "] 中的一种！");
+        }
+    }
+
+    public static boolean isValidCocoType(String type) {
+        return TaskType.getTypes().contains(type);
+    }
+
+    /**
+     * 创建COCO数据集目录结构
+     */
+    public static void createCocoDirectoryStructure(String baseDir, String type) throws IOException {
+        // 创建基础目录
+        Files.createDirectories(Paths.get(baseDir + "annotations"));
+        Files.createDirectories(Paths.get(baseDir + "images"));
+
+        // 根据类型创建特定目录 detection, classification, segmentation, keypoints, face_keypoints 使用标准结构
+        if (TaskType.OCR.getType().equals(type) || TaskType.ROTATED_DETECTION.getType().equals(type)) {
+            Files.createDirectories(Paths.get(baseDir + "labels"));
+        }
+    }
+
+
+    public static void createZipFromDirectory(String sourceDir, String zipPath) throws IOException {
+        // 使用Java原生ZIP压缩
+        try (FileOutputStream fos = new FileOutputStream(zipPath);
+             java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(fos)) {
+
+            File sourceFile = new File(sourceDir);
+            addFilesToZip(sourceFile, sourceFile.getName(), zos);
+        }
+    }
+
+    public static void addFilesToZip(File file, String fileName, java.util.zip.ZipOutputStream zos) throws IOException {
+        if (file.isDirectory()) {
+            if (!fileName.endsWith("/")) {
+                fileName += "/";
+            }
+            zos.putNextEntry(new java.util.zip.ZipEntry(fileName));
+            zos.closeEntry();
+
+            File[] files = file.listFiles();
+            if (files != null) {
+                for (File childFile : files) {
+                    addFilesToZip(childFile, fileName + childFile.getName(), zos);
+                }
+            }
+        } else {
+            zos.putNextEntry(new java.util.zip.ZipEntry(fileName));
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] buffer = new byte[1024];
+                int len;
+                while ((len = fis.read(buffer)) > 0) {
+                    zos.write(buffer, 0, len);
+                }
+            }
+            zos.closeEntry();
+        }
+    }
+
+    public static void deleteDirectory(File directory) throws IOException {
+        if (directory.exists()) {
+            File[] files = directory.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        deleteDirectory(file);
+                    } else {
+                        file.delete();
+                    }
+                }
+            }
+            directory.delete();
+        }
+    }
+
+    /**
      * 创建示例 JSONObject 数据（用于测试新方法）
      */
     private static List<JSONObject> createSampleJSONObjectData() {
@@ -113,14 +195,36 @@ public class DatasetUtil {
     /**
      * 定义支持的任务类型
      */
-    public enum TaskType {
-        CLASSIFICATION,
-        DETECTION,
-        SEGMENTATION,
-        POSE_KEYPOINTS,
-        FACE_KEYPOINTS,
-        ROTATED_DETECTION,
-        OCR
+    public static enum TaskType {
+        CLASSIFICATION("cls"),
+        DETECTION("det"),
+        SEGMENTATION("seg"),
+        POSE_KEYPOINTS("pose"),
+        FACE_KEYPOINTS("face"),
+        ROTATED_DETECTION("obb"),
+        OCR("ocr");
+
+        private final String type;
+        TaskType(String type) {
+            this.type = type;
+        }
+        public String getType() {
+            return type;
+        }
+
+        public static final List<String> TYPES = Arrays.asList(
+                CLASSIFICATION.getType(),
+                DETECTION.getType(),
+                SEGMENTATION.getType(),
+                POSE_KEYPOINTS.getType(),
+                FACE_KEYPOINTS.getType(),
+                ROTATED_DETECTION.getType(),
+                OCR.getType()
+        );
+        public static List<String> getTypes() {
+            return TYPES;
+        }
+
     }
 
     /**
@@ -215,10 +319,13 @@ public class DatasetUtil {
             Files.createDirectories(parentDir);
         }
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
-        try (FileWriter writer = new FileWriter(outputPath)) {
-            gson.toJson(dataset, writer);
-        }
+        FileOutputStream fos = new FileOutputStream(outputPath);
+        fos.write(JSON.toJSONString(dataset, true).getBytes(StandardCharsets.UTF_8));
+
+        //Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        //try (FileWriter writer = new FileWriter(outputPath)) {
+        //    gson.toJson(dataset, writer);
+        //}
         System.out.println("Successfully generated COCO JSON file at: " + outputPath);
     }
 
@@ -428,7 +535,7 @@ public class DatasetUtil {
                 );
 
         // 用于跟踪图片ID映射
-        Map<String, Integer> fileNameToImageId = new HashMap<>();
+        Map<String, Integer> imgNameIdMap = new HashMap<>();
 
         // --- 2. 解析数据并添加图片和标注 ---
         for (JSONObject item : data) {
@@ -444,37 +551,53 @@ public class DatasetUtil {
 
                 if (fileName != null && width != null && height != null) {
                     int imageId = builder.addImage(fileName, width, height, imgUrl).dataset.getImages().size();
-                    fileNameToImageId.put(fileName, imageId);
+                    imgNameIdMap.put(fileName, imageId);
                 }
             }
 
             // 解析 TestRecord.response 部分（标注信息）
             JSONObject testRecord = item.getJSONObject("TestRecord");
             if (testRecord != null) {
-                String responseStr = testRecord.getString("response");
-                if (responseStr != null) {
-                    try {
-                        JSONObject response = JSONObject.parseObject(responseStr);
+                try {
+                    JSONObject response = testRecord.getJSONObject("response");
+                    JSONArray wrongs = testRecord.getJSONArray("wrongs");
+                    JSONObject missTruth = testRecord.getJSONObject("missTruth");
 
-                        Map<String, Integer> categoryNameIdMap = new HashMap<>();
-
-                        // 解析 bboxes（检测标注）
-                        JSONArray bboxes = response.getJSONArray("bboxes");
-                        if (bboxes != null) {
-                            processBboxes(bboxes, builder, tasks, fileNameToImageId, randomObj, categoryNameIdMap);
+                    // 解析 bboxes（检测标注）
+                    JSONArray bboxes = missTruth == null ? null : missTruth.getJSONArray("bboxes");
+                    JSONArray resBboxes = response == null ? null : response.getJSONArray("bboxes");
+                    if (resBboxes != null && ! resBboxes.isEmpty()) {
+                        if (bboxes == null) {
+                            bboxes = new JSONArray();
                         }
 
-                        // 解析 polygons（分割标注）
-                        JSONArray polygons = response.getJSONArray("polygons");
-                        if (polygons != null) {
-                            processPolygons(polygons, builder, tasks, fileNameToImageId, randomObj, categoryNameIdMap);
-                        }
+                        if (wrongs == null || wrongs.isEmpty()) {
+                            bboxes.addAll(resBboxes);
+                        } else {
+                            for (int i = 0; i < resBboxes.size(); i++) {
+                                JSONObject bbox = wrongs.contains(i) ? null : resBboxes.getJSONObject(i);
+                                if (bbox == null || bbox.isEmpty()) {
+                                    continue;
+                                }
 
-                    } catch (Exception e) {
-                        System.err.println("Failed to parse response JSON: " + responseStr);
-                        e.printStackTrace();
+                                bboxes.add(bbox);
+                            }
+                        }
                     }
+
+                    Map<String, Integer> categoryNameIdMap = new HashMap<>();
+
+                    processBboxes(bboxes, builder, tasks, imgNameIdMap, randomObj, categoryNameIdMap);
+
+                    // 解析 polygons（分割标注）
+                    JSONArray polygons = response.getJSONArray("polygons");
+                    processPolygons(polygons, builder, tasks, imgNameIdMap, randomObj, categoryNameIdMap);
+
+                } catch (Exception e) {
+                    System.err.println("Failed to parse bboxes: " + e.getMessage());
+                    e.printStackTrace();
                 }
+
             }
         }
 
@@ -498,11 +621,17 @@ public class DatasetUtil {
      */
     private static void processBboxes(
             JSONArray bboxes, DatasetBuilder builder, Set<TaskType> tasks,
-            Map<String, Integer> fileNameToImageId, JSONObject randomObj, Map<String, Integer> categoryNameIdMap
+            Map<String, Integer> imgNameIdMap, JSONObject randomObj, Map<String, Integer> categoryNameIdMap
     ) {
+        if (bboxes == null || bboxes.isEmpty()) {
+            return;
+        }
+
         String fileName = randomObj.getString("file");
-        Integer imageId = fileNameToImageId.get(fileName);
-        if (imageId == null) return;
+        Integer imageId = imgNameIdMap.get(fileName);
+        if (imageId == null) {
+            return;
+        }
 
         for (int i = 0; i < bboxes.size(); i++) {
             JSONObject bboxObj = bboxes.getJSONObject(i);
@@ -562,9 +691,13 @@ public class DatasetUtil {
      */
     private static void processPolygons(
             JSONArray polygons, DatasetBuilder builder, Set<TaskType> tasks,
-            Map<String, Integer> fileNameToImageId, JSONObject randomObj, Map<String, Integer> categoryNameIdMap) {
+            Map<String, Integer> imgNameIdMap, JSONObject randomObj, Map<String, Integer> categoryNameIdMap) {
         // 处理多边形数据的逻辑可以在这里扩展
         // 目前主要通过 bboxes 处理，polygons 可以作为额外信息
+        if (polygons == null || polygons.isEmpty()) {
+            return;
+        }
+        
     }
 
     /**
@@ -670,6 +803,7 @@ public class DatasetUtil {
         private int width;
         private int height;
         @Expose(serialize=false)
+        @JSONField(serialize = false)
         private String img; // 图片来源，支持URL或base64格式
 
         public int getId() {
