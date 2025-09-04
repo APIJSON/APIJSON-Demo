@@ -68,7 +68,7 @@ public class DatasetUtil {
             System.out.println("\nGenerating dataset from JSONObject data...");
             List<JSONObject> sampleData = createSampleJSONObjectData();
             Set<TaskType> jsonTasks = new HashSet<>(Collections.singletonList(TaskType.DETECTION));
-            generate("./output/json_dataset", jsonTasks, sampleData);
+            generate(sampleData, jsonTasks, "./output/detection_dataset/", "train");
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -513,12 +513,13 @@ public class DatasetUtil {
     
     /**
      * 从 List<JSONObject> 数据生成 COCO 数据集
-     * @param outputDir 输出目录
-     * @param tasks 任务类型集合
      * @param data 包含图片和标注信息的 JSONObject 列表
+     * @param tasks 任务类型集合
+     * @param outputDir 输出目录
+     * @param part train/val
      * @throws IOException
      */
-    public static void generate(String outputDir, Set<TaskType> tasks, List<JSONObject> data) throws IOException {
+    public static void generate(List<JSONObject> data, Set<TaskType> tasks, String outputDir, String part) throws IOException {
         if (data == null || data.isEmpty()) {
             throw new IllegalArgumentException("Data list cannot be null or empty");
         }
@@ -605,13 +606,15 @@ public class DatasetUtil {
         CocoDataset cocoDataset = builder.build();
 
         // 为不同任务生成不同的文件名
-        String taskName = tasks.iterator().next().toString().toLowerCase();
-        String outputJsonPath = Paths.get(outputDir, "annotations", "instances_" + taskName + ".json").toString();
+        String[] keys = StringUtil.split(outputDir, "/");
+        String taskName = StringUtil.isNotEmpty(part) ? part : (keys != null && keys.length >= 1 ? keys[keys.length - 1] : tasks.iterator().next().toString().toLowerCase());
 
+        String outputJsonPath = Paths.get(outputDir, "annotations", taskName + ".json").toString();
         writeToFile(cocoDataset, outputJsonPath);
+        writeToFile(cocoDataset, Paths.get(outputDir, taskName + ".json").toString());
 
-        // 复制图片文件到指定目录 outputDir/images/
-        copyImagesToDirectory(cocoDataset.getImages(), outputDir + "/images/");
+        // 复制图片文件到指定目录 outputDir/images/ train/val
+        copyImagesToDirectory(cocoDataset.getImages(), outputDir + taskName + "/");
 
         System.out.println("Successfully generated dataset from JSONObject data at: " + outputDir);
     }

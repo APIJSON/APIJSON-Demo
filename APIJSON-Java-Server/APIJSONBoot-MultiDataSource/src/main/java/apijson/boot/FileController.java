@@ -456,25 +456,29 @@ public class FileController {
 	public ResponseEntity<Object> downloadDataset(
 			@PathVariable("id") String idStr,
 			@RequestParam(name = "type", required = false) String type,
-			@RequestParam(name = "datasetName", required = false) String datasetName
+			@RequestParam(name = "ratio", required = false) String ratioStr,
+			@RequestParam(name = "name", required = false) String datasetName
 	) throws IOException {
 		try {
-			// 参数验证
+			long repOrDocId = Long.parseLong(idStr);
+			if (repOrDocId <= 0) {
+				throw new IllegalArgumentException("id 必须为 > 0 的 reportId 或 documentId 有效整数！");
+			}
+
 			if (StringUtil.isNotEmpty(type)) {
 				validateCocoType(type);
 			} else {
 				type = "";
 			}
 
-			String dataset = StringUtil.isEmpty(datasetName) ? type + "_dataset" : datasetName;
-			String exportDir = fileUploadRootDir + dataset + "/";
-
-			long repOrDocId = Long.parseLong(idStr);
-			if (repOrDocId <= 0) {
-				throw new IllegalArgumentException("id 必须为 > 0 的 reportId 或 documentId 有效整数！");
+			int ratio = StringUtil.isEmpty(ratioStr) ? 20 : Integer.parseInt(ratioStr);
+			if (ratio < 0 || ratio > 100) {
+				throw new IllegalArgumentException("测试集比例 ratio 必须为 0 ~ 100 范围内的有效整数！");
 			}
 
-			String name = "CVAuto_" + dataset + repOrDocId + ".zip";
+			String dataset = StringUtil.isNotEmpty(datasetName) ? datasetName : "CVAuto_" + (StringUtil.isNotEmpty(type) ? type + "_" : "") + "dataset_" + repOrDocId;
+			String exportDir = fileUploadRootDir + dataset + "/";
+			String name = dataset + ".zip";
 			String path = fileUploadRootDir + name;
 
 			File file = new File(path);
@@ -499,8 +503,8 @@ public class FileController {
 
 				{   // [] <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 					JSONObject item = new JSONObject();
-					//item.put("count", 0);
-					item.put("count", 3);
+					item.put("count", 0);
+					//item.put("count", 3);
 					item.put("join", "@/TestRecord");
 
 					{   // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
@@ -545,17 +549,29 @@ public class FileController {
 				//long documentId = lastTr == null ? 0 : lastTr.getLongValue("documentId");
 				//long randomId = lastTr == null ? 0 : lastTr.getLongValue("randomId");
 				if (reportId != repOrDocId) {
-					name = "CVAuto_" + dataset + (reportId > 0 ? reportId : repOrDocId + "_last") + ".zip";
+					dataset = StringUtil.isNotEmpty(datasetName) ? datasetName : "CVAuto_" + (StringUtil.isNotEmpty(type) ? type + "_" : "") + "dataset_" + (reportId > 0 ? reportId : repOrDocId + "_last");
+					exportDir = fileUploadRootDir + dataset + "/";
+					name = dataset + ".zip";
 					path = fileUploadRootDir + name;
 				}
 
 				JSONArray array = response.getJSONArray("[]");
 
-				List<JSONObject> list = new ArrayList<>();
+				List<JSONObject> trainList = new ArrayList<>();
+				List<JSONObject> validList = new ArrayList<>();
 				if (array != null) {
-					for (int i = 0; i < array.size(); i++) {
+					int len = array.size();
+					for (int i = 0; i < len; i++) {
 						JSONObject item = array.getJSONObject(i);
-						list.add(item);
+						if (item == null || item.isEmpty()) {
+							continue;
+						}
+
+						if (ratio <= 0 || ratio <= 100 - 100.0*i/len) {
+							trainList.add(item);
+						} else {
+							validList.add(item);
+						}
 
 						//JSONObject random = item == null ? null : item.getJSONObject("Random");
 						//JSONObject testRecord = item == null ? null : item.getJSONObject("TestRecord");
@@ -586,7 +602,9 @@ public class FileController {
 				//generateCocoDatasetFromApiJson(exportDir, type, dataset, list);
 
 				Set<DatasetUtil.TaskType> detectionTasks = new HashSet<>(Collections.singletonList(DatasetUtil.TaskType.DETECTION));
-				DatasetUtil.generate(exportDir, detectionTasks, list);
+
+				DatasetUtil.generate(trainList, detectionTasks, exportDir, "train");
+				DatasetUtil.generate(validList, detectionTasks, exportDir, "val");
 
 				createZipFromDirectory(exportDir, path);
 

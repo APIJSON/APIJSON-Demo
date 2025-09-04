@@ -2949,7 +2949,7 @@ https://github.com/Tencent/APIJSON/issues
           }
           else if (this.isRandomShow && this.isRandomListShow) {
             var id = this.reportId || this.getCurrentDocumentId()
-            window.open(this.server + '/download/dataset/' + id)
+            window.open(this.server + '/download/dataset/' + id + "?ratio=20")
           }
           else if (this.view == 'markdown' || this.view == 'output') { //model
             var clazz = StringUtil.trim(this.exTxt.name)
