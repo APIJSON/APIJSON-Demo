@@ -14,7 +14,7 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import apijson.gson.*;
+import apijson.jackson.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -26,10 +26,6 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import apijson.Log;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
 
 
 /**
@@ -105,7 +101,7 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
   }
 
   static {
-    //// 使用 gson
+    //// 使用 jackson
     //apijson.JSON.DEFAULT_JSON_PARSER = new JSONParser<JSONObject, JSONArray>() {
     //
     //  @Override
