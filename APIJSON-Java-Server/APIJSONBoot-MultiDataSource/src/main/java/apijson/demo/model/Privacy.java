@@ -43,6 +43,7 @@ public class Privacy extends BaseModel {
 	public static final int PASSWORD_TYPE_PAY = 1;
 	
 	private String phone; //手机
+	private String email; //邮箱
 	private String password; //登录密码，隐藏字段
 	private String payPassword; //支付密码，隐藏字段
 	private Double balance;	//余额
@@ -62,13 +63,19 @@ public class Privacy extends BaseModel {
 		setPassword(password);
 	}
 
-
-
 	public String getPhone() {
 		return phone;
 	}
 	public Privacy setPhone(String phone) {
 		this.phone = phone;
+		return this;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+	public Privacy setEmail(String email) {
+		this.email = email;
 		return this;
 	}
 

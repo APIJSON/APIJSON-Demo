@@ -46,6 +46,7 @@ public class Verify extends BaseModel {
 	public static final int TYPE_RELOAD = 4; //重载配置
 	
 	private String phone;	//手机
+	private String email;	//邮箱
 	private String verify;	//验证码
 	private Integer type;	//验证类型
 
@@ -60,6 +61,17 @@ public class Verify extends BaseModel {
 		this();
 		setType(type);
 		setPhone(phone);
+	}
+	/**type和phone为联合主键，必传
+	 * @param type
+	 * @param phone
+	 * @param email
+	 */
+	public Verify(int type, String phone, String email) {
+		this();
+		setType(type);
+		setPhone(phone);
+		setEmail(email);
 	}
 
 
@@ -76,6 +88,14 @@ public class Verify extends BaseModel {
 	}
 	public Verify setPhone(String phone) {
 		this.phone = phone;
+		return this;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+	public Verify setEmail(String email) {
+		this.email = email;
 		return this;
 	}
 

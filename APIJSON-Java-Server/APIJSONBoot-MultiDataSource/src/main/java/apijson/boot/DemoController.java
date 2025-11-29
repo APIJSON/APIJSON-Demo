@@ -501,7 +501,9 @@ public class DemoController extends APIJSONController<Long> {
 
     public static final String CURRENT_USER_ID = "currentUserId";
     public static final String NAME = "name";
+    public static final String ACCOUNT = "account";
     public static final String PHONE = "phone";
+    public static final String EMAIL = "email";
     public static final String PASSWORD = "password";
     public static final String _PASSWORD = "_password";
     public static final String _PAY_PASSWORD = "_payPassword";
@@ -535,18 +537,20 @@ public class DemoController extends APIJSONController<Long> {
         String type;
         JSONObject value;
         String phone;
+        String email;
         String verify;
         try {
             requestObject = DemoParser.parseRequest(request);
             type = requestObject.getString(TYPE);
             value = requestObject.getJSONObject(VALUE);
             phone = requestObject.getString(PHONE);
+            email = requestObject.getString(EMAIL);
             verify = requestObject.getString(VERIFY);
         } catch (Exception e) {
             return extendErrorResult(requestObject, e);
         }
 
-        JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, verify));
+        JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_RELOAD, phone, email, verify));
         response = response.getJSONResponse(VERIFY_);
         if (JSONResponse.isExist(response) == false) {
             return extendErrorResult(requestObject, new ConditionErrorException("手机号或验证码错误"));
@@ -601,15 +605,17 @@ public class DemoController extends APIJSONController<Long> {
         JSONObject requestObject = null;
         int type;
         String phone;
+        String email;
         try {
             requestObject = DemoParser.parseRequest(request);
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
+            email = requestObject.getString(EMAIL);
         } catch (Exception e) {
             return extendErrorResult(requestObject, e);
         }
 
-        new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone));
+        new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone, email));
 
         JSONObject response = new DemoParser(POST, false).parseResponse(
                 newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
@@ -617,7 +623,7 @@ public class DemoController extends APIJSONController<Long> {
 
 
         if (JSONResponse.isSuccess(response) == false) {
-            new DemoParser(DELETE, false).parseResponse(newVerifyRequest(type, phone));
+            new DemoParser(DELETE, false).parseResponse(newVerifyRequest(type, phone, email));
             return response;
         }
 
@@ -625,6 +631,7 @@ public class DemoController extends APIJSONController<Long> {
         JSONObject object = new JSONObject();
         object.put(TYPE, type);
         object.put(PHONE, phone);
+        object.put(EMAIL, email);
         return getVerify(JSON.toJSONString(object));
     }
 
@@ -643,14 +650,16 @@ public class DemoController extends APIJSONController<Long> {
         JSONObject requestObject = null;
         int type;
         String phone;
+        String email;
         try {
             requestObject = DemoParser.parseRequest(request);
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
+            email = requestObject.getString(EMAIL);
         } catch (Exception e) {
             return extendErrorResult(requestObject, e);
         }
-        return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone));
+        return new DemoParser(GETS, false).parseResponse(newVerifyRequest(type, phone, email));
     }
 
     /**校验验证码
@@ -669,29 +678,32 @@ public class DemoController extends APIJSONController<Long> {
         JSONObject requestObject = null;
         int type;
         String phone;
+        String email;
         String verify;
         try {
             requestObject = DemoParser.parseRequest(request);
             type = requestObject.getIntValue(TYPE);
             phone = requestObject.getString(PHONE);
+            email = requestObject.getString(EMAIL);
             verify = requestObject.getString(VERIFY);
         } catch (Exception e) {
             return extendErrorResult(requestObject, e);
         }
-        return headVerify(type, phone, verify);
+        return headVerify(type, phone, email, verify);
     }
 
     /**校验验证码
      * @author Lemon
      * @param type
      * @param phone
+     * @param email
      * @param code
      * @return
      */
-    public JSONObject headVerify(int type, String phone, String code) {
+    public JSONObject headVerify(int type, String phone, String email, String code) {
         JSONResponse response = new JSONResponse(
                 new DemoParser(GETS, false).parseResponse(
-                        newVerifyRequest(type, phone, code)
+                        newVerifyRequest(type, phone, email, code)
                 )
         );
         Verify verify = response.getObject(Verify.class);
@@ -705,13 +717,13 @@ public class DemoController extends APIJSONController<Long> {
         long now = System.currentTimeMillis();
         if (now > 60*1000 + time) {
             new DemoParser(DELETE, false).parseResponse(
-                    newVerifyRequest(type, phone)
+                    newVerifyRequest(type, phone, email)
             );
             return newErrorResult(new TimeoutException("验证码已过期！"));
         }
 
         return new DemoParser(HEADS, false).parseResponse(
-                newVerifyRequest(type, phone, code)
+                newVerifyRequest(type, phone, email, code)
         );
     }
 
@@ -722,8 +734,8 @@ public class DemoController extends APIJSONController<Long> {
      * @param phone
      * @return
      */
-    public static JSONObject newVerifyRequest(int type, String phone) {
-        return newVerifyRequest(type, phone, null);
+    public static JSONObject newVerifyRequest(int type, String phone, String email) {
+        return newVerifyRequest(type, phone, email, null);
     }
     /**新建一个验证码请求
      * @param type
@@ -731,9 +743,9 @@ public class DemoController extends APIJSONController<Long> {
      * @param verify
      * @return
      */
-    public static JSONObject newVerifyRequest(int type, String phone, String verify) {
+    public static JSONObject newVerifyRequest(int type, String phone, String email, String verify) {
         return new JSONRequest(
-                        new Verify(type, phone).setVerify(verify)
+                        new Verify(type, phone, email).setVerify(verify)
                 ).setTag(VERIFY_).setFormat(true);
     }
 
@@ -762,7 +774,9 @@ public class DemoController extends APIJSONController<Long> {
     public JSONObject login(@RequestBody String request, HttpSession session) {
         JSONObject requestObject = null;
         boolean isPassword;
+        String account;
         String phone;
+        String email;
         String password;
         int version;
         Boolean format;
@@ -773,7 +787,9 @@ public class DemoController extends APIJSONController<Long> {
             requestObject = DemoParser.parseRequest(request);
 
             isPassword = requestObject.getIntValue(TYPE) == LOGIN_TYPE_PASSWORD;//登录方式
+            account = requestObject.getString(ACCOUNT);//帐号
             phone = requestObject.getString(PHONE);//手机
+            email = requestObject.getString(EMAIL);//邮箱
             password = requestObject.getString(PASSWORD);//密码
 
             if (StringUtil.isPhone(phone) == false) {
@@ -788,6 +804,18 @@ public class DemoController extends APIJSONController<Long> {
                 if (StringUtil.isVerify(password) == false) {
                     throw new IllegalArgumentException("验证码不合法！");
                 }
+            }
+
+            if (StringUtil.isEmpty(phone) && StringUtil.isPhone(account)) {
+                phone = account;
+            } else if (StringUtil.isNotEmpty(phone) && ! StringUtil.isPhone(phone)) {
+                throw new IllegalArgumentException(PRIVACY_ + "/" + PHONE + ":value 中 value 不合法！必须符合手机号格式！");
+            }
+
+            if (StringUtil.isEmpty(email) && StringUtil.isEmail(account)) {
+                email = account;
+            } else if (StringUtil.isNotEmpty(email) && ! StringUtil.isEmail(email)) {
+                throw new IllegalArgumentException(PRIVACY_ + "/" + EMAIL + ":value 中 value 不合法！必须符合邮箱格式！");
             }
 
             version = requestObject.getIntValue(VERSION);
@@ -806,25 +834,25 @@ public class DemoController extends APIJSONController<Long> {
 
         //手机号是否已注册
         JSONObject phoneResponse = new DemoParser(HEADS, false).parseResponse(
-                new JSONRequest(new Privacy().setPhone(phone))
+                new JSONRequest(StringUtil.isNotEmpty(phone) ? new Privacy().setPhone(phone) : new Privacy().setEmail(email))
         );
         if (JSONResponse.isSuccess(phoneResponse) == false) {
             return newResult(phoneResponse.getIntValue(JSONResponse.KEY_CODE), getString(phoneResponse, JSONResponse.KEY_MSG));
         }
         JSONResponse response = new JSONResponse(phoneResponse).getJSONResponse(PRIVACY_);
         if(JSONResponse.isExist(response) == false) {
-            return newErrorResult(new NotExistException("手机号未注册"));
+            return newErrorResult(new NotExistException(StringUtil.isNotEmpty(phone) ? "手机号未注册！" : "邮箱未注册！"));
         }
 
         //根据phone获取User
         JSONObject privacyResponse = new DemoParser(GETS, false).parseResponse(
                 new JSONRequest(
-                        new Privacy().setPhone(phone)
+                        new Privacy().setPhone(phone).setEmail(email)
                 ).setFormat(true)
         );
         response = new JSONResponse(privacyResponse);
 
-        Privacy privacy = response == null ? null : response.getObject(Privacy.class);
+        Privacy privacy = response.getObject(Privacy.class);
         long userId = privacy == null ? 0 : BaseModel.value(privacy.getId());
         if (userId <= 0) {
             return privacyResponse;
@@ -837,8 +865,8 @@ public class DemoController extends APIJSONController<Long> {
                             new JSONRequest(new Privacy(userId).setPassword(password))
                     )
             );
-        } else {//verify手机验证码登录
-            response = new JSONResponse(headVerify(Verify.TYPE_LOGIN, phone, password));
+        } else {//verify手机/邮箱验证码登录
+            response = new JSONResponse(headVerify(Verify.TYPE_LOGIN, phone, email, password));
         }
         if (JSONResponse.isSuccess(response) == false) {
             return response.toObject(JSONObject.class);
@@ -859,7 +887,7 @@ public class DemoController extends APIJSONController<Long> {
         );
         User user = response.getObject(User.class);
         if (user == null || BaseModel.value(user.getId()) != userId) {
-            return newErrorResult(new NullPointerException("服务器内部错误"));
+            return newErrorResult(new NullPointerException("服务器内部错误，未查到用户信息！"));
         }
 
         //登录状态保存至session
@@ -915,11 +943,12 @@ public class DemoController extends APIJSONController<Long> {
      * <pre>
     {
     "Privacy": {
-    "phone": "13000082222",
-    "_password": "123456"
+        "email": "test@qq.com", // 手机号和邮箱至少传一个
+        "phone": "13000082222",
+        "_password": "123456"
     },
     "User": {
-    "name": "APIJSONUser"
+        "name": "APIJSONUser"
     },
     "verify": "1234"
     }
@@ -932,6 +961,7 @@ public class DemoController extends APIJSONController<Long> {
         JSONObject privacyObj;
 
         String phone;
+        String email;
         String verify;
         String password;
         try {
@@ -939,11 +969,19 @@ public class DemoController extends APIJSONController<Long> {
             privacyObj = requestObject.getJSONObject(PRIVACY_);
 
             phone = StringUtil.get(privacyObj.getString(PHONE));
+            email = StringUtil.get(privacyObj.getString(EMAIL));
             verify = requestObject.getString(VERIFY);
             password = privacyObj.getString(_PASSWORD);
 
-            if (StringUtil.isPhone(phone) == false) {
+            if (StringUtil.isEmpty(phone) && StringUtil.isEmpty(email)) {
+                return newIllegalArgumentResult(requestObject, PRIVACY_ + " 中 " + PHONE + " 手机, " + EMAIL + " 邮箱 至少传参一个！");
+            }
+
+            if (StringUtil.isNotEmpty(phone) && StringUtil.isPhone(phone) == false) {
                 return newIllegalArgumentResult(requestObject, PRIVACY_ + "/" + PHONE);
+            }
+            if (StringUtil.isNotEmpty(email) && StringUtil.isEmail(email) == false) {
+                return newIllegalArgumentResult(requestObject, PRIVACY_ + "/" + EMAIL);
             }
             if (StringUtil.isPassword(password) == false) {
                 return newIllegalArgumentResult(requestObject, PRIVACY_ + "/" + _PASSWORD);
@@ -955,14 +993,13 @@ public class DemoController extends APIJSONController<Long> {
             return extendErrorResult(requestObject, e);
         }
 
-
-        JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_REGISTER, phone, verify));
+        JSONResponse response = new JSONResponse(headVerify(Verify.TYPE_REGISTER, phone, email, verify));
         if (JSONResponse.isSuccess(response) == false) {
             return response;
         }
         //手机号或验证码错误
         if (JSONResponse.isExist(response.getJSONResponse(VERIFY_)) == false) {
-            return extendErrorResult(response, new ConditionErrorException("手机号或验证码错误！"));
+            return extendErrorResult(response, new ConditionErrorException("手机号/邮箱或验证码错误！"));
         }
 
         //生成User和Privacy
@@ -1050,7 +1087,9 @@ public class DemoController extends APIJSONController<Long> {
 
         JSONObject privacyObj;
         long userId;
+        String account;
         String phone;
+        String email;
         String password;
         try {
             requestObject = DemoParser.parseRequest(request);
@@ -1065,7 +1104,9 @@ public class DemoController extends APIJSONController<Long> {
                 throw new IllegalArgumentException(PRIVACY_ + " 不能为空！");
             }
             userId = privacyObj.getLongValue(ID);
+            account = privacyObj.getString(ACCOUNT);
             phone = privacyObj.getString(PHONE);
+            email = privacyObj.getString(EMAIL);
             password = privacyObj.getString(_PASSWORD);
 
             if (StringUtil.isEmpty(password, true)) { //支付密码
@@ -1078,6 +1119,18 @@ public class DemoController extends APIJSONController<Long> {
                 if (StringUtil.isPassword(password) == false) {
                     throw new IllegalArgumentException(PRIVACY_ + "/" + _PASSWORD + ":value 中value不合法！");
                 }
+            }
+
+            if (StringUtil.isEmpty(phone) && StringUtil.isPhone(account)) {
+                phone = account;
+            } else if (StringUtil.isNotEmpty(phone) && ! StringUtil.isPhone(phone)) {
+                throw new IllegalArgumentException(PRIVACY_ + "/" + PHONE + ":value 中 value 不合法！必须符合手机号格式！");
+            }
+
+            if (StringUtil.isEmpty(email) && StringUtil.isEmail(account)) {
+                email = account;
+            } else if (StringUtil.isNotEmpty(email) && ! StringUtil.isEmail(email)) {
+                throw new IllegalArgumentException(PRIVACY_ + "/" + EMAIL + ":value 中 value 不合法！必须符合邮箱格式！");
             }
         } catch (Exception e) {
             return extendErrorResult(requestObject, e);
@@ -1108,8 +1161,8 @@ public class DemoController extends APIJSONController<Long> {
                 return extendErrorResult(requestObject, new ConditionErrorException("账号或原密码错误，请重新输入！"));
             }
         }
-        else if (StringUtil.isPhone(phone) && StringUtil.isVerify(verify)) {
-            JSONResponse response = new JSONResponse(headVerify(type, phone, verify));
+        else if (StringUtil.isVerify(verify) && (StringUtil.isPhone(phone)) || StringUtil.isEmail(email)) {
+            JSONResponse response = new JSONResponse(headVerify(type, phone, email, verify));
             if (JSONResponse.isSuccess(response) == false) {
                 return response;
             }
@@ -1126,6 +1179,7 @@ public class DemoController extends APIJSONController<Long> {
             Privacy privacy = response.getObject(Privacy.class);
             long id = privacy == null ? 0 : BaseModel.value(privacy.getId());
             privacyObj.remove(PHONE);
+            privacyObj.remove(ACCOUNT);
             privacyObj.put(ID, id);
 
             requestObject.put(PRIVACY_, privacyObj);
