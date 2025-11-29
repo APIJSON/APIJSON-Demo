@@ -190,15 +190,15 @@ var JSONResponse = {
    * @return
    */
   isSuccess: function(obj) {
-    if (obj == null) {
-      return false
-    }
+//    if (obj == null) {
+//      return false
+//    }
 
     if (obj instanceof Array == false && obj instanceof Object) {
-      return obj[JSONResponse.KEY_CODE] == JSONResponse.CODE_SUCCESS;
+      obj = obj[JSONResponse.KEY_CODE];
     }
 
-    return obj == JSONResponse.CODE_SUCCESS
+    return obj == JSONResponse.CODE_SUCCESS || obj == 200 || (obj != null && (obj.toUpperCase() == "OK" || obj.toUpperCase() == "SUCCESS" || obj.toUpperCase() == "SUCCEED"))
   },
 
   /**校验服务端是否存在table
