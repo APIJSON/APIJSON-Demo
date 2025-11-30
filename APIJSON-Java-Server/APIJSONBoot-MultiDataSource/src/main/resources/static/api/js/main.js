@@ -2588,8 +2588,8 @@ https://github.com/Tencent/APIJSON/issues
           for (var i = 0; i < accounts.length; i ++) {
             var acc = accounts[i]
             if (acc != null && (acc.id == chain.testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
-                    (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
-                    || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
+                    (StringUtil.isNotEmpty(acc.phone) && acc.phone == testInfo.phone)
+                    || (StringUtil.isNotEmpty(acc.email) && acc.email == testInfo.email) )
              ))) {
                this.currentAccountIndex = i
                acc.isLoggedIn = true
@@ -4778,7 +4778,7 @@ https://github.com/Tencent/APIJSON/issues
           var hasTests = JSONObject.isEmpty(tests) != true
           if (hasTests || this.isChainShow || (reportId != null && reportId >= 0)) {
 
-            const lastAccountIndex = this.currentAccountIndex || 0
+            const lastAccountIndex = accountIndex || 0
 
             for (var i = 0; i < allCount; i++) {
               var item = testCases[i]
@@ -4796,11 +4796,11 @@ https://github.com/Tencent/APIJSON/issues
                 for (var i = 0; i < accounts.length; i ++) {
                   var acc = accounts[i]
                   if (acc != null && (acc.id == chain.testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
-                    (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
-                    || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
+                    (StringUtil.isNotEmpty(acc.phone) && acc.phone == testInfo.phone)
+                    || (StringUtil.isNotEmpty(acc.email) && acc.email == testInfo.email) )
                   ))) {
                     if (! map[chain.testAccountId]) {
-                        this.currentAccountIndex = i
+                        accountIndex = i
                         acc.isLoggedIn = true
                     }
 
@@ -4821,7 +4821,7 @@ https://github.com/Tencent/APIJSON/issues
                 }
                 map[chain.testAccountId] = true
 
-                this.currentAccountIndex = lastAccountIndex || 0
+                accountIndex = lastAccountIndex || 0
                 curAccount.isLoggedIn = isLoggedIn
               }
 
@@ -5315,7 +5315,7 @@ https://github.com/Tencent/APIJSON/issues
           App.allCount = allCount
           if (allCount > 0) {
             if (! (this.isAllSummaryShow() || this.isCurrentSummaryShow())) {
-              this.showCompare4TestCaseList(show)
+              this.showCompare4TestCaseList(show, this.isChainShow)
             }
             return;
           }
@@ -10921,11 +10921,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 for (var i = 0; i < accounts.length; i ++) {
                   var acc = accounts[i]
                   if (acc != null && (acc.id == chain.testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
-                    (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
-                    || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
+                    (StringUtil.isNotEmpty(acc.phone) && acc.phone == testInfo.phone)
+                    || (StringUtil.isNotEmpty(acc.email) && acc.email == testInfo.email) )
                   ))) {
                     if (! map[chain.testAccountId]) {
-                        this.currentAccountIndex = i
+//                        this.currentAccountIndex = i
                         acc.isLoggedIn = true
                     }
 
@@ -10947,7 +10947,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 map[chain.testAccountId] = true
             }
 
-            this.currentAccountIndex = lastAccountIndex || 0
+//            this.currentAccountIndex = lastAccountIndex || 0
             curAccount.isLoggedIn = isLoggedIn
         }
 
@@ -11882,8 +11882,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 for (var i = 0; i < accounts.length; i ++) {
                     var acc = accounts[i]
                     if (acc != null && (acc.id == testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
-                        (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
-                        || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
+                        (StringUtil.isNotEmpty(acc.phone) && acc.phone == testInfo.phone)
+                        || (StringUtil.isNotEmpty(acc.email) && acc.email == testInfo.email) )
                     ))) {
                         chain.testAccountId = acc.id
                         this.currentAccountIndex = i
