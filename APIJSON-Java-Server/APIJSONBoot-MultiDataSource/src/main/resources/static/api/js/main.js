@@ -4573,7 +4573,7 @@ https://github.com/Tencent/APIJSON/issues
           }
       },
 
-      onClickAccount: function (index, item, callback) {
+      onClickAccount: function (index, item, callback, noShowCase) {
         this.isReportShow = false
         var accounts = this.accounts
         var num = accounts == null ? 0 : accounts.length
@@ -4605,10 +4605,10 @@ https://github.com/Tencent/APIJSON/issues
           this.changeScriptType(App.scriptType)
 
           var accountIdStr = String(item != null && item.isLoggedIn ? item.id || 0 : 0)
-          var tests = this.isCrossEnabled && this.isStatisticsEnabled && this.reportId != null && this.reportId > 0 ? this.tests[accountIdStr] : null
+          var tests = App.doneCount >= App.allCount && noShowCase != true && this.isCrossEnabled && this.isStatisticsEnabled && this.reportId != null && this.reportId > 0 ? this.tests[accountIdStr] : null
           if (JSONObject.isEmpty(tests) != true) {
             this.showCompare4TestCaseList(true)
-            if (! this.isTestCaseShow) {
+            if (App.deepDoneCount >= App.deepAllCount && ! this.isTestCaseShow) {
                 this.showCompare4RandomList(true, false)
                 this.showCompare4RandomList(true, true)
             }
@@ -4675,7 +4675,7 @@ https://github.com/Tencent/APIJSON/issues
                       callback(true, index, err)
                   }
 
-                  if (App.isCrossEnabled && App.isStatisticsEnabled && App.reportId != null && App.reportId > 0) {
+                  if (App.doneCount >= App.allCount && noShowCase != true && App.isStatisticsEnabled && App.reportId != null && App.reportId > 0) {
                       if (item != null) {
                         item.isLoggedIn = true
                       }
@@ -4684,7 +4684,7 @@ https://github.com/Tencent/APIJSON/issues
                       var tests = App.tests[accountIdStr]
                       if (JSONObject.isEmpty(tests) != true) {
                           App.showCompare4TestCaseList(true)
-                          if (! App.isTestCaseShow) {
+                          if (App.deepDoneCount >= App.deepAllCount && ! App.isTestCaseShow) {
                               App.showCompare4RandomList(true, false)
                               App.showCompare4RandomList(true, true)
                           }
@@ -4754,7 +4754,7 @@ https://github.com/Tencent/APIJSON/issues
         this.showLogin(true, false)
       },
 
-      showCompare4TestCaseList: function (show) {
+      showCompare4TestCaseList: function (show, isCheckAccount) {
         var testCases = show ? App.testCases : null
         var allCount = testCases == null ? 0 : testCases.length
         App.allCount = allCount
@@ -4787,7 +4787,7 @@ https://github.com/Tencent/APIJSON/issues
                 continue
               }
 
-              var chain = item.Chain
+              var chain = isCheckAccount ? item.Chain : null
               var testInfo = chain == null ? null : chain.testInfo
               var testAccount = testInfo == null ? null : testInfo.account
               if (StringUtil.isNotEmpty(testAccount, true)) {
@@ -4816,7 +4816,7 @@ https://github.com/Tencent/APIJSON/issues
 
                     var isStatisticsEnabled = this.isStatisticsEnabled
                     this.isStatisticsEnabled = false
-//                    this.onClickAccount(accounts.length - 1, testInfo)
+                    this.onClickAccount(accounts.length - 1, testInfo, null, true)
                     this.isStatisticsEnabled = isStatisticsEnabled
                 }
                 map[chain.testAccountId] = true
@@ -5356,7 +5356,7 @@ https://github.com/Tencent/APIJSON/issues
               'Chain': isChainShow ? {
                 // TODO 后续再支持嵌套子组合 'toGroupId': groupId,
                 'groupId': groupId,
-                '@column': "id,groupId,documentId,randomId,documentName,randomName,rank", // ;unix_timestamp(rank):rank",
+                '@column': "id,groupId,documentId,randomId,documentName,randomName,rank,testAccountId,testName,testInfo", // ;unix_timestamp(rank):rank",
                 '@order': 'rank+,id+',
                 'documentId>': 0
               } : null,
@@ -5468,7 +5468,7 @@ https://github.com/Tencent/APIJSON/issues
             this.showDoc()
           }
 
-          this.showCompare4TestCaseList(show)
+          this.showCompare4TestCaseList(show, this.isChainShow)
 
           //this.onChange(false)
         } else if (IS_BROWSER) { // 解决一旦错了，就只能清缓存
@@ -7987,7 +7987,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               groupId = new Date().getTime()
             }
 
-            //修改 Document
+            //修改 Chain
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + (isAdd ? '/post' : '/put'), {
               Chain: {
                 'groupName': groupName,
@@ -8006,6 +8006,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               alert((isAdd ? '新增' : '修改') + (isOk ? '成功' : '失败') + (isAdd ? '! \n' :'！\ngroupId: ' + groupId) + '\ngroupName: ' + groupName + '\n' + msg)
 
               App.isCaseGroupEditable = ! isOk
+              App.selectChainGroup(App.currentChainGroupIndex, null)
             })
 
             return
@@ -8171,6 +8172,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         type = type || ''
         var page
         switch (type) {
+          case 'chainGroup':
+            page = this.chainGroupPage
+            break
           case 'caseGroup':
             page = this.caseGroupPage
             break
@@ -8195,6 +8199,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (page > 0) {
           page --
           switch (type) {
+            case 'chainGroup':
+              this.chainGroupPage = page
+              break
             case 'caseGroup':
               this.caseGroupPage = page
               break
@@ -8218,6 +8225,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       pageUp: function(type) {
         type = type || ''
         switch (type) {
+          case 'chainGroup':
+            this.chainGroupPage ++
+            break
           case 'caseGroup':
             this.caseGroupPage ++
             break
@@ -10809,7 +10819,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (isCross) {
           var isCrossDone = accountIndex >= accounts.length
-          this.crossProcess = isCrossDone ? '交叉账号:已开启' : ('交叉账号: ' + ((this.testAccountIndex || 0) + 1) + '/' + accounts.length)
+          this.crossProcess = isCrossDone ? '交叉账号:已开启' : ('交叉账号: ' + (accountIndex + 1) + '/' + accounts.length)
           if (isCrossDone) {
             this.testProcess = (this.isMLEnabled ? '机器学习:已开启' : '机器学习:已关闭')
             this.testRandomProcess = ''
@@ -11406,7 +11416,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               App.testRandomProcess = ''
               if (isCross) {
                 if (deepDoneCount == deepAllCount) {
-                  App.test(false, accInd + 1, isCross)
+                  App.testAccountIndex = (App.testAccountIndex || 0) + 1
+                  App.test(false, App.testAccountIndex, isCross)
                 }
               } else {
                 if (deepDoneCount == deepAllCount) {
