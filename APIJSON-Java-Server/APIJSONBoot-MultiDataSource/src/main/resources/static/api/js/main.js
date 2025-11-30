@@ -1265,6 +1265,7 @@ https://github.com/Tencent/APIJSON/issues
       otherEnvCookieMap: {},
       allSummary: {},
       currentAccountIndex: 0,
+      testAccountIndex: 0,
       currentChainGroupIndex: -1,
       currentDocIndex: -1,
       currentRandomIndex: -1,
@@ -2735,10 +2736,10 @@ https://github.com/Tencent/APIJSON/issues
         const testCases = App.testCases
         const position = index
 
-        const id = curAccount.id
-        const name = curAccount.name
-        const account = curAccount.account || curAccount.phone
-        const info = JSON.stringify(curAccount)
+        const id = curAccount.id || 0
+        const name = curAccount.name || ''
+        const account = curAccount.account || curAccount.phone || ''
+        const info = JSON.stringify(curAccount) || '{}'
 
         this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/put', {
             Chain: {
@@ -4604,7 +4605,7 @@ https://github.com/Tencent/APIJSON/issues
           this.changeScriptType(App.scriptType)
 
           var accountIdStr = String(item != null && item.isLoggedIn ? item.id || 0 : 0)
-          var tests = this.isStatisticsEnabled && this.reportId != null && this.reportId > 0 ? this.tests[accountIdStr] : null
+          var tests = this.isCrossEnabled && this.isStatisticsEnabled && this.reportId != null && this.reportId > 0 ? this.tests[accountIdStr] : null
           if (JSONObject.isEmpty(tests) != true) {
             this.showCompare4TestCaseList(true)
             if (! this.isTestCaseShow) {
@@ -4673,27 +4674,43 @@ https://github.com/Tencent/APIJSON/issues
                   if (callback != null) {
                       callback(true, index, err)
                   }
+
+                  if (App.isCrossEnabled && App.isStatisticsEnabled && App.reportId != null && App.reportId > 0) {
+                      if (item != null) {
+                        item.isLoggedIn = true
+                      }
+
+                      var accountIdStr = String(item != null && item.isLoggedIn ? item.id || 0 : 0)
+                      var tests = App.tests[accountIdStr]
+                      if (JSONObject.isEmpty(tests) != true) {
+                          App.showCompare4TestCaseList(true)
+                          if (! App.isTestCaseShow) {
+                              App.showCompare4RandomList(true, false)
+                              App.showCompare4RandomList(true, true)
+                          }
+                      }
+                  }
                 }
               });
             }
 
           }
 
-          if (this.isStatisticsEnabled && this.reportId != null && this.reportId > 0) {
-              if (item != null) {
-                item.isLoggedIn = true
-              }
-
-              var accountIdStr = String(item != null && item.isLoggedIn ? item.id || 0 : 0)
-              var tests = this.tests[accountIdStr]
-              if (JSONObject.isEmpty(tests) != true) {
-                  this.showCompare4TestCaseList(true)
-                  if (! this.isTestCaseShow) {
-                      this.showCompare4RandomList(true, false)
-                      this.showCompare4RandomList(true, true)
-                  }
-              }
-          }
+//          if (this.isStatisticsEnabled && this.reportId != null && this.reportId > 0) {
+//              if (item != null) {
+//                item.isLoggedIn = true
+//              }
+//
+//              var accountIdStr = String(item != null && item.isLoggedIn ? item.id || 0 : 0)
+//              var tests = this.tests[accountIdStr]
+//              if (JSONObject.isEmpty(tests) != true) {
+//                  this.showCompare4TestCaseList(true)
+//                  if (! this.isTestCaseShow) {
+//                      this.showCompare4RandomList(true, false)
+//                      this.showCompare4RandomList(true, true)
+//                  }
+//              }
+//          }
           return;
         }
 
@@ -4792,16 +4809,16 @@ https://github.com/Tencent/APIJSON/issues
                   }
                 }
 
-//                if (! find) {
-//                    testInfo.isLoggedIn = false
-//                    accounts.push(testInfo)
-////                    this.saveAccounts()
-//
-//                    var isStatisticsEnabled = this.isStatisticsEnabled
-//                    this.isStatisticsEnabled = false
-////                    this.onClickAccount(accounts.length - 1, testInfo)
-//                    this.isStatisticsEnabled = isStatisticsEnabled
-//                }
+                if (! find) {
+                    testInfo.isLoggedIn = false
+                    accounts.push(testInfo)
+//                    this.saveAccounts()
+
+                    var isStatisticsEnabled = this.isStatisticsEnabled
+                    this.isStatisticsEnabled = false
+//                    this.onClickAccount(accounts.length - 1, testInfo)
+                    this.isStatisticsEnabled = isStatisticsEnabled
+                }
                 map[chain.testAccountId] = true
 
                 this.currentAccountIndex = lastAccountIndex || 0
@@ -10732,7 +10749,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
 
         var isCross = this.isCrossEnabled
-        var accountIndex = isCross ? -1 : this.currentAccountIndex
+        var accountIndex = this.testAccountIndex = isCross ? -1 : this.currentAccountIndex
 
         var accounts = this.accounts
         var num = accounts == null ? 0 : accounts.length
@@ -10792,7 +10809,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (isCross) {
           var isCrossDone = accountIndex >= accounts.length
-          this.crossProcess = isCrossDone ? '交叉账号:已开启' : ('交叉账号: ' + (accountIndex + 1) + '/' + accounts.length)
+          this.crossProcess = isCrossDone ? '交叉账号:已开启' : ('交叉账号: ' + ((this.testAccountIndex || 0) + 1) + '/' + accounts.length)
           if (isCrossDone) {
             this.testProcess = (this.isMLEnabled ? '机器学习:已开启' : '机器学习:已关闭')
             this.testRandomProcess = ''
@@ -10907,16 +10924,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   }
                 }
 
-//                if (! find) {
-//                    testInfo.isLoggedIn = false
-//                    accounts.push(testInfo)
-////                    this.saveAccounts()
-//
-//                    var isStatisticsEnabled = this.isStatisticsEnabled
-//                    this.isStatisticsEnabled = false
-////                    this.onClickAccount(accounts.length - 1, testInfo)
-//                    this.isStatisticsEnabled = isStatisticsEnabled
-//                }
+                if (! find) {
+                    testInfo.isLoggedIn = false
+                    accounts.push(testInfo)
+//                    this.saveAccounts()
+
+                    var isStatisticsEnabled = this.isStatisticsEnabled
+                    this.isStatisticsEnabled = false
+//                    this.onClickAccount(accounts.length - 1, testInfo)
+                    this.isStatisticsEnabled = isStatisticsEnabled
+                }
                 map[chain.testAccountId] = true
             }
 
@@ -11061,23 +11078,28 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
             const header = hdr
 
-            const chain = item.Chain || {}
-            const testInfo = chain.testInfo || {}
-            const accounts = (chain.testAccountId == null || StringUtil.isEmpty(String(chain.testAccountId)) ? null : this.accounts) || []
-            var accountIndex2 = accountIndex
-            for (var i = 0; i < accounts.length; i ++) {
-              var acc = accounts[i]
-              if (acc != null && (acc.id == chain.testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
-                (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
-                || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
-              ))) {
-                accountIndex2 = this.currentAccountIndex = i
-                acc.isLoggedIn = testInfo.isLoggedIn == null || testInfo.isLoggedIn
-                break
-              }
+            const chain = item.Chain
+            const testInfo = (chain || {}).testInfo || {}
+            if (chain != null) {
+                const testAccountId = chain.testAccountId
+                const accounts = this.accounts || []
+                if (StringUtil.isEmpty(testAccountId, true)) {
+                    chain.testAccountId = (accounts[accountIndex] || {}).id
+                } else {
+                    for (var i = 0; i < accounts.length; i ++) {
+                      var acc = accounts[i]
+                      if (acc != null && (acc.id == testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
+                        (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
+                        || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
+                      ))) {
+                        chain.testAccountId = acc.id
+                        accountIndex = this.currentAccountIndex = i
+                        acc.isLoggedIn = testInfo.isLoggedIn == null || testInfo.isLoggedIn
+                        break
+                      }
+                    }
+                }
             }
-
-            const accountIndex3 = accountIndex2
 
             const caseScript = {
               pre: (item['Script:pre'] || {}),
@@ -11095,6 +11117,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             var random = item.Random || {}
             this.parseRandom(req, random.config, random.id, true, false, false, function(randomName, constConfig, constJson) {
+                App.currentAccountIndex = accountIndex
                 App.request(false, method, type, isEnvCompare ? otherEnvUrl : curEnvUrl, constJson, header, function (url, res, err) {
                   try {
                     App.onResponse(url, res, err)
@@ -11120,7 +11143,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   tr[standardKey] = isMLEnabled ? JSON.stringify(JSONResponse.updateFullStandard({}, rsp, isMLEnabled)) : rspStr // res.data
                   item.TestRecord = tr
 
-                  App.currentAccountIndex = accountIndex3
+                  App.currentAccountIndex = accountIndex
                   App.request(false, method, type, curEnvUrl, constJson, header, function (url, res, err) {
                     try {
                       App.onResponse(url, res, err)
@@ -11345,7 +11368,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             App.deepDoneCount = 0;
             this.startRandomTest4Doc(list, this.toTestDocIndexes, 0, deepAllCount, accountIndex, isCross)
           } else if (isCross && doneCount == allCount && accountIndex <= this.accounts.length) {
-            this.test(false, accountIndex + 1, isCross)
+            this.testAccountIndex = (this.testAccountIndex || 0) + 1
+            this.test(false, this.testAccountIndex, isCross)
           }
         }
       },
@@ -11836,19 +11860,26 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         this.isFullAssert = true
 
-        var chain = item.Chain
-        var testAccountId = chain == null ? null : chain.testAccountId
-        var testInfo = (chain == null ? null : chain.testInfo) || {}
-        var accounts = (StringUtil.isEmpty(testAccountId == null ? null : String(testAccountId), true) ? null : this.accounts) || []
-        for (var i = 0; i < accounts.length; i ++) {
-            var acc = accounts[i]
-            if (acc != null && (acc.id == chain.testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
-                (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
-                || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
-            ))) {
-                this.currentAccountIndex = i
-                acc.isLoggedIn = true
-                break
+        const chain = item.Chain
+        if (chain != null) {
+            const testAccountId = chain.testAccountId
+            if (StringUtil.isEmpty(testAccountId, true)) {
+                this.currentAccountIndex = -1
+            } else {
+                const testInfo = chain.testInfo || {}
+                const accounts = this.accounts || []
+                for (var i = 0; i < accounts.length; i ++) {
+                    var acc = accounts[i]
+                    if (acc != null && (acc.id == testAccountId || ( acc.baseUrl = testInfo.baseUrl && (
+                        (StringUtil.isNotEmpty(item.phone) && acc.phone == testInfo.phone)
+                        || (StringUtil.isNotEmpty(item.email) && acc.email == testInfo.email) )
+                    ))) {
+                        chain.testAccountId = acc.id
+                        this.currentAccountIndex = i
+                        acc.isLoggedIn = testInfo.isLoggedIn == null || testInfo.isLoggedIn
+                        break
+                    }
+                }
             }
         }
 
