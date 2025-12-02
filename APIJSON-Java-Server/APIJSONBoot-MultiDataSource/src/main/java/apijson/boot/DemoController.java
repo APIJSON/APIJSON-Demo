@@ -1621,10 +1621,51 @@ public class DemoController extends APIJSONController<Long> {
                 String branch = isSQL ? req.getString("uri") : (isBodyEmpty ? url : rawUrl);
                 branch = index < 0 ? branch : (index2 < 0 ? branch.substring(index) : branch.substring(index + 3 + index2));
 
-                String reqType = isBodyEmpty ? (method == HttpMethod.PUT || method == HttpMethod.DELETE ?
-                        method.toString() : (method == HttpMethod.POST ? "PARAM"
+                int index3 = branch.indexOf("?");
+                String query = index3 < 0 ? null : branch.substring(index3 + 1);
+                branch = index3 < 0 ? branch : branch.substring(0, index3);
+
+                try {
+                    query = URLDecoder.decode(query, StringUtil.UTF_8);
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+
+                String[] kvs = StringUtil.split(query, "&");
+
+                Map<String, Object> reqBody = new LinkedHashMap<>();
+                if (kvs != null) {
+                    for (int i = 0; i < kvs.length; i++) {
+                        String kv = kvs[i];
+                        int ind = kv.indexOf("=");
+                        String k = ind < 0 ? kv : kv.substring(0, ind);
+                        Object v = ind < 0 ? null : kv.substring(ind + 1);
+
+                        try {
+                            v = JSON.parse(v);
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+
+                        reqBody.put(k, v);
+                    }
+                }
+
+                JSONObject bodyObj = null;
+                if (! isBodyEmpty) {
+                    try {
+                        bodyObj = JSON.parseObject(body);
+                        if (bodyObj != null && ! bodyObj.isEmpty()) {
+                            reqBody.putAll(bodyObj);
+                        }
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                String reqType = isBodyEmpty ? (method == null || method == HttpMethod.GET ? "PARAM"
                         : (MediaType.APPLICATION_FORM_URLENCODED.equals(contentType) ? "FORM"
-                        : (MediaType.MULTIPART_FORM_DATA.equals(contentType) ? "DATA" : "JSON"))) // FIXME 考虑 XML, PNG 等格式？
+                        : (MediaType.MULTIPART_FORM_DATA.equals(contentType) ? "DATA" : "JSON")) // FIXME 考虑 XML, PNG 等格式？
                 ) : "JSON";
 
                 String sql = isSQL ? StringUtil.trim(req.getString("sql")) : null;
@@ -1732,7 +1773,7 @@ public class DemoController extends APIJSONController<Long> {
                     // Document >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
                 }
 
-                JSONObject existRsp = newParser(session, GET).parseResponse(existReq);
+                JSONObject existRsp = newParser(session, GET).setNeedVerify(false).parseResponse(existReq);
                 JSONResponse existRsp2 = new JSONResponse(existRsp).getJSONResponse("Document");
                 long documentId = existRsp2 == null ? 0 : existRsp2.getId();
 
@@ -1768,9 +1809,10 @@ public class DemoController extends APIJSONController<Long> {
                         document.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         document.put("name", "[Record] " + new java.util.Date().toLocaleString());
                         document.put("type", reqType);
+                        document.put("method", method);
                         document.put("url", branch);
                         document.put("header", StringUtil.isEmpty(hs, true) ? null : hs.trim());
-                        document.put("request", isSQL ? "{}" : (isBodyEmpty ? JSON.toJSONString(map) : body));
+                        document.put("request", isSQL ? "{}" : reqBody);
                         if (isSQL) {
                             // 没有名称，除非 args 传对象而不是数组
                             // JSONList args = req.getJSONArray("args");
@@ -1794,7 +1836,7 @@ public class DemoController extends APIJSONController<Long> {
                 }
                 else {
                     // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    Map<String, ?> m = isSQL ? null : (isBodyEmpty ? map : JSON.parseObject(body));
+                    Map<String, ?> m = isSQL ? null : reqBody;
                     String config = isSQL ? hs : parseRandomConfig("", m);
 
                     JSONObject random = JSON.newJSONObject();
@@ -1838,7 +1880,7 @@ public class DemoController extends APIJSONController<Long> {
                                 JSONObject randomReq = JSON.newJSONObject();
                                 randomReq.put("Random", random);
 
-                                JSONObject rsp = newParser(session, GET).parseResponse(randomReq);
+                                JSONObject rsp = newParser(session, GET).setNeedVerify(false).parseResponse(randomReq);
                                 JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("Random");
                                 randomId = rsp2 == null ? 0 : rsp2.getLongValue("id");
                             }
@@ -1862,11 +1904,12 @@ public class DemoController extends APIJSONController<Long> {
                 else {   // TestRecord <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                     testRecord.put("from", 2); // 0-接口工具，1-CI/CD，2-流量录制
                     testRecord.put("host", host);
-                    testRecord.put("response", rspBody); // 用 JSONRequest.put 会转为 JSONMap
+                    testRecord.put("response", rspBody == null ? "" : rspBody); // 用 JSONRequest.put 会转为 JSONMap
                 }   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                 request.put("TestRecord", testRecord);
-                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST).parseResponse(request);
+                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST)
+                        .setNeedVerify(false).setNeedVerifyContent(true).parseResponse(request);
                 if (recordType < 0) {
                     JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("TestRecord");
                     String response = rsp2 == null ? null : rsp2.getString("response");
