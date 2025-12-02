@@ -3105,7 +3105,7 @@ https://github.com/Tencent/APIJSON/issues
             }
           }
 
-          if ((isExportRandom != true || btnIndex == 1) && StringUtil.isEmpty(this.exTxt.name, true)) {
+          if ((isExportRandom != true || btnIndex == 1) && StringUtil.isEmpty(this.exTxt.name, true) && ! this.isEditResponse) {
             alert('请输入接口名！')
             return
           }
@@ -8543,6 +8543,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               // 'table_name!$': ['\\_%', 'sys\\_%', 'system\\_%'],
               'table_name$': search,
               'table_comment$': this.database == 'POSTGRESQL' ? null : search,
+              'table_schema!$': '\\_%',
+              'table_name!$': '\\_%',
               '@combine': search == null || this.database == 'POSTGRESQL' ? null : 'table_name$,table_comment$',
               'table_name{}@': 'sql',
               '@order': 'table_name+', //MySQL 8 SELECT `table_name` 返回的仍然是大写的 TABLE_NAME，需要 AS 一下
