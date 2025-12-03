@@ -5,9 +5,11 @@
 <p align="center">☔ HTTP 接口 机器学习零代码测试 和 一站式智能开发管理 工具</p>
 
 <p align="center" >
+  <a href="https://deepwiki.com/TommyLemon/APIAuto">English</a>
   <a href="https://github.com/TommyLemon/APIAuto#%E5%BF%AB%E9%80%9F%E4%B8%8A%E6%89%8B">快速上手</a>
   <a href="https://search.bilibili.com/all?keyword=APIAuto">视频教程</a>
   <a href="http://apijson.cn/api">在线体验</a>
+  <a href="https://deepwiki.com/TommyLemon/APIAuto">AI 问答</a>
 </p>
 
 <p align="center" >
@@ -23,7 +25,8 @@
 腾讯内部用户包括 IEG 互动娱乐事业群、TEG 技术工程事业群、CSIG 云与智慧事业群 的多个部门及团队， <br />
 外部用户包含 华为、工商银行某地分行、500 强上市公司传音、跨境电商巨头 SHEIN、行业领头羊社保科技 等。
 
-![image](https://github.com/user-attachments/assets/24460af3-0001-46e7-aa2a-df28b711a8cf)
+![](https://github.com/user-attachments/assets/24460af3-0001-46e7-aa2a-df28b711a8cf)
+![](https://github.com/user-attachments/assets/8bc839b1-cce1-4cda-a35d-77ade1387035)
 ![](https://user-images.githubusercontent.com/5738175/145665502-94231804-5ea8-4784-b30d-d5558aad0f8d.jpeg)
 
 <h3 align="center" style="text-align:center;">
@@ -44,8 +47,9 @@
 https://testwo.cn1.quickconnect.cn/vs/sharing/iiP8VK1C#!aG9tZV92aWRlby0xMQ==
 ![https://testwo.cn1.quickconnect.cn/vs/sharing/iiP8VK1C#!aG9tZV92aWRlby0xMQ==](https://user-images.githubusercontent.com/5738175/179575169-de9cc578-6d90-4aec-bbf4-f28147277ed2.png)
 
-#### 和华为云副总裁并列，QECon-全球软件质量&效能 大会分享总结
-零代码开发和测试 成为大会主会场回看预约海报唯一分会场演讲范例 <br /><br />
+#### QECon-全球软件质量&效能大会-零代码开发和测试
+从包括 BAT、华为、字节、京东等几十个专家和架构师的分享脱颖而出，<br />
+零代码开发和测试 成为大会主会场回看预约海报唯一分会场演讲范例。 <br /><br />
 <img width="1360" alt="wecom-temp-377bbd0daf5aed716baf7ebcb003d94c" src="https://user-images.githubusercontent.com/5738175/121370207-1b35de00-c96f-11eb-840e-cc2ff2995888.png">
 
 <img width="390" src="https://user-images.githubusercontent.com/5738175/125167121-86bed580-e1d1-11eb-9dc6-2ea190146fe6.png">
@@ -118,7 +122,7 @@ Bilibili：https://search.bilibili.com/all?keyword=APIAuto
 ### 相关推荐
 [别再生成测试代码了！](https://mp.weixin.qq.com/s/G1GVNhhFbSX5GoyRU6GURg) <br />
 [APIAuto: 最先进的HTTP接口工具](https://blog.csdn.net/Nifc666/article/details/141966487)
-
+[APIAuto 开源项目教程](https://damodev.csdn.net/68a7c70a4e4959284dac25fc.html)
 
 ### 百度、搜狗、抖音公网接口调用演示<br />
 因为这些接口不支持 CORS 跨域，所以需要开启托管服务代理。<br />
@@ -281,22 +285,24 @@ https://github.com/TommyLemon/APIAuto/issues
 ### 技术交流
 ##### 关于作者
 [https://github.com/TommyLemon](https://github.com/TommyLemon)<br />
-<img width="1280" src="https://github.com/TommyLemon/UIGO/assets/5738175/ec77df98-ff9b-43aa-b2f1-2fce2549d276">
+![image](https://github.com/user-attachments/assets/c4aa8573-f8b3-4973-8c37-29677c06ac3b)
 
 如果有什么问题或建议可以 [提 issue](https://github.com/TommyLemon/APIAuto/issues)，交流技术，分享经验。<br >
 如果你解决了某些 bug，或者新增了一些功能，欢迎 [提 PR 贡献代码](https://github.com/Tencent/APIJSON/blob/master/CONTRIBUTING.md)，感激不尽。
 <br />
 <br />
 
-### 其它项目
+### 生态项目
 
-[APIJSON](https://github.com/Tencent/APIJSON) 🚀 腾讯零代码、全功能、强安全 ORM 库 🏆 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构
+[APIJSON](https://github.com/Tencent/APIJSON) 🏆 腾讯实时 零代码、全功能、强安全 ORM 库 🚀 后端接口和文档零代码，前端(客户端) 定制返回 JSON 的数据和结构
 
-[UnitAuto](https://github.com/TommyLemon/UnitAuto) 机器学习单元测试平台，零代码、全方位、自动化 测试 方法/函数 的正确性和可用性
+[CVAuto](https://github.com/TommyLemon/CVAuto) 👁 零代码零标注 CV AI 自动化测试平台 🚀 免除大量人工画框和打标签等，直接快速测试 CV 计算机视觉 AI 图像识别算法
 
-[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 语句执行结果的数据库工具，任意增删改查、任意 SQL 模板变量、一键批量生成参数组合、快速构造大量测试数据
+[UnitAuto](https://github.com/TommyLemon/UnitAuto) ☀️ 最先进、最省事、ROI 最高的单元测试，零代码、全方位、自动化 测试 方法/函数，用户包含腾讯、快手、某 500 强巨头等
 
-[UIGO](https://github.com/TommyLemon/UIGO) 📱 零代码快准稳 UI 智能录制回放平台 🚀 自动兼容任意宽高比分辨率屏幕，自动精准等待网络请求，录制回放快、准、稳！
+[SQLAuto](https://github.com/TommyLemon/SQLAuto) 智能零代码自动化测试 SQL 数据库工具，任意增删改查、任意 SQL 模板变量、一键批量生成参数组合、快速构造大量测试数据
+
+[UIGO](https://github.com/TommyLemon/UIGO) 📱 零代码快准稳 UI 智能录制回放平台 🚀 3 像素内自动精准定位，2 毫秒内自动精准等待，用户包含腾讯，微信团队邀请分享
 
 [apijson-doc](https://github.com/vincentCheng/apijson-doc) APIJSON 官方文档，提供排版清晰、搜索方便的文档内容展示，包括设计规范、图文教程等
 
@@ -336,5 +342,7 @@ https://github.com/TommyLemon/APIAuto/commits/master
 
 **创作不易、坚持更难，右上角点亮 ⭐Star 支持/收藏下本项目吧，谢谢 ^_^** <br />
 https://github.com/TommyLemon/APIAuto
+
+
 
 
