@@ -11039,7 +11039,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
                res = res || {}
                var config = res.config || {}
-               cur.arg = App.getRequest(config.data || config.params, {})
+               var p = config.data || config.params
+               try {
+                 cur.arg = App.getRequest(config.data || config.params, {})
+               } catch (e) {
+                 if (typeof p != 'string' || p.indexOf('=') <= 0) {
+                   throw e
+                 }
+                 cur.arg = getRequestFromURL('?' + p, true)
+               }
                cur.req = {
                  method: method,
                  url: config.url,
