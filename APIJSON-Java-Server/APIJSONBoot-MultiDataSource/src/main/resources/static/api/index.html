@@ -230,10 +230,10 @@
                     </div>
                 </div>
 
-                <div v-show="isChainShow && ! isLocalShow" :style="{width: chainShowType == 0 ? '40%' : '100%', 'border-right': chainShowType != 0 ? 'none' : '#DDD 1px solid' }" style="float: left; min-width: 30px; width: 40%; height: 100%;">
-                    <input v-show="isChainGroupShow()" id="vChainGroupAdd" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainGroupAdd', false, {'groupName': vChainGroupAdd.value})" placeholder="输入名称，回车来添加" />
+                <div v-show="isChainShow && isChainGroupShow() && ! isLocalShow" :style="{width: chainShowType == 0 ? '40%' : '100%', 'border-right': chainShowType != 0 ? 'none' : '#DDD 1px solid' }" style="float: left; min-width: 30px; width: 40%; height: 100%;">
+                    <input id="vChainGroupAdd" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainGroupAdd', false, {'groupName': vChainGroupAdd.value})" placeholder="输入名称，回车来添加" />
 
-                    <ul v-show="isChainGroupShow()" class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
+                    <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
                         <li v-for="(item, index) in chainGroups" :id="'chainGroup' + index" >
                             <div style="display: inline-table; width: 100%">
                                 <input v-show="isCaseGroupEditable" style="min-width: 60px; width: 40%; margin-right: 6px" v-model="item.Chain.groupName" @keyup="doOnKeyUp(event, 'chainGroup', false, item)" />
@@ -250,16 +250,7 @@
                         </li>
                     </ul>
 
-                    <div style="display: inline-flex; width: 100%; bottom: 36px; padding: 4px 10px 4px 10px; position: absolute; background-color: white; z-index: 102">
-                        <input id="vChainTagAdd" style="width: 64px; height: 30px; text-align: center" @keyup="doOnKeyUp(event, 'chainTagAdd', false, {'name': vChainTagAdd.value})" placeholder="新增标签，回车来添加" />
-                        <ul style="display: inline-flex; padding: 0px; width: 100%; height: 30px; overflow: hidden;overflow-x: scroll;">
-                            <li style="margin: 0px; padding: 2px; border: #DDD 1px solid; border-radius: 2px " v-for="(item, index) in chainTags" :id="'tag' + index" >
-                                <a href="javascript:void(0)" style="position: relative; min-width: 6px; width: auto; height: 30px; " @click="selectChainTag(index, item)" :style="{ color: item.selected ? 'red' : 'gray' }" >{{ item.name }}</a>
-                            </li>
-                        </ul>
-                    </div>
-
-                    <div v-show="isChainGroupShow()" style="bottom: 0px; padding: 4px 10px 4px 10px; position: absolute; background-color: white; z-index: 102">
+                    <div style="bottom: 0px; padding: 4px 10px 4px 10px; position: absolute; background-color: white; z-index: 102">
                         <button @click="pageDown('chainGroup')"><</button>
                         <input id="vChainGroupPage" v-model="chainGroupPage" style="width: 30px;text-align: center"  type="number" @keyup="doOnKeyUp(event, 'chainGroup', true)" placeholder="页码" />
                         <button @click="pageUp('chainGroup')">></button>
@@ -268,6 +259,14 @@
                     </div>
                 </div>
 
+                <div v-show="isChainShow && ! isLocalShow" style="left: 0px; display: inline-flex; width: 100%; bottom: 36px; padding: 4px 10px 4px 10px; position: absolute; background-color: white; z-index: 102">
+                    <input id="vChainTagAdd" style="width: 64px; height: 30px; text-align: center" @keyup="doOnKeyUp(event, 'chainTagAdd', false, {'name': vChainTagAdd.value})" placeholder="新增标签，回车来添加" />
+                    <ul style="display: inline-flex; padding: 0px; width: 100%; height: 30px; overflow: hidden;overflow-x: scroll;">
+                        <li style="margin: 0px; padding: 2px; border: #DDD 1px solid; border-radius: 2px " v-for="(item, index) in chainTags" :id="'tag' + index" >
+                            <a href="javascript:void(0)" style="position: relative; min-width: 6px; width: auto; height: 30px; " @click="selectChainTag(index, item)" :style="{ color: item.selected ? 'red' : 'gray' }" >{{ item.name }}</a>
+                        </li>
+                    </ul>
+                </div>
 
                 <div v-show="isLocalShow || isCaseItemShow()" :style="{width: isCaseGroupShow() && ! isLocalShow ? '60%' : '100%'}" style="float: right; flex-grow: 1; height: 100%;">
                     <input id="vChainAdd" v-show="isChainShow && currentChainGroupIndex >= 0" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainAdd', false, {'groupName': vChainAdd.value})" placeholder="输入名称，回车来搜索及添加" />

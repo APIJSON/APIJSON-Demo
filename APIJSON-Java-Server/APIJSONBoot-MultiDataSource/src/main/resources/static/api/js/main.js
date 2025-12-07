@@ -1222,7 +1222,7 @@ https://github.com/Tencent/APIJSON/issues
       history: {name: '请求0'},
       remotes: [],
       locals: [],
-      chainTags: [{name: 'Home', selected: true}, {name: 'Category', selected: false}, {name: 'Search', selected: true}, {name: 'Moment'}, {name: 'Chat'}, {name: 'Tommy'}, {name: 'Lemon'}],
+      chainTags: [{name: 'Home', selected: false}, {name: 'Category'}, {name: 'Search'}, {name: 'Moment'}, {name: 'Chat'}, {name: 'Tommy'}, {name: 'Lemon'}],
       chainPaths: [],
       casePaths: [],
       chainGroups: [],
@@ -4883,22 +4883,23 @@ https://github.com/Tencent/APIJSON/issues
         var tagList = chain.tagList || []
         var chainTags = this.chainTags || []
         for (var j = 0; j < chainTags.length; j ++) {
-          var tag = chainTags[i] || {}
+          var tag = chainTags[j] || {}
           tag.selected = false
         }
 
         for (var i = 0; i < tagList.length; i ++) {
           var name = tagList[i]
-          if (StringUtil.isEmpty(name)) {
+          if (StringUtil.isEmpty(name, true)) {
             continue
           }
 
           var find = false
           for (var j = 0; j < chainTags.length; j ++) {
-            var tag = chainTags[i] || {}
+            var tag = chainTags[j] || {}
             if (tag.name == name) {
               tag.selected = true
               find = true
+              break
             }
           }
 
@@ -5085,6 +5086,14 @@ https://github.com/Tencent/APIJSON/issues
               }
             },
           },
+          'Chain-tagList[]': {
+            'count': 0,
+            'Chain': {
+              'userId': userId,
+              '@column': "groupId;any_value(tagList):tagList",
+              '@group': 'groupId'
+            }
+          },
           '@role': IS_NODE ? null : 'LOGIN',
           key: IS_NODE ? this.key : undefined  // 突破常规查询数量限制
         }
@@ -5128,6 +5137,34 @@ https://github.com/Tencent/APIJSON/issues
             App.chainPaths.push(item.Chain)
           }
           App.remotes = App.testCases = item['[]'] || []
+
+          var tagLists = data['Chain-tagList[]'] || []
+          var chainTags = App.chainTags || []
+          for (var i = 0; i < tagLists.length; i ++) {
+            var tagList = tagLists[i] || []
+            for (var j = 0; j < tagList.length; j ++) {
+              var name = tagList[i]
+              if (StringUtil.isEmpty(name, true)) {
+                continue
+              }
+
+              var find = false
+              for (var k = 0; k < chainTags.length; k ++) {
+                var tag = chainTags[k] || {}
+                if (tag.name == name) {
+                  find = true
+                  break
+                }
+              }
+
+              if (! find) {
+                chainTags.push({name: name})
+              }
+            }
+          }
+
+          App.chainTags = chainTags
+
           App.isTestCaseShow = true
 //          App.showTestCase(true, false, null)
         })
@@ -8077,7 +8114,27 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             return
           }
 
-          if (type == 'chainGroupAdd' || type == 'chainGroup') {
+          if (type == 'chainTagAdd') {
+            var name = StringUtil.trim(item.name)
+            if (StringUtil.isEmpty(name)) {
+              alert('请输入有效标签名！')
+              return
+            }
+
+            var chainTags = this.chainTags = this.chainTags || []
+            for (var j = 0; j < chainTags.length; j ++) {
+              var tag = chainTags[j] || {}
+              if (tag.name == name) {
+                if (find) {
+                  alert(name + ' 已存在，请勿重复添加！')
+                  return
+                }
+              }
+            }
+
+            chainTags.push({name: name})
+          }
+          else if (type == 'chainGroupAdd' || type == 'chainGroup') {
             var isAdd = type == 'chainGroupAdd'
             var groupName = item == null ? null : item.groupName
             if (StringUtil.isEmpty(groupName)) {
@@ -13732,8 +13789,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         // alert(event.key) 小写字母 i 而不是 KeyI
 
         var target = event.target;
-        if (target == vAskAI || target == vSearch || target == vTestCaseSearch || target == vCaseGroupSearch
-          || target == vChainGroupSearch || target == vChainGroupAdd || target == vChainAdd) {
+        if ([vInput, vRandom, vHeader, vScript].indexOf(target) < 0) {
           return
         }
 
