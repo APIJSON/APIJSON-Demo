@@ -4949,6 +4949,12 @@ https://github.com/Tencent/APIJSON/issues
         var chain = group.Chain || {}
         var tagList = chain.tagList || []
         if (tag.selected) {
+          for (var i = 0; i < tagList.length; i ++) {
+            var name = tagList[i]
+            if (name == tag.name) {
+              return
+            }
+          }
           tagList.push(tag.name)
         } else {
           var ind = tagList.indexOf(tag.name)
@@ -5143,7 +5149,7 @@ https://github.com/Tencent/APIJSON/issues
           for (var i = 0; i < tagLists.length; i ++) {
             var tagList = tagLists[i] || []
             for (var j = 0; j < tagList.length; j ++) {
-              var name = tagList[i]
+              var name = tagList[j]
               if (StringUtil.isEmpty(name, true)) {
                 continue
               }
