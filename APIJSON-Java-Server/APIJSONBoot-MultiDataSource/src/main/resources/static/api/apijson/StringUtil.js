@@ -153,6 +153,55 @@ var StringUtil = {
     return s.toLowerCase();
   },
 
+  getTableName: function(s) {
+    s = StringUtil.trim(s);
+    var keys = s.split('_');
+    if (keys.length > 1) {
+      return keys[keys.length - 2];
+    }
+
+    boolean hasBig = false;
+    var lastInd = -1;
+    for (var i = s.length - 1; i >= 0; i--) {
+      var c = s.substring(i, i + 1);
+      var isBig = /[A-Z]/.test(c)
+      if (lastInd >= 1 && (isBig || i <= 0)) {
+        return s.substring(i, lastInd);
+      }
+
+      if (hasBig && ! isBig) {
+        lastInd = i;
+      }
+      hasBig = hasBig || isBig
+    }
+
+    return '';
+  },
+  getColumnName: function(s) {
+    s = StringUtil.trim(s);
+    var keys = s.split('_');
+    if (keys.length > 0) {
+      return keys[keys.length - 1];
+    }
+
+    boolean hasBig = false;
+    var lastInd = -1;
+    for (var i = s.length - 1; i >= 0; i--) {
+      var c = s.substring(i, i + 1);
+      var isBig = /[A-Z]/.test(c)
+      if (lastInd >= 0 && (isBig || i <= 0)) {
+        return s.substring(lastInd + 1);
+      }
+
+      if (hasBig && ! isBig) {
+        lastInd = i;
+      }
+      hasBig = hasBig || isBig
+    }
+
+    return s;
+  },
+
   split: function (s, separator, trim) {
     if (StringUtil.isEmpty(s, trim)) {
       return null;
