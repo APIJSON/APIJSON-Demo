@@ -160,7 +160,7 @@ var StringUtil = {
       return keys[keys.length - 2];
     }
 
-    boolean hasBig = false;
+    var hasBig = false;
     var lastInd = -1;
     for (var i = s.length - 1; i >= 0; i--) {
       var c = s.substring(i, i + 1);
@@ -184,7 +184,7 @@ var StringUtil = {
       return keys[keys.length - 1];
     }
 
-    boolean hasBig = false;
+    var hasBig = false;
     var lastInd = -1;
     for (var i = s.length - 1; i >= 0; i--) {
       var c = s.substring(i, i + 1);
