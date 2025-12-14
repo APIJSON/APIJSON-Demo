@@ -166,10 +166,10 @@ var StringUtil = {
       var c = s.substring(i, i + 1);
       var isBig = /[A-Z]/.test(c)
       if (lastInd >= 1 && (isBig || i <= 0)) {
-        return s.substring(i, lastInd);
+        return s.substring(i, lastInd + 1);
       }
 
-      if (hasBig && ! isBig) {
+      if (hasBig && lastInd < 0 && ! isBig) {
         lastInd = i;
       }
       hasBig = hasBig || isBig
@@ -189,11 +189,11 @@ var StringUtil = {
     for (var i = s.length - 1; i >= 0; i--) {
       var c = s.substring(i, i + 1);
       var isBig = /[A-Z]/.test(c)
-      if (lastInd >= 0 && (isBig || i <= 0)) {
-        return s.substring(lastInd + 1);
+      if (lastInd >= 0 && (isBig != hasBig || i <= 0)) {
+        return s.substring(lastInd + (isBig ? 0 : 1));
       }
 
-      if (hasBig && ! isBig) {
+      if (hasBig && lastInd < 0 && ! isBig) {
         lastInd = i;
       }
       hasBig = hasBig || isBig
