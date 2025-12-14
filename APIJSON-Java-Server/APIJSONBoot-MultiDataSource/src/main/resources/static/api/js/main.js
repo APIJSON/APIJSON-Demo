@@ -3591,7 +3591,7 @@ https://github.com/Tencent/APIJSON/issues
             var tbl = StringUtil.getTableName(key)
             tbl = StringUtil.firstCase(tbl, true)
             var col = StringUtil.getColumnName(key)
-            col = StringUtil.firstCase(tbl, false)
+            col = StringUtil.firstCase(col, false)
 
             var ks = keys == null ? [] : keys.slice(0, keys.length - 1)
             ks.push(tbl)
@@ -3651,17 +3651,17 @@ https://github.com/Tencent/APIJSON/issues
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("list/0/' + key + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("list/0/id")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/list/0/' + fd + 'id")';
-                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/list/0/' + (tbl || table) + '/' + key + '")';
+                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/list/0/' + (tbl || table) + '/' + (col || key) + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/0/' + fd + 'id")';
-                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/0/' + (tbl || table) + '/' + key + '")';
+                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/0/' + (tbl || table) + '/' + (col || key) + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/' + fd + 'id")';
-                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/' + (tbl || table) + '/' + key + '")';
+                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/' + (tbl || table) + '/' + (col || key) + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/list/0/' + fd + 'id")';
-                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/list/0/' + (tbl || table) + '/' + key + '")';
+                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/list/0/' + (tbl || table) + '/' + (col || key) + '")';
                 } else {
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("[]/0/' + key + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("[]/0/id")';
-                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + fd + key + '")';
+                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + fd + (col || key) + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + fd + 'id")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + (path || '') + '[]/0/' + key + '")';
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + (path || '') + '[]/0/id")';
@@ -3698,11 +3698,11 @@ https://github.com/Tencent/APIJSON/issues
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + 'list/0/' + camelIdKey + '")';
                 } else {
                     config += prefix + 'PRE_DATA("' + kp + '[]/0/' + camelIdKey + '")';
-                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + kp + '[]/0/' + (tbl || table).toLowerCase() + '_id")';
+                    config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + kp + '[]/0/' + snakeIdKey + '")';
                 }
 
                 config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + camelIdKey + '")';
-                config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + (tbl || table).toLowerCase() + '_id")';
+                config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + snakeIdKey + '")';
                 config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + cp + '")';
                 if (isRestful) {
                     config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("data/' + cp + '")';
@@ -3713,7 +3713,7 @@ https://github.com/Tencent/APIJSON/issues
                 config += '\n// 可替代上面的 ' + prefix + 'CTX_GET("' + camelIdKey + '")';
                 config += '\n// 可替代上面的 ' + prefix + 'CTX_GET("' + snakeIdKey + '")';
                 config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + (StringUtil.isEmpty(path) ? '' : path + '/') + camelIdKey + '")';
-                config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + (StringUtil.isEmpty(path) ? '' : path + '/') + (tbl || table).toLowerCase() + '_id")';
+                config += '\n// 可替代上面的 ' + prefix + 'PRE_DATA("' + (StringUtil.isEmpty(path) ? '' : path + '/') + snakeIdKey + '")';
               }
               else if (StringUtil.isIdKey(key)) {
                 if (isRestful) {
