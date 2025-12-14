@@ -180,7 +180,7 @@ var StringUtil = {
   getColumnName: function(s) {
     s = StringUtil.trim(s);
     var keys = s.split('_');
-    if (keys.length > 0) {
+    if (keys.length > 1) {
       return keys[keys.length - 1];
     }
 
