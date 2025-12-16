@@ -243,6 +243,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			// return "jdbc:mysql://47.122.25.116:3306?userSSL=false&serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8";
 			// 以下是 MySQL 5.7 及以下
 			return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+//			return "jdbc:mysql://apijson.cn:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 		}
 		if (isPostgreSQL()) { // PG JDBC 必须在 URI 传 catalog
 			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
