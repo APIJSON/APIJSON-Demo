@@ -565,7 +565,8 @@
       isVideoFirst: false,
       type: OPERATE_TYPE_REVIEW,
       types: [ OPERATE_TYPE_RECORD, OPERATE_TYPE_REVIEW, OPERATE_TYPE_REPLAY ],
-      host: 'uiauto.UIAutoApp.', // 'unitauto.test.TestUtil.',
+//      host: 'uiauto.UIAutoApp', // 'unitauto.test.TestUtil.',
+      host: 'uigo.x.UIAutoApp', // 'unitauto.test.TestUtil.',
       branch: 'countArray',
       database: 'MYSQL',// 'POSTGRESQL',
       schema: 'sys',
@@ -713,9 +714,9 @@
           vUrl.value = (isAdminOperation ? this.server : baseUrl) + branchUrl
         }
         else {  //隐藏(固定)URL Host
-          if (isAdminOperation) {
-            this.host = this.server
-          }
+//          if (isAdminOperation) {
+//            this.host = this.server
+//          }
           vUrl.value = branchUrl
         }
 
@@ -779,8 +780,8 @@
         if (index <= 0) {
           throw new Error('必须要有类名！完整的 URL 必须符合格式 package.Class.method ！')
         }
-        url = url.substring(0, index)
-        index = url.lastIndexOf('.')
+        // url = url.substring(0, index)
+        // index = url.lastIndexOf('.')
         var clazz = StringUtil.trim(index < 0 ? url : url.substring(index + 1))
         if (App.language == 'Java' || App.language == 'JavaScript' || App.language == 'TypeScript') {
           if (/[A-Z]{0}[A-Za-z0-9_]/.test(clazz) != true) {
@@ -796,8 +797,8 @@
         if (index <= 0) {
           throw new Error('必须要有类名！完整的 URL 必须符合格式 package.Class.method ！')
         }
-        url = url.substring(0, index)
-        index = url.lastIndexOf('.')
+        // url = url.substring(0, index)
+        // index = url.lastIndexOf('.')
         return StringUtil.trim(index < 0 ? '' : url.substring(0, index))
       },
       //获取请求的tag
@@ -968,7 +969,8 @@
       showConfig: function (show, index) {
         App.isConfigShow = false
         if (App.isTestCaseShow) {
-          if (index == 3 || index == 4 || index == 5 || index == 10) {
+//          if (index == 3 || index == 4 || index == 5 || index == 10) {
+          if (index == 4 || index == 5 || index == 10) {
             App.showTestCase(false, false)
           }
         }
@@ -980,12 +982,13 @@
             case 0:
             case 1:
             case 2:
+            case 3:
             case 6:
             case 7:
             case 8:
             case 10:
               App.exTxt.name = index == 0 ? App.database : (index == 1 ? App.schema : (index == 2
-                ? App.language : (index == 6 ? App.server : (index == 8 ? App.project : '/method/list'))))
+                ? App.language : (index == 3 ? App.host : (index == 6 ? App.server : (index == 8 ? App.project : '/method/list')))))
               App.isConfigShow = true
 
               if (index == 0) {
@@ -1008,11 +1011,11 @@
                   , App.getRequest(vInput.value), App.getHeader(vHeader.value))
               }
               break
-            case 3:
-              App.host = App.getBaseUrl()
-              App.showUrl(false, new String(vUrl.value).substring(App.host.length)) //没必要导致必须重新获取 Response，App.onChange(false)
-              App.remotes = null
-              break
+//            case 3:
+//              App.host = App.getBaseUrl()
+//              App.showUrl(false, new String(vUrl.value).substring(App.host.length)) //没必要导致必须重新获取 Response，App.onChange(false)
+//              App.remotes = null
+//              break
             case 4:
               App.isHeaderShow = show
               App.saveCache('', 'isHeaderShow', show)
@@ -1029,12 +1032,13 @@
         }
         else if (index == 3) {
           var host = StringUtil.get(App.host)
-          var branch = new String(vUrl.value)
-          App.host = ''
-          vUrl.value = host + branch //保证 showUrl 里拿到的 baseUrl = App.host (http://apijson.cn:8080/put /balance)
-          App.setBaseUrl() //保证自动化测试等拿到的 baseUrl 是最新的
-          App.showUrl(false, branch) //没必要导致必须重新获取 Response，App.onChange(false)
-          App.remotes = null
+//          var branch = new String(vUrl.value)
+          App.host = host
+//          vUrl.value = host + branch //保证 showUrl 里拿到的 baseUrl = App.host (http://apijson.cn:8080/put /balance)
+//          App.setBaseUrl() //保证自动化测试等拿到的 baseUrl 是最新的
+//          App.showUrl(false, branch) //没必要导致必须重新获取 Response，App.onChange(false)
+//          App.remotes = null
+          App.saveCache('', 'host', host)
         }
         else if (index == 4) {
           App.isHeaderShow = show
@@ -1517,6 +1521,10 @@
             doc = null
             App.onChange(false)
             break
+          case 3:
+            App.host = App.exTxt.name
+            App.saveCache('', 'host', App.host)
+            break
           case 6:
             App.server = App.exTxt.name
             App.saveCache('', 'server', App.server)
@@ -1619,7 +1627,7 @@
             },
             'Output': {
               'inputId': 0,
-	      'host': App.getBaseUrl(),
+              'host': App.getBaseUrl(),
               'testAccountId': currentAccountId,
               'response': ''
             },
@@ -3252,9 +3260,12 @@
             inputList[i] = list[i].Input
           }
 
-          App.request(false, REQUEST_TYPE_JSON, App.project + '/method/invoke', {
-            "package": 'uiauto', // 'uiauto',
-            "class": 'UIAutoApp', // 'UIAutoApp',
+          var pkg = this.getPackage(this.host) || 'uiauto'
+          var cls = this.getClass(this.host) || 'UIAutoApp'
+
+          this.request(false, REQUEST_TYPE_JSON, this.project + '/method/invoke', {
+            "package": pkg, // 'uiauto',
+            "class": cls, // 'UIAutoApp',
             "constructor": 'getInstance',
             "method": isRecord ? 'prepareRecord' : 'prepareReplay',
             "methodArgs": isRecord ? ["boolean:true", "boolean:true"] : [ inputList, "int:0", "boolean:true", "boolean:true"]
@@ -3274,8 +3285,8 @@
 
             App.testRandomProcess = '正在' + (isRecord ? '录制' : '回放') + '...'
             App.request(false, REQUEST_TYPE_JSON, App.project + '/method/invoke', {
-              "package": 'uiauto', // 'uiauto',
-              "class": 'UIAutoApp', // 'UIAutoApp',
+              "package": pkg, // 'uiauto',
+              "class": cls, // 'UIAutoApp',
               "constructor": 'getInstance',
               "method": 'onClickPlay',
               "static": false
@@ -3326,10 +3337,12 @@
       },
 
       loopRandomTestResult: function (list, inputList, allCount, offset, header) {
-        App.request(false, REQUEST_TYPE_JSON, App.project + '/method/invoke', {
+        var pkg = this.getPackage(this.host) || 'uiauto'
+        var cls = this.getClass(this.host) || 'UIAutoApp'
+        this.request(false, REQUEST_TYPE_JSON, App.project + '/method/invoke', {
           "static": true,
-          "package": 'uiauto', // 'uiauto',
-          "class": 'UIAutoApp', // 'UIAutoApp',
+          "package": pkg, // 'uiauto',
+          "class": cls, // 'UIAutoApp',
           "method": 'getOutputList',
           "methodArgs": [{  // UIAutoApp app
           //   "type": "uiauto.UIAutoApp",
