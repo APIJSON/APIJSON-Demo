@@ -237,8 +237,8 @@
               </div>
               <!-- 持久化存储的配置项 -->
               <ul v-show="isRandomListShow" class="historys" style="margin-top: 40px; background: transparent; width: 100%; height: 100%;overflow: hidden; overflow-y: scroll; padding-bottom: 150px;">
-                  <li style="width: 100%; min-height: 60px; padding: 0px; margin: 0px; border: none; background: transparent" v-for="(item, index) in randoms" >
-                      <a v-show="! isRandomEditable" style="width: 300px; right: -20px; top: 4px; position: absolute;" class="hint--rounded hint--no-animate" ref="randomTexts" @mouseover="setRequestHint(index, item, true)" href="javascript:void(0)" @click="restoreRandom(item)" >{{ (item.Input || {}).name }}</a>
+                  <li style="width: 100%; min-height: 80px; padding: 0px; margin: 0px; border: none; background: transparent" v-for="(item, index) in randoms" >
+                      <textarea v-show="! isRandomEditable" style="width: 300px; right: -20px; top: 4px; position: absolute; max-lines: 10" ref="randomTexts" @mouseover="setRequestHint(index, item, true)" href="javascript:void(0)" >{{ (index + 1) + '. ' + new Date((item.Input || {}).time || 0).toLocaleString() + '  ' + (item.Input || {}).name }}</textarea>
                       <input v-show="isRandomEditable" style="width: 300px; right: -20px; top: 4px; position: absolute;" v-model="(item.Input || {}).name" @keyup="doOnKeyUp(event, 'random', false, item)" />
 
                       <div v-show="! isRandomEditable" style="position: absolute;bottom: 4px;right: 0px;display: inline-block;">
@@ -659,12 +659,13 @@
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONObject.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONRequest.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONResponse.js" ></script>
-<<<<<<< Updated upstream
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/R.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/CodeUtil.js" ></script>
-<!-- 必须在main.js前 TODO 可能有冲突，代码写入vue文件？ >>>>>>>>>>>>>>>> -->
-
-
-<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/CodeUtil.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/KeyEvent.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/MotionEvent.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/Gravity.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/Configuration.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/InputUtil.js" ></script>
 <!-- 必须在main.js前 TODO 可能有冲突，代码写入vue文件？ >>>>>>>>>>>>>>>> -->
 
 <!-- 图片像素对比 -->

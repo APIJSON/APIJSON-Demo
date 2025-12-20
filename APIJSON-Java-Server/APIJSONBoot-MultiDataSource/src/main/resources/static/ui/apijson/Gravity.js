@@ -1,0 +1,27 @@
+const Gravity = {
+    NO_GRAVITY: 0,
+    CENTER_VERTICAL: 16,
+    CENTER_HORIZONTAL: 1,
+    CENTER: 17, // this.CENTER_VERTICAL|this.CENTER_HORIZONTAL,
+    TOP: 48,
+    BOTTOM: 80,
+    LEFT: 3,
+    RIGHT: 5,
+    GRAVITY_NAME_VALUE_MAP: {
+        center: this.CENTER,
+        center_horizontal: this.CENTER_HORIZONTAL,
+        center_vertical: this.CENTER_VERTICAL,
+        left: this.LEFT,
+        top: this.TOP,
+        right: this.RIGHT,
+        bottom: this.BOTTOM,
+        "left,top": this.LEFT | this.TOP,
+        "left,bottom": this.LEFT | this.BOTTOM,
+        "right,top": this.RIGHT | this.TOP,
+        "right,bottom": this.RIGHT | this.BOTTOM,
+        "left,center_vertical": this.LEFT | this.CENTER_VERTICAL,
+        "right,center_vertical": this.RIGHT | this.CENTER_VERTICAL,
+        "top,center_horizontal": this.TOP | this.CENTER_HORIZONTAL,
+        "bottom,center_horizontal": this.BOTTOM | this.CENTER_HORIZONTAL,
+    }
+}

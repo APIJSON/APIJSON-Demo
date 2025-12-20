@@ -536,7 +536,8 @@
       currentDocItem: {},
       currentRemoteItem: {},
       currentRandomItem: {},
-      currentOutputList: [],
+      eventList: [],
+      outputList: [],
       isAdminOperation: false,
       loginType: 'login',
       isExportRemote: false,
@@ -3215,7 +3216,7 @@
       },
       testRandom: function (show, testList) {
         this.isRandomEditable = false
-        const isRecord = App.type == OPERATE_TYPE_RECORD
+        const isRecord = this.type == OPERATE_TYPE_RECORD
 
         if (testList != true && testSubList != true) {
           this.testRandomProcess = ''
@@ -3245,7 +3246,7 @@
             alert('请先获取随机配置\n点击[查看列表]按钮')
             return
           }
-          App.testRandomProcess = doneCount >= allCount ? '' : ('正在准备...')
+          this.testRandomProcess = doneCount >= allCount ? '' : ('正在准备...')
 
           // if (testSubList) {
           //   this.resetCount(this.currentRandomItem)
@@ -3298,8 +3299,11 @@
                 App.log('test  App.request >> } catch (e) {\n' + e.message)
               }
 
-              App.loopRandomTestResult(list, inputList, isRecord ? -1 : allCount, 0, header)
-
+              if (isRecord) {
+                App.loopEventList(list, inputList, allCount, 0, header)
+              } else {
+                App.loopRandomTestResult(list, inputList, allCount, 0, header)
+              }
             });
 
           });
@@ -3335,21 +3339,21 @@
           // }
         }
       },
-
-      loopRandomTestResult: function (list, inputList, allCount, offset, header) {
+      loopEventList: function (list, inputList, allCount, offset, header) {
+        list = list || []
         var pkg = this.getPackage(this.host) || 'uiauto'
         var cls = this.getClass(this.host) || 'UIAutoApp'
         this.request(false, REQUEST_TYPE_JSON, App.project + '/method/invoke', {
           "static": true,
           "package": pkg, // 'uiauto',
           "class": cls, // 'UIAutoApp',
-          "method": 'getOutputList',
+          "method": 'getEventList',
           "methodArgs": [{  // UIAutoApp app
-          //   "type": "uiauto.UIAutoApp",
-          //   "value": null  // TODO 可能要 {}
-          // },{  // int limit
+            //   "type": "uiauto.UIAutoApp",
+            //   "value": null  // TODO 可能要 {}
+            // },{  // int limit
             "type": "int",
-            "value": 100
+            "value": 20
           },{  // int offset
             "type": "int",
             "value": offset
@@ -3362,7 +3366,108 @@
             App.log('test  App.request >> } catch (e2) {\n' + e.message)
           }
 
-          offset = Math.max(offset, App.currentOutputList.length || 0)
+          offset = Math.max(offset, list.length || 0)
+
+          var eventList = (res.data || {})['return']
+          var count = eventList == null ? 0 : eventList.length
+          if (count <= 0) {
+            if (err == null && eventList instanceof Array && (res.data || {}).code == 200) {
+               App.testRandomProcess = ''
+               alert("录制完成")
+            }
+            else {
+              setTimeout(function () {
+                App.loopEventList(list, inputList, allCount, offset, header)
+              }, 2000)
+            }
+            return;
+          }
+
+          for (var j = 0; j < count; j++) {
+            const input = eventList[j]
+            if (input == null) {
+              continue
+            }
+
+            input.id = input.id || - j - allCount
+
+            allCount ++
+            list.push({
+              Input: input
+            })
+
+//            if (StringUtil.isEmpty(input.name)) {
+              var type = input.type || 0
+              var action = input.action || 0
+              var obj = input || {}
+              if (type == InputUtil.EVENT_TYPE_TOUCH) {
+                input.name = InputUtil.getTouchActionName(action)
+                    + "\npointerCount: " + (obj.pointerCount || 0) + ", x: " + Math.round(obj.x || 0) + ", y: " + Math.round(obj.y || 0)
+                    + "\nsplitX: " + Math.round(obj.splitX || 0) + ", splitY: " + Math.round(obj.splitY || 0) + " " + InputUtil.getOrientationName(obj.orientation)
+              } else if (type == InputUtil.EVENT_TYPE_KEY) {
+                if (obj.edit) {
+                  input.name = "EDIT " + EditTextEvent.getWhenName(obj.when)
+                      + "\n[" + (obj.selectStart || 0) + ", " + (obj.selectEnd || 0) + "] " + StringUtil.trim(obj.text)
+                } else {
+                  input.name = InputUtil.getKeyActionName(action)
+                      + "\nrepeatCount: " + (obj.repeatCount || 0) + ", scanCode: " + InputUtil.getScanCodeName(obj.scanCode)
+                      + "         " + InputUtil.getKeyCodeName(obj.keyCode)
+                }
+              } else if (type == InputUtil.EVENT_TYPE_UI) {
+                var fragment = StringUtil.trim(obj.fragment);
+
+                input.name = InputUtil.getUIActionName(action)
+                    + "\nactivity: " + StringUtil.trim(obj.activity) + (StringUtil.isEmpty(fragment, true) ? "" : "\nfragment: " + fragment)
+              } else if (type == InputUtil.EVENT_TYPE_HTTP) {
+                var isReq = action >= 0 && action != InputUtil.HTTP_ACTION_RESPONSE;
+                input.name = InputUtil.getHTTPActionName(action) + " " + StringUtil.trim(obj.format)
+                    + "\nURL: " + StringUtil.trim(obj.url)
+                    + "\n\nREQUEST: \n" + StringUtil.trim(obj.request)
+                    + (isReq ? "" : "\n\n\nRESPONSE: \n" + StringUtil.trim(obj.response))
+                    + "\n"
+              } else {
+                input.name = (input.name || "UNKNOWN !!!")
+              }
+//            }
+
+          }
+
+          App.randoms = list
+          setTimeout(function () {
+            App.loopRandomTestResult(list, inputList, allCount, offset, header, true)
+            App.loopEventList(list, inputList, allCount, offset + count, header)
+          }, 1000)
+        });
+      },
+
+      loopRandomTestResult: function (list, inputList, allCount, offset, header, once) {
+        list = list || []
+        var pkg = this.getPackage(this.host) || 'uiauto'
+        var cls = this.getClass(this.host) || 'UIAutoApp'
+        this.request(false, REQUEST_TYPE_JSON, App.project + '/method/invoke', {
+          "static": true,
+          "package": pkg, // 'uiauto',
+          "class": cls, // 'UIAutoApp',
+          "method": 'getOutputList',
+          "methodArgs": [{  // UIAutoApp app
+          //   "type": "uiauto.UIAutoApp",
+          //   "value": null  // TODO 可能要 {}
+          // },{  // int limit
+            "type": "int",
+            "value": 10
+          },{  // int offset
+            "type": "int",
+            "value": offset
+          }]
+        }, header, function (url, res, err) {
+          try {
+            App.onResponse(url, res, err)
+            App.log('test  App.request >> res.data = ' + JSON.stringify(res.data, null, '  '))
+          } catch (e) {
+            App.log('test  App.request >> } catch (e2) {\n' + e.message)
+          }
+
+          offset = Math.max(offset, App.outputList.length || 0)
 
           var outputList = (res.data || {})['return']
           if (outputList == null || outputList.length <= 0) {
@@ -3370,7 +3475,7 @@
               App.testRandomProcess = ''
               alert("测试完成")
             }
-            else {
+            else if (once != true) {
               setTimeout(function () {
                 App.loopRandomTestResult(list, inputList, allCount, offset, header)
               }, 2000)
@@ -3378,11 +3483,11 @@
             return;
           }
 
-          if (App.currentOutputList == null || App.currentOutputList.length <= 0) {
-            App.currentOutputList = outputList
+          if (App.outputList == null || App.outputList.length <= 0) {
+            App.outputList = outputList
           }
           else {
-            App.currentOutputList.push(outputList)
+            App.outputList.push(outputList)
           }
 
           App.picDelayTime = 0
@@ -3399,7 +3504,8 @@
             // 部分非手动触发的事件(切换界面、HTTP 请求 Response 等) 导致位移不准确，必须全量匹配 var ind = j + offset
             for (var k = 0; k < list.length; k++) {
               const ik = list[k]
-              if (ik != null && ik.Input != null && ik.Input.id == oInputId) {
+              const input = ik == null ? null : ik.Input;
+              if (input != null && ik.Input.id == oInputId) {
                 const resultIndex = k
                 setTimeout(function () {  // 让图片切换更平滑，且保持和选项断言结果同时出现
                   App.compareResponse(allCount, list, resultIndex, ik, {
@@ -3417,9 +3523,13 @@
           }
 
           if (allCount < 0 || offset < allCount) {
-            App.loopRandomTestResult(list, inputList, allCount, offset + outputList.length, header)
+            if (once != true) {
+              setTimeout(function () {
+                App.loopRandomTestResult(list, inputList, allCount, offset + outputList.length, header)
+              }, 200)
+            }
           }
-          else if (allCount >= 0) {
+          else if (allCount >= 0 && (once != true)) {
             App.testRandomProcess = ''
             alert("测试完成")
           }
