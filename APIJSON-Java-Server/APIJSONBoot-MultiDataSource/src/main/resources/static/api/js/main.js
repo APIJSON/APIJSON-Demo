@@ -11046,7 +11046,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   + '\n+，-，step 前后都不能有空格等其它字符！');
               }
 
-              var args = StringUtil.split(value.substring(start + 1, end), ', ') || []
+              var args = parseJSON('[' + value.substring(start + 1, end) + ']') // StringUtil.split(value.substring(start + 1, end), ', ') || []
 
               if (fun == ORDER_DB) {
                 request4Db(JSONResponse.getTableName(pathKeys[pathKeys.length - 2]), which, p_k, pathKeys, key, lastKeyInPath, false, isDesc, step, args[4]); //request4Db(key + (isDesc ? '-' : '+'), step);
@@ -11127,8 +11127,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               else {
                   fun = funWithOrder;  //还原，其它函数不支持 升降序和跨步！
 
-                  if (fun == RANDOM_DB) { // FIXME 改用 parseJSON('[' + value.substring(start + 1, end) + ']') 兼容复杂表达式
-                    var args = StringUtil.split(value.substring(start + 1, end), ', ') || []
+                  if (fun == RANDOM_DB) {
+                    var args = parseJSON('[' + value.substring(start + 1, end) + ']') // StringUtil.split(value.substring(start + 1, end), ', ') || []
                     request4Db(JSONResponse.getTableName(pathKeys[pathKeys.length - 2]), which, p_k, pathKeys, key, lastKeyInPath, true, null, null, args[4]); //'random()');
                     continue;
                   }
