@@ -28,6 +28,7 @@ if (typeof window == 'undefined') {
  * @author Lemon
  */
 var CodeUtil = {
+  DEBUG: true,
   TAG: 'CodeUtil',
   APP_NAME: 'APIAuto',
   DIVIDER: '/',
@@ -82,6 +83,38 @@ var CodeUtil = {
   thirdParty: 'YAPI',
   thirdPartyApiMap: null,  // {}
 
+  extractTableNames: function(keys) {
+    if (StringUtil.isEmpty(keys)) {
+      return null;
+    }
+
+    var ks = [];
+    for (var i = 0; i < keys.length; i ++) {
+      var k = StringUtil.trim(keys[i]);
+      while (k.startsWith('_')) {
+        k = k.substring(1);
+      }
+      while (k.endsWith('_')) {
+        k = k.substring(0, k.length - 1);
+      }
+
+      if (StringUtil.isListKey(k)) {
+        k = k.substring(0, k.length - 4);
+      }
+      else if (StringUtil.isArrKey(k)) {
+        k = k.substring(0, k.length - (k.toLowerCase().endsWith('array') ? 5 : 4));
+      }
+      else if (StringUtil.isSetKey(k)) {
+        k = k.substring(0, k.length - 3);
+      }
+
+      if (StringUtil.isTableName(k)) {
+        ks.push(k);
+      }
+    }
+
+    return ks;
+  }
 
   /**生成JSON的注释
    * @param reqStr //已格式化的JSON String
@@ -91,12 +124,23 @@ var CodeUtil = {
    * @param language
    * @return parseComment
    */
-  parseComment: function (reqStr, tableList, method, database, language, isReq, standardObj, isExtract, isWarning, isAPIJSONRouter) { //怎么都获取不到真正的长度，cols不行，默认20不变，maxLineLength不行，默认undefined不变 , maxLineLength) {
+  parseComment: function (reqStr, tableList, method, schema, database, language, isReq, standardObj, isExtract, isWarning, isAPIJSONRouter, search) { //怎么都获取不到真正的长度，cols不行，默认20不变，maxLineLength不行，默认undefined不变 , maxLineLength) {
     if (StringUtil.isEmpty(reqStr)) {
       return '';
     }
 
     var reqObj = JSON5.parse(reqStr);
+
+    var possibleTables = CodeUtil.extractTableNames(StringUtil.split(method, '/', true)) || [];
+    var searchTables = CodeUtil.extractTableNames(StringUtil.split(search, '/', true)) || [];
+    for (var i = 0; i < possibleTables.length; i ++) {
+      var t = possibleTables[i];
+      if (StringUtil.isEmpty(t) || searchTables.indexOf(t) >= 0) {
+        continue;
+      }
+      searchTables.push(t);
+    }
+    possibleTables = searchTables;
 
     var methodInfo = JSONObject.parseUri(method, isReq) || {};
     method = methodInfo.method;
@@ -111,7 +155,7 @@ var CodeUtil = {
     var lines = reqStr.split('\n');
 
     var depth = startName == null ? 0 : 1;
-    var names =  startName == null ? [] : [startName];
+    var names = startName == null ? [] : [startName];
     var isInSubquery = false;
 
     var curObj = {
@@ -6340,10 +6384,13 @@ res_data = rep.json()
         name = ks[ks.length - 2];
         key = ks[ks.length - 1];
         names = ks.slice(0, ks.length - 1)
-
         var nk = name.endsWith('[]') ? name.substring(0, name.length - 2) : name;
-        if (JSONObject.isTableKey(nk) != true) {
-          nk = name;
+        var tbl = nk;
+        if (JSONObject.isTableKey(nk)) {
+          nk = key;
+        } else {
+          nk = tbl;
+          tbl = ks[ks.length - 3];
         }
 
         extraComment = CodeUtil.getComment4Request(tableList, null, nk, { [key]:value }, method, isInSubquery, database, language, isReq, ks.slice(0, ks.length - 2), isRestful, standardObj, isWarning, false).trim();
@@ -6497,6 +6544,7 @@ res_data = rep.json()
         if ((isReq != true || method == 'POST' || method == 'PUT') && JSONObject.isArrayKey(name)) {
           var aliaIndex = name.indexOf(':');
           var objName = name.substring(0, aliaIndex >= 0 ? aliaIndex : name.length - 2);
+          schema = value['@schema'] || schema;
 
           if (JSONObject.isTableKey(objName)) {
             var c = CodeUtil.getCommentFromDoc(tableList, objName, null, method, database, language, isReq != true || isRestful, isReq, pathKeys, isRestful, value, null, null, null, isWarning);
