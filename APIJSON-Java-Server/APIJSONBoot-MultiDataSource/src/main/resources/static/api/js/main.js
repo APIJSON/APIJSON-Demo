@@ -7598,7 +7598,7 @@ https://github.com/Tencent/APIJSON/issues
         }
 
         var evalScript = isAdminOperation || caseScript_ == null ? function () {}
-            : function (isPre, code, method, type, url, req, header, callback, res, err) {
+            : function (isPre, script, method, type, url, req, header, callback, res, err) {
           var logger = console.log
           console.log = function(msg) {
             logger(msg)
@@ -7607,6 +7607,8 @@ https://github.com/Tencent/APIJSON/issues
 
           App.view = 'output'
           vOutput.value = ''
+
+          script = StringUtil.get(script)
           var isTest = false;
           var isInject = false;
           var data = res == null ? null : res.data
@@ -7628,7 +7630,7 @@ https://github.com/Tencent/APIJSON/issues
 //           })()`
 //
 //             eval(s)
-            var result = eval(code)
+            var result = eval(script)
             console.log = logger
             return result
           }
@@ -7637,7 +7639,7 @@ https://github.com/Tencent/APIJSON/issues
             console.log = logger
 
             App.loadingCount --
-            e.message = '执行脚本报错：\n' + e.message + '; 脚本：' + code
+            e.message = '执行脚本报错：\n' + e.message + '; 脚本：\n' + script
 
             // TODO if (isPre) {
             App.view = 'error'
@@ -10254,6 +10256,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         this.view = 'output'
         vOutput.value = ''
+        var script = StringUtil.get(vScript.value)
 
         try {
           var isTest = true
@@ -10276,15 +10279,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             App.request(isAdminOperation, method, type, url, req, header, callback)
           }
 
-          eval(vScript.value);
+          eval(script);
         }
         catch(e) {
           console.log(e);
           console.log = logger
+          e.message = '执行脚本报错：\n' + e.message + '; 脚本：\n' + script
 
           this.view = 'error'
           this.error = {
-            msg: '执行脚本报错：\n' + e.message
+            msg: e.message
           }
         }
 
