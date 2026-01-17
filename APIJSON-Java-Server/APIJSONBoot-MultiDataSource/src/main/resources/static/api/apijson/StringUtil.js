@@ -112,10 +112,10 @@ var StringUtil = {
   ],
 
   isBizName: function(s) {
-    if (typeof s != 'string' || s.trim().length < 3) {
+    if (typeof s != 'string' || StringUtil.length(s) < 3) {
       return false;
     }
-    if (StringUtil.isBigName(s) && || ! StringUtil.isConstName(s)) {
+    if (StringUtil.isBigName(s) && ! StringUtil.isConstName(s)) {
       return true;
     }
     if (! StringUtil.isName(s)) {
@@ -137,7 +137,7 @@ var StringUtil = {
     return typeof s == 'string' && StringUtil.isBizName(s.replaceAll('-', ''));
   },
   isTableName: function(s) {
-    if (StringUtil.isBigName(s) && || ! StringUtil.isConstName(s)) {
+    if (StringUtil.isBigName(s) && ! StringUtil.isConstName(s)) {
       return true;
     }
     if (! StringUtil.isBizName(s)) {
@@ -259,7 +259,10 @@ var StringUtil = {
       return null;
     }
 
-    if (trim) {
+    if (typeof s != 'string') {
+      s = StringUtil.get(s);
+    }
+    else if (trim) {
       s = s.trim();
     }
 
@@ -290,7 +293,10 @@ var StringUtil = {
   join: function (arr, separator) {
     return arr == null ? '' : arr.join(separator);
   },
-  length: function (s) {
+  length: function (s, trim) {
+    if (trim && typeof s == 'string') {
+      s = StringUtil.trim(s);
+    }
     return s == null ? 0 : s.length;
   },
   limitLength: function (s, maxLen, ellipsize) {
@@ -519,8 +525,8 @@ var StringUtil = {
        return false;
      }
 
-     if ((key.startsWith('is') || key.startsWith('Is')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('IS') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('is') || key.startsWith('Is')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('IS') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
@@ -529,13 +535,13 @@ var StringUtil = {
        return false;
      }
 
-     if ((key.startsWith('has') || key.startsWith('Has')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('HAS') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('has') || key.startsWith('Has')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('HAS') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
-     if ((key.startsWith('can') || key.startsWith('Can')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('CAN') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('can') || key.startsWith('Can')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('CAN') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
@@ -544,8 +550,8 @@ var StringUtil = {
        return false;
      }
 
-     if ((key.startsWith('have') || key.startsWith('Have')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('HAVE') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('have') || key.startsWith('Have')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('HAVE') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
@@ -554,8 +560,8 @@ var StringUtil = {
        return false;
      }
 
-     if ((key.startsWith('shall') || key.startsWith('Shall')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('SHALL') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('shall') || key.startsWith('Shall')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('SHALL') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
@@ -564,13 +570,13 @@ var StringUtil = {
        return false;
      }
 
-     if ((key.startsWith('should') || key.startsWith('Should')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('SHOULD') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('should') || key.startsWith('Should')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('SHOULD') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
-     if ((key.startsWith('enable') || key.startsWith('Enable')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('ENABLE') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('enable') || key.startsWith('Enable')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('ENABLE') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 
@@ -579,8 +585,8 @@ var StringUtil = {
        return false;
      }
 
-     if ((key.startsWith('disable') || key.startsWith('Disable')) && /[a-z]/g.test(k) != true)
-       || (key.startsWith('DISABLE') && /[A-Za-z]/g.test(k) != true) {
+     if (((key.startsWith('disable') || key.startsWith('Disable')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('DISABLE') && /[A-Za-z]/g.test(k) != true)) {
        return true;
      }
 

@@ -114,7 +114,7 @@ var CodeUtil = {
     }
 
     return ks;
-  }
+  },
 
   /**生成JSON的注释
    * @param reqStr //已格式化的JSON String

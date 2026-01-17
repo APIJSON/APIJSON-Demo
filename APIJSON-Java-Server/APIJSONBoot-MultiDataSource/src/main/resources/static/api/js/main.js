@@ -673,7 +673,7 @@ https://github.com/Tencent/APIJSON/issues
 There may be something wrong, you can follow by the steps:
 1. Check whether the network connection is available, you can open the address with a browser: https://www.google.com/search?q=%22APIJSON%22
 2. Check whether the URL is an available domain name/IPV4 address, try opening it with a browser: if return the result normally or return a Whitelabel Error Page for a non-GET request, generally the URL is available
-3. Turn it on or off at the top right, Settings>Server Proxy, and try again: If it is enabled, it should be a CORS cross-domain problem; and if it is turned off, it should be caused by using an external network service proxy to access the intranet, You can log out and modify the logout server address to the APIJSON proxy service address of the intranet
+3. Turn it on or off at the top right, Settings>Server Proxy, and try again: If it is enabled, it should be a CORS cross-domain problem; and if it is turned off, it should be caused by using an external network service proxy to access the internet, You can log out and modify the logout server address to the APIJSON proxy service address of the internet
 4. Disable the network proxy software App client on the computer/phone/tablet such as VPN, or switch the proxy server address, and then try again
 5. Press Fn+F12 or right-click the webpage>Inspect to view the Network interface call information and Console console log
 6. Check the log on the request target server, and give priority to find the abnormal error content
@@ -685,6 +685,9 @@ https://github.com/TommyLemon/APIAuto/issues
 
 If you are requesting an APIJSON backend service, use the following link:
 https://github.com/Tencent/APIJSON/issues
+
+
+
 `;
 
 
@@ -1525,7 +1528,7 @@ https://github.com/Tencent/APIJSON/issues
           return
         }
         try {
-          if (this.jsoncon.trim() === '') {
+          if (StringUtil.isEmpty(this.jsoncon, true)) {
             this.view = 'empty'
           } else {
             this.view = 'code'
@@ -1543,7 +1546,7 @@ https://github.com/Tencent/APIJSON/issues
             var path = null;
             var key = null;
 
-            if (isSingle || ! JSONResponse.isObject(vi)) {
+            if (isSingle || ! JSONResponse.isObject(ret)) {
               var val = ret;
               if (isSingle != true && val instanceof Array) {
                   // alert('onRenderJSONItem  key = ' + key + '; val = ' + JSON.stringify(val))
@@ -1671,13 +1674,13 @@ https://github.com/Tencent/APIJSON/issues
           if (isAdminOperation != true) {
             baseUrl = this.getBaseUrl(vUrl.value, true)
           }
-          vUrl.value = (isAdminOperation ? this.server : baseUrl) + branchUrl
+          vUrl.value = ((isAdminOperation ? this.server : baseUrl) + branchUrl).replaceAll('\n', '')
         }
         else {  //隐藏(固定)URL Host
           if (isAdminOperation) {
             this.host = this.server
           }
-          vUrl.value = branchUrl
+          vUrl.value = (branchUrl || '').replaceAll('\n', '')
         }
 
         vUrlComment.value = isSingle || StringUtil.isEmpty(this.urlComment, true)
@@ -1736,7 +1739,7 @@ https://github.com/Tencent/APIJSON/issues
       },
       getUrl: function () {
         var url = StringUtil.get(this.host) + vUrl.value
-        return url.replaceAll(' ', '')
+        return url.replaceAll(' ', '').replaceAll('\n', '')
       },
       //获取基地址
       getBaseUrl: function (url_, fixed) {
@@ -1772,7 +1775,7 @@ https://github.com/Tencent/APIJSON/issues
       },
       //获取操作方法
       getMethod: function (url, noQuery) {
-        var url = StringUtil.get(url == null ? vUrl.value : url).trim()
+        var url = StringUtil.trim(url == null ? vUrl.value : url).replaceAll('\n', '')
         var index = this.getBaseUrlLength(url)
         url = index <= 0 ? url : url.substring(index)
         index = noQuery ? url.indexOf("?") : -1
@@ -1782,7 +1785,7 @@ https://github.com/Tencent/APIJSON/issues
         return url.startsWith('/') ? url.substring(1) : url
       },
       getBranchUrl: function (url) {
-        var url = StringUtil.get(url == null ? vUrl.value : url).trim()
+        var url = StringUtil.trim(url == null ? vUrl.value : url).replaceAll('\n', '')
         var index = this.getBaseUrlLength(url)
         url = index <= 0 ? url : url.substring(index)
         return url.startsWith('/') ? url : '/' + url
@@ -1836,7 +1839,7 @@ https://github.com/Tencent/APIJSON/issues
             // 解决整体 trim 后第一行  // 被当成正常的 key 路径而不是注释
             var index = StringUtil.trim(item).startsWith('//') ? 0 : item.lastIndexOf(' //')  // 不加空格会导致 http:// 被截断  ('//')  //这里只支持单行注释，不用 removeComment 那种带多行的去注释方式
             var item2 = index < 0 ? item : item.substring(0, index)
-            item2 = item2.trim()
+            item2 = StringUtil.trim(item2)
             if (item2.length <= 0) {
               continue;
             }
@@ -2247,7 +2250,7 @@ https://github.com/Tencent/APIJSON/issues
                         detail: name
                         + '\n' + (api.up_time == null ? '' : (typeof api.up_time != 'number' ? api.up_time : new Date(1000*api.up_time).toLocaleString()))
                         + '\nhttp://apijson.cn/yapi/project/1/interface/api/' + api._id
-                        + '\n\n' + (StringUtil.isEmpty(api.markdown, true) ? StringUtil.trim(api.description) : api.markdown.trim().replace(/\\_/g, '_'))
+                        + '\n\n' + (StringUtil.isEmpty(api.markdown, true) ? StringUtil.trim(api.description) : StringUtil.trim(api.markdown).replace(/\\_/g, '_'))
                       }
                     }
                     else {
@@ -2337,8 +2340,8 @@ https://github.com/Tencent/APIJSON/issues
           }
         }
         else if (index == 3) {
-          var host = StringUtil.get(this.host)
-          var branch = StringUtil.get(vUrl.value)
+          var host = StringUtil.get(this.host).replaceAll('\n', '')
+          var branch = StringUtil.get(vUrl.value).replaceAll('\n', '')
           this.host = ''
           vUrl.value = host + branch //保证 showUrl 里拿到的 baseUrl = this.host (http://apijson.cn:8080/put /balance)
           this.setBaseUrl() //保证自动化测试等拿到的 baseUrl 是最新的
@@ -2483,13 +2486,15 @@ https://github.com/Tencent/APIJSON/issues
 
       // 保存当前的JSON
       save: function () {
-        if (this.history.name.trim() === '') {
+        var name = (this.history || {}).name
+        if (StringUtil.isEmpty(name)) {
           Helper.alert('名称不能为空！', 'danger')
           return
         }
+
         var val = {
-          name: this.history.name,
-          detail: this.history.name,
+          name: name,
+          detail: name,
           type: this.type,
           url: '/' + this.getMethod(),
           request: inputted,
@@ -2553,7 +2558,15 @@ https://github.com/Tencent/APIJSON/issues
         vRandom.value = StringUtil.get(random.config)
 
         var response = ((item || {}).TestRecord || {}).response
-        if (StringUtil.isEmpty(response, true) == false) {
+        var curAccount = this.getCurrentAccount() || {}
+        var accountIdStr = String(curAccount.isLoggedIn ? curAccount.id || '' : '')
+        var tests = this.tests[accountIdStr] || {}
+        var currentResponse = (tests[random.documentId] || {})[random.id > 0 ? random.id : (random.toId + '' + random.id)]
+        if (StringUtil.isNotEmpty(currentResponse, true)) {
+          response = JSON.stringify(currentResponse, null, 4);
+        }
+
+        if (! StringUtil.isEmpty(response, true)) {
             this.jsoncon = StringUtil.trim(response)
             this.view = 'code'
         }
@@ -3213,7 +3226,7 @@ https://github.com/Tencent/APIJSON/issues
                 var t = JSONResponse.getType(v);
                 typeObj[k] = t == 'integer' ? 'NUMBER' : (t == 'number' ? 'DECIMAL' : t.toUpperCase());
 
-                newCfg += (i <= 0 ? '' : '\n') + k + ': ' + cfgLine.substring(ind+2).trim();
+                newCfg += (i <= 0 ? '' : '\n') + k + ': ' + StringUtil.trim(cfgLine.substring(ind+2));
               }
 
               refuseKeys.push('!');
@@ -3484,7 +3497,7 @@ https://github.com/Tencent/APIJSON/issues
                config += prefix + '[]'
                for (var i = 0; i < value.length; i ++) {
                   var cfg = this.newRandomConfig(childPath, '' + i, value[i], isRand, isBad, noDeep, isConst)
-                  config += '\n' + (StringUtil.isEmpty(cfg, true) ? 'null' : cfg.trim())
+                  config += '\n' + (StringUtil.isEmpty(cfg, true) ? 'null' : StringUtil.trim(cfg))
                }
                return config
           }
@@ -3521,7 +3534,7 @@ https://github.com/Tencent/APIJSON/issues
                    break
                  }
 
-                 config += '\n' + cfg.trim()
+                 config += '\n' + StringUtil.trim(cfg)
               }
           }
 
@@ -4185,7 +4198,7 @@ https://github.com/Tencent/APIJSON/issues
         var tp = StringUtil.trim(thirdParty)
         var index = tp.indexOf(' ')
         var platform = index < 0 ? PLATFORM_SWAGGER : tp.substring(0, index).toUpperCase()
-        var docUrl = index <= 0 ? tp.trim() : tp.substring(index + 1).trim()
+        var docUrl = index <= 0 ? tp : StringUtil.trim(tp.substring(index + 1))
 
         var jsonData = null
         try {
@@ -4214,8 +4227,8 @@ https://github.com/Tencent/APIJSON/issues
         else if (platform == PLATFORM_RAP || platform == PLATFORM_YAPI) {
           var isRap = platform == PLATFORM_RAP
           index = docUrl.indexOf(' ')
-          listUrl = index < 0 ? docUrl + (isRap ? '/repository/joined' : '/api/interface/list_menu') : docUrl.substring(0, index).trim()
-          itemUrl = index < 0 ? docUrl + (isRap ? '/repository/get' : '/api/interface/get') : docUrl.substring(index + 1).trim()
+          listUrl = index < 0 ? docUrl + (isRap ? '/repository/joined' : '/api/interface/list_menu') : StringUtil.trim(docUrl.substring(0, index))
+          itemUrl = index < 0 ? docUrl + (isRap ? '/repository/get' : '/api/interface/get') : StringUtil.trim(docUrl.substring(index + 1))
 
           if (listUrl.startsWith('/')) {
             listUrl = host + listUrl
@@ -4478,7 +4491,7 @@ https://github.com/Tencent/APIJSON/issues
           ,  (StringUtil.trim(api.username) + ': ' + StringUtil.trim(api.title)
           + '\n' + (api.up_time == null ? '' : (typeof api.up_time != 'number' ? api.up_time : new Date(1000*api.up_time).toLocaleString()))
           + '\nhttp://apijson.cn/yapi/project/1/interface/api/' + api._id
-          + '\n\n' + (StringUtil.isEmpty(api.markdown, true) ? StringUtil.trim(api.description) : api.markdown.trim().replace(/\\_/g, '_')))
+          + '\n\n' + (StringUtil.isEmpty(api.markdown, true) ? StringUtil.trim(api.description) : StringUtil.trim(api.markdown).replace(/\\_/g, '_')))
           , api.username
         )
       },
@@ -4649,7 +4662,7 @@ https://github.com/Tencent/APIJSON/issues
               'Document': isRandom ? undefined : {
                 'creator': creator,
                 'testAccountId': currentAccountId,
-                'method': StringUtil.isEmpty(method, true) ? null : method.trim().toUpperCase(),
+                'method': StringUtil.isEmpty(method, true) ? null : StringUtil.toUpperCase(method, true),
                 'operation': CodeUtil.getOperation(path.substring(1), reqObj),
                 'type': type,
                 'name': StringUtil.get(name),
@@ -4709,7 +4722,7 @@ https://github.com/Tencent/APIJSON/issues
         else {
             this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/get/Document?format=false&@role=OWNER', {
                url: path,
-               method: StringUtil.isEmpty(method, true) ? null : method.trim().toUpperCase()
+               method: StringUtil.isEmpty(method, true) ? null : StringUtil.toUpperCase(method, true)
             }, {}, callback)
         }
 
@@ -4815,7 +4828,8 @@ https://github.com/Tencent/APIJSON/issues
               item.isLoggedIn = false
               App.saveAccounts()
 
-              App.changeScriptType(App.scriptType)
+              // App.changeScriptType(App.scriptType)
+              // App.listScript()
 
               if (callback != null) {
                 callback(false, index, err)
@@ -4830,7 +4844,8 @@ https://github.com/Tencent/APIJSON/issues
           }
 
           this.currentAccountIndex = index
-          this.changeScriptType(App.scriptType)
+          // this.changeScriptType(App.scriptType)
+          // this.listScript()
 
           var accountIdStr = String(item != null && item.isLoggedIn ? item.id || '' : '')
           var tests = App.doneCount >= App.allCount && noShowCase != true && this.isCrossEnabled && this.isStatisticsEnabled && this.reportId != null && this.reportId > 0 ? this.tests[accountIdStr] : null
@@ -4862,7 +4877,8 @@ https://github.com/Tencent/APIJSON/issues
 
                 item.isLoggedIn = false
                 App.saveAccounts()
-                App.changeScriptType(App.scriptType)
+                // App.changeScriptType(App.scriptType)
+                // App.listScript()
 
                 if (callback != null) {
                   callback(false, index, err)
@@ -4897,7 +4913,8 @@ https://github.com/Tencent/APIJSON/issues
                   App.accounts[App.currentAccountIndex] = item
                   App.saveAccounts()
 
-                  App.changeScriptType(App.scriptType)
+                  // App.changeScriptType(App.scriptType)
+                  // App.listScript()
 
                   if (callback != null) {
                       callback(true, index, err)
@@ -4951,7 +4968,8 @@ https://github.com/Tencent/APIJSON/issues
 
         //切换到这个tab
         this.currentAccountIndex = index
-        this.changeScriptType(App.scriptType)
+        // this.changeScriptType(App.scriptType)
+        // this.listScript()
 
         //目前还没做到同一标签页下测试账号切换后，session也跟着切换，所以干脆每次切换tab就重新登录
         if (item != null) {
@@ -6271,6 +6289,7 @@ https://github.com/Tencent/APIJSON/issues
           }
 
           App.scripts = Object.assign(newDefaultScript(), scripts)
+          App.restoreRemote(App.currentDocIndex, App.currentRemoteItem)
         })
       },
 
@@ -6358,7 +6377,7 @@ https://github.com/Tencent/APIJSON/issues
           vRandom.value = `phone: App.account\npassword: App.password\nremember: vRemember.checked`
         }
 
-        this.scripts = newDefaultScript()
+        // this.scripts = newDefaultScript()
         this.method = REQUEST_TYPE_POST
         this.type = REQUEST_TYPE_JSON
         this.showTestCase(false, this.isLocalShow)
@@ -6451,7 +6470,7 @@ https://github.com/Tencent/APIJSON/issues
             }
           }
 
-          this.scripts = newDefaultScript()
+          // this.scripts = newDefaultScript()
 
           const isLoginShow = this.isLoginShow
           var curUser = this.getCurrentAccount() || {}
@@ -6494,7 +6513,7 @@ https://github.com/Tencent/APIJSON/issues
             return
           }
 
-          this.scripts = newDefaultScript()
+          // this.scripts = newDefaultScript()
 
           this.parseRandom(loginReq, loginHeader, loginRandom, 0, true, false, false, function(randomName, constConfig, constJson, constHeader) {
               App.request(isAdminOperation, loginMethod, loginType, baseUrl + loginUrl, constJson, constHeader, function (url, res, err) {
@@ -6617,7 +6636,7 @@ https://github.com/Tencent/APIJSON/issues
       /**注册
        */
       register: function (isAdminOperation) {
-        this.scripts = newDefaultScript()
+        // this.scripts = newDefaultScript()
         this.showUrl(isAdminOperation, '/register')
         vInput.value = JSON.stringify(
           {
@@ -6652,7 +6671,7 @@ https://github.com/Tencent/APIJSON/issues
       /**重置密码
        */
       resetPassword: function (isAdminOperation) {
-        this.scripts = newDefaultScript()
+        // this.scripts = newDefaultScript()
         this.showUrl(isAdminOperation, '/put/password')
         vInput.value = JSON.stringify(
           {
@@ -6718,7 +6737,7 @@ https://github.com/Tencent/APIJSON/issues
           const logoutUrl = account.logoutUrl || this.logoutUrl || '/logout'
           const logoutHeader = account.logoutHeader || this.logoutHeader || this.getHeader(vHeader.value)
           const logoutReq = account.logoutReq || {id: account.id}
-          this.scripts = newDefaultScript()
+          // this.scripts = newDefaultScript()
 //          this.showUrl(isAdminOperation, '/logout')
 //          vInput.value = JSON.stringify(req, null, '    ')
 //          this.method = REQUEST_TYPE_POST
@@ -6750,7 +6769,7 @@ https://github.com/Tencent/APIJSON/issues
       /**获取验证码
        */
       getVerify: function (isAdminOperation) {
-        this.scripts = newDefaultScript()
+        // this.scripts = newDefaultScript()
         this.showUrl(isAdminOperation, '/post/verify')
         var type = this.loginType == 'login' ? 0 : (this.loginType == 'register' ? 1 : 2)
         vInput.value = JSON.stringify(
@@ -7115,7 +7134,7 @@ https://github.com/Tencent/APIJSON/issues
           CodeUtil.type = this.type;
         }
 
-        var url = StringUtil.get(vUrl.value)
+        var url = StringUtil.get(vUrl.value).replaceAll('\n', '')
         var index = url.indexOf('?')
         if (index >= 0) {
           var paramObj = getRequestFromURL(url.substring(index), true)
@@ -7562,7 +7581,7 @@ https://github.com/Tencent/APIJSON/issues
                   App.server + '/delegate?$_type=' + (type || REQUEST_TYPE_JSON)
                   + (StringUtil.isEmpty(App.delegateId, true) ? '' : '&$_delegate_id=' + App.delegateId)
                   + '&$_delegate_url=' + encodeURIComponent(url)
-                  + (StringUtil.isEmpty(hs, true) ? '' : '&$_headers=' + encodeURIComponent(hs.trim()))
+                  + (StringUtil.isEmpty(hs, true) ? '' : '&$_headers=' + encodeURIComponent(StringUtil.trim(hs)))
                 ) : (
                   App.isEncodeEnabled ? encodeURI(url) : url
                 )
@@ -7588,7 +7607,9 @@ https://github.com/Tencent/APIJSON/issues
 
           App.view = 'output'
           vOutput.value = ''
-
+          var isTest = false;
+          var isInject = false;
+          var data = res == null ? null : res.data
           try {
 //             var s = `(function () {
 // var App = ` + App + `;
@@ -7607,10 +7628,6 @@ https://github.com/Tencent/APIJSON/issues
 //           })()`
 //
 //             eval(s)
-
-            var isTest = false;
-            var isInject = false;
-            var data = res == null ? null : res.data
             var result = eval(code)
             console.log = logger
             return result
@@ -7620,11 +7637,12 @@ https://github.com/Tencent/APIJSON/issues
             console.log = logger
 
             App.loadingCount --
+            e.message = '执行脚本报错：\n' + e.message + '; 脚本：' + code
 
             // TODO if (isPre) {
             App.view = 'error'
             App.error = {
-              msg: '执行脚本报错：\n' + e.message
+              msg: e.message + '\n\n' + (data == null || typeof data == 'string' ? StringUtil.get(data) : JSON.stringify(data, null, 4))
             }
 
             if (callback != null) {
@@ -7636,7 +7654,7 @@ https://github.com/Tencent/APIJSON/issues
               // }
 
               // TODO 右侧底部新增断言列表
-              App.onResponse(url, null, new Error('执行脚本报错：\n' + e.message)) // this.onResponse is not a function
+              App.onResponse(url, null, Object.assign({response: res}, e)) // this.onResponse is not a function
               // callback = function (url, res, err) {}  // 仅仅为了后续在 then 不执行 onResponse
             }
           }
@@ -7798,8 +7816,9 @@ https://github.com/Tencent/APIJSON/issues
         if (err != null) {
           if (IS_BROWSER) {
             var errObj = err instanceof Array == false && err instanceof Object ? err : {}
-            var data = (errObj.response || {}).data
+            var data = res.data || (errObj.response || {}).data
             var msg = typeof data == 'string' ? StringUtil.trim(data) : JSON.stringify(data, null, '    ')
+            this.jsoncon = msg
             msg = "Response:\nurl = " + url + "\nerror = " + err.message + (StringUtil.isEmpty(msg) ? '' : '\n\n' + msg) + '\n\n' + ERR_MSG
             // vOutput.value = "Response:\nurl = " + url + "\nerror = " + err.message;
             this.view = 'error';
@@ -7914,7 +7933,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           || selectionStart <= 0 && selectionEnd >= StringUtil.get(target.value).length)) {
           if (target == vUrl) {  // TODO 把 Chrome 或 Charles 等抓到的 Response Header 和 Content 自动粘贴到 vUrl, vHeader
             try {
-              if (paste.trim().indexOf('\n') > 0) {  // 解决正常的 URL 都粘贴不了
+              if (StringUtil.trim(paste).indexOf('\n') > 0) {  // 解决正常的 URL 都粘贴不了
                 var contentStart = 0;
                 var lines = StringUtil.split(paste, '\n');
                 var header = '';
@@ -7926,7 +7945,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
                   if (/^[a-zA-Z0-9\- ]+$/g.test(left)) {
                     var lowerKey = left.toLowerCase();
-                    var value = l.substring(ind + 1).trim();
+                    var value = StringUtil.trim(l.substring(ind + 1));
 
                     if (lowerKey == 'host') {
                       this.setBaseUrl(value.endsWith(':443') ? 'https://' + value.substring(0, value.length - ':443'.length) : 'http://' + value);
@@ -7973,7 +7992,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                       this.method = t
                       this.type = t == 'GET' ? 'PARAM' : (t == 'POST' ? 'JSON' : t);
 
-                      l = l.substring(ind).trim();
+                      l = StringUtil.trim(l.substring(ind));
                       ind = l.indexOf(' ');
                       var url = ind < 0 ? l : l.substring(0, ind);
                       if (url.length > 0 && url != '/') {
@@ -8336,6 +8355,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         var obj = event.srcElement ? event.srcElement : event.target;
         if ($(obj).attr('id') == 'vUrl') {
+          vUrl.value = StringUtil.trim(vUrl.value).replaceAll('\n', '')
           vUrlComment.value = ''
           this.currentDocItem = null
           this.currentRemoteItem = null
@@ -9173,17 +9193,17 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var schema = table.table_schema
               var modelName = App.getModelName(i)
               map[StringUtil.toLowerCase(schema) + '.' + StringUtil.toLowerCase(modelName)] = table
+              var argStr = i + ",'" + modelName + "'" + (StringUtil.isEmpty(schema, true) ? '' : ",'" + schema + "'")
 
               // TODO 对 isAPIJSON 和 isRESTful 生成不一样的
-              doc += '\n### ' + (i + 1) + '. ' + modelName
-                + (StringUtil.isEmpty(schema, true) ? '' : ': { @schema: ' + schema + ' }')
-                + ' - <a href="javascript:void(0)" onclick="window.App.onClickPost(' + i + ',\'' + modelName + '\')">POST</a>'
-                + ' <a href="javascript:void(0)" onclick="window.App.onClickPut(' + i + ',\'' + modelName + '\')">PUT</a>'
-                + ' <a href="javascript:void(0)" onclick="window.App.onClickDelete(' + i + ',\'' + modelName + '\')">DELETE</a>'
-                + ' <a href="javascript:void(0)" onclick="window.App.onClickGet(' + i + ',\'' + modelName + '\')">GET</a>'
-                + ' <a href="javascript:void(0)" onclick="window.App.onClickGets(' + i + ',\'' + modelName + '\')">GETS</a>'
-                + ' <a href="javascript:void(0)" onclick="window.App.onClickHead(' + i + ',\'' + modelName + '\')">HEAD</a>'
-                + ' <a href="javascript:void(0)" onclick="window.App.onClickHeads(' + i + ',\'' + modelName + '\')">HEADS</a>'
+              doc += '\n### ' + (i + 1) + '. ' + (StringUtil.isEmpty(schema, true) ? '' : schema + '.') + modelName
+                + ' - <a href="javascript:void(0)" onclick="window.App.onClickPost(' + argStr + ')">POST</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickPut(' + argStr + ')">PUT</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickDelete(' + argStr + ')">DELETE</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickGet(' + argStr + ')">GET</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickGets(' + argStr + ')">GETS</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickHead(' + argStr + ')">HEAD</a>'
+                + ' <a href="javascript:void(0)" onclick="window.App.onClickHeads(' + argStr + ')">HEADS</a>'
                 + '\n' + App.toMD(table_comment);
 
               //Column[]
@@ -9556,7 +9576,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         var arrName = modelName + '[]'
 
-        this.showCRUD('/get' + (isSingle ? '/' + arrName + '?total@=' + arrName + '/total' + '&info@=' + arrName + '/info' : ''),
+        this.showCRUD('/get' + (isSingle ? '/' + arrName : ''),
           isSingle ? `{
     '` + modelName + `': {` + (StringUtil.isEmpty(role, true) ? '' : `
         '@role': '` + role + "',") + (StringUtil.isEmpty(schemaName, true) ? '' : `
@@ -9583,8 +9603,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         "page": 0,
         "query": 2
     },
-    "total@": "` + modelName + `[]/total",
-    "info@": "` + modelName + `[]/info",
     "@explain": true
 }`)
       },
@@ -9725,7 +9743,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         var arrName = modelName + '[]'
 
-        this.showCRUD('/get' + (isSingle ? '/' + arrName + '?total@=' + arrName + '/total' + '&info@=' + arrName + '/info' : ''),
+        this.showCRUD('/get' + (isSingle ? '/' + arrName : ''),
           isSingle ? `{
     '` + modelName + `': {
         '@column': 'DISTINCT ` + columnName + `',
@@ -9744,8 +9762,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         "page": 0,
         "query": 2
     },
-    "total@": "` + modelName + '-' + columnName + `[]/total",
-    "info@": "` + modelName + '-' + columnName + `[]/info",
     "@explain": true
 }`)
       },
@@ -9963,7 +9979,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           log('getStructure  tag = ' + tag + '; version = ' + version + '; isDemo = ' + isDemo + '; obj = \n' + format(obj));
         }
 
-        method = method == null ? 'GET' : method.trim().toUpperCase()
+        method = method == null ? 'GET' : StringUtil.toUpperCase(method, true)
 
         var isArrayKey = tag != null && tag.endsWith('[]');
         var isMultiArrayKey = isArrayKey && tag.endsWith(":[]")
@@ -10742,7 +10758,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        * @param callback
        */
       parseRandom: function (json, head, config, randomId, generateJSON, generateConfig, generateName, callback, preScript, ctx) {
-        var lines = config == null ? null : config.trim().split('\n')
+        var lines = config == null ? null : StringUtil.trim(config).split('\n')
         if (lines == null || lines.length <= 0) {
           // return null;
           callback('', '', json, head);
@@ -10768,7 +10784,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           // remove comment   // 解决整体 trim 后第一行  // 被当成正常的 key 路径而不是注释
           const commentIndex = StringUtil.trim(lineItem).startsWith('//') ? 0 : lineItem.lastIndexOf(' //'); //  -1; // eval 本身支持注释 eval('1 // test') = 1 lineItem.indexOf(' //');
-          const line = commentIndex < 0 ? lineItem : lineItem.substring(0, commentIndex).trim();
+          const line = commentIndex < 0 ? lineItem : StringUtil.trim(lineItem.substring(0, commentIndex));
 
           if (line.length <= 0) {
             respCount ++;
@@ -10802,7 +10818,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           const lastKeyInPath = pathKeys[pathKeys.length - 1]
           const customizeKey = bi > 0;
           const key = customizeKey ? p_k.substring(bi + 1) : lastKeyInPath;
-          if (key == null || key.trim().length <= 0) {
+          if (key == null || StringUtil.length(key, true) <= 0) {
             throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + key + ' 不是合法的 JSON key!' +
               '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
               '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
@@ -13208,7 +13224,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             var lastIndex = before.lastIndexOf('\n');
             var lastLine = before.substring(lastIndex + 1, before.length);
             lastIndex = lastLine.lastIndexOf(':');
-            lastLine = lastIndex < 0 ? '' : lastLine.substring(0, lastIndex).trim();
+            lastLine = lastIndex < 0 ? '' : StringUtil.trim(lastLine.substring(0, lastIndex));
 
             var endsWithDoubleQuote = lastLine.endsWith('"')
             if (endsWithDoubleQuote || lastLine.endsWith("'")) {
@@ -13964,7 +13980,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           if (StringUtil.isNotEmpty(rawReq.url, true)) {
             hasTestArg = true
-            vUrl.value = StringUtil.trim(rawReq.url)
+            vUrl.value = StringUtil.trim(rawReq.url).replaceAll('\n', '')
           }
 
           var decode = false
@@ -14188,7 +14204,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             var prefixEnd = 0;
             for (var i = 0; i < lastLine.length; i++) {
-              if (lastLine.charAt(i).trim().length > 0) {
+              if (StringUtil.length(lastLine.charAt(i), true) > 0) {
                 if (isDel) {
                   prefixEnd = 0;
                 }
@@ -14239,7 +14255,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               hasComma = isJSON && isStart != true && isEnd != true && hasRight != true && tll.endsWith(',') != true;
               if (hasComma) {
                 for (var i = before.length; i >= 0; i--) {
-                  if (before.charAt(i).trim().length > 0) {
+                  if (StringUtil.length(before.charAt(i), true) > 0) {
                     break;
                   }
 
