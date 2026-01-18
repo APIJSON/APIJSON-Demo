@@ -65,7 +65,7 @@ var StringUtil = {
       return s <= 0;
     }
 
-    if (trim && typeof s == 'string') {
+    if (trim !== false && typeof s == 'string') {
       s = s.trim();
     }
     return s.length <= 0;
@@ -193,7 +193,7 @@ var StringUtil = {
    * @return
    */
   toUpperCase: function(s, trim) {
-    s = trim ? StringUtil.trim(s) : StringUtil.get(s);
+    s = trim !== false ? StringUtil.trim(s) : StringUtil.get(s);
     return s.toUpperCase();
   },
   /**全部小写
@@ -201,7 +201,7 @@ var StringUtil = {
    * @return
    */
   toLowerCase: function(s, trim) {
-    s = trim ? StringUtil.trim(s) : StringUtil.get(s);
+    s = trim !== false ? StringUtil.trim(s) : StringUtil.get(s);
     return s.toLowerCase();
   },
 
@@ -262,7 +262,7 @@ var StringUtil = {
     if (typeof s != 'string') {
       s = StringUtil.get(s);
     }
-    else if (trim) {
+    else if (trim !== false) {
       s = s.trim();
     }
 
@@ -270,7 +270,7 @@ var StringUtil = {
       separator = ',';
     }
 
-    if (trim) {
+    if (trim !== false) {
       while (s.startsWith(separator)) {
         s = s.substring(1);
       }
@@ -286,6 +286,10 @@ var StringUtil = {
     return s.split(separator);
   },
 
+  splitPath: function (s, trim) {
+    return StringUtil.split(s, '/', trim);
+  },
+
   isNumber: function (s) {
     return typeof s == 'string' && /^[0-9]+$/.test(s);
   },
@@ -294,7 +298,7 @@ var StringUtil = {
     return arr == null ? '' : arr.join(separator);
   },
   length: function (s, trim) {
-    if (trim && typeof s == 'string') {
+    if (trim !== false && typeof s == 'string') {
       s = StringUtil.trim(s);
     }
     return s == null ? 0 : s.length;
