@@ -6431,7 +6431,7 @@ res_data = rep.json()
           if (c.startsWith(' ! ')) {
             return c;
           }
-          return StringUtil.isEmpty(c) ? ' ! 字段 ' + key + ' 不存在！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(c, false, ' ')) + extraComment;
+          return StringUtil.isEmpty(c) ? ' ! 字段 ' + key + ' 不存在！' : (isWarning ? '' : CodeUtil.getComment(c, false, ' ')) + extraComment;
         }
       }
       catch (e) {
@@ -6537,7 +6537,7 @@ res_data = rep.json()
           if (c != null && c.startsWith(' ! ')) {
             return c;
           }
-          return StringUtil.isEmpty(c) ? ' ! 表 ' + objName + ' 不存在！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return StringUtil.isEmpty(c) ? ' ! 表 ' + objName + ' 不存在！' : (isWarning ? '' : CodeUtil.getComment(
             (aliaIndex < 0 ? '' : '新建别名: ' + key.substring(aliaIndex + 1, key.length - 2) + ' < ') + objName + ': ' + c, false, ' ')) + extraComment;
         }
       }
@@ -6566,7 +6566,7 @@ res_data = rep.json()
             if (c.startsWith(' ! ')) {
               return c;
             }
-            return StringUtil.isEmpty(c) ? ' ! 表 ' + objName + ' 不存在！' : (isWarning && ! isFuzzTable ? '' : ' ' + CodeUtil.getComment(objName + ': ' + c, false, ' ')) + extraComment;
+            return StringUtil.isEmpty(c) ? ' ! 表 ' + objName + ' 不存在！' : (isWarning ? '' : ' ' + CodeUtil.getComment(objName + ': ' + c, false, ' ')) + extraComment;
           }
         }
       }
@@ -6621,7 +6621,7 @@ res_data = rep.json()
         if (c.startsWith(' ! ')) {
           return c;
         }
-        return StringUtil.isEmpty(c) ? ' ! 表不存在！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+        return StringUtil.isEmpty(c) ? ' ! 表不存在！' : (isWarning ? '' : CodeUtil.getComment(
           (aliaIndex < 0 ? '' : '新建别名: ' + key.substring(aliaIndex + 1, key.length) + ' < ' + objName + ': ') + c, false, ' ')) + extraComment;
       }
 
@@ -6636,15 +6636,15 @@ res_data = rep.json()
     if (isRestful != true && (isInSubquery || JSONObject.isArrayKey(name))) {
       switch (key) {
         case 'count':
-          return value != null && isValueNotInteger ? ' ! value必须是Integer类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment('每页数量' + (isValueNotEmpty ? '' : '，例如 5 10 20 等'), false, ' ')) + extraComment;
+          return value != null && isValueNotInteger ? ' ! value必须是Integer类型！' : (isWarning ? '' : CodeUtil.getComment('每页数量' + (isValueNotEmpty ? '' : '，例如 5 10 20 等'), false, ' ')) + extraComment;
         case 'page':
           if (value != null && isValueNotInteger) {
             return ' ! value必须是Integer类型！';
           }
-          return value != null && value < 0 ? ' ! 必须 >= 0 ！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment('分页页码' + (isValueNotEmpty ? '' : ': 例如 0 1 2 ...'), false, ' ')) + extraComment;
+          return value != null && value < 0 ? ' ! 必须 >= 0 ！' : (isWarning ? '' : CodeUtil.getComment('分页页码' + (isValueNotEmpty ? '' : ': 例如 0 1 2 ...'), false, ' ')) + extraComment;
         case 'query':
           var query = CodeUtil.QUERY_TYPES[value];
-          return StringUtil.isEmpty(query) ? ' ! value必须是[' + CodeUtil.QUERY_TYPE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment('查询内容：0-对象 1-总数和分页详情 2-数据、总数和分页详情', false, ' ')) + extraComment;
+          return StringUtil.isEmpty(query) ? ' ! value必须是[' + CodeUtil.QUERY_TYPE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment('查询内容：0-对象 1-总数和分页详情 2-数据、总数和分页详情', false, ' ')) + extraComment;
         case 'join':
           if (isValueNotString) {
             return ' ! value必须是String类型！';
@@ -6701,9 +6701,9 @@ res_data = rep.json()
                 if (isValueNotString) {
                   return ' ! value必须是String类型！';
                 }
-                return CodeUtil.SUBQUERY_RANGES.indexOf(value) < 0 ? ' ! value必须是[' + CodeUtil.SUBQUERY_RANGES.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment('比较范围：ANY-任意 ALL-全部', false, ' ')) + extraComment;
+                return CodeUtil.SUBQUERY_RANGES.indexOf(value) < 0 ? ' ! value必须是[' + CodeUtil.SUBQUERY_RANGES.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment('比较范围：ANY-任意 ALL-全部', false, ' ')) + extraComment;
               case 'from':
-                return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment('数据来源' + (isValueNotEmpty ? '，同一层级必须有 "' + value + '":{...}' : '，例如 "User"，同一层级必须有 "User":{...}'), false, ' ')) + extraComment;
+                return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment('数据来源' + (isValueNotEmpty ? '，同一层级必须有 "' + value + '":{...}' : '，例如 "User"，同一层级必须有 "User":{...}'), false, ' ')) + extraComment;
             }
           }
           break;
@@ -6718,63 +6718,63 @@ res_data = rep.json()
     if (isRestful != true && JSONObject.isTableKey(objName)) {
       switch (key) {
         case '@column':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '返回字段' + (isValueNotEmpty ? '，可传 字段(:别名)、SQL 函数(:别名，用分号 ; 隔开)、表达式，以及部分 SQL 关键词'
               : '：例如 "name" "toId:parentId" "id,userId;json_length(praiseUserIdList):praiseCount" 等'), false, ' ')) + extraComment;
         case '@from@': //value 类型为 Object 时 到不了这里，已在上方处理
-          return isValueNotString && typeOfValue != 'object' ? ' ! value必须是String或Object类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString && typeOfValue != 'object' ? ' ! value必须是String或Object类型！' : (isWarning ? '' : CodeUtil.getComment(
             '数据来源：引用赋值 子查询 "' + value + '@":{...} ', false, ' ')) + extraComment;
         case '@group':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '分组方式' + (isValueNotEmpty ? '' : '，例如 "userId" "momentId,toId" 等'), false, ' ')) + extraComment;
         case '@having':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '聚合函数' + (isValueNotEmpty ? '，可传 SQL 函数(用分号 ; 隔开)、表达式，以及部分 SQL 关键词'
               : '，例如 "max(id)>100" "length(phone)>0;sum(balance)<=10000" 等'), false, ' ')) + extraComment;
         case '@order':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '排序方式：+升序，-降序' + (isValueNotEmpty ? '' : '，例如 "date-" "name+,id-" 等'), false, ' ')) + extraComment;
         case '@combine':  //TODO 解析 value 并直接给出条件组合结果
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '条件组合' + (isValueNotEmpty ? '，| 可省略。合并同类，外层按照 & | ! 顺序，内层按传参顺序组合成 (key0 & key1 & key6 & 其它key) & (key2 | key3 | key7) & !(key4 | key5)'
               : '，例如 "name$,tag$" "!userId<,!toId" 等'), false, ' ')) + extraComment;
         case '@raw':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '原始SQL片段' + (isValueNotEmpty ? '，由后端 RAW_MAP 代码配置指定 "key0,key1.." 中每个 key 对应 key:"SQL片段" 中的 SQL片段'
               : '，例如 "@column" "id{},@having" 等'), false, ' ')) + extraComment;
         case '@json':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '转为JSON' + (isValueNotEmpty ? '' : '，例如 "request" "gets,heads" 等'), false, ' ')) + extraComment;
         case '@null':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             'NULL值字段' + (isValueNotEmpty ? '' : '，例如 "tag" "content,praiseUserIdList" 等'), false, ' ')) + extraComment;
         case '@cast':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '类型转换' + (isValueNotEmpty ? '' : '，例如 "date:DATETIME" "date>:DATETIME,id{}:JSON" 等'), false, ' ')) + extraComment;
         case '@schema':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '集合空间(数据库名/模式)' + (isValueNotEmpty ? '' : '，例如 "sys" "apijson" "postgres" "dbo" 等'), false, ' ')) + extraComment;
         case '@database':
-          return CodeUtil.DATABASE_KEYS.indexOf(value) < 0 ? ' ! value必须是[' + CodeUtil.DATABASE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return CodeUtil.DATABASE_KEYS.indexOf(value) < 0 ? ' ! value必须是[' + CodeUtil.DATABASE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment(
             '数据库类型：例如 "MYSQL" "POSTGRESQL" "SQLSERVER" "ORACLE" "DB2" "CLICKHOUSE" 等', false, ' ')) + extraComment;
         case '@datasource':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '跨数据源' + (isValueNotEmpty ? '' : '，例如 "DRUID" "HIKARICP" 等'), false, ' ')) + extraComment;
         case '@role':
           var role = CodeUtil.ROLES[value];
-          return StringUtil.isEmpty(role) ? ' ! value必须是[' + CodeUtil.ROLE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return StringUtil.isEmpty(role) ? ' ! value必须是[' + CodeUtil.ROLE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment(
             '来访角色：' + role + '，限制可操作的数据，假定真实强制匹配', false, ' ')) + extraComment;
         case '@cache':
           var cache = CodeUtil.CACHE_TYPES[value];
-          return StringUtil.isEmpty(cache) ? ' ! value必须是[' + CodeUtil.CACHE_TYPE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return StringUtil.isEmpty(cache) ? ' ! value必须是[' + CodeUtil.CACHE_TYPE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment(
             '缓存方式：0-全部 1-磁盘 2-内存', false, ' ')) + extraComment;
         case '@explain':
-          return isValueNotBoolean ? ' ! value必须是Boolean类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotBoolean ? ' ! value必须是Boolean类型！' : (isWarning ? '' : CodeUtil.getComment(
             '性能分析：true-开启 false-关闭，返回执行的 SQL 及查询计划', false, ' ')) + extraComment;
       }
       if (key.startsWith('@')) {
         if (key.endsWith('()')) {
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '存储过程' + (isValueNotEmpty ? '，触发调用数据库存储过程' : '：例如 "getCommentByUserId(id,@limit,@offset)"'), false, ' ')) + extraComment;
         }
         return StringUtil.isEmpty(extraComment, true) ? '' : CodeUtil.getComment(extraComment.substring(3), false, ' ');
@@ -6784,42 +6784,42 @@ res_data = rep.json()
       if (c.startsWith(' ! ')) {
         return c;
       }
-      return StringUtil.isEmpty(c, false) ? ' ! 字段不存在！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(c, false, ' ')) + extraComment;
+      return StringUtil.isEmpty(c, false) ? ' ! 字段不存在！' : (isWarning ? '' : CodeUtil.getComment(c, false, ' ')) + extraComment;
     }
 
     // alert('name = ' + name + '; key = ' + key);
     if (isRestful != true && StringUtil.isEmpty(name)) {
       switch (key) {
         case 'tag':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '请求标识' + (method == 'GET' || method == 'HEAD' ? '，GET,HEAD 请求不会自动解析，仅为后续迭代可能的手动优化而预留'
               : (isValueNotEmpty ? '，用来区分不同请求并校验，由后端 Request 表中指定' : '，例如 "User" "Comment[]" "Privacy-CIRCLE" 等')), false, ' '));
         case 'version':
-          return isValueNotInteger ? ' ! value必须是Integer类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotInteger ? ' ! value必须是Integer类型！' : (isWarning ? '' : CodeUtil.getComment(
             '版本号' + (method == 'GET' || method == 'HEAD' ? '，GET,HEAD 请求不会自动解析，仅为后续迭代可能的手动优化而预留'
               : (isValueNotEmpty ? '，用来使用特定版本的校验规则，由后端 Request 表中指定' : '，例如 1 2 3 等')), false, ' '));
         case 'format':
-          return isValueNotBoolean ? ' ! value必须是Boolean类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotBoolean ? ' ! value必须是Boolean类型！' : (isWarning ? '' : CodeUtil.getComment(
             '格式化: true-是 false-否，将 TableName 转为 tableName, TableName[] 转为 tableNameList, Table:alias 转为 alias 等小驼峰格式', false, ' '));
         case '@schema':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '集合空间(数据库名/模式)' + (isValueNotEmpty ? '' : '，例如 "sys" "apijson" "postgres" "dbo" 等'), false, ' '));
         case '@datasource':
-          return isValueNotString ? ' ! value必须是String类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotString ? ' ! value必须是String类型！' : (isWarning ? '' : CodeUtil.getComment(
             '跨数据源' + (isValueNotEmpty ? '' : '，例如 "DRUID" "HIKARICP" 等'), false, ' '));
         case '@database':
-          return CodeUtil.DATABASE_KEYS.indexOf(value) < 0 ? ' ! value必须是[' + CodeUtil.DATABASE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return CodeUtil.DATABASE_KEYS.indexOf(value) < 0 ? ' ! value必须是[' + CodeUtil.DATABASE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment(
             '数据库' + (isValueNotEmpty ? '' : '，例如 "MYSQL" "POSTGRESQL" "SQLSERVER" "ORACLE" 等'), false, ' '));
         case '@role':
           var role = CodeUtil.ROLES[value];
-          return StringUtil.isEmpty(role) ? ' ! value必须是[' + CodeUtil.ROLE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return StringUtil.isEmpty(role) ? ' ! value必须是[' + CodeUtil.ROLE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment(
             '默认角色：' + role, false, ' '));
         case '@cache':
           var cache = CodeUtil.CACHE_TYPES[value];
-          return StringUtil.isEmpty(cache) ? ' ! value必须是[' + CodeUtil.CACHE_TYPE_KEYS.join() + ']中的一种！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return StringUtil.isEmpty(cache) ? ' ! value必须是[' + CodeUtil.CACHE_TYPE_KEYS.join() + ']中的一种！' : (isWarning ? '' : CodeUtil.getComment(
             '缓存方式：0-全部 1-磁盘 2-内存', false, ' '));
         case '@explain':
-          return isValueNotBoolean ? ' ! value必须是Boolean类型！' : (isWarning && ! isFuzzTable ? '' : CodeUtil.getComment(
+          return isValueNotBoolean ? ' ! value必须是Boolean类型！' : (isWarning ? '' : CodeUtil.getComment(
             '性能分析：true-开启 false-关闭，返回执行的 SQL 及查询计划', false, ' '));
       }
     }
@@ -7008,12 +7008,12 @@ res_data = rep.json()
       var c = StringUtil.isEmpty(targetComment, true) ? '' : ' ' + CodeUtil.getType4Language(language, t, true)
        + (targetObj.notEmpty ? '! ' : (targetObj.notNull ? ', ' : '? ')) + StringUtil.trim(targetComment);
       if (CodeUtil.isTypeMatch(t, CodeUtil.getType4Request(value)) != true) {
-        c = ' ! value必须是' + CodeUtil.getType4Language(language, t) + '类型！' + (isWarning && ! isFuzzTable ? ' ' : CodeUtil.getComment(c, false, ' '));
+        c = ' ! value必须是' + CodeUtil.getType4Language(language, t) + '类型！' + (isWarning ? ' ' : CodeUtil.getComment(c, false, ' '));
         if (ignoreError != true) {
           throw new Error(c);
         }
 
-        if (isWarning && ! isFuzzTable) {
+        if (isWarning) {
           return c;
         }
       }
@@ -7224,7 +7224,7 @@ res_data = rep.json()
           }
 
           if (CodeUtil.isTypeMatch(t, CodeUtil.getType4Request(value)) != true) {
-            c = ' ! value必须是' + CodeUtil.getType4Language(language, t) + '类型！' + (isWarning && ! isFuzzTable ? ' ' : CodeUtil.getComment(c, false, ' '))
+            c = ' ! value必须是' + CodeUtil.getType4Language(language, t) + '类型！' + (isWarning ? ' ' : CodeUtil.getComment(c, false, ' '))
             if (ignoreError != true) {
               throw new Error(c);
             }
@@ -7383,7 +7383,7 @@ res_data = rep.json()
           hasAt = true;
 
           at = '引用赋值' + (isValueNotEmpty ? (value.startsWith('/') ? '，从对象父级开始的相对(缺省)路径' : '，从最外层开始的绝对(完整)路径') : '，例如 "User/id" "[]/Moment/id" 等');
-          key = columnName = columnName.substring(0, columnName.length - 1);
+          columnName = columnName.substring(0, columnName.length - 1);
 
           if (value != null && isValueNotStringOrObject) {
             return ' ! value必须是String或Object类型！';
@@ -7567,7 +7567,7 @@ res_data = rep.json()
           // if (ignoreError != true) {
           //   throw new Error(c);
           // }
-          return ' ! value必须是' + t + '类型！' + (isWarning && ! isFuzzTable ? ' ' : CodeUtil.getComment(c, false, ' '));
+          return ' ! value必须是' + t + '类型！' + (isWarning ? ' ' : CodeUtil.getComment(c, false, ' '));
         }
 
         if (isFuzzTable) {
@@ -7575,7 +7575,7 @@ res_data = rep.json()
             continue;
           }
 
-          if (StringUtil.isNotEmpty(c, true)) {
+          if (StringUtil.isNotEmpty(c, true) && ! isWarning) {
             comment = (StringUtil.isEmpty(comment, true) ? '' : comment + ' | ')
               + (StringUtil.isEmpty(table_schema, true) || table_schema == schemaName ? '' : table_schema + '.')
               + table_name + '.' + name + ': ' + c;
