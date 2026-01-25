@@ -1313,12 +1313,18 @@ public class DemoController extends APIJSONController<Long> {
     public static final String ADD_COOKIE = "Add-Cookie";
     public static final String APIJSON_DELEGATE_ID = "Apijson-Delegate-Id";  // 有些 Web 框架会强制把全大写改为全小写或大驼峰
     public static final List<String> EXCEPT_HEADER_LIST;
+    public static final List<String> IGNORE_HEADER_LIST;
     static {
         SESSION_MAP = new SessionMap();
 
         EXCEPT_HEADER_LIST = Arrays.asList(  //accept-encoding 在某些情况下导致乱码，origin 和 sec-fetch-mode 等 CORS 信息导致服务器代理失败
                 "accept-encoding", "accept-language", "content-length", "dnt", // "accept", "connection"
                 "host", "origin", "referer", "user-agent", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-dest", "sec-fetch-user"
+        );
+        IGNORE_HEADER_LIST = Arrays.asList(
+                "accept-encoding", "accept-language", "content-length", "dnt", "accept", "connection", "cookie", "token",
+                "host", "origin", "referer", "user-agent", "sec-fetch-mode", "sec-fetch-site", "sec-fetch-dest", "sec-fetch-user",
+                "authorization", "x-authorization", "authentication", "x-authentication"
         );
     }
 
@@ -1463,18 +1469,20 @@ public class DemoController extends APIJSONController<Long> {
                     }
 
                     String name = line.substring(0, ind).trim();
+                    String n = name == null ? null : name.toLowerCase();
                     String h = line.substring(ind + 1).trim();
 
-                    if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
+                    if (SET_COOKIE.toLowerCase().equals(n)) {  //接收到时就已经被强制小写
                         setCookie = Arrays.asList(h);  // JSON.parseArray(request.getHeader(name), String.class);
-                    } else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
+                    } else if (ADD_COOKIE.toLowerCase().equals(n)) {
                         addCookie = Arrays.asList(h);
-                    } else if (APIJSON_DELEGATE_ID.toLowerCase().equals(name.toLowerCase())) {
+                    } else if (APIJSON_DELEGATE_ID.toLowerCase().equals(n)) {
                         apijsonDelegateId = Arrays.asList(h);
                     } else {
                         headers.put(name, Arrays.asList(h));
 
-                        if (recordType != 0) {
+                        if (recordType != 0 && ! (n.equals("cookie") || n.equals("token") || n.equals("authorization")
+                                || n.equals("authentication") || n.startsWith("x-") || (isSQL != true && IGNORE_HEADER_LIST.contains(n)))) {
                             if (isSQL) {
                                 hm.put(name, h);
 
@@ -1503,20 +1511,22 @@ public class DemoController extends APIJSONController<Long> {
 
             while (names.hasMoreElements()) {
                 String name = names.nextElement();
-                if (name != null && exceptHeaderList.contains(name.toLowerCase()) == false) {
+                String n = name == null ? null : name.toLowerCase();
+                if (n != null && exceptHeaderList.contains(n) == false) {
                     //APIAuto 是一定精准发送 Set-Cookie 名称过来的，预留其它命名可实现覆盖原 Cookie Header 等更多可能
 
                     String h = httpServletRequest.getHeader(name);
-                    if (SET_COOKIE.toLowerCase().equals(name.toLowerCase())) {  //接收到时就已经被强制小写
+                    if (SET_COOKIE.toLowerCase().equals(n)) {  //接收到时就已经被强制小写
                         setCookie = Arrays.asList(h);  // JSON.parseArray(request.getHeader(name), String.class);
-                    } else if (ADD_COOKIE.toLowerCase().equals(name.toLowerCase())) {
+                    } else if (ADD_COOKIE.toLowerCase().equals(n)) {
                         addCookie = Arrays.asList(h);
-                    } else if (APIJSON_DELEGATE_ID.toLowerCase().equals(name.toLowerCase())) {
+                    } else if (APIJSON_DELEGATE_ID.toLowerCase().equals(n)) {
                         apijsonDelegateId = Arrays.asList(h);
                     } else {
                         headers.add(name, h);
 
-                        if (recordType != 0) {
+                        if (recordType != 0 && ! (n.equals("cookie") || n.equals("token") || n.equals("authorization")
+                                || n.equals("authentication") || n.startsWith("x-") || (isSQL != true && IGNORE_HEADER_LIST.contains(n)))) {
                             if (isSQL) {
                                 hm.put(name, h);
 
