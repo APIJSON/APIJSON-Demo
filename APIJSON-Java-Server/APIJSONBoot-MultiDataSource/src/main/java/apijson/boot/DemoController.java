@@ -1789,6 +1789,7 @@ public class DemoController extends APIJSONController<Long> {
 
                 JSONRequest request = new JSONRequest();
                 JSONRequest testRecord = new JSONRequest();
+                long randomId = 0;
 
                 if (documentId <= 0) {
                     if (isUnit) {
@@ -1819,10 +1820,10 @@ public class DemoController extends APIJSONController<Long> {
                         document.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         document.put("name", "[Record] " + new java.util.Date().toLocaleString());
                         document.put("type", reqType);
-                        document.put("method", method);
+                        document.put("method", method == null ? "GET" : method.name());
                         document.put("url", branch);
                         document.put("header", StringUtil.isEmpty(hs, true) ? null : hs.trim());
-                        document.put("request", isSQL ? "{}" : reqBody);
+                        document.put("request", isSQL ? "{}" : (reqBody != null && ! reqBody.isEmpty() ? JSON.toJSONString(reqBody) : (StringUtil.isEmail(body) ? "{}" : body)));
                         if (isSQL) {
                             // 没有名称，除非 args 传对象而不是数组
                             // JSONList args = req.getJSONArray("args");
@@ -1850,12 +1851,24 @@ public class DemoController extends APIJSONController<Long> {
                     String config = isSQL ? hs : parseRandomConfig("", m);
 
                     JSONObject random = JSON.newJSONObject();
-                    random.put("count", 1);
+                    random.put("toId", 0);
+                    random.put("chainId", 0);
                     random.put("documentId", documentId);
+                    random.put("count", 1);
                     random.put("config", config.trim());
                     // Random >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                     if (recordType > 0) {
+                        try {
+                            JSONObject randomReq = JSON.newJSONObject();
+                            randomReq.put("Random", random);
+                            JSONObject rsp = newParser(session, GET).setNeedVerify(false).parseResponse(randomReq);
+                            JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("Random");
+                            randomId = rsp2 == null ? 0 : rsp2.getLongValue("id");
+                        } catch (Throwable e) {
+                            e.printStackTrace();
+                        }
+
                         random.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         random.put("name", "[Record] " + new java.util.Date().toLocaleString());
 
@@ -1885,7 +1898,6 @@ public class DemoController extends APIJSONController<Long> {
                             testRecord.put("randomId", 0);
                         }
                         else {
-                            long randomId = 0;
                             try {
                                 JSONObject randomReq = JSON.newJSONObject();
                                 randomReq.put("Random", random);
@@ -1918,7 +1930,7 @@ public class DemoController extends APIJSONController<Long> {
                 }   // TestRecord >>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
                 request.put("TestRecord", testRecord);
-                JSONObject rsp = newParser(session, recordType < 0 ? GET : POST)
+                JSONObject rsp = recordType > 0 && randomId > 0 ? null : newParser(session, recordType < 0 ? GET : POST)
                         .setNeedVerify(false).setNeedVerifyContent(true).parseResponse(request);
                 if (recordType < 0) {
                     JSONObject rsp2 = rsp == null ? null : rsp.getJSONObject("TestRecord");
