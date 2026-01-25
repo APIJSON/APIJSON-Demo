@@ -1438,7 +1438,7 @@ https://github.com/Tencent/APIJSON/issues
       types: null, // [ REQUEST_TYPE_PARAM, REQUEST_TYPE_JSON, REQUEST_TYPE_FORM, REQUEST_TYPE_DATA],  // 很多人喜欢用 GET 接口测试，默认的 JSON 看不懂 , REQUEST_TYPE_FORM, REQUEST_TYPE_DATA,  REQUEST_TYPE_GRPC ],  //默认展示
       host: '',
       database: 'MYSQL', // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释  'MYSQL',// 'POSTGRESQL',
-      schema: '', // 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
+      schema: 'sys',  // 查文档必须，除非后端提供默认配置接口  // 用后端默认的，避免用户总是没有配置就问为什么没有生成文档和注释   'sys',
       otherEnv: 'http://localhost:8080',  // 其它环境服务地址，用来对比当前的
       server: 'http://apijson.cn:9090', // 'http://localhost:8080', //  Chrome 90+ 跨域问题非常难搞，开发模式启动都不行了
       // server: 'http://47.74.39.68:9090',  // apijson.org
