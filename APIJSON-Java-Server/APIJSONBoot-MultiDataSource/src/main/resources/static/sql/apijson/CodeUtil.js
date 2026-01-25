@@ -3472,7 +3472,7 @@ var CodeUtil = {
       delete reqObj.orderBy;
     }
 
-    // var columnStr = (StringUtil.isEmpty(colums, true) ? '' : StringUtil.trim(colums));
+    // var columnStr = (StringUtil.isEmpty(columns, true) ? '' : StringUtil.trim(columns));
     var quote = database == 'MYSQL' ? '`' : '"';
     var tablePath = (StringUtil.isEmpty(schema, true) ? '' : quote + schema + quote + '.') + quote + modelName + quote;
     if (isPost) {
@@ -3491,11 +3491,11 @@ var CodeUtil = {
         '    DELETE FROM ' + tablePath;
     }
     else {
-      var colums = Object.keys(reqObj);
+      var columns = Object.keys(reqObj);
       var cs = '';
-      if (colums != null && colums.length > 0) {
-        for (var i = 0; i < colums.length; i++) {
-          cs += (i <= 0 ? '' : ', ') + quote + colums[i] + quote; //需要尽可能保留原字段 [] 肯定不是字段名 JSONResponse.getVariableName(colums[i]) + quote;
+      if (columns != null && columns.length > 0) {
+        for (var i = 0; i < columns.length; i++) {
+          cs += (i <= 0 ? '' : ', ') + quote + columns[i] + quote; //需要尽可能保留原字段 [] 肯定不是字段名 JSONResponse.getVariableName(columns[i]) + quote;
         }
       }
 
