@@ -188,16 +188,24 @@ function toFormData(data) {
     return null
   }
   if (data instanceof Object == false || data instanceof Array) {
-    alert('toFormData  data instanceof Object == false || data instanceof Array ! >> return')
-    return
+    // alert('toFormData  data instanceof Object == false || data instanceof Array ! >> return')
+    throw new Error('data must be Object!')
   }
 
   var first = true
   var ret = ''
   for (var key in data) {
     var val = data[key]
-    if (typeof val != 'string') {
-      val = JSON.stringify(val)
+    if (val == null) {
+      val = ''
+    }
+    else if (typeof val != 'string') {
+      try {
+        val = JSON.stringify(val)
+      } catch (e) {
+        console.log(e)
+        val = new String(val)
+      }
     }
     ret += (first ? '' : '&') + encodeURIComponent(key) + '=' + encodeURIComponent(val)
     first = false
