@@ -3200,23 +3200,23 @@ https://github.com/Tencent/APIJSON/issues
               log(e)
             }
 
-            var code_ = inputObj.code
+            var code_ = inputObj[JSONResponse.KEY_CODE]
             if (isEditResponse) {
-              inputObj.code = null  // delete inputObj.code
+              inputObj[JSONResponse.KEY_CODE] = typeof code_ == 'undefined' ? undefined : null  // delete inputObj.code
             }
 
             commentObj = JSONResponse.updateStandard(commentStddObj, inputObj);
             CodeUtil.parseComment(after, docObj == null ? null : docObj['[]'], path, this.schema, this.database, this.language, isEditResponse != true, commentObj, true);
 
             if (isEditResponse) {
-              inputObj.code = code_
+              inputObj[JSONResponse.KEY_CODE] = code_
             }
           }
 
           var rawRspStr = JSON.stringify(currentResponse || {})
-          const code = currentResponse.code;
+          const code = currentResponse[JSONResponse.KEY_CODE];
           const thrw = currentResponse.throw;
-          delete currentResponse.code; // currentResponse.code = null; //code必须一致
+          currentResponse[JSONResponse.KEY_CODE] = typeof code == 'undefined' ? undefined : null; // delete currentResponse.code; // currentResponse.code = null; //code必须一致
           delete currentResponse.throw; // currentResponse.throw = null; // throw必须一致
 
           const isML = this.isMLEnabled;
@@ -3224,7 +3224,7 @@ https://github.com/Tencent/APIJSON/issues
           stddObj.status = (this.currentHttpResponse || {}).status || 200;
           stddObj.code = code || 0;
           stddObj.throw = thrw;
-          currentResponse.code = code;
+          currentResponse[JSONResponse.KEY_CODE] = code;
           currentResponse.throw = thrw;
 
           var config = vRandom.value;
