@@ -618,7 +618,7 @@ public class DemoController extends APIJSONController<Long> {
         new DemoParser(DELETE, false).parse(newVerifyRequest(type, phone, email));
 
         JSONObject response = new DemoParser(POST, false).parseResponse(
-                newVerifyRequest(type, phone, "" + (new Random().nextInt(9999) + 1000))
+                newVerifyRequest(type, phone, null, "" + (new Random().nextInt(9999) + 1000))
         );
 
 
