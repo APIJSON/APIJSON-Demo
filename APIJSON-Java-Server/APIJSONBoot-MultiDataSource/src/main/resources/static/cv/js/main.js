@@ -8878,6 +8878,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (isEnter) { // enter
           if (isFilter) {
+            if (['chainGroup', 'caseGroup', 'testCase', 'random', 'randomSub'].indexOf(type) >= 0) {
+              this.reportId = 0;
+            }
             this.onFilterChange(type)
             return
           }

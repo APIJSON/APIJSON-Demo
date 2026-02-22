@@ -5842,6 +5842,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (isFilter && type == 'caseGroup') {
           this.isCaseGroupEditable = true
         }
+
         var obj = event.srcElement ? event.srcElement : event.target;
         if ($(obj).attr('id') == 'vUrl') {
           vUrlComment.value = ''
@@ -5851,6 +5852,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
         if (keyCode == 13) { // enter
           if (isFilter) {
+            if (['chainGroup', 'caseGroup', 'testCase', 'random', 'randomSub'].indexOf(type) >= 0) {
+              this.reportId = 0;
+            }
             this.onFilterChange(type)
             return
           }

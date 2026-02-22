@@ -1949,9 +1949,9 @@
               'Flow': {
                 '@order': 'time-',
                 'userId{}': [0, App.User.id],
-                'name$*~': search,
+                'name*~': search,
                 'detail*~': search,
-                '@combine': StringUtil.isEmpty(search) ? null : 'name$*~,detail*~'
+                '@combine': StringUtil.isEmpty(search) ? null : 'name*~,detail*~'
               },
               'Device': {
                 'id@': '/Flow/deviceId'
