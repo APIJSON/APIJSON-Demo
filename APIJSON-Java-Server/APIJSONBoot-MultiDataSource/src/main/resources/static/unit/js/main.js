@@ -1156,7 +1156,7 @@ https://github.com/Tencent/APIJSON/issues
       server: 'http://apijson.cn:9090',  //apijson.cn
       // server: 'http://47.74.39.68:9090',  // apijson.org
       project: 'http://apijson.cn:8080', // 'http://localhost:8081',
-      language: 'Java,Kotlin,Go', // CodeUtil.LANGUAGE_JAVA,
+      language: 'Java,Kotlin,Go,Python,C++,Rust', // CodeUtil.LANGUAGE_JAVA,
       header: {},
       page: 0,
       count: 15,
@@ -1418,7 +1418,7 @@ https://github.com/Tencent/APIJSON/issues
         var cls = url.substring(index + 1)
         var pkg = index < 0 ? '' : url.substring(0, index)
 
-        if ((this.language == CodeUtil.LANGUAGE_GO || this.language == CodeUtil.LANGUAGE_C_PLUS_PLUS) && StringUtil.isBigName(cls) != true) {
+        if ((lang == CodeUtil.LANGUAGE_GO || lang == CodeUtil.LANGUAGE_CPP) && StringUtil.isBigName(cls) != true) {
           pkg = StringUtil.isEmpty(pkg) ? cls : pkg + '.' + cls
         }
         return StringUtil.trim(pkg)
