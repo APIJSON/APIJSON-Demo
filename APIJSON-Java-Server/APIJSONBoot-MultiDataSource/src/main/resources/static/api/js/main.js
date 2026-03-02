@@ -3485,7 +3485,7 @@ https://github.com/Tencent/APIJSON/issues
           }
 
           configs.push(config)
-          config2 = StringUtil.trim(this.newRandomConfig(null, '', req, true))
+          var config2 = StringUtil.trim(this.newRandomConfig(null, '', req, true))
           if (StringUtil.isNotEmpty(config2, true)) {
             configs.push(config2)
           }
