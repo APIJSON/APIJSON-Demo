@@ -10947,10 +10947,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           const pathKeys = path.split('/')
           if (pathKeys == null || pathKeys.length <= 0) {
             throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + path + ' 不符合 JSON 路径的格式 key0/key1/../targetKey !' +
-              '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
-              '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
-              '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
-              '\nkey: 多行代码 必须用 function f() { var a = 1; return a; } f() 这种一行代码格式！');
+                '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
+                '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
+                '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
+                '\nkey: 多行代码 必须用 function f() { var a = 1; return a; } f() 这种一行代码格式！');
           }
 
           const lastKeyInPath = pathKeys[pathKeys.length - 1]
@@ -10958,10 +10958,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           const key = customizeKey ? p_k.substring(bi + 1) : lastKeyInPath;
           if (key == null || StringUtil.length(key, true) <= 0) {
             throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + key + ' 不是合法的 JSON key!' +
-              '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
-              '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
-              '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
-              '\nkey: 多行代码 必须用 function f() { var a = 1; return a; } f() 这种一行代码格式！');
+                '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
+                '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
+                '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
+                '\nkey: 多行代码 必须用 function f() { var a = 1; return a; } f() 这种一行代码格式！');
           }
 
           // value RANDOM_DB
@@ -11015,7 +11015,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   }
                   if (parent instanceof Object == false) {
                     throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中' +
-                      ' pathKeys[' + j + '] = ' + pathKeys[j] + ' 在实际请求 JSON 内对应的值不是对象 {} 或 数组 [] !');
+                        ' pathKeys[' + j + '] = ' + pathKeys[j] + ' 在实际请求 JSON 内对应的值不是对象 {} 或 数组 [] !');
                   }
                   parent = current;
                 }
@@ -11197,15 +11197,15 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var step = stepStr == null || stepStr.length <= 0 ? 1 : +stepStr; //都会自动忽略空格 Number(stepStr); //Number.parseInt(stepStr); //+stepStr;
 
               if (Number.isSafeInteger(step) != true || step <= 0
-                || (StringUtil.isEmpty(stepStr, false) != true && StringUtil.isNumber(stepStr) != true)
+                  || (StringUtil.isEmpty(stepStr, false) != true && StringUtil.isNumber(stepStr) != true)
               ) {
                 throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中字符 ' + stepStr + ' 不符合跨步 step 格式！'
-                  + '\n顺序整数 和 顺序取值 可以通过以下格式配置 升降序 和 跨步：'
-                  + '\n  ORDER_DB+step(arg0, arg1...)\n  ORDER_DB-step(arg0, arg1...)'
-                  + '\n  ORDER_INT+step(arg0, arg1...)\n  ORDER_INT-step(arg0, arg1...)'
-                  + '\n  ORDER_IN+step(start, end)\n  ORDER_IN-step(start, end)'
-                  + '\n其中：\n  + 为升序，后面没有 step 时可省略；\n  - 为降序，不可省略；' + '\n  step 为跨步值，类型为 正整数，默认为 1，可省略。'
-                  + '\n+，-，step 前后都不能有空格等其它字符！');
+                    + '\n顺序整数 和 顺序取值 可以通过以下格式配置 升降序 和 跨步：'
+                    + '\n  ORDER_DB+step(arg0, arg1...)\n  ORDER_DB-step(arg0, arg1...)'
+                    + '\n  ORDER_INT+step(arg0, arg1...)\n  ORDER_INT-step(arg0, arg1...)'
+                    + '\n  ORDER_IN+step(start, end)\n  ORDER_IN-step(start, end)'
+                    + '\n其中：\n  + 为升序，后面没有 step 时可省略；\n  - 为降序，不可省略；' + '\n  step 为跨步值，类型为 正整数，默认为 1，可省略。'
+                    + '\n+，-，step 前后都不能有空格等其它字符！');
               }
 
               if (fun == ORDER_DB) {
@@ -11214,56 +11214,77 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
 
               toEval = (fun == ORDER_IN ? 'orderIn' : (fun == ORDER_INT ? 'orderInt' : (fun == ORDER_BAD_BOOL ? 'orderBadBool' : (fun == ORDER_BAD_NUM
-               ? 'orderBadNum' : (fun == ORDER_BAD_STR ? 'orderBadStr' : (fun == ORDER_BAD_ARR ? 'orderBadArr' : (fun == ORDER_BAD_OBJ ? 'orderBadObj' : 'orderBad')))))))
-                + '(' + (fun == ORDER_BAD ? 'BADS, ' : '') + isDesc + ', ' + getOrderIndex(
-                  randomId, line
-                  , (fun == ORDER_INT || args == null ? 0 : args.length)
-                  + (fun == ORDER_BAD_BOOL ? BAD_BOOLS.length : (fun == ORDER_BAD_NUM ? BAD_NUMS.length : (fun == ORDER_BAD_STR
-                   ? BAD_STRS.length : (fun == ORDER_BAD_ARR ? BAD_ARRS.length : (fun == ORDER_BAD_OBJ ? BAD_OBJS.length : (fun == ORDER_BAD ? BADS.length : 0))))))
-                  , step
-                ) + ', ' + value.substring(start + 1);
+                      ? 'orderBadNum' : (fun == ORDER_BAD_STR ? 'orderBadStr' : (fun == ORDER_BAD_ARR ? 'orderBadArr' : (fun == ORDER_BAD_OBJ ? 'orderBadObj' : 'orderBad')))))))
+                  + '(' + (fun == ORDER_BAD ? 'BADS, ' : '') + isDesc + ', ' + getOrderIndex(
+                      randomId, line
+                      , (fun == ORDER_INT || args == null ? 0 : args.length)
+                      + (fun == ORDER_BAD_BOOL ? BAD_BOOLS.length : (fun == ORDER_BAD_NUM ? BAD_NUMS.length : (fun == ORDER_BAD_STR
+                          ? BAD_STRS.length : (fun == ORDER_BAD_ARR ? BAD_ARRS.length : (fun == ORDER_BAD_OBJ ? BAD_OBJS.length : (fun == ORDER_BAD ? BADS.length : 0))))))
+                      , step
+                  ) + ', ' + value.substring(start + 1);
             }
             else {  //随机函数
+              var as = StringUtil.split(value.substring(start + 1, end), ', ') || []
+              var as0 = as[0] // key path
+              var as1 = as[1] // default value
+              var as2 = as[2] // GET /users
+              var as3 = as[3] // account@host/index
+              var accountHostIndexPath = StringUtil.isEmpty(as3) ? '/' : as3 + (as3.indexOf('/') < 0 ? '/' : '')
+              var isChain = StringUtil.isNotEmpty(as2)
+              var chainArr = isChain ? '((ctx || {}).map || {})[' + as2 + ']' : null; // [GET /users] = { account@host: [] }
+              if (isChain) {
+                as2 = parseJSON(as2, as2, true)
+                as.splice(2, 2)
+              }
+
               if (fun == PRE_REQ) {
-                toEval = 'get4Path(((ctx || {}).pre || {}).req, ' + (value == 'PRE_REQ()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req")' : 'get4Path(((ctx || {}).pre || {}).req'
+                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_REQ()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_ARG) {
-                toEval = 'get4Path(((ctx || {}).pre || {}).arg, ' + (value == 'PRE_ARG()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg")' : 'get4Path(((ctx || {}).pre || {}).arg'
+                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_ARG()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_RES) {
-                toEval = 'get4Path(((ctx || {}).pre || {}).res, ' + (value == 'PRE_RES()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res")' : 'get4Path(((ctx || {}).pre || {}).res'
+                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_RES()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_DATA) {
-                toEval = 'get4Path(((ctx || {}).pre || {}).data, ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data")' : 'get4Path(((ctx || {}).pre || {}).data'
+                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == CTX_GET) {
                 toEval = 'get4Path((ctx || {}).ctx, ' + (value == 'CTX_GET()' ? JSON.stringify(path) : '') + value.substring(start + 1);
               }
               else if (fun == CTX_PUT) {
-                var as = StringUtil.split(value.substring(start + 1, end), ', ') || []
-                if (StringUtil.isEmpty(as[1], true) || as[1] == 'PRE_DATA') {
+                as1 = parseJSON(as1, as1, true)
+
+                if (StringUtil.isEmpty(as1, true) || as1 == 'PRE_DATA') {
                   as[1] = '((ctx || {}).pre || {}).data'
                 }
-                else if (as[1] == 'PRE_REQ') {
+                else if (as1 == 'PRE_REQ') {
                   as[1] = '((ctx || {}).pre || {}).req'
                 }
-                else if (as[1] == 'PRE_ARG') {
+                else if (as1 == 'PRE_ARG') {
                   as[1] = '((ctx || {}).pre || {}).arg'
                 }
-                else if (as[1] == 'PRE_RES') {
+                else if (as1 == 'PRE_RES') {
                   as[1] = '((ctx || {}).pre || {}).res'
                 }
-                else if (as[1] == 'CUR_DATA') {
+                else if (as1 == 'CUR_DATA') {
                   as[1] = '((ctx || {}).cur || {}).data'
                 }
-                else if (as[1] == 'CUR_REQ') {
+                else if (as1 == 'CUR_REQ') {
                   as[1] = '((ctx || {}).cur || {}).req'
                 }
-                else if (as[1] == 'CUR_ARG') {
+                else if (as1 == 'CUR_ARG') {
                   as[1] = '((ctx || {}).cur || {}).arg'
                 }
-                else if (as[1] == 'CUR_RES') {
+                else if (as1 == 'CUR_RES') {
                   as[1] = '((ctx || {}).cur || {}).res'
+                }
+                else if (as1 == 'MAP') {
+                  as[1] = '((ctx || {}).map || {})'
                 }
 
                 if (as.length >= 1) {
@@ -11285,43 +11306,43 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 toEval = 'get4Path(((ctx || {}).cur || {}).data, ' + (value == 'CUR_DATA()' ? JSON.stringify(path) : '') + value.substring(start + 1);
               }
               else {
-                  fun = funWithOrder;  //还原，其它函数不支持 升降序和跨步！
+                fun = funWithOrder;  //还原，其它函数不支持 升降序和跨步！
 
-                  if (fun == RANDOM_DB) {
-                    request4Db(JSONResponse.getTableName(pathKeys[pathKeys.length - 2]), which, p_k, pathKeys, key, lastKeyInPath, true, null, null, args[4]); //'random()');
-                    continue;
-                  }
+                if (fun == RANDOM_DB) {
+                  request4Db(JSONResponse.getTableName(pathKeys[pathKeys.length - 2]), which, p_k, pathKeys, key, lastKeyInPath, true, null, null, args[4]); //'random()');
+                  continue;
+                }
 
-                  if (fun == RANDOM_IN) {
-                    toEval = 'randomIn' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_INT) {
-                    toEval = 'randomInt' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_NUM) {
-                    toEval = 'randomNum' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_STR) {
-                    toEval = 'randomStr' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_BAD) {
-                    toEval = 'randomBad' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_BAD_BOOL) {
-                    toEval = 'randomBadBool' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_BAD_NUM) {
-                    toEval = 'randomBadNum' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_BAD_STR) {
-                    toEval = 'randomBadStr' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_BAD_ARR) {
-                    toEval = 'randomBadArr' + value.substring(start);
-                  }
-                  else if (fun == RANDOM_BAD_OBJ) {
-                    toEval = 'randomBadObj' + value.substring(start);
-                  }
+                if (fun == RANDOM_IN) {
+                  toEval = 'randomIn' + value.substring(start);
+                }
+                else if (fun == RANDOM_INT) {
+                  toEval = 'randomInt' + value.substring(start);
+                }
+                else if (fun == RANDOM_NUM) {
+                  toEval = 'randomNum' + value.substring(start);
+                }
+                else if (fun == RANDOM_STR) {
+                  toEval = 'randomStr' + value.substring(start);
+                }
+                else if (fun == RANDOM_BAD) {
+                  toEval = 'randomBad' + value.substring(start);
+                }
+                else if (fun == RANDOM_BAD_BOOL) {
+                  toEval = 'randomBadBool' + value.substring(start);
+                }
+                else if (fun == RANDOM_BAD_NUM) {
+                  toEval = 'randomBadNum' + value.substring(start);
+                }
+                else if (fun == RANDOM_BAD_STR) {
+                  toEval = 'randomBadStr' + value.substring(start);
+                }
+                else if (fun == RANDOM_BAD_ARR) {
+                  toEval = 'randomBadArr' + value.substring(start);
+                }
+                else if (fun == RANDOM_BAD_OBJ) {
+                  toEval = 'randomBadObj' + value.substring(start);
+                }
               }
 
             }
@@ -11339,7 +11360,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var res = {};
           var data = res.data;
           var err = null;
-          invoke(eval(StringUtil.trim(preScript) + '\n;\n(' + toEval + ')'), which, p_k, pathKeys, key, lastKeyInPath);
+          try {
+            var ret = eval(StringUtil.trim(preScript) + '\n;\n(' + toEval + ')')
+            invoke(ret, which, p_k, pathKeys, key, lastKeyInPath);
+          } catch (e) {
+            throw new Error(e.message + '\n; 第 ' + i + ' 行：' + line)
+          }
 
           // alert('> current = ' + JSON.stringify(current, null, '    '))
         }
@@ -11604,7 +11630,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
          cur.index = index
 //         item.pre = pre // list[index - 1]
 
-         var doc = item.Document || {}
+         var doc = item.Flow || {}
          var method = cur.method = doc.method
          var type = cur.type = doc.type
          var url = cur.url = doc.url
@@ -11616,22 +11642,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
            data: json
          }
          var header = cur.header = doc.header
+         var accountInfo = this.getCurrentAccount() || {}
+         const account = StringUtil.trim(accountInfo.account || accountInfo.phone || accountInfo.email)
 //
-//         this.parseRandom(json, header, rawConfig, random.id, true, false, function (randomName, constConfig, constJson) {
+//         this.parseRandom(json, rawConfig, random.id, true, false, function (randomName, constConfig, constJson) {
              this.startTestSingle(list, allCount, index, item, isRandom, accountIndex, isCross, callback
                , function(res, allCount, list, index, response, cmp, isRandom, accountIndex, justRecoverTest, isCross) {
 
                res = res || {}
                var config = res.config || {}
-               var p = config.data || config.params
-               try {
-                 cur.arg = App.getRequest(p, {})
-               } catch (e) {
-                 if (typeof p != 'string' || p.indexOf('=') <= 0) {
-                   throw e
-                 }
-                 cur.arg = getRequestFromURL('?' + p, true)
-               }
+               cur.arg = App.getRequest(config.data || config.params, {})
                cur.req = {
                  method: method,
                  url: config.url,
@@ -11642,6 +11662,20 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                cur.statusText = res.statusText
                cur.res = res
                cur.data = res.data
+               var map = ctx.map = ctx.map || {}
+               var m = map[method + ' ' + url] = map[method + ' ' + url] || {}
+
+               const baseUrl = App.getBaseUrl(config.url)
+               const accountKey = StringUtil.trim(account) + '@' + StringUtil.trim(baseUrl)
+               var arr = m[accountKey] = m[accountKey] || []
+               arr.push({
+                 type: type,
+                 req: req,
+                 arg: json,
+                 res: res,
+                 data: res.data
+               })
+
                App.startTestChain(list, allCount, index + 1, list[index + 1], item, ctx, isRandom, accountIndex, isCross, callback)
              }, ctx)
              return true
@@ -11856,10 +11890,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         if (err != null) {
           var status = res == null ? null : res.status
           var rsp = (err.response || {}).data || {}
+          var message = err.message
+          var msg = StringUtil.trim(StringUtil.trim(rsp.code) + ' ' + StringUtil.trim(rsp.message || rsp.reason)) || err.message || '请求出错！'
           tr.compare = {
             code: JSONResponse.COMPARE_ERROR, //请求出错
-            msg: StringUtil.trim(StringUtil.trim(rsp.code) + ' ' + StringUtil.trim(rsp.message)) || err.message || '请求出错！',
-            path: (status != null && status != 200 ? status + ' ' : '') + err.message
+            msg: msg,
+            path: (status != null && status != 200 ? status + ' ' : '') + (StringUtil.isEmpty(message) || msg.indexOf(message) >= 0 ? '' : message)
           }
         }
         else {
