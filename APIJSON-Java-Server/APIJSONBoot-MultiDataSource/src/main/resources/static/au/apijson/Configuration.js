@@ -1,0 +1,9 @@
+const Configuration = {
+    ORIENTATION_UNDEFINED: 0,
+    ORIENTATION_PORTRAIT: 1,
+    ORIENTATION_LANDSCAPE: 2
+}
+
+if (typeof module == 'object') {
+    module.exports = Configuration;
+}
