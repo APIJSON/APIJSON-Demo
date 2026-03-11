@@ -15,6 +15,8 @@ limitations under the License.*/
 package apijson.boot;
 
 import java.io.*;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.util.*;
@@ -125,15 +127,46 @@ public class FileController {
 
 	@PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	@ResponseBody
-	public JSONObject upload(@RequestParam("file") MultipartFile file) {
+	public JSONObject upload(
+			@RequestParam(value = "file", required = false) MultipartFile file,
+			@RequestParam(value = "url", required = false) String url
+	) {
 		try {
-			String name = file.getOriginalFilename();
-			name = (StringUtil.isEmpty(name) ? DateFormat.getDateInstance().format(new Date()) : name)
-					.replaceAll("[^a-zA-Z0-9._-]", String.valueOf(Math.round(1100*Math.random())));
+			byte[] bytes;
+			String name;
+			// 1 如果是文件上传
+			if (file != null && !file.isEmpty()) {
+				bytes = file.getBytes();
+				name = file.getOriginalFilename();
+			}
+			// 2 如果是 URL 上传
+			else if (url != null && url.startsWith("http")) {
+				URL imageUrl = new URL(url);
+				HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
+				conn.setConnectTimeout(10000);
+				conn.setReadTimeout(10000);
+				conn.setRequestProperty("User-Agent", "Mozilla/5.0");
+
+				InputStream in = conn.getInputStream();
+				bytes = in.readAllBytes();
+				in.close();
+
+				name = new File(imageUrl.getPath()).getName();
+			}
+			else {
+				throw new RuntimeException("file or url required");
+			}
+
+			// 3 文件名处理
+			name = (StringUtil.isEmpty(name)
+					? DateFormat.getDateInstance().format(new Date())
+					: name)
+					.replaceAll("[^a-zA-Z0-9._-]", String.valueOf(Math.round(1100 * Math.random())));
+
+			// 4 写入文件
 			File convertFile = new File(fileUploadRootDir + name);
-			FileOutputStream fileOutputStream;
-			fileOutputStream = new FileOutputStream(convertFile);
-			fileOutputStream.write(file.getBytes());
+			FileOutputStream fileOutputStream = new FileOutputStream(convertFile);
+			fileOutputStream.write(bytes);
 			fileOutputStream.close();
 
 			if (fileNames != null && ! fileNames.isEmpty()) {
@@ -142,9 +175,10 @@ public class FileController {
 
 			JSONObject res = new JSONObject();
 			res.put("path", "/download/" + name);
-			res.put("size", file.getBytes().length);
+			res.put("size", bytes.length);
 			return new DemoParser().extendSuccessResult(res);
-		} 
+
+		}
 		catch (Exception e) {
 			e.printStackTrace();
 			return new DemoParser().newErrorResult(e);
