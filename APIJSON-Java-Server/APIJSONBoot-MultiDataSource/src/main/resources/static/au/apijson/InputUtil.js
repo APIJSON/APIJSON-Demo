@@ -323,14 +323,17 @@ const InputUtil = {
         }
 
         if (type == InputUtil.EVENT_TYPE_UI) {
-            var fragment = StringUtil.trim(obj.fragment);
+            var activityKeys = StringUtil.split(obj.activity, '.') || [];
+            var fragmentKeys = StringUtil.trim(obj.fragment, '.') || [];
 
-            return InputUtil.getUIActionName(action) + ' ' + (StringUtil.isEmpty(fragment, true) ? StringUtil.trim(obj.activity) : StringUtil.trim(fragment))
+            return InputUtil.getUIActionName(action) + ' ' + (StringUtil.isEmpty(fragmentKeys, true) ? StringUtil.trim(activityKeys[activityKeys.length - 1]) : StringUtil.trim(fragmentKeys[fragmentKeys.length - 1]))
         }
 
         if (type == InputUtil.EVENT_TYPE_HTTP) {
             var isReq = action >= 0 && action != InputUtil.HTTP_ACTION_RESPONSE;
-            return InputUtil.getHTTPActionName(action) + " " + StringUtil.trim(obj.format || '?') + (isReq ? '' : ' ' + (obj.status || 200)) + " " + StringUtil.trim(obj.url)
+            var format = obj.format
+            format = StringUtil.isNumber(format) ? '' : format
+            return InputUtil.getHTTPActionName(action) + " " + StringUtil.trim(isReq ? format : obj.status || 200) + " " + StringUtil.trim(obj.url)
         }
 
         return (input.name || "UNKNOWN !!!")
@@ -373,11 +376,13 @@ const InputUtil = {
 
         if (type == InputUtil.EVENT_TYPE_HTTP) {
             var isReq = action >= 0 && action != InputUtil.HTTP_ACTION_RESPONSE;
-            return timeStr + ' ' + InputUtil.getHTTPActionName(action) + " " + StringUtil.trim(obj.format)
+            var format = obj.format
+            format = StringUtil.isNumber(format) ? '' : format
+            return timeStr + ' ' + InputUtil.getHTTPActionName(action)
                 + "\nURL: " + StringUtil.trim(obj.url)
-                + "\n\nREQUEST: \n" + StringUtil.trim(obj.request)
-                + (isReq ? "" : "\n\n\nRESPONSE: \n" + StringUtil.trim(obj.response))
-                + "\n"
+                + "\n\nREQUEST: " + StringUtil.trim(format) + '\n' + StringUtil.trim(obj.request)
+                + (isReq ? "" : "\n\n\nRESPONSE: " + StringUtil.trim(obj.status) + '\n' + + StringUtil.trim(obj.response))
+                + "\n\n"
         }
 
         return timeStr + ' ' + (input.name || "UNKNOWN !!!")

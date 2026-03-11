@@ -920,3 +920,64 @@ table.diff thead th.texttitle {
 .cancel-btn:hover {
   background: #e0e0e0;
 }
+
+.vContainer{
+  margin-top: 45px;
+  position:absolute;
+  inset:0;
+  display:table-column;
+  flex-direction:column;
+  gap:12px;
+  overflow-y:auto;
+  overflow-x:hidden;
+  background:white;
+  z-index: 100;
+  object-fit:contain;
+  text-align: left;
+  padding-left: 10px;
+}
+
+/* 行 */
+.vRow{
+  display:flex;
+  gap:16px; /* 左右固定间距 */
+  object-fit:contain;
+  width: auto;
+}
+
+/* 单元 */
+.vCell{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  height: 100%;
+  width: auto;
+  object-fit:contain;
+}
+
+/* 标题 */
+.vTitle{
+  font-size:12px;
+  margin-bottom:4px;
+}
+
+/* 图片区域 */
+.vBox{
+  position:relative;
+  width:auto;
+  min-height:320px;
+  height: 100%;
+  object-fit:contain;
+}
+
+/* overlay */
+.vBox img,
+.vBox canvas{
+  position:absolute;
+  inset:0;
+  min-width: 180px;
+  width:auto;
+  height:100%;
+  object-fit:contain;
+}

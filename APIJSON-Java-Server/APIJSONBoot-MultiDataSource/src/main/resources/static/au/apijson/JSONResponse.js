@@ -1059,7 +1059,7 @@ var JSONResponse = {
         var format = target.format;
         if (typeof format == 'string' && FORMAT_PRIORITIES[format] != null) {
           var verifier = max.code < JSONResponse.COMPARE_FORMAT_CHANGE && StringUtil.isNotEmpty(format, true)
-              ? FORMAT_VERIFIERS[format] : null;
+          && StringUtil.isNotEmpty(real, true) ? FORMAT_VERIFIERS[format] : null;
           if (typeof verifier == 'function' && verifier(real) != true) {
               max.code = JSONResponse.COMPARE_FORMAT_CHANGE - (guess != true ? 0 : 1);
               max.msg = '不是 ' + format + " 格式！";
@@ -1664,9 +1664,13 @@ var JSONResponse = {
 
   /**根据 APIJSON 引用赋值路径精准地获取值
    */
-  getValByPath: function(target, pathKeys, isTry) {
+  getValByPath: function(target, pathKeys, isTry, isDesc) {
     if (target == null) {
       return null;
+    }
+
+    if (StringUtil.isString(pathKeys)) {
+      pathKeys = StringUtil.split(pathKeys, '/', false)
     }
 
     var tgt = target;
@@ -1689,14 +1693,44 @@ var JSONResponse = {
       if (tgt instanceof Object) {
         if (k == '') {
           if (tgt instanceof Array) {
-              k = 0;
+              for (var j = 0; j < tgt.length; j ++) {
+                var ind = isDesc ? tgt.length - 1 - j : j;
+                var val = tgt[ind]
+                if (i >= depth - 1) {
+                  if (val == null) {
+                    continue
+                  }
+                  return val
+                }
+
+                var ks = pathKeys.slice(i + 1);
+                var child = JSONResponse.getValByPath(val, ks, isTry, isDesc);
+                if (child != null) {
+                  return child
+                }
+              }
           } else {
-              ks = Object.keys(tgt);
-              k = ks == null ? null : ks[0];
-              if (k == null) {
-                return null;
+              var tks = Object.keys(tgt);
+              for (var j = 0; j < tks.length; j ++) {
+                var ind = isDesc ? tks.length - 1 - j : j;
+                var k2 = tks[ind]
+                var val = tgt[k2]
+                if (i >= depth - 1) {
+                  if (val == null) {
+                    continue
+                  }
+                  return val
+                }
+
+                var ks = pathKeys.slice(i + 1);
+                var child = JSONResponse.getValByPath(val, ks, isTry, isDesc);
+                if (child != null) {
+                  return child
+                }
               }
           }
+
+          return null;
         }
         else {
           k = decodeURI(k)
@@ -2584,8 +2618,8 @@ var JSONResponse = {
   },
 
   drawDetections: function(canvas, detection, options, img, ctx, isClear) {
-    if (Object.keys(JSONResponse.isObject(detection) ? detection : {}) <= 0) {
-      console.error('drawDetections: invalid detection input');
+    if (StringUtil.isEmpty(JSONResponse.isObject(detection) ? detection : null)) {
+      console.log('drawDetections: invalid detection input: ' + StringUtil.trim(detection));
       return;
     }
 
@@ -2677,7 +2711,10 @@ var JSONResponse = {
           }
 
           // Label
-          const label = mark + (isDiff ? (isBefore ? '- ' : '+ ') : '') + `${item.ocr || item.label || ''}${item.id == null ? '' : '-' + item.id} ${((JSONResponse.getScore(item) || 0)*100).toFixed(0)}%${angle == 0 ? '' : ' ' + Math.round(angle) + '°'}`;
+          const id = item.viewIdName || item.id
+          const viewPath = isHovered ? item.viewPath : null
+          const gravity = item.gravity
+          const label = mark + (isDiff ? (isBefore ? '- ' : '+ ') : '') + (StringUtil.isEmpty(viewPath) ? `${id == null ? '' : id}` : StringUtil.limitLength(viewPath, 30, 'start'));
           // ctx.font = 'bold 36px';
           // const size = ctx.measureText(label);
           // const textHeight = size.height || height*0.1; // Math.max(height*0.1, size.height);
@@ -2842,6 +2879,141 @@ var JSONResponse = {
         }
       });
     }
+  },
+
+  INTEREST_TYPES: [
+    "TextView",
+    "ImageView",
+    "Button",
+    "EditText",
+    "CheckBox",
+    "Switch",
+    "ImageButton"
+  ],
+
+  getPx: function(v) {
+    if (!v) return 0;
+    if (typeof v === "number") return v;
+    return (v.real || v.px) ?? 0;
+  },
+
+  isInteresting: function(type) {
+    if (!type) return false;
+    return JSONResponse.INTEREST_TYPES.some(t => type.includes(t));
+  },
+
+  computeOffset: function(input) {
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (input.popupWindow) {
+      offsetX = input.popupWindowX ?? 0;
+      offsetY = input.popupWindowY ?? 0;
+    }
+    else if (input.dialog) {
+      offsetX = input.dialogX ?? 0;
+      offsetY = input.dialogY ?? 0;
+    }
+    else if (input.fragment) {
+      offsetX = input.fragmentX ?? 0;
+      offsetY = input.fragmentY ?? 0;
+    }
+    else {
+      offsetX = input.contentX ?? 0;
+      offsetY = input.contentY ?? 0;
+    }
+
+    return { offsetX, offsetY };
+  },
+
+  convertViewTree: function(root, input) {
+    input = input || {};
+
+    const results = [];
+    let id = 1;
+    const offset = JSONResponse.computeOffset(input);
+
+    function walk(node, parentX = 0, parentY = 0, path = "", assertPath = '') {
+      if (! node) {
+        return;
+      }
+
+      const x = parentX + JSONResponse.getPx(node.x);
+      const y = parentY + JSONResponse.getPx(node.y);
+      let w = JSONResponse.getPx(node.width);
+      let h = JSONResponse.getPx(node.height);
+      if (w <= 0 || h <= 0) {
+        w = 0;
+        h = 0;
+      }
+
+      var viewType = node.type || ''
+      var viewIdName = node.viewIdName || ''
+      if (StringUtil.isString(viewType)) {
+        if (viewType.startsWith('android.widget.')) {
+          viewType = viewType.substring('android.widget.'.length)
+        } else if (viewType.startsWith('android.view.')) {
+          viewType = viewType.substring('android.view.'.length)
+        } else if (viewType.startsWith('androidx.widget.')) {
+          viewType = viewType.substring('androidx.widget.'.length)
+        } else if (viewType.startsWith('androidx.view.')) {
+          viewType = viewType.substring('androidx.view.'.length)
+        }
+      }
+
+      if (w > 0 && h > 0 && JSONResponse.isInteresting(viewType)) {
+        const screenX = x + offset.offsetX;
+        const screenY = y + offset.offsetY;
+        results.push({
+          id: id++,
+          bbox: [screenX, screenY, w, h],
+          label: viewType,
+          text: node.text ?? null,
+          viewId: node.viewId ?? null,
+          viewIdName: viewIdName ?? null,
+          viewPath: (StringUtil.isEmpty(path) ? '' : path + "/") + (viewIdName || viewType),
+          assertPath: (StringUtil.isEmpty(assertPath) ? '' : assertPath + "/") + (viewType + (StringUtil.isEmpty(viewIdName) ? '' : ':' + viewIdName)),
+          center: [screenX + w / 2, screenY + h / 2],
+          area: w * h
+        });
+      }
+
+      var arr = node.childList || []
+      if (! Array.isArray(arr)) {
+        return;
+      }
+
+      for (let i = 0; i < arr.length; i++) {
+          const child = arr[i];
+          const childPath = (StringUtil.isEmpty(path) ? '' : path + "/") + (viewIdName || viewType) + "/" + i;
+          const childAssertPath = (StringUtil.isEmpty(assertPath) ? '' : assertPath + "/") + (viewType + (StringUtil.isEmpty(viewIdName) ? '' : ':' + viewIdName)) + "/" + i;
+          walk(child, x, y, childPath, childAssertPath);
+      }
+    }
+
+    walk(root, 0, 0, "");
+
+    return results;
+  },
+
+  getNodeByPath: function(root, path) {
+    if (root == null || StringUtil.isEmpty(path)) {
+      return root;
+    }
+
+    const parts = path.split("/");
+    let node = root;
+
+    for (let i = 0; i < parts.length; i += 2) {
+      const key = parts[i];
+      const index = Number(parts[i + 1]);
+      node = node?.[key]?.[index];
+      if (node == null) {
+        return null;
+      }
+    }
+
+    return node;
   }
 
 };

@@ -19,13 +19,20 @@
 var StringUtil = {
   TAG: 'StringUtil',
 
+  isString: function(s) {
+    return typeof s == 'string';
+  },
+  isNotString: function(s) {
+    return ! StringUtil.isString(s);
+  },
+
   /**获取string,为null则返回''
    * @param s
    * @return
    */
   get: function(s) {
 //    return s == null ? '' : (JSONResponse.isString(s) ? s : JSON.stringify(s));
-    return s == null ? '' : (typeof s == 'string' ? s : JSON.stringify(s));
+    return s == null ? '' : (typeof StringUtil.isString(s) ? s : JSON.stringify(s));
   },
 
   /**获取去掉前后空格后的string,为null则返回''
@@ -232,17 +239,33 @@ var StringUtil = {
     return s.split(separator);
   },
 
+  splitPath: function (s, trim) {
+    return StringUtil.split(s, '/', trim)
+  },
+
   isNumber: function (s) {
-    return typeof s == 'string' && /^[0-9]+$/.test(s);
+    return typeof StringUtil.isString(s) && /^[0-9]+$/.test(s);
   },
 
   join: function (arr, separator) {
     return arr == null ? '' : arr.join(separator);
   },
   length: function (s) {
-    return s == null ? 0 : s.length;
+    if (s == null) {
+      return 0;
+    }
+    if (s instanceof Array) {
+      return s.length;
+    }
+    if (s instanceof Object) {
+      return Object.keys(s).length;
+    }
+
+    s = StringUtil.get(s)
+    return s.length;
   },
   limitLength: function (s, maxLen, ellipsize) {
+    s = StringUtil.get(s);
     var l = StringUtil.length(s);
     if (maxLen == null || maxLen <= 0 || l <= maxLen) {
       return s;
@@ -258,11 +281,11 @@ var StringUtil = {
   },
 
   isUri: function (s) {
-    var ind = s == null ? -1 : s.indexOf('://');
+    var ind = StringUtil.isNotString(s) ? -1 : s.indexOf('://');
     return ind > 0;
   },
   isUrl: function (s, schemas) {
-    var ind = s == null ? -1 : s.indexOf('://');
+    var ind = StringUtil.isNotString(s) ? -1 : s.indexOf('://');
     if (ind <= 0) {
       return false;
     }
@@ -305,7 +328,7 @@ var StringUtil = {
     return StringUtil.isPath(s, true);
   },
   isPath: function (s, allowQuery) {
-    if (StringUtil.isEmpty(s)) {
+    if (StringUtil.isNotString(s) || StringUtil.isEmpty(s)) {
       return false;
     }
 
@@ -341,7 +364,7 @@ var StringUtil = {
     return true;
   },
   isPackage: function (s) {
-    var arr = StringUtil.split(s, '.');
+    var arr = StringUtil.isNotString(s) ? null : StringUtil.split(s, '.');
     if (arr == null || arr.length <= 1) {
       return false;
     }
@@ -356,7 +379,7 @@ var StringUtil = {
   },
   isMonth: function (s) {
     try {
-      if (/\d{4}-\d{1,2}/g.test(s) != true) {
+      if (StringUtil.isNotString(s) || /\d{4}-\d{1,2}/g.test(s) != true) {
         return false;
       }
 
@@ -371,7 +394,7 @@ var StringUtil = {
   },
   isDate: function (s) {
     try {
-      if (/\d{4}-\d{1,2}-\d{1,2}/g.test(s) != true) {
+      if (StringUtil.isNotString(s) || /\d{4}-\d{1,2}-\d{1,2}/g.test(s) != true) {
         return false;
       }
 
@@ -397,7 +420,7 @@ var StringUtil = {
   },
   isMinute: function (s) {
     try {
-      if (/\d{1,2}:\d{1,2}/g.test(s) != true) {
+      if (StringUtil.isNotString(s) || /\d{1,2}:\d{1,2}/g.test(s) != true) {
         return false;
       }
 
@@ -411,7 +434,7 @@ var StringUtil = {
   },
   isTime: function (s) {
     try {
-      if (/\d{1,2}:\d{1,2}:\d{1,2}/g.test(s) != true) {
+      if (StringUtil.isNotString(s) || /\d{1,2}:\d{1,2}:\d{1,2}/g.test(s) != true) {
         return false;
       }
 
@@ -425,7 +448,7 @@ var StringUtil = {
   },
   isDatetime: function (s) {
     try {
-      var date = new Date(s);
+      var date = StringUtil.isNotString(s) ? null : new Date(s);
       return date.getDay() > 0 && date.getTime() % 1000 > 0;
     }
     catch (e) {
@@ -434,30 +457,42 @@ var StringUtil = {
     return false;
   },
   isFileUri: function (s) {
-    return s != null && s.startsWith('file://') && StringUtil.isPath(s.substring('file://'.length));
+    return StringUtil.isNotString(s) && s.startsWith('file://') && StringUtil.isPath(s.substring('file://'.length));
   },
   isFile: function (s) {
-    var ind = s == null ? -1 : s.lastIndexOf('.');
+    var ind = StringUtil.isNotString(s) ? -1 : s.lastIndexOf('.');
+    if (ind <= 0) {
+      return false
+    }
     var prefix = s.substring(0, ind);
     var suffix = StringUtil.toLowerCase(s.substring(ind + 1));
     return StringUtil.isName(suffix) && StringUtil.isNotEmpty(prefix, true);
   },
   isImage: function (s) {
-    var ind = s == null ? -1 : s.lastIndexOf('.');
+    var ind = StringUtil.isNotString(s) ? -1 : s.lastIndexOf('.');
+    if (ind <= 0) {
+      return false
+    }
     var prefix = s.substring(0, ind);
     var suffix = StringUtil.toLowerCase(s.substring(ind + 1));
 
     return ['jpg', 'jpeg', 'png', 'bmp', 'gif'].indexOf(suffix) >= 0 && StringUtil.isNotEmpty(prefix, true);
   },
   isAudio: function (s) {
-    var ind = s == null ? -1 : s.lastIndexOf('.');
+    var ind = StringUtil.isNotString(s) ? -1 : s.lastIndexOf('.');
+    if (ind <= 0) {
+      return false
+    }
     var prefix = s.substring(0, ind);
     var suffix = StringUtil.toLowerCase(s.substring(ind + 1));
 
     return ['mp3', 'wav', 'flac', 'ogg', 'aiff'].indexOf(suffix) >= 0 && StringUtil.isNotEmpty(prefix, true);
   },
   isVideo: function (s) {
-    var ind = s == null ? -1 : s.lastIndexOf('.');
+    var ind = StringUtil.isNotString(s) ? -1 : s.lastIndexOf('.');
+    if (ind <= 0) {
+      return false
+    }
     var prefix = s.substring(0, ind);
     var suffix = StringUtil.toLowerCase(s.substring(ind + 1));
 
@@ -483,7 +518,7 @@ var StringUtil = {
   },
 
   isBoolKey: function (key) {
-     if (StringUtil.isEmpty(key, true) || key.length < 3) {
+     if (StringUtil.isNotString(key) || key.length < 3) {
         return false;
      }
      if (key.toLowerCase().startsWith('enable') || key.toLowerCase().startsWith('disable')
