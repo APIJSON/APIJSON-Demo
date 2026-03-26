@@ -32,7 +32,7 @@ var StringUtil = {
    */
   get: function(s) {
 //    return s == null ? '' : (JSONResponse.isString(s) ? s : JSON.stringify(s));
-    return s == null ? '' : (typeof StringUtil.isString(s) ? s : JSON.stringify(s));
+    return s == null ? '' : (StringUtil.isString(s) ? s : JSON.stringify(s));
   },
 
   /**获取去掉前后空格后的string,为null则返回''
@@ -87,7 +87,7 @@ var StringUtil = {
    * @param s
    * @return
    */
-  isName(s) {
+  isName: function(s) {
     return s != null && s.length > 0 && /[a-zA-Z_]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
   },
 
@@ -95,7 +95,7 @@ var StringUtil = {
    * @param s
    * @return
    */
-  isBigName(s) {
+  isBigName: function(s) {
     return s != null && s.length > 0 && /[A-Z]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
   },
 
@@ -103,11 +103,11 @@ var StringUtil = {
    * @param s
    * @return
    */
-  isSmallName(s) {
+  isSmallName: function(s) {
     return s != null && s.length > 0 && /[a-z]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
   },
 
-  isConstName(s) {
+  isConstName: function(s) {
     return s != null && s.length > 0 && /[A-Z_]/.test(s.substring(0, 1)) && /^[0-9A-Z_]+$/.test(s);
   },
 
@@ -244,7 +244,7 @@ var StringUtil = {
   },
 
   isNumber: function (s) {
-    return typeof StringUtil.isString(s) && /^[0-9]+$/.test(s);
+    return StringUtil.isString(s) && /^[0-9]+$/.test(s);
   },
 
   join: function (arr, separator) {
@@ -278,6 +278,21 @@ var StringUtil = {
       return s.substring(0, m) + '..' + s.substring(l - m);
     }
     return s.substring(0, maxLen) + '..';
+  },
+  PATTERN_PHONE: /"^1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4(?:(?:10|4[01])\\d{3}|[68]\\d{4}|[579]\\d{2}))\\d{6}$"/g,
+  isPhone: function (s) {
+    if (Number.isSafeInteger(s)) {
+      s = StringUtil.get(s)
+    }
+    return StringUtil.isString(s) && StringUtil.PATTERN_PHONE.test(s)
+  },
+  PATTERN_EMAIL: /"^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$"/g,
+  isEmail: function (s) {
+    return StringUtil.isString(s) && StringUtil.PATTERN_EMAIL.test(s)
+  },
+  PATTERN_ID_CARD: /"(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)"/g,
+  isIDCard: function (s) {
+    return StringUtil.isString(s) && StringUtil.PATTERN_EMAIL.test(s)
   },
 
   isUri: function (s) {
@@ -476,7 +491,7 @@ var StringUtil = {
     var prefix = s.substring(0, ind);
     var suffix = StringUtil.toLowerCase(s.substring(ind + 1));
 
-    return ['jpg', 'jpeg', 'png', 'bmp', 'gif'].indexOf(suffix) >= 0 && StringUtil.isNotEmpty(prefix, true);
+    return ['jpg', 'jpeg', 'png', 'bmp', 'gif', 'webp'].indexOf(suffix) >= 0 && StringUtil.isNotEmpty(prefix, true);
   },
   isAudio: function (s) {
     var ind = StringUtil.isNotString(s) ? -1 : s.lastIndexOf('.');

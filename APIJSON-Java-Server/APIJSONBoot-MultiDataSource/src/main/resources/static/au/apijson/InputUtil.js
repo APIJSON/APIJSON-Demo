@@ -378,10 +378,14 @@ const InputUtil = {
             var isReq = action >= 0 && action != InputUtil.HTTP_ACTION_RESPONSE;
             var format = obj.format
             format = StringUtil.isNumber(format) ? '' : format
+            var host = StringUtil.trim(obj.host);
+            var url = StringUtil.trim(obj.url);
+            var query = StringUtil.trim(obj.query);
             return timeStr + ' ' + InputUtil.getHTTPActionName(action)
-                + "\nURL: " + StringUtil.trim(obj.url)
+                + "\nURL: " + (StringUtil.isEmpty(host) || url.includes("://") || url.startsWith(host) ? url : host + url)
+                + (StringUtil.isEmpty(query) || url.endsWith(query) ? "" : (url.includes("?") ? "&" : "?") + query)
                 + "\n\nREQUEST: " + StringUtil.trim(format) + '\n' + StringUtil.trim(obj.request)
-                + (isReq ? "" : "\n\n\nRESPONSE: " + StringUtil.trim(obj.status) + '\n' + + StringUtil.trim(obj.response))
+                + (isReq ? "" : "\n\n\nRESPONSE: " + StringUtil.trim(obj.status) + '\n' + StringUtil.trim(obj.response))
                 + "\n\n"
         }
 

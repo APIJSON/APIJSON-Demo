@@ -160,8 +160,10 @@
     <!--<div :class="'side-left side-view-' + baseview">-->
     <div class="side-left" style="padding-bottom: -4px">
         <div v-show="! isTestCaseShow" class="left-bar" >
+            <button class="transfer" id="vOperate" :disabled="isEditResponse" @click="changeOperate()">{{ getOperateName(operate) }}</button>
+            <button v-show="operate != 'HTTP'" class="transfer" id="vTransfer" @click="transfer()">{{ isVideoFirst ? '视频' : '截屏' }}</button>
+            <button v-show="isShowMethod()" class="transfer" style="width: 60px" id="vMethod" :disabled="isEditResponse" @click="changeMethod()">{{ getMethodName(method, type) }}</button>
             <button v-show="isShowType()" class="transfer" id="vType" :disabled="isEditResponse" @click="changeType()">{{ getTypeName(type, method) }}</button>
-	        <button class="transfer" id="vTransfer" @click="transfer()">{{ isVideoFirst ? '视频' : '截屏' }}</button>
             <div style="height: 100%;display: flex;flex-grow: 1">
                 <input class="url" id="vUrlComment" :disabled="isEditResponse" type="text" style="width: 100%; position: absolute; z-index: -100; color: darkseagreen;background: #0000;"  ></input>
                 <textarea class="url" id="vUrl" :disabled="isEditResponse" type="text" @copy="doOnCopy" @paste="doOnPaste" @keyup="doOnKeyUp(event)"
@@ -382,6 +384,7 @@
                         <div class="left-bar" style="height: 40px; width: 100%; right: 0px; border-top: #DDD 1px solid; position: absolute; border-top: none; background-color: rgba(255, 255, 255, 0.5);">
                             <input v-show="isRandomListShow != true && isRandomSubListShow != true" id="vTestRandomCount" v-model="testRandomCount" style="margin-left: 10px; min-width: 12px; max-width: 30px; width: auto; text-align: center" type="number" />
                             <a v-show="isRandomListShow != true && isRandomSubListShow != true" style="margin-left: 4px;">次</a>
+                            <a v-show="currentBbox != null" href="javascript:void(0)" @click="isEditReqLink = true" :style="{'color': isEditReqLink ? 'red' : 'gray'}" style="font-size: medium; padding-left: 10px">请求</a><a v-show="currentBbox != null" >|</a><a v-show="currentBbox != null"  href="javascript:void(0)" @click="isEditReqLink = false" :style="{'color': isEditReqLink ? 'gray' : 'red'}" style="font-size: medium">响应</a>
                             <a style="display: flex;flex-grow: 1;padding-left: 0px;padding-right: 2px;font-size: medium;color: black" >{{ (isRandomListShow || StringUtil.isEmpty(randomTestTitle, true) ? '事件 Event' : randomTestTitle) + (isRandomListShow || isRandomSubListShow ? '(' + ((isRandomListShow ? randoms : randomSubs) || []).length + '/' + (((currentRemoteItem.Input || {}).count - (currentRemoteItem.Input || {}).disableCount) || '0') + '/' + ((currentRemoteItem.Input || {}).count || '?') + ')' : '') }}
                                 <a v-show="isRandomListShow != true && (currentRemoteItem || {}).Flow != null" style="padding-right: 6px;padding-top: 2px" href="javascript:void(0)" @click="showRandomList(true, (currentRemoteItem || {}).Flow)">
                                     列表 List
@@ -500,7 +503,7 @@
                             <input id="vRandomCount" v-model="randomCount" style="width: 30px;text-align: center; margin-right: 4px"  type="number" @keyup="doOnKeyUp(event, 'random', true)" placeholder="条数" />
                         </div>
 
-                        <textarea v-show="false" id="vRandom" @copy="doOnCopy" @paste="doOnPaste" style="width: 100%;height: 100%; margin-top: 36px; background-color: rgba(255, 255, 255, 0.5)" wrap="off"
+                        <textarea id="vRandom" @copy="doOnCopy" @paste="doOnPaste" style="width: 100%;height: 100%; margin-top: 36px; background-color: rgba(255, 255, 255, 0.5)" wrap="off"
                                   placeholder="# 常用：
 RANDOM_IN(val0:Any, val1:Any ...) // 从选项内随机取值
 RANDOM_INT(min:Integer, max:Integer) // 从范围内随机取整数
@@ -659,7 +662,7 @@ fun(true, 1, 'a'..);
                             <button style="background-color: #DDD;margin: 0px;outline: none;border: #DDD 1px solid;" href="javascript:void(0)" @click="removeAccountTab()"> - </button>
                             <!-- 每个账号 -->
                             <div v-for="(item, index) in accounts" style="display: inline-block; border: #DDD 1px solid" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD'}">
-                              <button style="outline: none; border: none" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD', color: currentAccountIndex == index && item.isLoggedIn ? 'red' : 'black'}" @click="onClickAccount(index, item)">{{ item.name + (getBaseUrlLength(vUrl.value) > 0 ? '' : '@' + StringUtil.trim(item.baseUrl)) }}</button>
+                              <button style="outline: none; border: none" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD', color: currentAccountIndex == index && item.isLoggedIn ? 'red' : 'black'}" @click="onClickAccount(index, item)">{{ JSONResponse.getName(item) + (StringUtil.isEmpty(item.baseUrl) || StringUtil.trim(item.baseUrl) == getBaseUrl() ? '' : '@' + StringUtil.trim(item.baseUrl)) }}</button>
                               <br v-show="isStatisticsEnabled && isCrossEnabled && isAllSummaryShow()" />
                               <div v-show="isStatisticsEnabled && isCrossEnabled && isAllSummaryShow()" style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
                                 <!-- 只能写成一行来消除间隙，不能换行、空格 -->
@@ -794,7 +797,7 @@ fun(true, 1, 'a'..);
         </svg>
 
         <input type="text" placeholder="请输入名称" v-model="exTxt.name" />
-        <div style="display: inline-block; margin-top: 6px; padding-bottom: 0px"><button v-show="! isExportRandom" @click="exportTxt(0)">{{isExportRemote ? '上传' : '下载'}}</button><button v-show="isExportRemote && isExportScript != true && (isExportRandom != true || isEditResponse != true)" style="margin-left: 6px" @click="exportTxt(1)">{{isExportRandom ? '导出场景接口用例' : '分享'}}</button></div>
+        <div style="display: inline-block; margin-top: 6px; padding-bottom: 0px"><button v-show="! (isExportRandom && isRandomListShow)" @click="exportTxt(0)">{{isExportRemote ? '上传' : '下载'}}</button><button v-show="isExportRemote && isExportScript != true && (isExportRandom != true || isEditResponse != true)" style="margin-left: 6px" @click="exportTxt(1)">{{isExportRandom && isRandomListShow ? '导出场景接口用例' : '分享'}}</button></div>
     </div>
 
     <!--弹出设置文本框-->

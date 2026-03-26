@@ -482,6 +482,49 @@ function newArrayString(table, json, count, page) {
     + table + "\":" + JSON.stringify(json) + "}}";
 }
 
+
+
+function getRequestFromURL(url_, tryParse) {
+  var url = url_ || window.location.search;
+
+  var index = url == null ? -1 : url.indexOf("?")
+  if(index < 0) { //判断是否有参数
+    return null;
+  }
+
+  var theRequest = null;
+  var str = url.substring(index + 1);  //从第一个字符开始 因为第0个是?号 获取所有除问号的所有符串
+  var arr = str.split("&");  //截除“&”生成一个数组
+
+  var len = arr == null ? 0 : arr.length;
+  for(var i = 0; i < len; i++) {
+    var part = arr[i];
+    var ind = part == null ? -1 : part.indexOf("=");
+    if (ind <= 0) {
+      continue
+    }
+
+    if (theRequest == null) {
+      theRequest = {};
+    }
+
+    var v = decodeURIComponent(part.substring(ind+1));
+    if (tryParse == true) {
+      try {
+        v = parseJSON(v)
+      }
+      catch (e) {
+        console.log(e)
+      }
+    }
+
+    theRequest[part.substring(0, ind)] = v;
+  }
+
+  return theRequest;
+}
+
+
 if (typeof module == 'object') {
   module.exports = this;
 }
