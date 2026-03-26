@@ -121,10 +121,11 @@ Bilibili：https://search.bilibili.com/all?keyword=APIAuto
 
 ### 相关推荐
 [别再生成测试代码了！](https://mp.weixin.qq.com/s/G1GVNhhFbSX5GoyRU6GURg) <br />
-[APIAuto: 最先进的HTTP接口工具](https://blog.csdn.net/Nifc666/article/details/141966487)
-[APIAuto 开源项目教程](https://damodev.csdn.net/68a7c70a4e4959284dac25fc.html)
+[APIAuto: 最先进的 HTTP 接口工具](https://blog.csdn.net/Nifc666/article/details/141966487) <br />
+[APIAuto 开源项目教程](https://blog.csdn.net/gitblog_00138/article/details/142802330) <br />
+[Github 2.2k Star！一款开源的机器学习 HTTP 接口工具！](https://mp.weixin.qq.com/s/4ZS80QP-WN-holFQkrxK-w) 
 
-### 百度、搜狗、抖音公网接口调用演示<br />
+### 百度、搜狗、抖音公网接口调用演示 <br />
 因为这些接口不支持 CORS 跨域，所以需要开启托管服务代理。<br />
 可以复制 Chrome 等浏览器、Charles 等抓包工具的请求文本，<br />
 粘贴到 APIAuto 的 URL 输入框，会自动填充 URL, JSON, Header 等。<br />
@@ -152,7 +153,7 @@ https://www.bilibili.com/video/BV1JZ4y1d7c8
 
 本项目是纯静态 SPA 网页，下载源码解压后：<br />
 可以用浏览器打开 index.html，建议用 [Chrome](https://www.google.com/intl/zh-CN/chrome) 或 [Firefox](https://www.mozilla.org/zh-CN/firefox) (Safari、Edge、IE 等可能有兼容问题)，注意此方法不显示 svg 图标。<br />
-也可以用 [IntelliJ Webstorm](https://www.jetbrains.com/webstorm/), [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](https://www.eclipse.org/) 等 IDE 来打开。<br />
+也可以用 [Webstorm](https://www.jetbrains.com/webstorm/), [IntelliJ IDEA](https://www.jetbrains.com/idea/), [Eclipse](https://www.eclipse.org/) 等 IDE 来打开。<br />
 也可以部署到服务器并用 [Nginx](https://www.jianshu.com/p/11fa3a1a6d65) 或 [Node](https://segmentfault.com/a/1190000039744899) 反向代理，或者 [把源码放到 SpringBoot 项目的 resources/static 目录](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)。 <br />
 还可以直接访问官方网站 http://apijson.cn/api 或 http://apijson.cn:8080 <br />
 <br />
@@ -254,6 +255,9 @@ https://github.com/TommyLemon/APIAuto/issues/12
 托管服务地址改为 http://47.98.196.224:8080  <br />
 https://github.com/TommyLemon/APIAuto/issues/13
 
+#### 5.如何清除多余的表记录？
+https://github.com/TommyLemon/APIAuto/issues/82
+
 更多问题及解答 <br />
 https://github.com/TommyLemon/APIAuto/issues
 
@@ -342,6 +346,8 @@ https://github.com/TommyLemon/APIAuto/commits/master
 
 **创作不易、坚持更难，右上角点亮 ⭐Star 支持/收藏下本项目吧，谢谢 ^_^** <br />
 https://github.com/TommyLemon/APIAuto
+
+
 
 
 

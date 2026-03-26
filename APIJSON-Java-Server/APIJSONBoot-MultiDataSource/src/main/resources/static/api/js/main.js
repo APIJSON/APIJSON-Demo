@@ -11696,7 +11696,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
          cur.index = index
 //         item.pre = pre // list[index - 1]
 
-         var doc = item.Flow || {}
+         var doc = item.Document || {}
          var method = cur.method = doc.method
          var type = cur.type = doc.type
          var url = cur.url = doc.url
@@ -11711,7 +11711,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
          var accountInfo = this.getCurrentAccount() || {}
          const account = StringUtil.trim(accountInfo.account || accountInfo.phone || accountInfo.email)
 //
-//         this.parseRandom(json, rawConfig, random.id, true, false, function (randomName, constConfig, constJson) {
+//         this.parseRandom(json, header, rawConfig, random.id, true, false, function (randomName, constConfig, constJson) {
              this.startTestSingle(list, allCount, index, item, isRandom, accountIndex, isCross, callback
                , function(res, allCount, list, index, response, cmp, isRandom, accountIndex, justRecoverTest, isCross) {
 
