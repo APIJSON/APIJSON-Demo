@@ -1278,6 +1278,8 @@ https://github.com/Tencent/APIJSON/issues
       history: {name: '请求0'},
       remotes: [],
       locals: [],
+      tagCombineIndex: 0,
+      tagCombines: ['&', '|', '!'],
       tags: [{name: 'P0', selected: false}, {name: 'P1', selected: false}, {name: 'P2', selected: false}, {name: 'P3', selected: false}, {name: 'Home', selected: false}, {name: 'Category'}, {name: 'Search'}, {name: 'Moment'}, {name: 'Chat'}, {name: 'Tommy'}, {name: 'Lemon'}],
       chainPaths: [],
       casePaths: [],
@@ -5189,6 +5191,15 @@ https://github.com/Tencent/APIJSON/issues
       isChainItemShow: function () {
         return this.chainShowType != 2 || (this.chainGroups.length <= 0 && this.chainPaths.length > 0)
       },
+
+      changeTagCombine: function () {
+        this.tagCombineIndex = (this.tagCombineIndex + 1) % this.tagCombines.length
+        if (this.isChainShow) {
+          this.selectChainGroup(this.currentChainGroupIndex)
+        } else {
+          this.onFilterChange('testCase')
+        }
+      },
       removeTag: function (ind, tag, index, item, isDoc) {
         if (! this.isCaseGroupEditable) {
           this.isCaseGroupEditable = true
@@ -5348,6 +5359,8 @@ https://github.com/Tencent/APIJSON/issues
         var page = this.chainGroupPage = this.chainGroupPages[key] || 0
         var count = this.chainGroupCount = this.chainGroupCounts[key] || 0
         var search = this.chainGroupSearch = this.chainGroupSearches[key] || ''
+
+        var logic = this.tagCombines[this.tagCombineIndex] || '&'
         var tagList = this.tags || []
         var tags = []
         for (var i = 0; i < tagList.length; i ++) {
@@ -5367,7 +5380,7 @@ https://github.com/Tencent/APIJSON/issues
               'userId': userId,
               'toGroupId': groupId,
               'groupName%$': search,
-              'tagList&<>': tags == null || tags.length <= 0 ? null : tags,
+              ['tagList' + logic + '<>']: tags == null || tags.length <= 0 ? null : tags,
               '@raw': '@column',
               '@column': "groupId;any_value(groupName):groupName;any_value(tagList):tagList;count(*):count",
               '@group': 'groupId',
@@ -5853,6 +5866,7 @@ https://github.com/Tencent/APIJSON/issues
           var url = this.server + '/get'
           var userId = this.User.id
 
+          var logic = this.tagCombines[this.tagCombineIndex] || '&'
           var tagList = (isChainShow ? null : this.tags) || []
           var tags = []
           for (var i = 0; i < tagList.length; i ++) {
@@ -5885,7 +5899,7 @@ https://github.com/Tencent/APIJSON/issues
                 'project': StringUtil.isEmpty(project, true) ? null : project,
                 'operation$': search,
                 'name%$': search,
-                'tagList&<>': tags == null || tags.length <= 0 ? null : tags,
+                ['tagList' + logic + '<>']: tags == null || tags.length <= 0 ? null : tags,
                 'url%$': search,
                 'url|$': StringUtil.isEmpty(groupUrl) ? null : [groupUrl, groupUrl.replaceAll('_', '\\_').replaceAll('%', '\\%') + '/%'],
                 // 'group{}': group == null || StringUtil.isNotEmpty(groupUrl) ? null : 'length(group)<=0',
