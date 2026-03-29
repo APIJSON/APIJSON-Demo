@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>7.2.6</version>
+    <version>8.1.5</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -23,11 +23,6 @@
 
     <dependencies>
         <!-- APIJSON 需要用的依赖库，1.2.0 以上 -->
-<!--        <dependency>-->
-<!--            <groupId>com.alibaba</groupId>-->
-<!--            <artifactId>fastjson</artifactId>-->
-<!--            <version>1.2.83</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>
             <artifactId>fastjson2</artifactId>
@@ -64,25 +59,30 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>8.0.2</version>
+            <version>8.1.5</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-framework</artifactId>
-            <version>7.2.2</version>
+            <version>8.1.5</version>
         </dependency>
         <!--   fastjson2, gson 等 JSON 库插件选其中一个即可 <<<<<<<<<<<<<<<     -->
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-fastjson2</artifactId>
-            <version>1.0.3</version>
+            <version>1.1.5</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.github.APIJSON</groupId>-->
-<!--            <artifactId>apijson-gson</artifactId>-->
+<!--            <artifactId>apijson-jackson</artifactId>-->
+<!--            <version>1.1.5</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.github.APIJSON</groupId>-->
+<!--            <artifactId>apijson-jackson</artifactId>-->
 <!--            <version>1.0.3</version>-->
 <!--        </dependency>-->
-        <!--   fastjson2, gson 等 JSON 库插件选其中一个即可 >>>>>>>>>>>>>>>     -->
+        <!--   fastjson2, jackson, gson 等 JSON 库插件选其中一个即可 >>>>>>>>>>>>>>>     -->
 
         <dependency>
             <groupId>com.databend</groupId>

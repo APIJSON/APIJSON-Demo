@@ -2841,6 +2841,16 @@ public class DemoController extends APIJSONController<Long> {
         return "forward:/ui/index.html"; // 两者都无效 "redirect:/ui/index.html";
     }
 
+    @GetMapping("au")
+    public String au() {
+        try {
+            httpServletResponse.sendRedirect("/au/index.html");
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+        return "forward:/au/index.html"; // 两者都无效 "redirect:/au/index.html";
+    }
+
     // 为 APIAuto, UnitAuto, SQLAuto, UIGO 提供网页入口 >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
