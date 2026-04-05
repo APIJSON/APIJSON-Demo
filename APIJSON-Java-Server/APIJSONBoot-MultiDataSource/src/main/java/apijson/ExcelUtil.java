@@ -53,11 +53,11 @@ import org.apache.poi.ss.usermodel.Sheet;
 
 import java.util.Map;
 
-/**
- * CV AI 图片预测指标报告生成器 (功能增强最终版)
+/** CV AI 图片预测指标报告生成器 (功能增强最终版)，详情见：https://github.com/TommyLemon/CVAuto
  * - 新增 "核对" 列
  * - 新增 最小、平均、中位、最大 统计
  * - 总览区域与详情数据全公式联动
+ * @author Lemon
  */
 public class ExcelUtil {
 

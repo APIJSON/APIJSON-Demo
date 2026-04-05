@@ -15,8 +15,6 @@ limitations under the License.*/
 package apijson;
 
 import com.alibaba.fastjson2.annotation.JSONField;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 
 import java.io.*;
@@ -29,10 +27,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Base64;
 
-// 添加 JSONObject 支持
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONArray;
 
+/**Computer Vision AI 数据集工具类，详情见：https://github.com/TommyLemon/CVAuto
+ * @author Lemon
+ */
 public class DatasetUtil {
 
     public static void main(String[] args) {
