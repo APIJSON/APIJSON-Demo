@@ -323,6 +323,11 @@
 <!--                </exclusion>-->
             </exclusions>
         </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
+            <version>3.2.5</version>
+        </dependency>
 
 
         <!-- DemoController /delegate 代理转发请求 HTTP PATCH 方法需要，使用 PATCH 可以取消注释 -->

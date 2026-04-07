@@ -92,4 +92,38 @@ spring:
       maxPoolPreparedStatementPerConnectionSize: 20
       # filters: stat,wall,log4j
       connectionProperties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000
-      useGlobalDataSourceStat: true    
+      useGlobalDataSourceStat: true
+
+# 每日上午 10:00 和晚上 8:00(20:00) 自动跑定时任务触发接口自动化回归测试并邮箱通知报告，点链接跳转可交互在线报告
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${MAIL_SMTP_AUTH:true}
+          starttls:
+            enable: ${MAIL_SMTP_STARTTLS_ENABLE:true}
+apijson:
+  auto-test:
+    enabled: ${AUTO_TEST_ENABLED:true}
+    cron: ${AUTO_TEST_CRON:0 0 10,20 * * *}
+    zone: ${AUTO_TEST_ZONE:Asia/Shanghai}
+    start-url: ${AUTO_TEST_START_URL:http://localhost:3000/test/start}
+    status-url: ${AUTO_TEST_STATUS_URL:http://localhost:3000/test/status}
+    report-host: ${AUTO_TEST_REPORT_HOST:http://localhost:8080}
+    poll-interval-millis: ${AUTO_TEST_POLL_INTERVAL_MILLIS:15000}
+    timeout-minutes: ${AUTO_TEST_TIMEOUT_MINUTES:180}
+    node:
+      enabled: ${AUTO_TEST_NODE_ENABLED:true}
+      command: ${AUTO_TEST_NODE_COMMAND:node}
+      script: ${AUTO_TEST_NODE_SCRIPT:js/server.js}
+      working-directory: ${AUTO_TEST_NODE_WORKING_DIRECTORY:src/main/resources/static/api}
+      startup-timeout-millis: ${AUTO_TEST_NODE_STARTUP_TIMEOUT_MILLIS:60000}
+      health-check-interval-millis: ${AUTO_TEST_NODE_HEALTH_CHECK_INTERVAL_MILLIS:30000}
+    mail:
+      from: ${AUTO_TEST_MAIL_FROM:${MAIL_USERNAME:}}
+      to: ${AUTO_TEST_MAIL_TO:${MAIL_USERNAME:}}
+      subject-prefix: ${AUTO_TEST_MAIL_SUBJECT_PREFIX:[APIJSON]}

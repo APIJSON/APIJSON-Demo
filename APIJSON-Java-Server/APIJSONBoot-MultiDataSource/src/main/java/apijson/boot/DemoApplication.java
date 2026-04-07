@@ -30,6 +30,7 @@ import org.springframework.boot.web.servlet.server.ConfigurableServletWebServerF
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -64,6 +65,7 @@ import unitauto.jar.UnitAutoApp;
  * @author Lemon
  */
 @Configuration
+@EnableScheduling
 @SpringBootApplication
 public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableServletWebServerFactory> {
     private static final String TAG = "DemoApplication";
