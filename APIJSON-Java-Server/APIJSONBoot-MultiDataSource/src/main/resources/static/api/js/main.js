@@ -49,7 +49,11 @@
         var CodeUtil = require('../apijson/CodeUtil');
         var JSONObject = require('../apijson/JSONObject');
         var JSONResponse = require('../apijson/JSONResponse');
-        var JSONRequest = require('../apijson/JSONRequest');
+        var JSONRequest0 = require('../apijson/JSONRequest');
+        var JSONRequest = JSONRequest0.JSONRequest; // require('../apijson/JSONRequest');
+        var toFromData = JSONRequest0.toFromData;
+        var parseJSON = JSONRequest0.parseJSON;
+        var encode = JSONRequest0.encode;
         var localforage = require('./localforage.min');
         var clipboard = require('./clipboard.min');
         var jsonlint = require('./jsonlint');
@@ -339,7 +343,6 @@
         }
 
         return true
-
       }
 
 
@@ -351,10 +354,15 @@
        */
       Vue.prototype.setResponseHint = function (val, key, $event, isAssert, color, isDynamic) {
         console.log('setResponseHint')
+        var responseKey = this.$refs.responseKey
+        if (responseKey == null) {
+          return
+        }
+
         if (! isDynamic) {
           CodeUtil.tableList = (docObj || {})['[]'] || CodeUtil.tableList;
         }
-        this.$refs.responseKey.setAttribute('data-hint', isSingle ? '' : this.getResponseHint(val, key, $event, isAssert, color, isDynamic));
+        responseKey.setAttribute('data-hint', isSingle ? '' : this.getResponseHint(val, key, $event, isAssert, color, isDynamic));
       }
       /**获取 Response JSON 的注释
        * 方案一：
@@ -1958,7 +1966,8 @@ https://github.com/Tencent/APIJSON/issues
             search: StringUtil.isEmpty(this.search, true) ? undefined : encodeURIComponent(this.search),
             testCaseSearch: StringUtil.isEmpty(this.testCaseSearch, true) ? undefined : this.testCaseSearch,
             randomSearch: StringUtil.isEmpty(this.randomSearch, true) ? undefined : encodeURIComponent(this.randomSearch),
-            randomSubSearch: StringUtil.isEmpty(this.randomSubSearch, true) ? undefined : encodeURIComponent(this.randomSubSearch)
+            randomSubSearch: StringUtil.isEmpty(this.randomSubSearch, true) ? undefined : encodeURIComponent(this.randomSubSearch),
+            tags: StringUtil.isEmpty(this.tags) ? undefined : encodeURIComponent(JSON.stringify(this.tags))
           })
         } catch (e) {
           log(e)
@@ -5768,10 +5777,10 @@ https://github.com/Tencent/APIJSON/issues
           this.isLocalShow = type == 2
 
           this.testCases = this.remotes = []
-          if (type == 1 && this.chainGroups.length <= 0) {
+          if (type == 1 && StringUtil.isEmpty(this.chainGroups)) {
             this.selectChainGroup(-1, null)
           }
-          else if (type == 0 && this.caseGroups.length <= 0) {
+          else if (type == 0 && StringUtil.isEmpty(this.caseGroups)) {
             this.selectCaseGroup(-1, null)
           }
           else {
@@ -5787,29 +5796,18 @@ https://github.com/Tencent/APIJSON/issues
       },
 
       getCaseCountStr: function() {
-        var isChainShow = this.isChainShow
-        var isCaseGroupShow = this.isCaseGroupShow()
-        var isLocalShow = this.isLocalShow
-        var caseShowType = this.caseShowType
-        var caseGroups = (isChainShow ? this.chainGroups : this.caseGroups) || []
-        var testCases = this.testCases || []
-
-        if (isLocalShow) {
-          return '(' + testCases.length + ')'
+        if (this.isLocalShow) {
+          return '(' + StringUtil.length(this.testCases) + ')'
         }
 
-        return '(' + (isCaseGroupShow ? caseGroups.length : '')
-            + (caseShowType == 0 && isCaseGroupShow ? '|' : '')
-            + (caseShowType == 2 && (isCaseGroupShow) ? '' : testCases.length) + ')';
+        var isChainShow = this.isChainShow
+        var isCaseGroupShow = this.isCaseGroupShow()
+        var isCaseItemShow = this.isCaseItemShow()
+        var caseGroups = (isChainShow ? this.chainGroups : this.caseGroups)
 
-        // 以下代码不知道为啥结果显示不对
-        // var isCaseGroupShow = this.isCaseGroupShow()
-        // var isCaseItemShow = this.isCaseItemShow()
-        // var caseGroups = (this.isChainShow ? this.chainGroups : this.caseGroups) || []
-        //
-        // return '(' + (isCaseGroupShow ? caseGroups.length : '')
-        //     + (isCaseGroupShow && isCaseItemShow ? '|' : '')
-        //     + (isCaseItemShow ? '' : testCases.length) + ')';
+        return '(' + (isCaseGroupShow ? StringUtil.length(caseGroups) : '')
+            + (isCaseGroupShow && isCaseItemShow ? '|' : '')
+            + (isCaseItemShow ? StringUtil.length(this.testCases) : '') + ')';
       },
 
       //显示远程的测试用例文档
@@ -7698,6 +7696,20 @@ https://github.com/Tencent/APIJSON/issues
             return Promise.reject(error);
           });
 
+          // Object.defineProperty(req, 'constructor', {
+          //   value: 'getInstance',
+          //   enumerable: true,
+          //   configurable: false,
+          //   writable: true
+          // })
+
+          var isJSON = HTTP_JSON_TYPES.indexOf(type) >= 0;
+          if (isJSON && JSONResponse.isObject(req) && (req.constructor != null || req.package != null || req.class != null || req.method != null || req.prototype != null)) {
+            req = JSON.stringify(req)
+            header = header || {}
+            header['Content-Type'] = 'application/json'
+          }
+
           // axios.defaults.withcredentials = true
           axios({
             method: method != null ? method : (HTTP_METHODS.indexOf(type) >= 0 ? type.toLowerCase() : (type == REQUEST_TYPE_PARAM ? 'get' : 'post')),
@@ -7711,7 +7723,7 @@ https://github.com/Tencent/APIJSON/issues
                 )
             ),
             params: isParam ? req : null,
-            data: HTTP_JSON_TYPES.indexOf(type) >= 0 ? req : (HTTP_FORM_DATA_TYPES.indexOf(type) >= 0 ? toFormData(req) : null),
+            data: isJSON ? req : (HTTP_FORM_DATA_TYPES.indexOf(type) >= 0 ? toFormData(req) : null),
             headers: header,  //Accept-Encoding（HTTP Header 大小写不敏感，SpringBoot 接收后自动转小写）可能导致 Response 乱码
             withCredentials: true, //Cookie 必须要  type == REQUEST_TYPE_JSON
             // crossDomain: true
@@ -11246,8 +11258,28 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           var toEval = value;
           if (start > 0 && end > start) {
-
             var funWithOrder = value.substring(0, start);
+            var prefixEnd = funWithOrder.indexOf('ORDER_')
+            if (prefixEnd < 0) {
+              prefixEnd = funWithOrder.indexOf('RANDOM_')
+              if (prefixEnd < 0) {
+                prefixEnd = funWithOrder.indexOf('PRE_')
+                if (prefixEnd < 0) {
+                  prefixEnd = funWithOrder.indexOf('CTX_')
+                  if (prefixEnd < 0) {
+                    prefixEnd = funWithOrder.indexOf('CUR_')
+                  }
+                }
+              }
+            }
+
+            var prefix = prefixEnd < 0 ? '' : StringUtil.get(funWithOrder.substring(0, prefixEnd))
+            if (/^[_A-Za-z]+$/g.test(prefix.substring(prefix.length - 1))) {
+              prefix = ''
+            } else {
+              funWithOrder = funWithOrder.substring(prefixEnd)
+            }
+
             var splitIndex = funWithOrder.indexOf('+');
 
             var isDesc = false;
@@ -11297,26 +11329,26 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var as3 = as[3] // account@host/index
               var accountHostIndexPath = StringUtil.isEmpty(as3) ? '/' : as3 + (as3.indexOf('/') < 0 ? '/' : '')
               var isChain = StringUtil.isNotEmpty(as2)
-              var chainArr = isChain ? '((ctx || {}).map || {})[' + as2 + ']' : null; // [GET /users] = { account@host: [] }
+              var chainArr = isChain ? '(((ctx || {}).ctx || {}).map || {})[' + as2 + ']' : null; // [GET /users] = { account@host: [] }
               if (isChain) {
                 as2 = parseJSON(as2, as2, true)
                 as.splice(2, 2)
               }
 
               if (fun == PRE_REQ) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req")' : 'get4Path(((ctx || {}).pre || {}).req'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req")' : '((ctx || {}).pre || {}).req'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_REQ()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_ARG) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg")' : 'get4Path(((ctx || {}).pre || {}).arg'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg")' : '((ctx || {}).pre || {}).arg'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_ARG()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_RES) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res")' : 'get4Path(((ctx || {}).pre || {}).res'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res")' : '((ctx || {}).pre || {}).res'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_RES()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_DATA) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data")' : 'get4Path(((ctx || {}).pre || {}).data'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data")' : '((ctx || {}).pre || {}).data'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == CTX_GET) {
@@ -11413,6 +11445,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             }
 
+            toEval = prefix + toEval
           }
 
           var isInject = true;
@@ -11717,7 +11750,16 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
                res = res || {}
                var config = res.config || {}
-               cur.arg = App.getRequest(config.data || config.params, {})
+               var p = config.data || config.params
+               try {
+                 cur.arg = App.getRequest(p, {})
+               } catch (e) {
+                 if (StringUtil.isNotString(p) || p.indexOf('=') <= 0) {
+                   throw e
+                 }
+                 cur.arg = getRequestFromURL('?' + p, true)
+               }
+
                cur.req = {
                  method: method,
                  url: config.url,
@@ -11728,19 +11770,32 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                cur.statusText = res.statusText
                cur.res = res
                cur.data = res.data
-               var map = ctx.map = ctx.map || {}
-               var m = map[method + ' ' + url] = map[method + ' ' + url] || {}
 
-               const baseUrl = App.getBaseUrl(config.url)
-               const accountKey = StringUtil.trim(account) + '@' + StringUtil.trim(baseUrl)
-               var arr = m[accountKey] = m[accountKey] || []
-               arr.push({
+               var info = {
                  type: type,
                  req: req,
                  arg: json,
                  res: res,
                  data: res.data
-               })
+               }
+
+               var map = ctx.map = ctx.map || {}
+               var m = map[method + ' ' + url] = map[method + ' ' + url] || {}
+
+               const baseUrl = StringUtil.trim(App.getBaseUrl(config.url))
+               const accountKey = account + '@' + baseUrl
+               var arr = m[accountKey] = m[accountKey] || []
+               arr.push(info)
+
+               if (StringUtil.isNotEmpty(account)) {
+                 var arr2 = m[account] = m[account] || []
+                 arr2.push(info)
+               }
+
+               if (StringUtil.isNotEmpty(baseUrl)) {
+                 var arr2 = m[baseUrl] = m[baseUrl] || []
+                 arr2.push(info)
+               }
 
                App.startTestChain(list, allCount, index + 1, list[index + 1], item, ctx, isRandom, accountIndex, isCross, callback)
              }, ctx)
@@ -12123,7 +12178,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
 
       startRandomTest4Doc: function (list, indexes, position, deepAllCount, accountIndex, isCross) {
-        const accInd = accountIndex
+        const accInd = accountIndex || 0
         var callback = function (isRandom, allCount, msg) {
           log("startRandomTest4Doc  callback isRandom = " + isRandom + "; allCount = " + allCount + "; msg = " + msg)
           if (App.randomDoneCount < App.randomAllCount) {
@@ -12154,7 +12209,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               App.testRandomProcess = ''
               if (isCross) {
                 if (deepDoneCount == deepAllCount) {
-                  App.testAccountIndex = (App.testAccountIndex || 0) + 1
+                  App.testAccountIndex = accInd + 1 // (App.testAccountIndex || 0) + 1
                   App.test(false, App.testAccountIndex, isCross)
                 }
               } else {
@@ -12642,7 +12697,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var curAccount = this.getCurrentAccount() || {}
         var accountIdStr = String(curAccount.isLoggedIn ? curAccount.id || '' : '')
         var tests = this.tests[accountIdStr] || {}
-        var currentResponse = (tests[isRandom ? random.documentId : document.id] || {})[
+        var currentResponse = item.data || (tests[isRandom ? random.documentId : document.id] || {})[
           isRandom ? (random.id > 0 ? random.id : (random.toId + '' + random.id)) : 0
         ]
 
@@ -13034,6 +13089,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         this.testCasePage = setting.testCasePage
         // this.randomCount = setting.randomCount
         this.randomPage = setting.randomPage
+        this.tags = setting.tags || this.tags
         this.server = 'http://localhost:8080' // this.getBaseUrl()
 
         // if (this.isCrossEnabled) {
@@ -13041,6 +13097,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         // }
 
         this.login(true, function (url, res, err) {
+          App.listScript()
           if (setting.isRandomShow && setting.isRandomListShow) {
             delayTime += Math.min(5000, (App.isMLEnabled ? 50 : 20) * (setting.randomCount || App.randomCount) + 1000)
             App.isRandomShow = true

@@ -1,2 +1,5 @@
 /target/
 /bin/
+/src/main/resources/static/api/.npm-cache/
+/src/main/resources/static/api/node_modules/
+/src/main/resources/static/api/logs/

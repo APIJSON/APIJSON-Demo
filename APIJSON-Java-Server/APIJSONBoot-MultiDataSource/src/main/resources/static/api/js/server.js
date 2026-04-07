@@ -1,6 +1,6 @@
 const Koa = require('koa');
 //const cors = require('koa2-cors');
-const bodyParser = require('koa-bodyparser');
+// const bodyParser = require('koa-bodyparser');
 // const Vue = require('vue');
 const {getRequestFromURL, App} = require('./main');
 // const { createBundleRenderer } = require('vue-server-renderer')
@@ -23,15 +23,7 @@ var testCaseProgress = 0;
 var deepProgress = 0;
 var randomProgress = 0;
 
-function update() {
-  if (isLoading != true) {
-    return;
-  }
-
-  if (error != null) {
-    isLoading = false;
-  }
-
+function calcProgress() {
   var curTime = isLoading ? (new Date()).getTime() : null;
   if (endTime <= 0 || isLoading) {
     endTime = curTime;
@@ -43,13 +35,13 @@ function update() {
     + (isLoading ? '; \nCurrent' : '\nEnd') + ' Time: ' + endTime + ' = ' + new Date(endTime).toLocaleString()
     + '; \nTime Spent: ' + duration + ' = ' + dd.getHours() + ":" + dd.getMinutes() + ":" + dd.getSeconds() + "." + dd.getMilliseconds();
 
-  var accountDoneCount = App.currentAccountIndex + 1;
-  var accountAllCount = App.accounts.length;
+  var accountDoneCount = (App.testAccountIndex != null ? App.testAccountIndex : App.currentAccountIndex) + 1;
+  var accountAllCount = App.accounts == null ? 0 : App.accounts.length;
 
-  accountProgress = isCrossEnabled != true || accountAllCount <= 0 || accountDoneCount >= accountAllCount ? 1 : (accountDoneCount/accountAllCount).toFixed(2);
-  testCaseProgress = App.doneCount >= App.allCount ? 1 : (App.doneCount/App.allCount).toFixed(2);
-  deepProgress = App.deepDoneCount >= App.deepAllCount ? 1 : (App.deepDoneCount/App.deepAllCount).toFixed(2);
-  randomProgress = App.randomDoneCount >= App.randomAllCount ? 1 : (App.randomDoneCount/App.randomAllCount).toFixed(2);
+  accountProgress = isCrossEnabled != true || accountAllCount <= 0 || accountDoneCount >= accountAllCount ? 1 : parseFloat((accountDoneCount/accountAllCount).toFixed(2));
+  testCaseProgress = App.allCount <= 0 || App.doneCount >= App.allCount ? 1 : parseFloat((App.doneCount/App.allCount).toFixed(2));
+  deepProgress = App.deepAllCount <= 0 || App.deepDoneCount >= App.deepAllCount ? 1 : parseFloat((App.deepDoneCount/App.deepAllCount).toFixed(2));
+  randomProgress = App.randomAllCount <= 0 || App.randomDoneCount >= App.randomAllCount ? 1 : parseFloat((App.randomDoneCount/App.randomAllCount).toFixed(2));
   // progress = accountProgress*testCaseProgress*deepProgress*randomProgress;
   progress = accountProgress >= 1 ? 1 : (accountProgress + (accountAllCount <= 0 ? 1 : 1/accountAllCount*(testCaseProgress
     + (App.allCount <= 0 ? 1 : 1/App.allCount*(deepProgress + (App.deepAllCount <= 0 ? 1 : 1/App.deepAllCount*randomProgress))))));
@@ -62,8 +54,23 @@ function update() {
     + '\nTest Account: ' + accountDoneCount + ' / ' + accountAllCount + ' = ' + (100*accountProgress) + '%'
     + '\nTest Case: ' + App.doneCount + ' / ' + App.allCount + ' = ' + (100*testCaseProgress) + '%'
     + '\nDeep Test Case: ' + App.deepDoneCount + ' / ' + App.deepAllCount + ' = ' + (100*deepProgress) + '%'
-    + '\nRandom & Order: ' + App.randomDoneCount + ' / ' + App.randomAllCount + ' = ' + (100*randomProgress) + '%';
+    + '\nRandom & Order: ' + App.randomDoneCount + ' / ' + App.randomAllCount + ' = ' + (100*randomProgress) + '%'
+    + '\nAll: ' + App.getAllSummaryTotalText() + ', White: ' + App.getAllSummaryWhiteText() + ', Green: ' + App.getAllSummaryGreenText()
+    + ', Blue: ' + App.getAllSummaryBlueText() + ', Orange: ' + App.getAllSummaryOrangeText() + ', Red: ' + App.getAllSummaryRedText()
+  ;
 };
+
+function update() {
+  if (isLoading != true) {
+    return;
+  }
+
+  if (error != null) {
+    isLoading = false;
+  }
+
+  calcProgress();
+}
 
 const PORT = 3000;
 
@@ -114,6 +121,10 @@ app.use(async ctx => {
 
     update();
 
+    App.statisticsShowType = 2;
+    App.isScriptShow = App.isHeaderShow = true;
+    App.testCaseCount = App.caseCount = 0;
+    // App.tags = [{name: 'P0', selected: true}];
     App.key = ctx.query.key;
     if (StringUtil.isNotEmpty(App.key, true)) {
       App.testCaseCount = App.data.testCaseCount = 1000;
@@ -122,8 +133,13 @@ app.use(async ctx => {
     }
 
     App.autoTest(function (msg, err) {
-      message = msg;
-      error = err;
+      if (typeof msg == 'string') {
+        message = msg;
+      }
+      if (err instanceof Error || typeof err == 'string') {
+        error = err;
+      }
+
       update();
       console.log('autoTest callback(' + msg + ')' + timeMsg + progressMsg);
       return Number.isNaN(progress) != true && progress >= 1;
@@ -142,7 +158,7 @@ app.use(async ctx => {
     // }, 1000)
   }
   else if (ctx.path == '/test/status' || (isLoading && ctx.path == '/test')) {
-    update();
+    calcProgress();
     if (isLoading) {
       // ctx.response.header['refresh'] = "1";
       // ctx.redirect('/status');
@@ -157,7 +173,7 @@ app.use(async ctx => {
       'msg': (message || (progress < 1 || isLoading ? 'Auto testing in node...' : 'Done auto testing in node.')) + timeMsg + progressMsg,
       'progress': progress,
       'reportId': App.reportId,
-      'link': server + (ind < 0 ? '?' : '&') + 'reportId=' + App.reportId
+      'link': server + '/api/index.html' + (ind < 0 ? '?' : '&') + 'reportId=' + App.reportId
     });
   }
   else if (ctx.path == '/test/compare' || ctx.path == '/test/ml') {

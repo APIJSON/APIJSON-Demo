@@ -22,6 +22,13 @@ var StringUtil = {
   MAX_NICK_NAME_LENGTH: 20,
   MAX_CONST_NAME_LENGTH: 30,
 
+  isString: function(s) {
+    return typeof s == 'string';
+  },
+  isNotString: function(s) {
+    return ! StringUtil.isString(s);
+  },
+
   /**获取string,为null则返回''
    * @param s
    * @return
