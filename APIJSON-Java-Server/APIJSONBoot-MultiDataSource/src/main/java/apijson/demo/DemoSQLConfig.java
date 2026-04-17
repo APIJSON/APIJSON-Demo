@@ -76,13 +76,14 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 
 			@Override
 			public AbstractSQLConfig<Long, JSONObject, JSONArray> getSQLConfig(
-					RequestMethod method, String database, String schema, String datasource, String table) {
+					RequestMethod method, String database, String datasource, String namespace
+					, String catalog, String schema, String table) {
 				return new DemoSQLConfig(method, table);
 			}
 
 			//取消注释来实现自定义各个表的主键名
 			//			@Override
-			//			public String getIdKey(String database, String schema, String datasource, String table) {
+			//			public String getIdKey(String database, String datasource, String namespace, String catalog, String schema, String table) {
 			//				//	return "_id"; // SurrealDB 强制用 id 作为主键名，surrealdb.java 查不到也改不了，所以需要另外加主键
 			//				return StringUtil.firstCase(table + "Id");  // userId, comemntId ...
 			//				//	return StringUtil.toLowerCase(t) + "_id";  // user_id, comemnt_id ...
@@ -90,18 +91,18 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			//			}
 
 			@Override
-			public String getUserIdKey(String database, String schema, String datasource, String table) {
+			public String getUserIdKey(String database, String datasource, String namespace, String catalog, String schema, String table) {
 				return USER_.equals(table) || PRIVACY_.equals(table) ? ID : USER_ID; // id / userId
 			}
 
 			// 取消注释来实现数据库自增 id
 			//			@Override
-			//			public Long newId(RequestMethod method, String database, String schema, String datasource, String table) {
+			//			public Long newId(RequestMethod method, String database, String datasource, String namespace, String catalog, String schema, String table) {
 			//				return null; // return null 则不生成 id，一般用于数据库自增 id
 			//			}
 
 			//			@Override
-			//			public void onMissingKey4Combine(String name, JSONMap request, String combine, String item, String key) throws Exception {
+			//			public void onMissingKey4Combine(String name, JSONObject request, String combine, String item, String key) throws Exception {
 			////				super.onMissingKey4Combine(name, request, combine, item, key);
 			//			}
 		};

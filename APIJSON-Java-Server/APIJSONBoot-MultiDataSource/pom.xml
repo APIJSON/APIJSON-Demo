@@ -5,7 +5,7 @@
 
     <groupId>apijson.boot</groupId>
     <artifactId>apijson-boot-multi-datasource</artifactId>
-    <version>8.1.5</version>
+    <version>8.1.6</version>
     <packaging>jar</packaging>
 
     <name>APIJSONBoot-MultiDataSource</name>
@@ -59,23 +59,23 @@
         <dependency>
             <groupId>com.github.Tencent</groupId>
             <artifactId>APIJSON</artifactId>
-            <version>8.1.5</version>
+            <version>8.1.6</version>
         </dependency>
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-framework</artifactId>
-            <version>8.1.5</version>
+            <version>8.1.6</version>
         </dependency>
-        <!--   fastjson2, gson 等 JSON 库插件选其中一个即可 <<<<<<<<<<<<<<<     -->
+        <!--   fastjson2, jackson, gson 等 JSON 库插件选其中一个即可 <<<<<<<<<<<<<<<     -->
         <dependency>
             <groupId>com.github.APIJSON</groupId>
             <artifactId>apijson-fastjson2</artifactId>
-            <version>1.1.5</version>
+            <version>1.1.6</version>
         </dependency>
 <!--        <dependency>-->
 <!--            <groupId>com.github.APIJSON</groupId>-->
 <!--            <artifactId>apijson-jackson</artifactId>-->
-<!--            <version>1.1.5</version>-->
+<!--            <version>1.1.6</version>-->
 <!--        </dependency>-->
 <!--        <dependency>-->
 <!--            <groupId>com.github.APIJSON</groupId>-->
