@@ -1281,6 +1281,7 @@ https://github.com/Tencent/APIJSON/issues
       requestCount: 1,
       urlComment: '一对多关联查询。可粘贴浏览器/抓包工具/接口工具 的 Network/Header/Content 等请求信息，自动填充到界面，格式为 key: value',
       selectIndex: 0,
+      isEditReqLink: false,
       options: [], // [{name:"id", type: "integer", comment:"主键"}, {name:"name", type: "string", comment:"用户名称"}],
       historys: [],
       history: {name: '请求0'},
@@ -3304,6 +3305,7 @@ https://github.com/Tencent/APIJSON/issues
             commentObj = JSONResponse.updateStandard({}, mapReq2);
           }
 
+          const isRes = ! this.isEditReqLink
           var isChainShow = this.isChainShow
           var paths = (isChainShow ? this.chainPaths : this.casePaths) || []
           var index = paths.length - 1
@@ -3353,6 +3355,7 @@ https://github.com/Tencent/APIJSON/issues
             const req = isExportRandom && btnIndex <= 0 ? {
               format: false,
               'Random': {
+                isRes: isRes,
                 userId: userId,
                 toId: 0,
                 chainGroupId: cgId,
@@ -10574,12 +10577,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
           summaryItem.totalCount = allCount
 
+          const isRes = ! this.isEditReqLink
           var methods = this.methods
           var method = this.isShowMethod() ? this.method : null
           var type = this.type
-          var json = this.getRequest(vInput.value, {})
+          var json = this.getRequest(isRes ? this.jsoncon : vInput.value, {})
           var url = this.getUrl()
-          var header = this.getHeader(vHeader.value)
+          var header = (isRes ? (this.currentHttpResponse || {}).headers : this.getHeader(vHeader.value)) || {}
 
           ORDER_MAP = {}  //重置
 
@@ -10752,7 +10756,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
 
               },
-              preScript
+              preScript, null, random.isRes
             );
           }
           catch (e) {
@@ -10942,9 +10946,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             totalCount: count
           }
 
+          const isRes = ! this.isEditReqLink
           this.testRandomSingle(show, false, this.isRandomSubListShow, this.currentRandomItem,
             this.isShowMethod() ? this.method : null, this.type, this.getUrl()
-            , this.getRequest(vInput.value, {}), this.getHeader(vHeader.value), false, false, callback
+            , this.getRequest(isRes ? this.jsoncon : vInput.value, {})
+            , (isRes ? (this.currentHttpResponse || {}).headers : this.getHeader(vHeader.value)) || {}
+            , false, false, callback
           )
         }
         catch (e) {
@@ -10973,13 +10980,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
        * @param show
        * @param callback
        */
-      parseRandom: function (json, head, config, randomId, generateJSON, generateConfig, generateName, callback, preScript, ctx) {
+      parseRandom: function (json, head, config, randomId, generateJSON, generateConfig, generateName, callback, preScript, ctx, isRes) {
         var lines = config == null ? null : StringUtil.trim(config).split('\n')
         if (lines == null || lines.length <= 0) {
           // return null;
           callback('', '', json, head);
           return
         }
+        const isUI = this.isRandomSubListShow
         json = json || {};
         head = head || {};
 
@@ -11103,12 +11111,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
                 // alert('< current = ' + JSON.stringify(current, null, '    '))
 
-                // FIXME 还需要吗？之前的替换字段功能都废弃了，这个导致顺序变化
-                if (key != lastKeyInPath || current.hasOwnProperty(key) == false) {
-                  delete current[lastKeyInPath];
+                if (isRes) {
+                  var real = current[key]
+                  if (real !== val) {
+                    throw new Error(p_k + ' != ' + (val == null ? 'null' : StringUtil.limitLength(StringUtil.get(val), 20)) + '！')
+                  }
+                } else {
+                  current[key] = val;
                 }
-
-                current[key] = val;
               }
 
             }
@@ -11327,29 +11337,43 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var as1 = as[1] // default value
               var as2 = as[2] // GET /users
               var as3 = as[3] // account@host/index
-              var accountHostIndexPath = StringUtil.isEmpty(as3) ? '/' : as3 + (as3.indexOf('/') < 0 ? '/' : '')
               var isChain = StringUtil.isNotEmpty(as2)
-              var chainArr = isChain ? '(((ctx || {}).ctx || {}).map || {})[' + as2 + ']' : null; // [GET /users] = { account@host: [] }
+              var chainArr = isChain ? '(((ctx || {}).ctx || {}).map || {})[' + as2 + ']' : null; // [GET /users] = { account@host: [], account: [], host: [] }
               if (isChain) {
                 as2 = parseJSON(as2, as2, true)
+                as3 = parseJSON(as3, as3, true)
                 as.splice(2, 2)
               }
+              var as3s = isChain ? StringUtil.trim(as3) : ''
+              var accountHostIndexPath = isChain ? (StringUtil.isNumber(as3) ? '/' + as3 : (StringUtil.isEmpty(as3) ? '/' : as3s + (as3s.indexOf('/') < 0 ? '/' : ''))) : ''
 
-              if (fun == PRE_REQ) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req")' : '((ctx || {}).pre || {}).req'
+              if (fun == PRE_DATA) {
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data", undefined, null, true)' : '((ctx || {}).pre || {}).data'
+                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
+              }
+              else if (fun == PRE_REQ) {
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req", undefined, null, true)' : '((ctx || {}).pre || {}).req'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_REQ()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_ARG) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg")' : '((ctx || {}).pre || {}).arg'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg", undefined, null, true)' : '((ctx || {}).pre || {}).arg'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_ARG()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_RES) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res")' : '((ctx || {}).pre || {}).res'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res", undefined, null, true)' : '((ctx || {}).pre || {}).res'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_RES()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
-              else if (fun == PRE_DATA) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data")' : '((ctx || {}).pre || {}).data'
-                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
+              else if (fun == CUR_REQ) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).req, ' + (value == 'CUR_REQ()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+              }
+              else if (fun == CUR_ARG) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).arg, ' + (value == 'CUR_ARG()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+              }
+              else if (fun == CUR_RES) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).res, ' + (value == 'CUR_RES()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+              }
+              else if (fun == CUR_DATA) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).data, ' + (value == 'CUR_DATA()' ? JSON.stringify(path) : '') + value.substring(start + 1);
               }
               else if (fun == CTX_GET) {
                 toEval = 'get4Path((ctx || {}).ctx, ' + (value == 'CTX_GET()' ? JSON.stringify(path) : '') + value.substring(start + 1);
@@ -11380,9 +11404,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
                 else if (as1 == 'CUR_RES') {
                   as[1] = '((ctx || {}).cur || {}).res'
-                }
-                else if (as1 == 'MAP') {
-                  as[1] = '((ctx || {}).map || {})'
                 }
 
                 if (as.length >= 1) {
@@ -11531,7 +11552,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
 
         this.coverage = {}
-        this.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.getBaseUrl() + '/coverage/start', {}, {}, function (url, res, err) {
+        this.requestPost(false, '/coverage/start', {}, {}, function (url, res, err) {
           try {
             App.onResponse(url, res, err)
             if (DEBUG) {
@@ -11915,6 +11936,14 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             const cur = item
             const pre = list[index - 1] || {} // item.pre = item.pre || list[index - 1] || {}
 //            const ctx = item.ctx = item.ctx || {}
+            const ctx = {
+              list: list,
+              allCount: allCount,
+              index: index,
+              cur: cur,
+              pre: pre,
+              ctx: {} // ctx
+            }
 
             var random = item.Random || {}
             this.parseRandom(req, header, random.config, random.id, true, false, false, function(randomName, constConfig, constJson, constHeader) {
@@ -11955,26 +11984,19 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                       App.log('startTestSingle  App.request >> } catch (e) {\n' + e.message)
                     }
 
-                    App.compareResponse(res, allCount, list, index, item, res.data, isRandom, accountIndex, false, err || otherErr, null, isCross, callback, singleCallback)
+                    App.compareResponse(res, allCount, list, index, item, res.data, isRandom, accountIndex, false, err || otherErr, null, isCross, callback, singleCallback, caseScript, ctx)
                   }, caseScript)
 
                 }, caseScript)
-            }, (caseScript.pre || {}).script, {
-                list: list,
-                allCount: allCount,
-                index: index,
-                cur: cur,
-                pre: pre,
-                ctx: ctx
-            })
+            }, (caseScript.pre || {}).script, ctx)
           }
           catch(e) {
-            this.compareResponse(null, allCount, list, index, item, null, isRandom, accountIndex, false, e, null, isCross, callback, singleCallback)
+            this.compareResponse(null, allCount, list, index, item, null, isRandom, accountIndex, false, e, null, isCross, callback, singleCallback, caseScript, ctx)
           }
 
       },
 
-      compareResponse: function (res, allCount, list, index, item, response, isRandom, accountIndex, justRecoverTest, err, ignoreTrend, isCross, callback, singleCallback) {
+      compareResponse: function (res, allCount, list, index, item, response, isRandom, accountIndex, justRecoverTest, err, ignoreTrend, isCross, callback, singleCallback, caseScript, ctx) {
         var it = item || {} //请求异步
         var cri = this.currentRemoteItem || {} //请求异步
         var d = (isRandom ? cri.Document : it.Document) || {} //请求异步
@@ -12030,6 +12052,24 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var standard = typeof stdd != 'string' ? stdd : (StringUtil.isEmpty(stdd, true) ? null : parseJSON(stdd))
           tr.compare = JSONResponse.compareResponse(res, standard, this.removeDebugInfo(response) || {}, '', isML, null, null, ignoreTrend) || {}
           tr.compare.duration = it.durationHint
+
+          var resRandom = it['Random:res'] || {}
+          var resCfg = resRandom.config
+          if (StringUtil.isNotEmpty(resCfg)) {
+            try {
+              this.parseRandom(response, res.headers, resCfg, resRandom.id, true, false, false, function (randomName, constConfig, constJson, constHeader) {
+                App.onTestResponse(res, allCount, list, index, it, d, r, tr, response, tr.compare || {}, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback);
+              }, StringUtil.trim((caseScript.pre || {}).script) + '\n' + StringUtil.trim((caseScript.post || {}).script), ctx, true)
+              return
+            } catch (e) {
+              err = e
+              tr.compare = {
+                code: JSONResponse.COMPARE_ERROR, //请求出错
+                msg: e.message,
+                path: ''
+              }
+            }
+          }
         }
 
         this.onTestResponse(res, allCount, list, index, it, d, r, tr, response, tr.compare || {}, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback);

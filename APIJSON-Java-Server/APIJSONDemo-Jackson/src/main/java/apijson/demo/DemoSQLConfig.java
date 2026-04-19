@@ -51,6 +51,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		return "jdbc:mysql://localhost:3306?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=UTF-8"; // TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
 	}
 
+	// FIXME：配置未生效！
 	@Override
 	public String gainDBAccount() {
 		return "root";  // TODO 改成你自己的
