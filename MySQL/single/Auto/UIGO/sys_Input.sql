@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.42, for macos15 (arm64)
+-- MySQL dump 10.13  Distrib 8.0.31, for macos12 (x86_64)
 --
 -- Host: apijson.cn    Database: sys
 -- ------------------------------------------------------
@@ -28,6 +28,8 @@ CREATE TABLE `Input` (
   `userId` bigint NOT NULL,
   `disable` tinyint NOT NULL DEFAULT '0',
   `step` int NOT NULL,
+  `chainGroupId` bigint NOT NULL DEFAULT '0',
+  `chainId` bigint NOT NULL DEFAULT '0',
   `flowId` bigint NOT NULL COMMENT '操作流程 id',
   `name` varchar(100) DEFAULT NULL,
   `tagName` varchar(100) DEFAULT NULL,
@@ -78,6 +80,7 @@ CREATE TABLE `Input` (
   `contentHeight` double NOT NULL DEFAULT '0',
   `pointerCount` int NOT NULL DEFAULT '1',
   `pointerIds` text,
+  `pointers` json DEFAULT NULL,
   `metaState` int NOT NULL DEFAULT '0',
   `xPrecision` double NOT NULL DEFAULT '1',
   `yPrecision` double NOT NULL DEFAULT '1',
@@ -93,16 +96,20 @@ CREATE TABLE `Input` (
   `format` varchar(45) DEFAULT NULL,
   `host` varchar(45) DEFAULT NULL,
   `url` varchar(1000) DEFAULT NULL,
+  `query` text,
   `header` text,
   `request` text,
+  `reqHeader` text,
+  `status` varchar(100) DEFAULT NULL,
   `response` longtext,
+  `resHeader` text,
   `compare` json DEFAULT NULL,
   `standard` text,
   `when` int DEFAULT NULL,
   `text` text,
   `hint` varchar(100) DEFAULT NULL,
   `start` int DEFAULT NULL,
-  `count` int DEFAULT NULL,
+  `length` int DEFAULT NULL,
   `after` int DEFAULT NULL,
   `edit` int DEFAULT NULL,
   `s` text,
@@ -110,6 +117,7 @@ CREATE TABLE `Input` (
   `targetId` int DEFAULT NULL,
   `targetIdName` varchar(100) DEFAULT NULL,
   `targetWebId` varchar(100) DEFAULT NULL,
+  `targetType` varchar(100) DEFAULT NULL,
   `childIndex` int DEFAULT NULL,
   `childCount` int DEFAULT NULL,
   `isSplit2Show` tinyint DEFAULT NULL,
@@ -122,11 +130,13 @@ CREATE TABLE `Input` (
   `focusId` int DEFAULT NULL,
   `focusIdName` varchar(100) DEFAULT NULL,
   `focusWebId` varchar(100) DEFAULT NULL,
+  `focusType` varchar(100) DEFAULT NULL,
   `focusChildIndex` int DEFAULT NULL,
   `focusChildCount` int DEFAULT NULL,
   `parentId` int DEFAULT NULL,
   `parentIdName` varchar(100) DEFAULT NULL,
   `parentWebId` varchar(100) DEFAULT NULL,
+  `parentType` varchar(100) DEFAULT NULL,
   `parentChildIndex` int DEFAULT NULL,
   `parentChildCount` int DEFAULT NULL,
   `timeout` bigint DEFAULT NULL COMMENT '等待超时时间',
@@ -139,6 +149,7 @@ CREATE TABLE `Input` (
   `dialogY` double DEFAULT NULL,
   `dialogWidth` double DEFAULT NULL,
   `dialogHeight` double DEFAULT NULL,
+  `popupWindow` varchar(100) DEFAULT NULL,
   `textIndex` int DEFAULT NULL,
   `leftText` text,
   `rightText` text,
@@ -152,10 +163,22 @@ CREATE TABLE `Input` (
   `throw` varchar(100) DEFAULT NULL,
   `exception` varchar(1000) DEFAULT NULL,
   `routeParams` json DEFAULT NULL,
+  `popupWindowX` double DEFAULT NULL,
+  `popupWindowY` double DEFAULT NULL,
+  `popupWindowWidth` double DEFAULT NULL,
+  `popupWindowHeight` double DEFAULT NULL,
+  `count` int DEFAULT NULL,
+  `config` varchar(5000) DEFAULT NULL COMMENT '配置',
+  `img` longtext,
+  `file` varchar(200) DEFAULT NULL,
+  `fileSize` bigint NOT NULL DEFAULT '0',
+  `width` int DEFAULT NULL,
+  `height` int DEFAULT NULL,
+  `rank` bigint NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `index_time` (`time`),
   KEY `index_flowId` (`flowId`)
-) ENGINE=InnoDB AUTO_INCREMENT=1711339080683 DEFAULT CHARSET=utf8mb3 COMMENT='输入事件，包括 屏幕触摸事件 MotionEvent, 按键事件 KeyEvent，界面切换, HTTP 请求';
+) ENGINE=InnoDB AUTO_INCREMENT=1711339086158 DEFAULT CHARSET=utf8mb3 COMMENT='输入事件，包括 屏幕触摸事件 MotionEvent, 按键事件 KeyEvent，界面切换, HTTP 请求';
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -167,4 +190,4 @@ CREATE TABLE `Input` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-22  3:41:18
+-- Dump completed on 2026-05-11  6:54:41
