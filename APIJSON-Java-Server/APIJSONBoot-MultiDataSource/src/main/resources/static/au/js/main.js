@@ -6484,10 +6484,10 @@ https://github.com/Tencent/APIJSON/issues
           if (StringUtil.isEmpty(method, true)) {
             t = REQUEST_TYPE_JSON
           }
-          else if (method == REQUEST_TYPE_GET) {
+          else if (method == HTTP_METHOD_GET) {
             t = REQUEST_TYPE_PARAM
           }
-          else if (method == REQUEST_TYPE_POST) {
+          else if (method == HTTP_METHOD_POST) {
             t = REQUEST_TYPE_JSON
           }
           else {

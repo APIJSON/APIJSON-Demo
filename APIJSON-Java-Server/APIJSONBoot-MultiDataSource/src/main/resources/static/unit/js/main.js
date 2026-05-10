@@ -579,19 +579,19 @@ https://github.com/Tencent/APIJSON/issues
   var REQUEST_TYPE_DATA = 'DATA'  // POST form-data
   var REQUEST_TYPE_JSON = 'JSON'  // POST application/json
   var REQUEST_TYPE_GRPC = 'GRPC'  // POST application/json
-  var REQUEST_TYPE_GET = 'GET'  // GET ?a=1&b=c&key=value
-  var REQUEST_TYPE_POST = 'POST'  // POST application/json
-  var REQUEST_TYPE_PUT = 'PUT'  // PUT
-  var REQUEST_TYPE_PATCH = 'PATCH'  // PATCH
-  var REQUEST_TYPE_DELETE = 'DELETE'  // DELETE
-  var REQUEST_TYPE_HEAD = 'HEAD'  // HEAD
-  var REQUEST_TYPE_OPTIONS = 'OPTIONS'  // OPTIONS
-  var REQUEST_TYPE_TRACE = 'TRACE'  // TRACE
-  var HTTP_METHODS = [REQUEST_TYPE_GET, REQUEST_TYPE_POST, REQUEST_TYPE_PUT, REQUEST_TYPE_PATCH, REQUEST_TYPE_DELETE, REQUEST_TYPE_HEAD, REQUEST_TYPE_OPTIONS, REQUEST_TYPE_TRACE]
-  var HTTP_POST_TYPES = [REQUEST_TYPE_POST, REQUEST_TYPE_JSON, REQUEST_TYPE_FORM, REQUEST_TYPE_DATA, REQUEST_TYPE_GRPC]
-  var HTTP_URL_ARG_TYPES = [REQUEST_TYPE_GET, REQUEST_TYPE_PARAM, REQUEST_TYPE_FORM]
-  var HTTP_JSON_TYPES = [REQUEST_TYPE_POST, REQUEST_TYPE_JSON, REQUEST_TYPE_GRPC]
-  var HTTP_FORM_DATA_TYPES = [REQUEST_TYPE_DATA, REQUEST_TYPE_PUT, REQUEST_TYPE_DELETE]
+  var HTTP_METHOD_GET = 'GET'  // GET ?a=1&b=c&key=value
+  var HTTP_METHOD_POST = 'POST'  // POST application/json
+  var HTTP_METHOD_PUT = 'PUT'  // PUT
+  var HTTP_METHOD_PATCH = 'PATCH'  // PATCH
+  var HTTP_METHOD_DELETE = 'DELETE'  // DELETE
+  var HTTP_METHOD_HEAD = 'HEAD'  // HEAD
+  var HTTP_METHOD_OPTIONS = 'OPTIONS'  // OPTIONS
+  var HTTP_METHOD_TRACE = 'TRACE'  // TRACE
+  var HTTP_METHODS = [HTTP_METHOD_GET, HTTP_METHOD_POST, HTTP_METHOD_PUT, HTTP_METHOD_PATCH, HTTP_METHOD_DELETE, HTTP_METHOD_HEAD, HTTP_METHOD_OPTIONS, HTTP_METHOD_TRACE]
+  var HTTP_POST_TYPES = [HTTP_METHOD_POST, REQUEST_TYPE_JSON, REQUEST_TYPE_FORM, REQUEST_TYPE_DATA, REQUEST_TYPE_GRPC]
+  var HTTP_URL_ARG_TYPES = [HTTP_METHOD_GET, REQUEST_TYPE_PARAM, REQUEST_TYPE_FORM]
+  var HTTP_JSON_TYPES = [HTTP_METHOD_POST, REQUEST_TYPE_JSON, REQUEST_TYPE_GRPC]
+  var HTTP_FORM_DATA_TYPES = [REQUEST_TYPE_DATA, HTTP_METHOD_PUT, HTTP_METHOD_DELETE]
   var HTTP_CONTENT_TYPES = [REQUEST_TYPE_PARAM, REQUEST_TYPE_FORM, REQUEST_TYPE_DATA, REQUEST_TYPE_JSON, REQUEST_TYPE_GRPC]
 
   var CONTENT_TYPE_MAP = {
@@ -1794,7 +1794,7 @@ https://github.com/Tencent/APIJSON/issues
                   + '\n    "types": null // 类型，不填默认全部，填 ["int", "String"] 这种则只查对应参数的方法 '
                   + '\n}'
                 this.onChange(false)
-                this.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.project + this.exTxt.name
+                this.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.project + this.exTxt.name
                   , this.getRequest(vInput.value), this.getHeader(vHeader.value))
               }
               break
@@ -1972,7 +1972,7 @@ https://github.com/Tencent/APIJSON/issues
           },
           'tag': 'Method'
         }
-        this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
+        this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
           App.onResponse(url, res, err)
 
           var rpObj = res.data || {}
@@ -2108,7 +2108,7 @@ https://github.com/Tencent/APIJSON/issues
           var postId = post.id
           if (docId > 0 && (preId == null || postId == null)) {
             // var accountId = this.getCurrentAccountId();
-            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,'/get', {
+            this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,'/get', {
               'Script:pre': preId != null ? undefined : {
                 'ahead': 1,
                 // 'testAccountId': 0,
@@ -2401,7 +2401,7 @@ https://github.com/Tencent/APIJSON/issues
               'tag': 'Script'
             }
 
-            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
+            this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
               App.onResponse(url, res, err)
 
               var rpObj = res.data || {}
@@ -2652,7 +2652,7 @@ https://github.com/Tencent/APIJSON/issues
               'tag': isEditResponse ? 'TestRecord' : 'Method'
             }
 
-            App.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
+            App.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
               App.onResponse(url, res, err)
 
               var rpObj = res.data || {}
@@ -2695,7 +2695,7 @@ https://github.com/Tencent/APIJSON/issues
                       tag: 'Request'
                     };
 
-                    App.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,baseUrl + '/post', reqObj, {}, function (url, res, err) {
+                    App.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,baseUrl + '/post', reqObj, {}, function (url, res, err) {
                       if (res.data != null && res.data.Request != null && JSONResponse.isSuccess(res.data.Request)) {
                         alert('已自动生成并上传 Request 表校验规则配置:\n' + JSON.stringify(reqObj.Request, null, '  '))
                       }
@@ -2758,7 +2758,7 @@ https://github.com/Tencent/APIJSON/issues
                   }
                   for (var i = 0; i < configs.length; i ++) {
                       const config = configs[i]
-                      this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, (isReleaseRESTful ? baseUrl : this.server) + '/post', {
+                      this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, (isReleaseRESTful ? baseUrl : this.server) + '/post', {
                         format: false,
                         Random: {
                           documentId: documentId,
@@ -3036,7 +3036,7 @@ https://github.com/Tencent/APIJSON/issues
               }
 
               this.saveCache(this.project, 'request4MethodList', vInput.value)
-              this.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.project + this.exTxt.name, this.getRequest(vInput.value), this.getHeader(vHeader.value), function (url, res, err) {
+              this.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.project + this.exTxt.name, this.getRequest(vInput.value), this.getHeader(vHeader.value), function (url, res, err) {
                 App.isSyncing = true
                 App.onResponse(url, res, err)
 
@@ -3154,7 +3154,7 @@ https://github.com/Tencent/APIJSON/issues
             'tag': 'Method'
           }
 
-          this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.server + '/post', reqObj, {}, function (url, res, err) {
+          this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.server + '/post', reqObj, {}, function (url, res, err) {
             // 太卡 App.onResponse(url, res, err)
             var rpObj = res.data || {}
             var tblObj = rpObj.Method
@@ -3610,7 +3610,7 @@ https://github.com/Tencent/APIJSON/issues
           this.onChange(false)
         }
 
-        this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/get', req, {}, function (url, res, err) {
+        this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, this.server + '/get', req, {}, function (url, res, err) {
           App.onResponse(url, res, err)
           var data = res.data
           if (JSONResponse.isSuccess(data) == false) {
@@ -3796,7 +3796,7 @@ https://github.com/Tencent/APIJSON/issues
           if (IS_BROWSER) {
             this.onChange(false)
           }
-          this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.server + '/get', req, {}, function (url, res, err) {
+          this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.server + '/get', req, {}, function (url, res, err) {
             App.isTestCaseShow = false
             if (callback) {
               callback(url, res, err)
@@ -4040,7 +4040,7 @@ https://github.com/Tencent/APIJSON/issues
             this.onChange(false)
           }
 
-          this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
+          this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,url, req, {}, function (url, res, err) {
             if (callback) {
               callback(url, res, err)
               return
@@ -4172,7 +4172,7 @@ https://github.com/Tencent/APIJSON/issues
           }
         }
 
-        this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,'/get', req, {}, function (url, res, err) {
+        this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON,'/get', req, {}, function (url, res, err) {
           var rpObj = res.data
           if (JSONResponse.isSuccess(rpObj) != true) {
             App.log(err != null ? err : (rpObj == null ? '' : rpObj.msg))
@@ -4310,7 +4310,7 @@ https://github.com/Tencent/APIJSON/issues
         }
 
         this.scripts = newDefaultScript()
-        this.method = REQUEST_TYPE_POST
+        this.method = HTTP_METHOD_POST
         this.type = REQUEST_TYPE_JSON
         this.showTestCase(false, this.isLocalShow)
         if (IS_BROWSER) {
@@ -4354,7 +4354,7 @@ https://github.com/Tencent/APIJSON/issues
 
         if (isAdminOperation) {
           this.isLoginShow = false
-          this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.server + '/login', req, this.getHeader(vHeader.value), function (url, res, err) {
+          this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.server + '/login', req, this.getHeader(vHeader.value), function (url, res, err) {
             if (callback) {
               callback(url, res, err)
               return
@@ -4400,7 +4400,7 @@ https://github.com/Tencent/APIJSON/issues
 
           const isLoginShow = this.isLoginShow
           var curUser = this.getCurrentAccount() || {}
-          const loginMethod = (isLoginShow ? this.method : curUser.loginMethod) || REQUEST_TYPE_POST
+          const loginMethod = (isLoginShow ? this.method : curUser.loginMethod) || HTTP_METHOD_POST
           const loginType = (isLoginShow ? this.type : curUser.loginType) || REQUEST_TYPE_JSON
           const loginUrl = (isLoginShow ? vUrl.value : curUser.loginUrl) || '/login'
           const loginReq = (isLoginShow ? this.getRequest(vInput.value) : curUser.loginReq) || req
@@ -4529,7 +4529,7 @@ https://github.com/Tencent/APIJSON/issues
        */
       register: function (isAdminOperation) {
         this.scripts = newDefaultScript()
-        this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,'/register', {
+        this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON,'/register', {
           Privacy: {
             phone: this.account,
             _password: this.password
@@ -4558,7 +4558,7 @@ https://github.com/Tencent/APIJSON/issues
        */
       resetPassword: function (isAdminOperation) {
         this.scripts = newDefaultScript()
-        this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,'/put/password', {
+        this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON,'/put/password', {
           verify: vVerify.value,
           Privacy: {
             phone: this.account,
@@ -4596,7 +4596,7 @@ https://github.com/Tencent/APIJSON/issues
 
         // alert('logout  isAdminOperation = ' + isAdminOperation + '; url = ' + url)
         if (isAdminOperation) {
-          this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.server + '/logout'
+          this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.server + '/logout'
               , req, this.getHeader(vHeader.value), function (url, res, err) {
             if (callback) {
               callback(url, res, err)
@@ -4614,7 +4614,7 @@ https://github.com/Tencent/APIJSON/issues
           this.scripts = newDefaultScript()
           this.showTestCase(false, this.isLocalShow)
           this.onChange(false)
-          this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.project + '/logout', req, this.getHeader(vHeader.value), function (url, res, err) {
+          this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.project + '/logout', req, this.getHeader(vHeader.value), function (url, res, err) {
             if (App.isEnvCompareEnabled != true) {
               if (callback) {
                 callback(url, res, err)
@@ -4622,7 +4622,7 @@ https://github.com/Tencent/APIJSON/issues
               return
             }
 
-            App.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, App.getBaseUrl(App.otherEnv) + '/logout'
+            App.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON, App.getBaseUrl(App.otherEnv) + '/logout'
                 , req, App.getHeader(vHeader.value), function (url_, res_, err_) {
               if (callback) {
                 callback(url, res, err)
@@ -4641,7 +4641,7 @@ https://github.com/Tencent/APIJSON/issues
         var type = this.loginType == 'login' ? 0 : (this.loginType == 'register' ? 1 : 2)
         this.showTestCase(false, this.isLocalShow)
         this.onChange(false)
-        this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,'/post/verify', {
+        this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON,'/post/verify', {
           type: type,
           phone: this.account
         }, this.getHeader(vHeader.value), function (url, res, err) {
@@ -4914,10 +4914,10 @@ https://github.com/Tencent/APIJSON/issues
           if (StringUtil.isEmpty(method, true)) {
             t = REQUEST_TYPE_JSON
           }
-          else if (method == REQUEST_TYPE_GET) {
+          else if (method == HTTP_METHOD_GET) {
             t = REQUEST_TYPE_PARAM
           }
-          else if (method == REQUEST_TYPE_POST) {
+          else if (method == HTTP_METHOD_POST) {
             t = REQUEST_TYPE_JSON
           }
           else {
@@ -5139,7 +5139,7 @@ https://github.com/Tencent/APIJSON/issues
           var caseScript = (caseScript_ != null ? caseScript_ : ((this.scripts || {}).case || {})[this.getCurrentDocumentId() || 0]) || {}
 
           this.setBaseUrl()
-          this.request(isAdminOperation, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.project + '/method/invoke', httpReq, isAdminOperation ? {} : header, callback, caseScript, accountScript_, globalScript_, ignorePreScript)
+          this.request(isAdminOperation, HTTP_METHOD_POST, REQUEST_TYPE_JSON, this.project + '/method/invoke', httpReq, isAdminOperation ? {} : header, callback, caseScript, accountScript_, globalScript_, ignorePreScript)
 
           this.locals = this.locals || []
           if (this.locals.length >= 1000) { //最多1000条，太多会很卡
@@ -5870,7 +5870,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           if (type == 'caseGroup') {
             var groupUrl = item == null ? null : item.groupUrl
             var rawName = item == null ? null : item.rawName
-            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/put', {
+            this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, this.server + '/put', {
               Method: {
                 'group': item.groupName,
                 'package{}': [groupUrl],
@@ -5901,7 +5901,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
 
             //修改 Random 的 count
-            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/put', {
+            this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, this.server + '/put', {
               Random: {
                 id: r.id,
                 count: r.count,
@@ -6250,7 +6250,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
            '@combine': StringUtil.isEmpty(search) ? null : 'package%$ | class%$'  // 'package%$ | class%$ | method%$'
         }
 
-        this.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,this.server + '/get', {
+        this.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON,this.server + '/get', {
           format: false,
           '@database': this.database,
           '@schema': this.schema,
@@ -6440,7 +6440,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           finalCallback()
 
-          App.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON,App.project + '/method/list', {
+          App.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON,App.project + '/method/list', {
         	  'query': 1,
         	  'package': App.getPackage(),
 //        	  'class': App.getClass()
@@ -6948,7 +6948,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
         }
 
-        this.method = REQUEST_TYPE_POST
+        this.method = HTTP_METHOD_POST
         this.type = REQUEST_TYPE_JSON
         this.showUrl(false, url)
         this.urlComment = ''
@@ -7591,7 +7591,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
             App[testSubList ? 'currentRandomSubIndex' : 'currentRandomIndex'] = index
             try {
-              this.testRandomSingle(show, false, itemAllCount > 1 && ! testSubList, item, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, url, json, header, isCross, isManual, function (url, res, err) {
+              this.testRandomSingle(show, false, itemAllCount > 1 && ! testSubList, item, HTTP_METHOD_POST, REQUEST_TYPE_JSON, url, json, header, isCross, isManual, function (url, res, err) {
                 var data = null
                 if (res instanceof Object) {  // 可能通过 onTestResponse 返回的是 callback(true, 18, null)
                   data = res.data
@@ -7730,7 +7730,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                       "timeout": constJson.timeout,
                       "ui": constJson.ui
                     }
-                    App.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, App.project + '/method/invoke', httpReq, header, cb, caseScript, null, null, true);
+                    App.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON, App.project + '/method/invoke', httpReq, header, cb, caseScript, null, null, true);
                   }
                 }
 
@@ -8171,7 +8171,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
 
             // reqCount ++;
-            App.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, App.project + '/get', req, {}, function (url, res, err) {
+            App.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, App.project + '/get', req, {}, function (url, res, err) {
               // respCount ++;
               try {
                 App.onResponse(url, res, err)
@@ -8388,7 +8388,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
 
         this.coverage = {}
-        this.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.project + '/coverage/start', {}, {}, function (url, res, err) {
+        this.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON, this.project + '/coverage/start', {}, {}, function (url, res, err) {
           try {
             App.onResponse(url, res, err)
             if (DEBUG) {
@@ -8621,7 +8621,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               }
             }
 
-            this.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, isEnvCompare ? otherEnvUrl : curEnvUrl, httpReq, header, function (url, res, err) {
+            this.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON, isEnvCompare ? otherEnvUrl : curEnvUrl, httpReq, header, function (url, res, err) {
               try {
                 App.onResponse(url, res, err)
                 if (DEBUG) {
@@ -8646,7 +8646,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               tr[standardKey] = isMLEnabled ? JSON.stringify(JSONResponse.updateFullStandard({}, rsp, isMLEnabled)) : rspStr // res.data
               item.TestRecord = tr
 
-              App.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, curEnvUrl, httpReq, header, function (url, res, err) {
+              App.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON, curEnvUrl, httpReq, header, function (url, res, err) {
                 try {
                   App.onResponse(url, res, err)
                   if (DEBUG) {
@@ -8913,7 +8913,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                     autoTestCallback('已完成回归测试')
                   }
 
-                  App.request(false, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, App.project + '/coverage/report', {}, {}, function (url, res, err) {
+                  App.request(false, HTTP_METHOD_POST, REQUEST_TYPE_JSON, App.project + '/coverage/report', {}, {}, function (url, res, err) {
                     try {
                       App.onResponse(url, res, err)
                       if (DEBUG) {
@@ -9384,7 +9384,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               tag: 'TestRecord'
             }
 
-            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
+            this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
               App.onResponse(url, res, err)
 
               var data = res.data || {}
@@ -9507,7 +9507,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             //   }
             // }
 
-            this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
+            this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, url, req, {}, function (url, res, err) {
               App.onResponse(url, res, err)
 
               var data = res.data || {}
@@ -9580,7 +9580,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         item = item || {}
         var doc = (isRandom ? item.Random : item.Method) || {}
 
-        this.request(true, REQUEST_TYPE_POST, REQUEST_TYPE_JSON, this.server + '/get', {
+        this.request(true, HTTP_METHOD_POST, REQUEST_TYPE_JSON, this.server + '/get', {
           TestRecord: {
             documentId: isRandom ? doc.documentId : doc.id,
             randomId: isRandom ? doc.id : null,
