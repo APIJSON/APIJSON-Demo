@@ -39,11 +39,11 @@ import static org.springframework.http.HttpHeaders.COOKIE;
 import static org.springframework.http.HttpHeaders.SET_COOKIE;
 
 @Service
-public class ApiAutoRegressionScheduler {
-    private static final String TAG = "ApiAutoRegressionScheduler";
+public class AutoTestRegressionScheduler {
+    private static final String TAG = "AutoTestRegressionScheduler";
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final ApiAutoNodeProcessSupervisor nodeProcessSupervisor;
+    private final AutoTestNodeProcessSupervisor nodeProcessSupervisor;
     private final ObjectProvider<JavaMailSender> mailSenderProvider;
     private final AtomicBoolean running = new AtomicBoolean(false);
 
@@ -68,8 +68,8 @@ public class ApiAutoRegressionScheduler {
     @Value("${apijson.auto-test.zone:Asia/Shanghai}")
     private String zone;
 
-    public ApiAutoRegressionScheduler(ApiAutoNodeProcessSupervisor nodeProcessSupervisor,
-                                      ObjectProvider<JavaMailSender> mailSenderProvider) {
+    public AutoTestRegressionScheduler(AutoTestNodeProcessSupervisor nodeProcessSupervisor,
+                                       ObjectProvider<JavaMailSender> mailSenderProvider) {
         this.nodeProcessSupervisor = nodeProcessSupervisor;
         this.mailSenderProvider = mailSenderProvider;
     }
