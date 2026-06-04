@@ -883,9 +883,9 @@ https://github.com/Tencent/APIJSON/issues
   var CUR_DATA = 'CUR_DATA' // CUR_DATA('[]/0/User/id')
   var CTX_PUT = 'CTX_PUT' // CTX_PUT('key', val)
 
-  function get4Path(obj, path, defaultVal, msg) {
-    var val = path == null || path == '' ? obj : JSONResponse.getValByPath(obj, StringUtil.split(path, '/'), true)
-    if (val == null && defaultVal == undefined) {
+  function get4Path(obj, path, defaultVal, msg, isDesc) {
+    var val = path == null || path === '' ? obj : JSONResponse.getValByPath(obj, StringUtil.split(path, '/'), true, isDesc)
+    if (val == null && defaultVal === undefined) {
       throw new Error('找不到 ' + path + ' 对应在 obj 中的非 null 值！' + StringUtil.get(msg))
     }
     return val
@@ -2618,7 +2618,8 @@ https://github.com/Tencent/APIJSON/issues
         this.currentRandomItem = item
         this.isRandomListShow = false
         this.isRandomSubListShow = false
-        var random = (item || {}).Random || {}
+        var isRes = ! this.isEditReqLink
+        var random = (item || {})[isRes ? 'Random:res' : 'Random'] || {}
         this.randomTestTitle = random.name
         this.testRandomCount = random.count
         vRandom.value = StringUtil.get(random.config)
@@ -3200,6 +3201,13 @@ https://github.com/Tencent/APIJSON/issues
             return
           }
 
+          const isRes = ! this.isEditReqLink
+          var random = (this.currentRandomItem || {}).Random || {};
+          if (isExportRandom && isRes && (Number.isNaN(random.id) || random.id <= 0)) {
+            alert('请先上传请求参数配置！')
+            return
+          }
+
           this.isTestCaseShow = false
 
           const currentResponse = this.view != 'code' || StringUtil.isEmpty(this.jsoncon, true) ? {} : this.removeDebugInfo(parseJSON(this.jsoncon));
@@ -3307,7 +3315,6 @@ https://github.com/Tencent/APIJSON/issues
             commentObj = JSONResponse.updateStandard({}, mapReq2);
           }
 
-          const isRes = ! this.isEditReqLink
           var isChainShow = this.isChainShow
           var paths = (isChainShow ? this.chainPaths : this.casePaths) || []
           var index = paths.length - 1
@@ -3354,12 +3361,15 @@ https://github.com/Tencent/APIJSON/issues
             const baseUrl = App.getBaseUrl();
             const url = (isReleaseRESTful ? baseUrl : App.server) + (isExportRandom || isEditResponse || did == null ? '/post' : '/put')
             const reqObj = btnIndex <= 0 ? constJson : mapReq
+            const httpRes = {} // this.currentHttpResponse || {}
+            const err = httpRes.error
+
             const req = isExportRandom && btnIndex <= 0 ? {
               format: false,
               'Random': {
-                isRes: isRes,
+                res: isRes ? 1 : 0,
                 userId: userId,
-                toId: 0,
+                toId: isRes ? random.id : 0,
                 chainGroupId: cgId,
                 chainId: cId,
                 documentId: did,
@@ -3367,6 +3377,17 @@ https://github.com/Tencent/APIJSON/issues
                 name: App.exTxt.name,
                 config: config
               },
+              // 'Random:res': {
+              //   res: 1,
+              //   userId: userId,
+              //   'toId@': '/Random/id',
+              //   chainGroupId: cgId,
+              //   chainId: cId,
+              //   documentId: did,
+              //   count: App.requestCount,
+              //   name: App.exTxt.name,
+              //   config: config
+              // },
               'TestRecord': {
                 'userId': userId,
                 'documentId': did,
@@ -3402,7 +3423,10 @@ https://github.com/Tencent/APIJSON/issues
                 'documentId': isEditResponse ? did : undefined,
                 'randomId': 0,
                 'host': baseUrl,
-               'testAccountId': currentAccountId,
+                'testAccountId': currentAccountId,
+                status: httpRes.status,
+                throw: err == null ? null : (err instanceof Error ? typeof err : StringUtil.get(err)),
+                msg: httpRes.message,
                 'response': isEditResponse ? rawInputStr : rawRspStr,
                 'standard': isML || isEditResponse ? JSON.stringify(isEditResponse ? commentObj : stddObj) : undefined,
                 // 没必要，直接都在请求中说明，查看也方便 'detail': (isEditResponse ? App.getExtraComment() : null) || ((App.currentRemoteItem || {}).TestRecord || {}).detail,
@@ -4937,7 +4961,7 @@ https://github.com/Tencent/APIJSON/issues
           var accountIdStr = String(item != null && item.isLoggedIn ? item.id || '' : '')
           var tests = App.doneCount >= App.allCount && noShowCase != true && this.isCrossEnabled && this.isStatisticsEnabled
             && this.reportId != null && this.reportId > 0 ? this.tests[accountIdStr] : null
-          if (JSONObject.isEmpty(tests) != true) {
+          if (StringUtil.isNotEmpty(tests)) {
             this.showCompare4TestCaseList(true)
             if (App.deepDoneCount >= App.deepAllCount && ! this.isTestCaseShow) {
                 this.showCompare4RandomList(true, false)
@@ -5116,6 +5140,7 @@ https://github.com/Tencent/APIJSON/issues
           if (hasTests || this.isChainShow || (reportId != null && reportId >= 0)) {
 
             const lastAccountIndex = accountIndex || 0
+            const isML = this.isMLEnabled
 
             for (var i = 0; i < allCount; i++) {
               var item = testCases[i]
@@ -5175,11 +5200,21 @@ https://github.com/Tencent/APIJSON/issues
                 tests[d.id] = [rsp]
 
                 var cmp = parseJSON(tr.compare)
-                if (cmp == null || Object.keys(cmp).length <= 0) {
-                  cmp = JSONResponse.compareWithBefore(null, null)
+                if (StringUtil.isEmpty(cmp) || cmp.code != JSONResponse.COMPARE_ERROR) {
+                  var oldTr = item['TestRecord:old'] || {}
+                  var stdd = parseJSON(isML ? oldTr.standard : oldTr.response, null, true)
+                  cmp = (StringUtil.isEmpty(stdd) ? null : JSONResponse.compareResponse({
+                    status: oldTr.status,
+                    message: StringUtil.trim(oldTr.throw) + ' ' + StringUtil.trim(oldTr.msg),
+                    data: rsp
+                  }, stdd, rsp, '', isML)) || cmp
+
+                  if (StringUtil.isEmpty(cmp)) {
+                    cmp = JSONResponse.compareWithBefore(null, null)
+                  }
                 }
 
-                this.onTestResponse(null, allCount, testCases, i, item, d, item.Random, tr, rsp, cmp, false, accountIndex, true);
+                this.onTestResponse(null, allCount, testCases, i, item, d, item.Random, tr, rsp, null, cmp, false, accountIndex, true);
                 continue
               }
 
@@ -5367,6 +5402,7 @@ https://github.com/Tencent/APIJSON/issues
         var isMLEnabled = this.isMLEnabled
         var userId = this.User.id
         var project = this.projectHost.project
+        var reportId = this.reportId
         baseUrl = this.getBaseUrl(vUrl.value, true)
 
         var key = groupId + ''
@@ -5385,6 +5421,8 @@ https://github.com/Tencent/APIJSON/issues
         }
 
         search = StringUtil.split(search)
+        var notShowReport = ! this.isShowReport()
+
         var req = {
           format: false,
           '[]': {
@@ -5432,7 +5470,18 @@ https://github.com/Tencent/APIJSON/issues
               },
               'Random':  {
 //                'id@': '/Chain/randomId',
+                'count>=': 1,
+                'res': 0,
                 'toId': 0,
+                'chainId@': '/Chain/id',
+                'documentId@': '/Document/id',
+                'userId': userId,
+                '@order': 'date-'
+              },
+              'Random:res':  {
+//                'id@': '/Chain/randomId',
+                'res': 1,
+                'toId@': '/Random/id',
                 'chainId@': '/Chain/id',
                 'documentId@': '/Document/id',
                 'userId': userId,
@@ -5445,8 +5494,8 @@ https://github.com/Tencent/APIJSON/issues
                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
                'testAccountId': this.getCurrentAccountId(),
                 'randomId': 0,
-//                'reportId': reportId <= 0 ? null : reportId,
-//                'invalid': reportId == null ? 0 : null,
+                'reportId': notShowReport ? null : reportId,
+                'invalid': notShowReport ? 0 : null,
                 '@order': 'date-',
                 '@column': 'id,userId,documentId,testAccountId,reportId,duration,minDuration,maxDuration,response' + (this.isStatisticsEnabled ? ',compare' : '')+ (isMLEnabled ? ',standard' : ''),
                 'standard{}': isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
@@ -5879,6 +5928,7 @@ https://github.com/Tencent/APIJSON/issues
             }
           }
 
+          var notShowReport = ! this.isShowReport()
           this.coverage = {}
           this.view = 'markdown'
           var req = {
@@ -5915,12 +5965,22 @@ https://github.com/Tencent/APIJSON/issues
               },
               'Random': isChainShow ? {
 //                'id@': '/Chain/randomId',
+                'res': 0,
                 'toId': 0, // null,
                 'chainId@': '/Chain/id',
 //                'documentId@': '/Document/documentId',
                 'userId': userId,
                 '@order': 'date-'
-              }: null,
+              } : null,
+              'Random:res': isChainShow ? {
+//                'id@': '/Chain/randomId',
+                'res': 1,
+                'toId@': '/Random/id',
+                'chainId@': '/Chain/id',
+                'documentId@': '/Document/id',
+                'userId': userId,
+                '@order': 'date-'
+              } : null,
               'TestRecord': {
                 'chainId@': isChainShow ? '/Chain/id' : null,
                 'chainId': isChainShow ? null : 0,
@@ -5929,9 +5989,24 @@ https://github.com/Tencent/APIJSON/issues
                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
                 'testAccountId': this.getCurrentAccountId(),
                 'randomId': 0,
-                'reportId': reportId <= 0 ? null : reportId,
-                'invalid': reportId == null ? 0 : null,
-                '@order': 'date-',
+                'reportId': notShowReport || reportId <= 0 ? null : reportId,
+                'invalid': notShowReport ? 0 : null,
+                '@order': 'id-,date-',
+                '@column': 'id,userId,documentId,testAccountId,reportId,duration,minDuration,maxDuration,status,throw,msg,response' + (this.isStatisticsEnabled ? ',compare' : '')+ (this.isMLEnabled ? ',standard' : ''),
+                'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
+              },
+              'TestRecord:old': notShowReport || reportId <= 0 ? undefined : {
+                'id<@': '/TestRecord/id',
+                'chainId@': isChainShow ? '/Chain/id' : null,
+                'chainId': isChainShow ? null : 0,
+                'documentId@': '/Document/id',
+                'userId': userId,
+                'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
+                'testAccountId': this.getCurrentAccountId(),
+                'randomId': 0,
+                'reportId<': reportId, // reportId <= 0 ? null : reportId,
+                'invalid': null, // reportId == null ? 0 : null,
+                '@order': 'id-,date-',
                 '@column': 'id,userId,documentId,testAccountId,reportId,duration,minDuration,maxDuration,response' + (this.isStatisticsEnabled ? ',compare' : '')+ (this.isMLEnabled ? ',standard' : ''),
                 'standard{}': this.isMLEnabled ? (this.database == 'SQLSERVER' ? 'len(standard)>2' : 'length(standard)>2') : null  //用 MySQL 5.6   '@having': this.isMLEnabled ? 'json_length(standard)>0' : null
               },
@@ -6137,6 +6212,10 @@ https://github.com/Tencent/APIJSON/issues
         }
       },
 
+      isShowReport: function () {
+        return this.isReportShow && this.reportId != null && ! (IS_NODE || typeof App.autoTestCallback == 'function')
+      },
+
       //显示远程的随机配置文档
       showRandomList: function (show, item, isSub, callback) {
         this.isRandomEditable = false
@@ -6182,40 +6261,80 @@ https://github.com/Tencent/APIJSON/issues
           const cri = this.currentRemoteItem || {}
           const chain = cri.Chain || {}
           const cId = chain.id || 0
-          const currentAccountId = this.getCurrentAccountId();
+          const currentAccountId = this.getCurrentAccountId()
+          var reportId = this.reportId
+          var notShowReport = ! this.isShowReport()
 
           var req = {
             '[]': {
               'count': (isSub ? this.randomSubCount : this.randomCount) || 100,
               'page': (isSub ? this.randomSubPage : this.randomPage) || 0,
               'Random': {
+                'res': 0,
                 'toId': isSub ? item.id : 0,
                 'chainId': cId,
                 'documentId': isSub ? null : item.id,
                 '@order': "date-",
                 'name%$': search
               },
+              'Random:res': {
+                'res': 1,
+                'toId@': '/Random/id',
+                'chainId': cId,
+                'documentId': isSub ? null : item.id,
+                '@order': "date-"
+              },
               'TestRecord': {
                 'randomId@': '/Random/id',
                 'testAccountId': currentAccountId,
                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
-                '@order': 'date-'
+                'reportId<=': notShowReport || reportId <= 0 ? null : reportId,
+                'invalid': notShowReport ? 0 : reportId,
+                '@order': 'id-,date-'
+              },
+              'TestRecord:old': notShowReport || reportId <= 0 ? undefined : {
+                'id<@': '/TestRecord/id',
+                'randomId@': '/Random/id',
+                'testAccountId': currentAccountId,
+                'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
+                'reportId<': reportId,
+                'invalid': 0,
+                '@order': 'id-,date-'
               },
               '[]': isSub ? null : {
                 'count': this.randomSubCount || 100,
                 'page': this.randomSubPage || 0,
                 'Random': {
                   'toId@': '[]/Random/id',
+                  'res': 0,
                   'chainId': cId,
                   'documentId': item.id,
                   '@order': "date-",
                   'name%$': subSearch
                 },
+                'Random:res': {
+                  'res': 1,
+                  'toId@': '/Random/id',
+                  'chainId': cId,
+                  'documentId': item.id,
+                  '@order': "date-"
+                },
                 'TestRecord': {
                   'randomId@': '/Random/id',
                   'testAccountId': currentAccountId,
                   'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
-                  '@order': 'date-'
+                  'reportId<=': notShowReport || reportId <= 0 ? null : reportId,
+                  'invalid': notShowReport ? null : 0,
+                  '@order': 'id-,date-'
+                },
+                'TestRecord:old': notShowReport || reportId <= 0 ? undefined : {
+                  'id<@': '/TestRecord/id',
+                  'randomId@': '/Random/id',
+                  'testAccountId': currentAccountId,
+                  'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
+                  'reportId<': reportId,
+                  'invalid': 0,
+                  '@order': 'id-,date-'
                 }
               }
             },
@@ -7529,7 +7648,9 @@ https://github.com/Tencent/APIJSON/issues
         var evalPostScript = function () {}
 
         const onHttpResponse = function (res) {
-          App.currentHttpResponse = res
+          if (! isAdminOperation) {
+            App.currentHttpResponse = res
+          }
           clearTimeout(errHandler)
           var postEvalResult = evalPostScript(method, type, url, req, header, callback, res, null)
           if (postEvalResult == BREAK_ALL) {
@@ -7601,7 +7722,9 @@ https://github.com/Tencent/APIJSON/issues
 
           var errObj = err instanceof Array == false && err instanceof Object ? err : {}
           var res = {status: errObj.status || (errObj.response || {}).status, request: {url: url, headers: header, data: req}, data: (errObj.response || {}).data}
-          App.currentHttpResponse = res
+          if (! isAdminOperation) {
+            App.currentHttpResponse = res
+          }
 
           var postEvalResult = evalPostScript(method, type, url, req, header, callback, res, err)
           if (postEvalResult == BREAK_ALL) {
@@ -7628,7 +7751,7 @@ https://github.com/Tencent/APIJSON/issues
             App.autoTestCallback('Error when testing: ' + err + '.\nurl: ' + url + ' \nrequest: \n' + JSON.stringify(req, null, '    '), err)
           }
 
-          App.onResponse(url, {request: {url: url, headers: header, data: req}}, err)
+          App.onResponse(url, res, err)
         }
 
         var retryReq = function (err) {
@@ -10517,6 +10640,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         console.log = logger
       },
 
+      onClickRandomType: function (isRes) {
+        this.isEditReqLink = ! isRes;
+        var random = (this.currentRandomItem || {})[isRes ? 'Random:res' : 'Random'] || {};
+        vRandom.value = StringUtil.trim(random.config);
+      },
+
       /**参数注入，动态替换键值对
        * @param show
        */
@@ -10584,13 +10713,12 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
           summaryItem.totalCount = allCount
 
-          const isRes = ! this.isEditReqLink
           var methods = this.methods
           var method = this.isShowMethod() ? this.method : null
           var type = this.type
-          var json = this.getRequest(isRes ? this.jsoncon : vInput.value, {})
+          var json = this.getRequest(vInput.value, {})
           var url = this.getUrl()
-          var header = (isRes ? (this.currentHttpResponse || {}).headers : this.getHeader(vHeader.value)) || {}
+          var header = this.getHeader(vHeader.value) || {}
 
           ORDER_MAP = {}  //重置
 
@@ -10763,7 +10891,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
 
               },
-              preScript, null, random.isRes
+              preScript, null, random.res
             );
           }
           catch (e) {
@@ -10953,11 +11081,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             totalCount: count
           }
 
-          const isRes = ! this.isEditReqLink
           this.testRandomSingle(show, false, this.isRandomSubListShow, this.currentRandomItem,
             this.isShowMethod() ? this.method : null, this.type, this.getUrl()
-            , this.getRequest(isRes ? this.jsoncon : vInput.value, {})
-            , (isRes ? (this.currentHttpResponse || {}).headers : this.getHeader(vHeader.value)) || {}
+            , this.getRequest(vInput.value, {}), this.getHeader(vHeader.value) || {}
             , false, false, callback
           )
         }
@@ -11060,7 +11186,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           // value RANDOM_DB
           const value = StringUtil.trim(line2.substring(index + ': '.length));
 
-          var invoke = function (val, which, p_k, pathKeys, key, lastKeyInPath) {
+          var invoke = function (val, which, p_k, pathKeys, key, lastKeyInPath, isRandom, isIn) {
             try {
               if (generateConfig) {
                 var configVal;
@@ -11078,15 +11204,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
               if (generateName) {
                 var s = val == undefined ? 'undefined' : (typeof val == 'string' && val != '' ? val : JSON.stringify(val)); // null 可以正常转为字符串
+                var valStr = s;
                 if (val instanceof Array) {
                   valStr = val.length <= 1 ? s : '[' + val.length + ' .. ' + s.substring(1, s.length - 1) + ']';
                 }
                 else if (val instanceof Object) {
                   var kl = Object.keys(val).length;
                   valStr = kl <= 1 ? s : '{' + kl + ' .. ' + s.substring(1, s.length - 1) + '}';
-                }
-                else {
-                  valStr = s;
                 }
 
                 if (valStr.length > 13) {
@@ -11099,32 +11223,45 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 //先按照单行简单实现
                 //替换 JSON 里的键值对 key: value
                 var targetObj = isHead ? head : json;
-                var parent = targetObj;
-                var current = null;
-                for (var j = 0; j < pathKeys.length - 1; j ++) {
-                  current = parent[pathKeys[j]]
-                  if (current == null) {
-                    current = parent[pathKeys[j]] = {}
-                  }
-                  if (parent instanceof Object == false) {
-                    throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中' +
-                        ' pathKeys[' + j + '] = ' + pathKeys[j] + ' 在实际请求 JSON 内对应的值不是对象 {} 或 数组 [] !');
-                  }
-                  parent = current;
-                }
-
-                if (current == null) {
-                  current = targetObj;
-                }
+                // var parent = targetObj;
+                // var current = null;
+                // for (var j = 0; j < pathKeys.length - 1; j ++) {
+                //   current = parent[pathKeys[j]]
+                //   if (current == null) {
+                //     current = parent[pathKeys[j]] = {}
+                //   }
+                //   if (parent instanceof Object == false) {
+                //     throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！路径 ' + path + ' 中' +
+                //         ' pathKeys[' + j + '] = ' + pathKeys[j] + ' 在实际请求 JSON 内对应的值不是对象 {} 或 数组 [] !');
+                //   }
+                //   parent = current;
+                // }
+                //
+                // if (current == null) {
+                //   current = targetObj;
+                // }
                 // alert('< current = ' + JSON.stringify(current, null, '    '))
 
                 if (isRes) {
-                  var real = current[key]
-                  if (real !== val) {
+                  var arr = []
+                  var real = JSONResponse.getValByPath(targetObj, pathKeys, null, null, arr, true) // current[key]
+                  if (isIn != true && real !== val) {
                     throw new Error(p_k + ' != ' + (val == null ? 'null' : StringUtil.limitLength(StringUtil.get(val), 20)) + '！')
                   }
+
+                  if (isRandom) {
+                    arr.sort();
+                    if (val instanceof Array) {
+                      val.sort();
+                    }
+                  }
+
+                  if (isIn && (val instanceof Array == false || StringUtil.get(arr) !== StringUtil.get(val))) {
+                    throw new Error(p_k + ' = ' + StringUtil.limitLength(StringUtil.get(arr), 20) + ' != ' + (val == null ? 'null' : StringUtil.limitLength(StringUtil.get(val), 20)) + '！')
+                  }
                 } else {
-                  current[key] = val;
+                  // current[key] = val;
+                  targetObj = JSONResponse.setValByPath(targetObj, pathKeys, val)
                 }
               }
 
@@ -11183,10 +11320,19 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             var tableReq = {
               '@column': isRandom ? finalColumnName : ('DISTINCT ' + finalColumnName),
               '@order': isRandom ? 'rand()' : (finalColumnName + (isDesc ? '-' : '+')),
-              '@schema': StringUtil.isEmpty(schema, true) ? undefined : schema
+              '@schema': StringUtil.isEmpty(schema, true) ? undefined : schema,
+              // [finalColumnName + '{}']: isRes ? args : undefined
             };
             tableReq[finalColumnName + '>='] = min;
             tableReq[finalColumnName + '<='] = max;
+
+            if (isRes) {
+              var targetObj = isHead ? head : json;
+              var arr = []; // FIXME 改成遍历每项再独立 request4Db ？
+              JSONResponse.getValByPath(targetObj, pathKeys, null, null, arr, true);
+              tableReq[finalColumnName + '{}'] = arr; // arr == null || arr.length <= 0 ? null : arr;
+            }
+
             try {
               body = parseJSON(body);
             } catch (e) {
@@ -11194,20 +11340,20 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             }
 
             var req = {};
-            const listName = isRandom ? null : finalTableName + '-' + finalColumnName + '[]';
-            const orderIndex = isRandom ? null : getOrderIndex(randomId, line, null);
+            const listName = isRandom && ! isRes ? null : finalTableName + '-' + finalColumnName + '[]';
+            const orderIndex = isRandom ? 0 : getOrderIndex(randomId, line, null);
 
             if (body != null && body[finalTableName] == null && (isRandom || body[listName] == null)) {
               tableReq = Object.assign(tableReq, body);
             }
 
-            if (isRandom) {
+            if (isRandom && ! isRes) {
               req[finalTableName] = tableReq;
             }
             else {
               // 从数据库获取时不考虑边界，不会在越界后自动循环
-              var listReq = {
-                count: 1, // count <= 100 ? count : 0,
+              var listReq = { // FIXME 改成遍历每项再独立 request4Db ？
+                count: isRes ? 0 : 1, // count <= 100 ? count : 0,
                 page: (step*orderIndex) % 100  //暂时先这样，APIJSON 应该改为 count*page <= 10000  //FIXME 上限 100 怎么破，lastKeyInPath 未必是 id
               };
               listReq[finalTableName] = tableReq;
@@ -11231,25 +11377,38 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
               var data = (res || {}).data || {}
               if (JSONResponse.isSuccess(data) != true) {
-                respCount = -reqCount;
-                vOutput.value = '参数注入 为第 ' + (which + 1) + ' 行\n  ' + p_k + '  \n获取数据库数据 异常：\n' + data.msg;
-                alert(StringUtil.get(vOutput.value));
-                return
+                respCount ++; // respCount = -reqCount;
+                var err = p_k + '  \n获取数据库数据 异常：\n' + data.msg
+                vOutput.value = '参数注入 为第 ' + (which + 1) + ' 行\n  ' + err;
+                if (callback == null) {
+                  alert(err);
+                } else {
+                  if (respCount >= reqCount) {
+                    var cn = randomNameKeys.join(', ')
+                    if (cn.length > 50) {
+                      cn = cn.substring(0, 30) + ' ..' + randomNameKeys.length + '.. ' + cn.substring(cn.length - 12)
+                    }
+                    callback(cn, constConfigLines.join('\n'), json, head);
+                  }
+                }
+                throw new Error(err)
                 // throw new Error('参数注入 为\n  ' + tableName + '/' + key + '  \n获取数据库数据 异常：\n' + data.msg)
               }
 
+              var arr = data[listName] || [];
               if (isRandom) {
-                invoke((data[finalTableName] || {})[finalColumnName], which, p_k, pathKeys, key, lastKeyInPath);
+                invoke(isRes ? arr : (data[finalTableName] || {})[finalColumnName], which, p_k, pathKeys, key, lastKeyInPath, isRandom, isRes);
+                // invoke((data[finalTableName] || {})[finalColumnName], which, p_k, pathKeys, key, lastKeyInPath);
               }
               else {
-                var val = (data[listName] || [])[0];
+                var val = isRes ? arr : arr[0];
                 //越界，重新获取
                 if (val == null && orderIndex > 0 && ORDER_MAP[randomId] != null && ORDER_MAP[randomId][line] != null) {
                   ORDER_MAP[randomId][line] = null;  //重置，避免还是在原来基础上叠加
                   request4Db(JSONResponse.getTableName(pathKeys[pathKeys.length - 2]), which, p_k, pathKeys, key, lastKeyInPath, false, isDesc, step, body);
                 }
                 else {
-                  invoke(val, which, p_k, pathKeys, key, lastKeyInPath);
+                  invoke(val, which, p_k, pathKeys, key, lastKeyInPath, isRandom, isRes);
                 }
               }
 
@@ -11861,8 +12020,13 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
       },
 
       startTestSingle: function (list, allCount, index, item, isRandom, accountIndex, isCross, callback, singleCallback, ctx) {
-          this.isFullAssert = false
-          try {
+        this.isFullAssert = false
+        const caseScript = {
+            pre: (item['Script:pre'] || {}),
+            post: (item['Script:post'] || {})
+        }
+
+        try {
             const isMLEnabled = this.isMLEnabled
             const standardKey = isMLEnabled != true ? 'response' : 'standard'
 
@@ -11930,11 +12094,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
             }
 
-            const caseScript = {
-              pre: (item['Script:pre'] || {}),
-              post: (item['Script:post'] || {})
-            }
-
             const method = document.method
             const type = document.type
             const req = this.getRequest(document.request, null, true)
@@ -11966,7 +12125,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   }
 
                   if (isEnvCompare != true) {
-                    App.compareResponse(res, allCount, list, index, item, res.data, isRandom, accountIndex, false, err, null, isCross, callback, singleCallback)
+                    App.compareResponse(res, allCount, list, index, item, res.data, isRandom, accountIndex, false, err, null, isCross, callback, singleCallback, caseScript, ctx)
                     return
                   }
 
@@ -12064,8 +12223,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           var resCfg = resRandom.config
           if (StringUtil.isNotEmpty(resCfg)) {
             try {
-              this.parseRandom(response, res.headers, resCfg, resRandom.id, true, false, false, function (randomName, constConfig, constJson, constHeader) {
-                App.onTestResponse(res, allCount, list, index, it, d, r, tr, response, tr.compare || {}, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback);
+              caseScript = caseScript || {}
+              this.parseRandom(response, (res || {}).headers, resCfg, resRandom.id, true, false, false, function (randomName, constConfig, constJson, constHeader) {
+                App.onTestResponse(res, allCount, list, index, it, d, r, tr, response, err, tr.compare || {}, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback);
               }, StringUtil.trim((caseScript.pre || {}).script) + '\n' + StringUtil.trim((caseScript.post || {}).script), ctx, true)
               return
             } catch (e) {
@@ -12079,10 +12239,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           }
         }
 
-        this.onTestResponse(res, allCount, list, index, it, d, r, tr, response, tr.compare || {}, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback);
+        this.onTestResponse(res, allCount, list, index, it, d, r, tr, response, err,tr.compare || {}, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback);
       },
 
-      onTestResponse: function(res, allCount, list, index, it, d, r, tr, response, cmp, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback) {
+      onTestResponse: function(res, allCount, list, index, it, d, r, tr, response, err, cmp, isRandom, accountIndex, justRecoverTest, isCross, callback, singleCallback) {
         this.isFullAssert = false
         tr = tr || {}
         cmp = cmp || {}
@@ -12212,11 +12372,11 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           // alert('onTestResponse  accountIndex = ' + accountIndex)
 
-          const deepAllCount = this.toTestDocIndexes == null ? 0 : this.toTestDocIndexes.length
+          const deepAllCount = IS_NODE || this.toTestDocIndexes == null ? 0 : this.toTestDocIndexes.length
           App.deepAllCount = deepAllCount
           if (isRandom != true && deepAllCount > 0 && ! this.isChainShow) { // 自动给非 红色 报错的接口跑参数注入
             App.deepDoneCount = 0;
-            this.startRandomTest4Doc(list, this.toTestDocIndexes, 0, deepAllCount, accountIndex, isCross)
+            this.startRandomTest4Doc(list, this.toTestDocIndexes.sort(), 0, deepAllCount, accountIndex, isCross)
           } else if (isCross && doneCount == allCount && accountIndex <= this.accounts.length) {
             this.testAccountIndex = (this.testAccountIndex || 0) + 1
             this.test(false, this.testAccountIndex, isCross)
@@ -13416,7 +13576,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var tableList = docObj == null ? null : docObj['[]']
               var isAPIJSONRouter = false // TODO
 
-              var json = App.getRequest(vInput.value)
+              var isRes = ! App.isEditReqLink
+              var json = App.getRequest(isRes ? (this.currentHttpResponse || {}).data || App.jsoncon : vInput.value)
               var map = App.toPathValuePairMap(json) || {}
               for (var path in map) {
                 if (StringUtil.isEmpty(path)) {
@@ -14911,16 +15072,36 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
     window.App = App
   }
   else {
+    var nodeApp = Object.assign({}, App)
     var methods = App.methods
     if (methods instanceof Object && (methods instanceof Array == false)) {
-      App = Object.assign(App, methods)
+      Object.keys(methods).forEach(function (key) {
+        var method = methods[key]
+        nodeApp[key] = typeof method == 'function' ? method.bind(nodeApp) : method
+      })
     }
     App.autoTest = App.autoTest || methods.autoTest
 
     var data = App.data
     if (data instanceof Object && (data instanceof Array == false)) {
-      App = Object.assign(App, data)
+      Object.keys(data).forEach(function (key) {
+        Object.defineProperty(nodeApp, key, {
+          configurable: true,
+          enumerable: true,
+          get: function () {
+            return data[key]
+          },
+          set: function (value) {
+            data[key] = value
+          }
+        })
+      })
     }
+
+    nodeApp.data = data
+    nodeApp.$data = data
+    nodeApp._data = data
+    App = nodeApp
 
     module.exports = {getRequestFromURL, App}
   }

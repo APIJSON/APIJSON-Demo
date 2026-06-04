@@ -631,7 +631,7 @@ var JSONResponse = {
         delete target[codeName];
         real[codeName] = typeof rCode == 'undefined' ? undefined : null; // delete real[codeName];
         delete target.throw;
-        real.throw = typeof rCode == 'undefined' ? rThrw : null; // delete real.throw;
+        real.throw = typeof rThrw == 'undefined' ? rThrw : null; // delete real.throw;
     }
 
     //可能提示语变化，也要提示
@@ -1039,7 +1039,7 @@ var JSONResponse = {
         var format = target.format;
         if (typeof format == 'string' && FORMAT_PRIORITIES[format] != null) {
           var verifier = max.code < JSONResponse.COMPARE_FORMAT_CHANGE && StringUtil.isNotEmpty(format, true)
-              ? FORMAT_VERIFIERS[format] : null;
+             && StringUtil.isNotEmpty(real, true) ? FORMAT_VERIFIERS[format] : null;
           if (typeof verifier == 'function' && verifier(real) != true) {
               max.code = JSONResponse.COMPARE_FORMAT_CHANGE - (guess != true ? 0 : 1);
               max.msg = '不是 ' + format + " 格式！";
@@ -1377,7 +1377,7 @@ var JSONResponse = {
 
     var notEmpty = target.notEmpty;
     log('updateStandard  notEmpty = target.notEmpty = ' + notEmpty + ' >>');
-    if (real != null && typeof real != 'boolean' && typeof real != 'number') {
+    if (notEmpty !== false && real != null && typeof real != 'boolean' && typeof real != 'number') {
       notEmpty = target.notEmpty = StringUtil.isNotEmpty(real, true);
     }
 
@@ -1648,16 +1648,17 @@ var JSONResponse = {
 
   /**根据 APIJSON 引用赋值路径精准地获取值
    */
-  getValByPath: function(target, pathKeys, isTry) {
-    if (target == null) {
-      return null;
-    }
-
-    var tgt = target;
-    var depth = pathKeys == null ? 0 : pathKeys.length
+  getValByPath: function(target, pathKeys, isTry, isDesc, arr4Multi, isUnique) {
+    var depth = target == null || pathKeys == null ? 0 : pathKeys.length
     if (depth <= 0) {
       return target;
     }
+
+    if (StringUtil.isString(pathKeys)) {
+      pathKeys = StringUtil.splitPath(pathKeys, false);
+    }
+
+    var tgt = target;
 
     for (var i = 0; i < depth; i ++) {
       if (tgt == null) {
@@ -1671,19 +1672,47 @@ var JSONResponse = {
       k = decodeURI(k)
 
       if (tgt instanceof Object) {
-        if (k == '') {
+        if (k == '') { // TODO 用 * 表示多个？
           if (tgt instanceof Array) {
-              k = 0;
-          } else {
-              ks = Object.keys(tgt);
-              k = ks == null ? null : ks[0];
-              if (k == null) {
-                return null;
+              for (var j = 0; j < tgt.length; j ++) {
+                var ind = isDesc ? tgt.length - 1 - j : j;
+                var val = tgt[ind];
+                if (i >= depth - 1) {
+                  if (val != null && arr4Multi == null) {
+                    return val;
+                  }
+                }
+
+                var ks = pathKeys.slice(i + 1);
+                var child = JSONResponse.getValByPath(val, ks, isTry, isDesc, arr4Multi, isUnique);
+                if (child != null && arr4Multi == null) {
+                  return child;
+                }
               }
+
+          } else {
+            var tks = Object.keys(tgt)
+            for (var j = 0; j < tks.length; j ++) {
+              var ind = isDesc ? tks.length - 1 - j : j;
+              var k2 = tks[ind];
+              var val = tgt[k2];
+              if (i >= depth - 1) {
+                if (val != null && arr4Multi == null) {
+                  return val;
+                }
+              }
+
+              var ks = pathKeys.slice(i + 1);
+              var child = JSONResponse.getValByPath(val, ks, isTry, isDesc, arr4Multi, isUnique);
+              if (child != null && arr4Multi == null) {
+                return child;
+              }
+            }
+
+            return null;
           }
         }
         else {
-          k = decodeURI(k)
           if (tgt instanceof Array) {
             try {
               var n = Number.parseInt(k);
@@ -1705,6 +1734,10 @@ var JSONResponse = {
       }
 
       return null;
+    }
+
+    if (arr4Multi != null && ! (isUnique && arr4Multi.includes(tgt))) {
+      arr4Multi.push(tgt);
     }
 
     return tgt;
@@ -1732,7 +1765,7 @@ var JSONResponse = {
           if (tgt instanceof Array) {
               k = 0;
           } else {
-              ks = Object.keys(tgt);
+              var ks = Object.keys(tgt);
               k = ks == null ? null : ks[0];
               if (k == null) {
                 return null;
@@ -1751,21 +1784,25 @@ var JSONResponse = {
           }
         }
 
-        parent = tgt;
+        if (tgt[k] != null) {
+          parent = tgt;
+        }
         tgt = tgt[k];
-        continue;
+        // continue;
       }
 
       if (tgt == null) {
-        try {
-          var n = Number.parseInt(k);
-          if (Number.isSafeInteger(n)) {
-            k = n >= 0 ? n : n + tgt.length;
+        if (parent instanceof Array) {
+          try {
+            var n = Number.parseInt(k);
+            if (Number.isSafeInteger(n)) {
+              k = n >= 0 ? n : n + parent.length;
+            }
+          } catch (e) {
           }
-        } catch (e) {
         }
 
-        tgt = Number.isInteger(k) ? [] : {};
+        tgt = Number.isInteger(pathKeys[i + 1]) ? [] : {};
         if (i == 0 && parent == null) {
           parent = target = tgt;
         } else {
@@ -1773,9 +1810,13 @@ var JSONResponse = {
         }
 
         parent = tgt;
-        tgt = tgt[k];
+        // tgt = tgt[k];
 
         continue;
+      }
+
+      if (tgt instanceof Object) {
+        continue
       }
 
       if (isTry != true) {
@@ -2244,8 +2285,10 @@ var JSONResponse = {
     switch (type) {
       case 'boolean':
         return 2;
-      case 'number':
+      case 'integer':
         return 10;
+      case 'number':
+        return 5;
       case 'string':
         return 10;
     }
