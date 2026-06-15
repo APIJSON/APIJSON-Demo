@@ -775,6 +775,7 @@ https://github.com/Tencent/APIJSON/issues
 
   var PRE_REQ = 'PRE_REQ' // PRE_REQ('[]/page')
   var PRE_ARG = 'PRE_ARG' // PRE_ARG('[]/page')
+  var NEXT_ARG = 'NEXT_ARG' // NEXT_ARG('[]/page')
   var PRE_RES = 'PRE_RES' // PRE_RES('[]/0/User/id')
   var PRE_DATA = 'PRE_DATA' // PRE_DATA('[]/0/User/id')
   var CTX_GET = 'CTX_GET' // CTX_GET('key')
@@ -784,8 +785,8 @@ https://github.com/Tencent/APIJSON/issues
   var CUR_DATA = 'CUR_DATA' // CUR_DATA('[]/0/User/id')
   var CTX_PUT = 'CTX_PUT' // CTX_PUT('key', val)
 
-  function get4Path(obj, path, defaultVal, msg) {
-    var val = path == null || path == '' ? obj : JSONResponse.getValByPath(obj, StringUtil.splitPath(path, false))
+  function get4Path(obj, path, defaultVal, msg, isDesc) {
+    var val = path == null || path == '' ? obj : JSONResponse.getValByPath(obj, StringUtil.splitPath(path, false), true, isDesc)
     if (val == null && defaultVal === undefined) {
       throw new Error('找不到 ' + path + ' 对应在 obj 中的非 null 值！' + StringUtil.get(msg))
     }
@@ -2582,7 +2583,7 @@ https://github.com/Tencent/APIJSON/issues
       },
 
       // 根据事件配置用例恢复数据
-      restoreRandom: function (index, item) {
+      restoreRandom: function (index, item, isSub) {
         if (this.isRandomSubListShow) {
           this.currentRandomSubIndex = index
         } else if (this.isRandomListShow) {
@@ -2593,10 +2594,14 @@ https://github.com/Tencent/APIJSON/issues
         this.isRandomListShow = false
         this.isRandomSubListShow = false
 
-        var random = (item || {}).Input || {}
+        var random = (isSub ? (item || {}).Random : (item || {}).Input) || {}
         this.randomTestTitle = random.name
         this.testRandomCount = random.count
         vRandom.value = StringUtil.get(random.config)
+
+        if (isSub) {
+          return
+        }
 
         var response = ((item || {}).TestRecord || {}).response
         if (StringUtil.isNotEmpty(response)) {
@@ -2693,7 +2698,7 @@ https://github.com/Tencent/APIJSON/issues
 
         
           var originItem = item
-          item.random = (originItem.Input || {}).config
+          item.random = (originItem.Input || originItem.Random || {}).config
 
           doc = item.Flow || {}
           docId = doc.id || 0
@@ -3156,6 +3161,7 @@ https://github.com/Tencent/APIJSON/issues
               [table]: {
                 // userId: userId,
                 id: randomId <= 0 ? undefined : randomId,
+                isRes: isSub ? (App.isEditReqLink ? 0 : 1) : null,
                 toId: isSub ? ((App.currentRandomItem || {}).Input || {}).id : 0,
                 chainGroupId: cgId,
                 chainId: cId,
@@ -3163,6 +3169,7 @@ https://github.com/Tencent/APIJSON/issues
                 documentId: isSub ? did : undefined,
                 count: isSub ? 1 : App.requestCount,
                 name: extName,
+                path: bbox.assertPath || bbox.viewPath,
                 config: config
               },
               'TestRecord': isPost ? {
@@ -7198,7 +7205,7 @@ https://github.com/Tencent/APIJSON/issues
 
         this.imgRatio = imgWidth/imgHeight;
 
-        this.moveSplit(Math.min(0.7, Math.max(0.3, (2*imgWidth + 450 + 20)/realWidth)));
+        // this.moveSplit(Math.min(0.7, Math.max(0.3, (2*imgWidth + 450 + 20)/realWidth)));
       },
       getCanvasXY: function(stage, event) {
         const el = this.canvasMap[stage];
@@ -7777,7 +7784,7 @@ https://github.com/Tencent/APIJSON/issues
         const realWidth = isFullScreen ? 0 : (window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth || 1920);
         const maxTextWidth = realWidth <= 0 ? 0 : Math.max(vAfterTitle.clientWidth || 0, vDiffTitle.clientWidth || 0, vBeforeTitle.clientWidth || 0);
         const imgWidth = maxTextWidth <= 0 ? 0 : Math.max(maxTextWidth, Math.min(700, vAfter.width || vDiffAfter.width || vDiffBefore.width || vBefore.width || realWidth/(window.devicePixelRatio*3)));
-        this.moveSplit(isFullScreen ? 0.73 : Math.min(0.6, Math.max(0.3, (2*imgWidth + 450 + 20)/realWidth)));
+        this.moveSplit(isFullScreen ? 0.4 : Math.max(0.6, (2*imgWidth + 450 + 20)/realWidth));
         event?.preventDefault();
       },
       /**
@@ -7866,18 +7873,29 @@ https://github.com/Tencent/APIJSON/issues
 
             var reqLinkConfigs = item.reqLinkConfigs || {};
             var resLinkConfigs = item.resLinkConfigs || {};
-            this.randomTestTitle = 'UI/Data 关联配置：' + (item.viewIdName || item.viewType || item.viewPath)
+            this.randomTestTitle = 'UI/Data 关联: ' + (item.viewIdName || item.viewType || item.viewPath)
             // vRandom.value = StringUtil.trim(item.reqLinkConfigs) + "\n\n// / \n\n" + StringUtil.trim(item.resLinkConfigs)
 
-            var randomSubs = []
-            for (let k in reqLinkConfigs) {
-              randomSubs.push({Input: {name: k, config: reqLinkConfigs[k]}})
+            var randomSubs = (this.currentRandomItem || {}).subs || this.randomSubs || []
+            var subs = []
+            for (let j = 0; j < randomSubs.length; j++) {
+              const rs = randomSubs[j]
+              const r = rs == null ? null : rs.Random
+              if (r != null && JSONResponse.isViewPathMatch(r.path, item.assertPath || item.viewPath)) {
+                subs.push(rs)
+              }
             }
-            for (let k in resLinkConfigs) {
-              randomSubs.push({Input: {name: k, config: reqLinkConfigs[k]}})
-            }
-            this.randomSubs = (this.currentRandomItem || {}).subs = randomSubs
 
+            if (StringUtil.isEmpty(subs)) {
+              for (let k in reqLinkConfigs) {
+                subs.push({Random: {isRes: 0, userId: this.User.id, name: k, path: item.assertPath || item.viewPath, config: reqLinkConfigs[k]}})
+              }
+              for (let k in resLinkConfigs) {
+                subs.push({Random: {isRes: 1, userId: this.User.id, name: k, path: item.assertPath || item.viewPath, config: reqLinkConfigs[k]}})
+              }
+            }
+
+            this.randomSubs = (this.currentRandomItem || {}).subs = subs
 
             break;
           }
@@ -11481,6 +11499,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           callback('', '', json, head);
           return
         }
+        const isUI = this.isRandomSubListShow
+
         json = json || {};
         head = head || {};
 
@@ -11818,21 +11838,37 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
               var as3s = isChain ? StringUtil.trim(as3) : ''
               var accountHostIndexPath = isChain ? (StringUtil.isNumber(as3) ? '/' + as3 : (StringUtil.isEmpty(as3) ? '/' : as3s + (as3s.indexOf('/') < 0 ? '/' : ''))) : ''
 
-              if (fun == PRE_REQ) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req")' : 'get4Path(((ctx || {}).pre || {}).req'
+              if (fun == NEXT_ARG || (isUI && fun == CUR_ARG)) {
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg")' : '((ctx || {}).next || {}).arg'
+                toEval = 'get4Path(' + source + ', ' + (value == 'NEXT_ARG()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
+              }
+              else if (fun == PRE_DATA || (isUI && fun == CUR_DATA)) {
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data", undefined, null, true)' : '((ctx || {}).pre || {}).data'
+                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
+              }
+              else if (fun == PRE_REQ) {
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/req", undefined, null, true)' : '((ctx || {}).pre || {}).req'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_REQ()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_ARG) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg")' : 'get4Path(((ctx || {}).pre || {}).arg'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/arg", undefined, null, true)' : '((ctx || {}).pre || {}).arg'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_ARG()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
               else if (fun == PRE_RES) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res")' : 'get4Path(((ctx || {}).pre || {}).res'
+                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/res", undefined, null, true)' : '((ctx || {}).pre || {}).res'
                 toEval = 'get4Path(' + source + ', ' + (value == 'PRE_RES()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
               }
-              else if (fun == PRE_DATA) {
-                var source = isChain ? 'get4Path(' + chainArr + ', "' + accountHostIndexPath + '/data")' : 'get4Path(((ctx || {}).pre || {}).data'
-                toEval = 'get4Path(' + source + ', ' + (value == 'PRE_DATA()' ? JSON.stringify(path) : '') + (isChain ? as.join(', ') + value.substring(end) : value.substring(start + 1));
+              else if (fun == CUR_REQ) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).req, ' + (value == 'CUR_REQ()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+              }
+              else if (fun == CUR_ARG) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).arg, ' + (value == 'CUR_ARG()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+              }
+              else if (fun == CUR_RES) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).res, ' + (value == 'CUR_RES()' ? JSON.stringify(path) : '') + value.substring(start + 1);
+              }
+              else if (fun == CUR_DATA) {
+                toEval = 'get4Path(((ctx || {}).cur || {}).data, ' + (value == 'CUR_DATA()' ? JSON.stringify(path) : '') + value.substring(start + 1);
               }
               else if (fun == CTX_GET) {
                 toEval = 'get4Path((ctx || {}).ctx, ' + (value == 'CTX_GET()' ? JSON.stringify(path) : '') + value.substring(start + 1);
@@ -11848,6 +11884,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                 }
                 else if (as1 == 'PRE_ARG') {
                   as[1] = '((ctx || {}).pre || {}).arg'
+                }
+                else if (as1 == 'NEXT_ARG') {
+                  as[1] = '((ctx || {}).next || {}).arg'
                 }
                 else if (as1 == 'PRE_RES') {
                   as[1] = '((ctx || {}).pre || {}).res'
@@ -11870,18 +11909,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   as.splice(1, 1)
                 }
                 toEval = 'put4Path((ctx || {}).ctx, ' + JSON.stringify(path) + ', ' + as.join(', ') + value.substring(end);
-              }
-              else if (fun == CUR_REQ) {
-                toEval = 'get4Path(((ctx || {}).cur || {}).req, ' + (value == 'CUR_REQ()' ? JSON.stringify(path) : '') + value.substring(start + 1);
-              }
-              else if (fun == CUR_ARG) {
-                toEval = 'get4Path(((ctx || {}).cur || {}).arg, ' + (value == 'CUR_ARG()' ? JSON.stringify(path) : '') + value.substring(start + 1);
-              }
-              else if (fun == CUR_RES) {
-                toEval = 'get4Path(((ctx || {}).cur || {}).res, ' + (value == 'CUR_RES()' ? JSON.stringify(path) : '') + value.substring(start + 1);
-              }
-              else if (fun == CUR_DATA) {
-                toEval = 'get4Path(((ctx || {}).cur || {}).data, ' + (value == 'CUR_DATA()' ? JSON.stringify(path) : '') + value.substring(start + 1);
               }
               else {
                 fun = funWithOrder;  //还原，其它函数不支持 升降序和跨步！
@@ -11990,6 +12017,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         this.caseShowType = 1
         this.operate = OPERATE_TYPE_REPLAY
 
+        this.isFullScreen = false
         this.moveSplit(0.6)
 
         var isCross = this.isCrossEnabled
@@ -13236,7 +13264,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             detection.beforePrecision = testRecord.precision;
             detection.beforeF1 = testRecord.f1;
 
-            detection.before = {bboxes: JSONResponse.convertViewTree(before.viewTree, random) || {}};
+            detection.before = {bboxes: testRecord.bboxes || JSONResponse.convertViewTree(before.viewTree, random) || {}};
             detection.after = {bboxes: JSONResponse.convertViewTree(after.viewTree, random) || {}};
 
             this.detection = detection;
@@ -13245,23 +13273,21 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             // this.processAutoMark();
             // this.drawAll();
             var diff = this.processDiffAndAutoMark();
+            // var jsonDiff = JSONResponse.deepMerge(JSON.parse(JSON.stringify(before)), JSON.parse(JSON.stringify(after)));
+            // this.draw('diffBefore'); // this.drawDetections(vDiffAfterCanvas, diff);
+            // this.draw('diffAfter'); //
 
-            // var diff = JSONResponse.deepMerge(JSON.parse(JSON.stringify(before)), JSON.parse(JSON.stringify(after)));
-
-            // this.drawDetections(vBefore, vBeforeCanvas, before); // FIXME
-            // this.drawDetections(vDiff, vDiffCanvas, diff);
-            // this.drawDetections(vAfter, vAfterCanvas, after);
-            
             var beforeRsp = before; // (StringUtil.isEmpty(testRecord.response, true) ? null : parseJSON(testRecord.response)) || {}
             var beforeImgUrl = (beforeRsp.TestRecord || {}).screenshot
             var afterImgUrl = ((currentResponse || {}).TestRecord || currentResponse || {}).screenshot
 
             var pic = isBefore ? afterImgUrl : beforeImgUrl
             if (StringUtil.isEmpty(pic)) {  // 往前寻找最近的截屏
-              if (list != null && list.length > index) {
-                while (index > 0) {
-                  index --
-                  var prevItem = list[index] || {}
+              var ind = index
+              if (list != null && list.length > ind) {
+                while (ind > 0) {
+                  ind --
+                  var prevItem = list[ind] || {}
                   var prevInput = prevItem.Input
                   var prevInputId = prevInput == null ? null : prevInput.id
                   if (prevInputId != null) {
@@ -13330,25 +13356,29 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
                   if (isFindReq) {
                     const reqLinkExp = inReqLinkPaths[prop] = JSONResponse.linkPaths2Exp(reqLinkPaths, value, inReqLinkExps[prop], true)
-                    const reqLinkConfig = inReqLinkConfigs[prop + ': ' + reqLinkExp]
+                    const reqLinkConfig = StringUtil.isEmpty(reqLinkExp) ? null : inReqLinkConfigs[prop + ': ' + reqLinkExp]
 
-                    if (StringUtil.isNotString(reqLinkConfig)) {
+                    if (reqLinkConfig != null && StringUtil.isNotString(reqLinkConfig)) {
                       inReqLinkConfigs[prop + ': ' + reqLinkExp] = JSONResponse.linkPaths2Config(reqLinkPaths, true)
                     }
                   }
 
                   if (isFindRes) {
                     const resLinkExp = inResLinkPaths[prop] = JSONResponse.linkPaths2Exp(resLinkPaths, value, inResLinkExps[prop], false)
-                    const resLinkConfig = inResLinkConfigs[prop + ': ' + resLinkExp]
+                    const resLinkConfig = StringUtil.isEmpty(resLinkExp) ? null : inResLinkConfigs[prop + ': ' + resLinkExp]
 
-                    if (StringUtil.isNotString(resLinkConfig)) {
+                    if (resLinkConfig != null && StringUtil.isNotString(resLinkConfig)) {
                       inResLinkConfigs[prop + ': ' + resLinkExp] = JSONResponse.linkPaths2Config(resLinkPaths, false)
                     }
                   }
                 }
               }
+
             }
 
+            if (random.type === InputUtil.EVENT_TYPE_TOUCH) {
+              this.loadPropsAndCompare(index, document, item, random, detection, false)
+            }
           }
         }
         else {
@@ -13467,56 +13497,6 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
             const missTruth = this.missTruth || {}
 
             const bboxes = (detection.after || {}).bboxes || []
-            // const randoms = (this.isRandomSubListShow ? this.randomSubs : this.randoms) || []
-            // var count = index >= 0 ? StringUtil.length(randoms) : 0
-            // if (count > index && count >= 2) {
-            //   function callback(exp, isReq) {
-            //     var v = null; // FIXME 还不如继续从 inputList 中找
-            //     App.parseRandom({}, {}, 'ret: ' + exp, 0, true, false, false, function (randomName, constConfig, constJson) {
-            //       v = constJson.ret
-            //     })
-            //     return v
-            //   }
-            //
-            //   for (let i = 0; i < bboxes.length; i++) {
-            //     const bbox = bboxes[i]
-            //     if (StringUtil.isEmpty(bbox)) {
-            //       continue
-            //     }
-            //
-            //     const inReqLinkExps = bbox.reqLinkExps = bbox.reqLinkExps || {} // a + b, a || b + c
-            //     const inResLinkExps = bbox.resLinkExps = bbox.resLinkExps || {} // a + b, a || b + c
-            //     const inReqLinkPaths = bbox.reqLinkPaths = bbox.reqLinkPaths || {}
-            //     const inResLinkPaths = bbox.resLinkPaths = bbox.resLinkPaths || {}
-            //     const inReqLinkConfigs = bbox.reqLinkConfigs = bbox.reqLinkConfigs || {}
-            //     const inResLinkConfigs = bbox.resLinkConfigs = bbox.resLinkConfigs || {}
-            //
-            //     const props = ['text', 'image', 'background']
-            //     for (let j = 0; j < props.length; j ++) {
-            //       const prop = props[j]
-            //       const value = bbox[prop]
-            //       if (StringUtil.isEmpty(value)) {
-            //         continue
-            //       }
-            //
-            //       const reqLinkPaths = {}
-            //       const resLinkPaths = {}
-            //       JSONResponse.findLinkPaths(bbox.viewIdName, prop, value, randoms, index, 20, reqLinkPaths, resLinkPaths, inReqLinkPaths[prop], inResLinkPaths[prop])
-            //
-            //       const reqLinkExp = inReqLinkPaths[prop] = JSONResponse.linkPaths2Exp(reqLinkPaths, value, inReqLinkExps[prop], true, callback)
-            //       const resLinkExp = inResLinkPaths[prop] = JSONResponse.linkPaths2Exp(resLinkPaths, value, inResLinkExps[prop], false, callback)
-            //       const reqLinkConfig = inReqLinkConfigs[prop + ': ' + reqLinkExp] = JSONResponse.linkPaths2Config(reqLinkPaths, true)
-            //       const resLinkConfig = inResLinkConfigs[prop + ': ' + resLinkExp] = JSONResponse.linkPaths2Config(resLinkPaths, false)
-            //     }
-            //
-            //     // if (reqLinkPaths.length >= 1) {
-            //     delete bbox.reqLinkPaths
-            //     // }
-            //     // if (resLinkPaths.length >= 1) {
-            //     delete bbox.resLinkPaths
-            //     // }
-            //   }
-            // }
 
             //TODO 先检查是否有重复名称的！让用户确认！
             // if (isML != true) {
@@ -13667,6 +13647,226 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
       },
 
+      loadPropsAndCompare: function (index, document, item, input, detection, isSummary) {
+        index = index || this.currentRandomIndex
+        var subSearch = StringUtil.isEmpty(this.randomSubSearch, true)
+            ? null : '%' + StringUtil.trim(this.randomSubSearch) + '%'
+        this.adminRequest('/get', {
+          '[]': {
+            count: 0,
+            Random: { // 人工核对上传后的 UI/Data 关联配置及表达式
+              toId: input.id,
+              '@order': 'date-',
+              '@column': 'id,toId,userId,documentId,isRes,name,path,config',
+              // 'name$': subSearch
+            },
+//             '[]': {
+//               'count': 10,
+//               'page': 0,
+//               'Random': {
+//                 'toId@': '[]/Random/id',
+//                 // 'chainId': cId,
+//                 documentId: input.id,
+//                 '@order': "time-",
+//                 // 'name$': subSearch
+//               },
+//               'TestRecord': {
+//                 'randomId@': '/Input/id',
+// //                  'testAccountId': this.getCurrentAccountId(),
+//                 'host': StringUtil.isEmpty(baseUrl, true) ? null : baseUrl,
+//                 '@order': 'date-'
+//               }
+//             }
+          }
+        }, {}, function (url, res, err) {
+          App.onResponse(url, res, err)
+
+          var data = (res || {}).data || {}
+          if (JSONResponse.isSuccess(data) != true) {
+            alert('获取最新的校验标准 异常：\n' + (data.msg || (err || {}).message || (err || {}).reason))
+            return
+          }
+
+          var randoms = App.randomSubs = item.subs = item['[]'] = data['[]'] || []
+          // var configMap = {}
+
+          const corrects = detection.corrects = detection.corrects || []
+          const wrongs = detection.wrongs = detection.wrongs || []
+          const bboxes = (detection.after || {}).bboxes || []
+
+          const head = ''
+          const inputs = App.randoms || []
+          const len = StringUtil.length(inputs)
+          var redCount = 0
+          var total = 0
+          App.resetCount(item, true, true, App.currentAccountIndex)
+
+          var pre = null // {}
+          for (let i = 0; i < index; i++) {
+            const inputItem = inputs[i]
+            const input_ = inputItem == null ? null : inputItem.Input
+            const type = input_ == null ? null : input_.type
+            if (type !== InputUtil.EVENT_TYPE_HTTP) {
+              continue
+            }
+
+            const data = parseJSON(input_.response, input_.response, true)
+            pre = {
+              // arg: ,
+              data: data,
+              pre: pre
+            }
+          }
+
+          var next = null // {}
+          for (let i = len - 1; i > index; i--) {
+            const inputItem = inputs[i]
+            const input_ = inputItem == null ? null : inputItem.Input
+            const type = input_ == null ? null : input_.type
+            if (type !== InputUtil.EVENT_TYPE_HTTP) {
+              continue
+            }
+
+            const arg = parseJSON(input_.request, input_.request, true)
+            next = {
+              arg: arg,
+              next: next
+            }
+          }
+
+          const ctx = {
+            pre: pre,
+            next: next
+            // req: ,
+            // arg: ,
+            // res: ,
+            // data: ,
+          }
+
+          const preScript = StringUtil.trim(((App.scripts.global['0'] || {}).pre || {}).script)
+              + '\n' + StringUtil.trim(((App.scripts.case[(document || {}).id] || {}).pre || {}).script)
+
+          for (let i = 0; i < randoms.length; i++) {
+            let randomItem = randoms[i]
+            const random = randomItem == null ? null : randomItem.Random
+            const path = random == null ? null : random.path
+            const name = StringUtil.isEmpty(path) ? null : random.name
+            if (StringUtil.isEmpty(name)) {
+              continue
+            }
+            const ind = name.indexOf(': ')
+            const key = name.substring(0, ind)
+            if (StringUtil.isEmpty(key)) {
+              random.name += ' // 无效配置 ！必须是 key: value 这种格式！key 只能是 text, image, background 等 View 属性名称！'
+              continue
+            }
+
+            const config = random.config
+            const tr = randomItem.TestRecord = {
+              id: -i - 1,
+              documentId: random.documentId,
+              randomId: random.id
+            }
+
+            for (let j = 0; j < bboxes.length; j++) {
+              const bbox = bboxes[j]
+              const assertPath = bbox == null ? null : bbox.assertPath || bbox.viewPath
+              if (! JSONResponse.isViewPathMatch(assertPath, path)) {
+                continue
+              }
+
+              const reqLinkConfigs = bbox.reqLinkConfigs = bbox.reqLinkConfigs || {};
+              const resLinkConfigs = bbox.resLinkConfigs = bbox.resLinkConfigs || {};
+              if (random.isRes) {
+                resLinkConfigs[name] = config
+              } else {
+                reqLinkConfigs[name] = config
+              }
+
+              const id = j // bbox.id || bbox.index || j
+              try {
+                App.parseRandom({}, head, config, random.id, true, false, false
+                  , function (randomName, constConfig, constJson) {
+                  // var first = true
+                  // var script = '\nvar ['
+                  var script = '\n'
+                  for (var k in constJson) {
+                    var v = constJson[k]
+                    script += '\nvar ' + k + ' = ' + (typeof v == 'undefined' ? 'undefined' : JSON.stringify(v)) + ';'
+                    // script += (first ? '' : ', ') + k
+                    // first = false
+                  }
+                  // script += '] = ' + JSON.stringify(constJson)
+
+                  App.parseRandom(constJson, head, name, random.id, true, false, false
+                    , function (randomName2, constConfig2, constJson2) {
+                        const val = constJson2 == null ? null : constJson2[key]
+                        const transVal = JSONResponse.transform(key, val, bbox)
+                        const compare = JSONResponse.compareWithBefore(transVal, bbox[key])
+                        tr.compare = {
+                            code: JSONResponse.COMPARE_VALUE_CHANGE,
+                            path: assertPath,
+                            msg: 'UI 没按数据渲染 ' + StringUtil.limitLength(transVal, 20) + (transVal === val ? '' : ' = transform(' + StringUtil.limitLength(val, 20) + ')')
+                        }
+                        var compareShowObj = JSONResponse.getCompareShowObj(tr.compare)
+                        var color = randomItem.compareColor = compareShowObj.compareColor || ''
+                        randomItem.compareType = compareShowObj.compareType
+                        randomItem.compareMessage = compareShowObj.compareMessage
+                        randomItem.hintMessage = compareShowObj.hintMessage
+
+                        total += 1
+                        item.totalCount = total
+
+                        var count = item[color + 'Count'] || 0
+                        item[color + 'Count'] = count + 1
+
+                        if (compare.code > JSONResponse.COMPARE_EQUAL) { // FIXME 生成 transform 函数内部代码，用这个函数处理后再对比；image/background 需要图像对比
+                          if (corrects.includes(id)) {
+                            corrects.splice(id, 1)
+                          }
+                          if (! wrongs.includes(id)) {
+                            wrongs.push(id)
+                          }
+                        }
+                    }, preScript + script, ctx)
+                  }, preScript, ctx)
+              } catch (e) {
+                console.log(e)
+                // random.name += ' // 断言报错！' + e.message
+                tr.compare = {
+                  code: JSONResponse.COMPARE_ERROR,
+                  path: assertPath,
+                  msg: '断言报错！' + e.message
+                }
+                var compareShowObj = JSONResponse.getCompareShowObj(tr.compare)
+                randomItem.compareColor = compareShowObj.compareColor
+                randomItem.compareType = compareShowObj.compareType
+                randomItem.compareMessage = compareShowObj.compareMessage
+                randomItem.hintMessage = compareShowObj.hintMessage
+                total += 1
+                redCount += 1
+                item.totalCount = total
+                item.redCount = redCount
+
+                // if (corrects.includes(id)) {
+                //   corrects.splice(id, 1)
+                // }
+                // if (! wrongs.includes(id)) {
+                //   wrongs.push(id)
+                // }
+              }
+            }
+          }
+
+          // App.compareResponse(res, allCount, list, index, item, response, isRandom, accountIndex, true, err, ignoreTrend, isCross);
+          App.drawAll()
+
+          if (isSummary) {
+            App.summary();
+          }
+        })
+      },
+
       updateTestRecord: function (allCount, list, index, item, response, isRandom, ignoreTrend, accountIndex, isCross, isSummary) {
         item = item || {}
         var doc = (isRandom ? item.Input : item.Flow) || {}
@@ -13731,7 +13931,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         item = item || {};
         var toId = isRandom ? ((item.Input || {}).toId || 0) : 0;
         var h = isDuration ? item.durationHint : (isHandle ? item.compareMessage : item.hintMessage);
-        var eles = this.$refs['test' + (isRandom ? (toId <= 0 ? 'Input' : 'RandomSub') : '') + (isHandle ? 'Handle' : 'Result') + (isDuration ? 'Duration' : '') + 'Buttons'];
+        var eles = this.$refs['test' + (isRandom ? (toId <= 0 ? 'Random' : 'RandomSub') : '') + (isHandle ? 'Handle' : 'Result') + (isDuration ? 'Duration' : '') + 'Buttons'];
         var ele = eles == null ? null : eles[index];
         if (ele == null) {
           return;
@@ -14200,10 +14400,10 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                       name: "CUR_REQ('config/data/[]/count')",
                       type: stringType,
                       comment: "从当前请求的 Request 对象中取值 function(path:String, defaultVal:Any?, msg:String?)"
-                    // }, {
-                    //   name: "CUR_DATA('[]/count')",
-                    //   type: stringType,
-                    //   comment: "从当前请求的返回结果中取值 function(path:String?, defaultVal:Any?, msg:String?)"
+                    }, {
+                      name: "CUR_DATA('[]/count')",
+                      type: stringType,
+                      comment: "从当前请求的返回结果中取值 function(path:String?, defaultVal:Any?, msg:String?)"
                     // }, {
                     //   name: "CUR_RES('[]/count')",
                     //   type: stringType,

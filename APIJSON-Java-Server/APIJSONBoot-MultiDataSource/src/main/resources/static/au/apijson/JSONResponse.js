@@ -3413,7 +3413,7 @@ var JSONResponse = {
         }
 
         var v = linkPaths[k]
-        var line = (isReq ? 'CUR_ARG(' : 'CUR_DATA(') + k + ')' + (StringUtil.isEmpty(v) ? '' : ' // ' + StringUtil.trim(v))
+        var line = (isReq ? 'NEXT_ARG(' : 'PRE_DATA(') + k + ')' + (StringUtil.isEmpty(v) ? '' : ' // ' + StringUtil.trim(v))
 
         s += '\n_' + index + ': ' + line
         index ++
@@ -3423,6 +3423,50 @@ var JSONResponse = {
     return StringUtil.trim(s);
   },
 
+  isViewPathMatch: function(realPath, targetPath) {
+    if (realPath == targetPath || StringUtil.isEmpty(targetPath)) {
+      return true;
+    }
+    if (StringUtil.isEmpty(realPath)) {
+      return false;
+    }
+
+    var realKeys = StringUtil.splitPath(realPath, false)
+    var targetKeys = StringUtil.splitPath(targetPath, false)
+    var rl = StringUtil.length(realKeys)
+    var tl = StringUtil.length(targetKeys)
+
+    for (let i = 0; i < tl; i++) {
+      if (i >= rl) {
+        break
+      }
+
+      var rk = realKeys[rl - 1 - i] // Type:id
+      var tk = targetKeys[tl - 1 - i]
+      var rp = StringUtil.parsePair(rk)
+      var tp = StringUtil.parsePair(tk)
+
+      var isIdEqual = StringUtil.isEmpty(tp) || rp[1] === tp[1]
+      if ((isIdEqual && StringUtil.isNotEmpty(tp[1]))) { // id 一样
+        return true
+      }
+
+      if ((isIdEqual || StringUtil.isEmpty(tp[1])) && (rp[0] === tp[0] || StringUtil.isEmpty(tp[0])
+          || (StringUtil.isNumber(tp[0]) && StringUtil.isNumber(rp[1]))
+      )) {
+        continue
+      }
+
+      return false
+    }
+
+    return true
+  },
+
+  // FIXME 生成 transform 函数内部代码，用这个函数处理后再对比；image/background 需要图像对比
+  transform: function (key, val, bbox) {
+    return val
+  }
 };
 
 if (typeof module == 'object') {

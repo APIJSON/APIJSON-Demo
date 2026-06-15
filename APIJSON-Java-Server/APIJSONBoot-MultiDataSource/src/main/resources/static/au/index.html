@@ -372,7 +372,7 @@
 
                     <div class="vRow"  :style="{ height: isFullScreen ? '80%' : '50%' }" >
                         <div class="vCell">
-                            <div id="vAfterTitle" class="vTitle" > <a >本次: {{ detection.isShowNum ? '正确数 ' + detection.afterCorrect + ' 误报数 ' + detection.afterWrong + ' 漏检数 ' + detection.afterMiss : '召回率 ' + detection.afterRecallStr + ' 精确率 ' + detection.afterPrecisionStr + ' F1 ' + detection.afterF1Str }} </a> <a style="height: 25px; color: black; font-weight: bold; padding: 0" href="javascript:void(0)" @click="onClickFullScreen($event)" > 全屏 </a> </div>
+                            <div id="vAfterTitle" class="vTitle" > <a >后:{{ detection.isShowNum ? '对 ' + detection.afterCorrect + ' 错 ' + detection.afterWrong + ' 少 ' + detection.afterMiss : ' ' + detection.afterRecallStr + ' 精确 ' + detection.afterPrecisionStr + ' F1 ' + detection.afterF1Str }} </a> <a style="height: 25px; color: black; font-weight: bold; padding: 0" href="javascript:void(0)" @click="onClickFullScreen($event)" > 全屏 </a> </div>
                             <div class="vBox" :style="{'aspect-ratio': imgRatio || 16/9}">
                                 <img id="vAfter" :src="img" ref="vAfterImg" @load="syncCanvasSize('after')">
                                 <canvas id="vAfterCanvas" ref="vAfterCanvas" @click="onClick('after', $event)" @mousemove="onMousemove('after', $event)" @mousedown="onMousedown('after', $event)" @mouseup="onMouseup('after', $event)" />
@@ -380,7 +380,7 @@
                         </div>
 
                         <div class="vCell">
-                            <div id="vBeforeTitle" class="vTitle" > <a >之前: {{ detection.isShowNum ? '正确数 ' + detection.beforeCorrect + ' 误报数 ' + detection.beforeWrong + ' 漏检数 ' + detection.beforeMiss : '召回率 ' + detection.beforeRecallStr + ' 精确率 ' + detection.beforePrecisionStr + ' F1 ' + detection.beforeF1Str }} </a> <a > 实际 </a><input id="vAfterTotal" v-model="detection.total" style="width: 36px;text-align: center" type="number" @keyup="doOnKeyUp(event, 'afterTotal', true)" placeholder="总数" /> </div>
+                            <div id="vBeforeTitle" class="vTitle" > <a >前:{{ detection.isShowNum ? '对 ' + detection.beforeCorrect + ' 错 ' + detection.beforeWrong + ' 少 ' + detection.beforeMiss : '召回 ' + detection.beforeRecallStr + ' 精确 ' + detection.beforePrecisionStr + ' F1 ' + detection.beforeF1Str }} </a> </div>
                             <div class="vBox" :style="{'aspect-ratio': imgRatio || 16/9}">
                                 <img id="vBefore" :src="img" ref="vBeforeImg" @load="syncCanvasSize('before')">
                                 <canvas id="vBeforeCanvas" ref="vBeforeCanvas" @mousemove="onMousemove('before', $event)" />
@@ -390,7 +390,7 @@
 
                     <div class="vRow" :style="{ height: isFullScreen ? '80%' : '50%' }" >
                         <div class="vCell">
-                            <div id="vDiffBeforeTitle" class="vTitle" > <a style="font-weight: bold; color: black">差异(之前): </a><a>重合度 </a><input id="vDiffThreshold" v-model="detection.diffThreshold" style="width: 24px;text-align: center" type="number" @keyup="doOnKeyUp(event, 'diffThreshold', true)" placeholder="阈值" /> </div>
+                            <div id="vDiffBeforeTitle" class="vTitle" > <a style="font-weight: bold; color: black">差异(前):</a><a>重合度 </a><input id="vDiffThreshold" v-model="detection.diffThreshold" style="width: 24px;text-align: center" type="number" @keyup="doOnKeyUp(event, 'diffThreshold', true)" placeholder="阈值" /> <a > 实际 </a><input id="vAfterTotal" v-model="detection.total" style="width: 36px;text-align: center" type="number" @keyup="doOnKeyUp(event, 'afterTotal', true)" placeholder="总数" /> </div>
                             <div class="vBox" :style="{'aspect-ratio': imgRatio || 16/9}">
                                 <img id="vDiffBefore"  :src="img" ref="vDiffImg" @load="syncCanvasSize('diffBefore')">
                                 <canvas id="vDiffBeforeCanvas" ref="vDiffBeforeCanvas" @click="onClick('diffBefore', $event)" @mousemove="onMousemove('diffBefore', $event)" />
@@ -398,7 +398,7 @@
                         </div>
 
                         <div class="vCell">
-                            <div id="vDiffAfterTitle" class="vTitle" > <a style="font-weight: bold; color: black">差异(本次): </a><a>总数 </a><input id="vDiffTotal" v-model="detection.total" style="width: 24px;text-align: center" type="number" @keyup="doOnKeyUp(event, 'total', true)" placeholder="总数" /> </div>
+                            <div id="vDiffAfterTitle" class="vTitle" > <a style="font-weight: bold; color: black">差异(后):</a><a>总数 </a><input id="vDiffTotal" v-model="detection.total" style="width: 24px;text-align: center" type="number" @keyup="doOnKeyUp(event, 'total', true)" placeholder="总数" /> </div>
                             <div class="vBox" :style="{'aspect-ratio': imgRatio || 16/9}">
                                 <img id="vDiffAfter" :src="img" ref="vDiffAfterImg" @load="syncCanvasSize('diffAfter')">
                                 <canvas id="vDiffAfterCanvas" ref="vDiffAfterCanvas" @click="onClick('diffAfter', $event)" @mousemove="onMousemove('diffAfter', $event)" />
@@ -415,7 +415,7 @@
                             <input v-show="isRandomListShow != true && isRandomSubListShow != true" id="vTestRandomCount" v-model="testRandomCount" style="margin-left: 10px; min-width: 12px; max-width: 30px; width: auto; text-align: center" type="number" />
                             <a v-show="isRandomListShow != true && isRandomSubListShow != true" style="margin-left: 4px;">次</a>
                             <a v-show="currentBbox != null" href="javascript:void(0)" @click="isEditReqLink = true" :style="{'color': isEditReqLink ? 'red' : 'gray'}" style="font-size: medium; padding-left: 10px">请求</a><a v-show="currentBbox != null" >|</a><a v-show="currentBbox != null"  href="javascript:void(0)" @click="isEditReqLink = false" :style="{'color': isEditReqLink ? 'gray' : 'red'}" style="font-size: medium">响应</a>
-                            <a style="display: flex;flex-grow: 1;padding-left: 0px;padding-right: 2px;font-size: medium;color: black" >{{ (isRandomListShow || StringUtil.isEmpty(randomTestTitle, true) ? '事件 Event' : randomTestTitle) + (isRandomListShow || isRandomSubListShow ? '(' + ((isRandomListShow ? randoms : randomSubs) || []).length + '/' + (((currentRemoteItem.Input || {}).count - (currentRemoteItem.Input || {}).disableCount) || '0') + '/' + ((currentRemoteItem.Input || {}).count || '?') + ')' : '') }}
+                            <a style="display: flex;flex-grow: 1;padding-left: 0px;padding-right: 2px;font-size: medium;color: black" >{{ (isRandomListShow || StringUtil.isEmpty(randomTestTitle, true) ? '事件 Event' : randomTestTitle) + (isRandomListShow || isRandomSubListShow ? '(' + ((isRandomListShow ? randoms : randomSubs) || []).length + (isRandomSubListShow ? '' : '/' + (((currentRemoteItem.Input || {}).count - (currentRemoteItem.Input || {}).disableCount) || '0') + '/' + ((currentRemoteItem.Input || {}).count || '?')) + ')' : '') }}
                                 <a v-show="isRandomListShow != true && (currentRemoteItem || {}).Flow != null" style="padding-right: 6px;padding-top: 2px" href="javascript:void(0)" @click="showRandomList(true, (currentRemoteItem || {}).Flow)">
                                     列表 List
                                 </a>
@@ -449,38 +449,41 @@
 <!--                        <div id="vAllContainer" v-show="isRandomListShow || isRandomSubListShow" style="width: 100%; margin-top: 40px; position: absolute; background-color: rgba(255, 255, 255, 0.5); display: flex; flex-direction: column;" @click="detection.isShowNum = ! detection.isShowNum">-->
 <!--                            <div id="vAllAfterTitle" style="background-color: rgba(255, 255, 255, 0.5); padding: 0; position: absolute; width: 100%; height: 25px;" >-->
 <!--                                <a style="font-size: small; font-weight: bold; color: black">本次: </a>-->
-<!--                                <a style="font-size: small; margin-left: -6px">{{ detection.isShowNum ? '正确(图' + detection.afterImgCorrect + ' 框' + detection.afterAllCorrect + ') 误报(图' + detection.afterImgWrong + ' 框' + detection.afterAllWrong + ') 漏检(图' + detection.afterImgMiss + ' 框' + detection.afterAllMiss + ')' : '召回(图' + detection.afterImgRecallStr + ' 框' + detection.afterAllRecallStr + ')% 精确(图' + detection.afterImgPrecisionStr + ' 框' + detection.afterAllPrecisionStr + ')% F1(图' + detection.afterImgF1Str + ' 框' + detection.afterAllF1Str + ')%' }} </a>-->
+<!--                                <a style="font-size: small; margin-left: -6px">{{ detection.isShowNum ? '对(图' + detection.afterImgCorrect + ' 框' + detection.afterAllCorrect + ') 错(图' + detection.afterImgWrong + ' 框' + detection.afterAllWrong + ') 少(图' + detection.afterImgMiss + ' 框' + detection.afterAllMiss + ')' : '召回(图' + detection.afterImgRecallStr + ' 框' + detection.afterAllRecallStr + ')% 精确(图' + detection.afterImgPrecisionStr + ' 框' + detection.afterAllPrecisionStr + ')% F1(图' + detection.afterImgF1Str + ' 框' + detection.afterAllF1Str + ')%' }} </a>-->
 <!--                            </div>-->
 <!--                            <div id="vAllDiffTitle" style="background-color: rgba(255, 255, 255, 0.5); padding: 0; position: absolute; width: 100%; height: 25px; margin-top: 25px" >-->
 <!--                                <a style="font-size: small; font-weight: bold; color: black">差异: </a>-->
-<!--                                <a style="font-size: small; margin-left: -6px">{{ detection.isShowNum ? '正确(图' + detection.diffImgCorrectStr + ' 框' + detection.diffAllCorrectStr + ') 误报(图' + detection.diffImgWrongStr + ' 框' + detection.diffAllWrongStr + ') 漏检(图' + detection.diffImgMissStr + ' 框' + detection.diffAllMissStr + ')' : '召回(图' + detection.diffImgRecallStr + ' 框' + detection.diffAllRecallStr + ')% 精确(图' + detection.diffImgPrecisionStr + ' 框' + detection.diffAllPrecisionStr + ')% F1(图' + detection.diffImgF1Str + ' 框' + detection.diffAllF1Str + ')%' }} </a>-->
+<!--                                <a style="font-size: small; margin-left: -6px">{{ detection.isShowNum ? '对(图' + detection.diffImgCorrectStr + ' 框' + detection.diffAllCorrectStr + ') 错(图' + detection.diffImgWrongStr + ' 框' + detection.diffAllWrongStr + ') 少(图' + detection.diffImgMissStr + ' 框' + detection.diffAllMissStr + ')' : '召回(图' + detection.diffImgRecallStr + ' 框' + detection.diffAllRecallStr + ')% 精确(图' + detection.diffImgPrecisionStr + ' 框' + detection.diffAllPrecisionStr + ')% F1(图' + detection.diffImgF1Str + ' 框' + detection.diffAllF1Str + ')%' }} </a>-->
 <!--                            </div>-->
 <!--                            <div id="vAllBeforeTitle" style="background-color: rgba(255, 255, 255, 0.5); padding: 0; position: absolute; width: 100%; height: 25px; margin-top: 50px" >-->
 <!--                                <a style="font-size: small; font-weight: bold; color: black">之前: </a>-->
-<!--                                <a style="font-size: small; margin-left: -6px">{{ detection.isShowNum ? '正确(图' + detection.beforeImgCorrect + ' 框' + detection.beforeAllCorrect + ') 误报(图' + detection.beforeImgWrong + ' 框' + detection.beforeAllWrong + ') 漏检(图' + detection.beforeImgMiss + ' 框' + detection.beforeAllMiss + ')' : '召回(图' + detection.beforeImgRecallStr + ' 框' + detection.beforeAllRecallStr + ')% 精确(图' + detection.beforeImgPrecisionStr + ' 框' + detection.beforeAllPrecisionStr + ')% F1(图' + detection.beforeImgF1Str + ' 框' + detection.beforeAllF1Str + ')%' }} </a>-->
+<!--                                <a style="font-size: small; margin-left: -6px">{{ detection.isShowNum ? '对(图' + detection.beforeImgCorrect + ' 框' + detection.beforeAllCorrect + ') 错(图' + detection.beforeImgWrong + ' 框' + detection.beforeAllWrong + ') 少(图' + detection.beforeImgMiss + ' 框' + detection.beforeAllMiss + ')' : '召回(图' + detection.beforeImgRecallStr + ' 框' + detection.beforeAllRecallStr + ')% 精确(图' + detection.beforeImgPrecisionStr + ' 框' + detection.beforeAllPrecisionStr + ')% F1(图' + detection.beforeImgF1Str + ' 框' + detection.beforeAllF1Str + ')%' }} </a>-->
 <!--                            </div>-->
 <!--                        </div>-->
 
 <!--                        <input id="vRandomKeyPath" v-show="isRandomListShow || isRandomSubListShow" v-model="((currentRemoteItem || {}).Flow || {}).path" style="width: 100%; text-align: center; margin-top: 115px; background-color: rgba(255, 255, 255, 0.5); border: #DDD 1px solid; border-radius: 2px"  @keyup="doOnKeyUp(event, 'randomKeyPath', false, {'path': vRandomKeyPath.value})" placeholder="image: 图片的 JSON key 路径，以 / 分隔，转义特殊字符 / 等" />-->
 
                         <!-- 临时生成的配置子项 -->
-                        <ul v-show="isRandomSubListShow" class="historys" style="width: 100%;height: 100%; background-color: transparent; overflow: hidden;overflow-y: scroll; padding-bottom: 215px">
-                            <li style="width: 100%; background-color: white; " v-for="(item, index) in randomSubs" :id="'randomSubItem' + index" >
-                                <img id="vRandomSubImg" :src="item.img" style="height: 90px; min-width: 90px" @click="restoreRandom(index, item)">
+                        <ul v-show="isRandomSubListShow" class="historys" style="width: 100%;height: 100%;overflow: hidden;overflow-y: scroll; padding-top: 50px; padding-bottom: 100px">
+                            <li style="width: 100%; min-height: 60px; padding: 0px" v-for="(item, index) in randomSubs" :id="'randomSubItem' + index" >
+                                <a v-show="! isRandomEditable" class="hint--rounded hint--no-animate" ref="randomSubTexts" @mouseover="setRequestHint(index, item, true)" style="left: 2px" href="javascript:void(0)" @click="restoreRandom(index, item, true)" :style="{ color: index == currentRandomSubIndex ? 'black' : 'gray' }">{{ (item.Random || {}).name }}</a>
+                                <input v-show="isRandomEditable" style="width: 96%" v-model="(item.Random || {}).name" @keyup="doOnKeyUp(event, 'randomSub', false, item)" />
+                                <input ref="randomSubPathTexts" v-model="(item.Random || {}).path" style="position: absolute; left: 2px; bottom: 2px; right: 2px; text-align: right" :style="{ color: index == currentRandomSubIndex ? 'black' : 'gray' }"/>
 
-                                <a class="hint--rounded hint--no-animate" ref="randomSubTexts" @mouseover="setRequestHint(index, item, true)" href="javascript:void(0)" @click="restoreRandom(index, item)" :style="{ color: index == currentRandomSubIndex ? 'black' : 'gray' }">{{ Math.round(100*((item.Input || {}).size || 0)/1024/1024)/100 + 'M ' + ((item.Input || {}).width || '') + "x" + ((item.Input || {}).height || '') }}</a>
-                                <input style="width: 96%" v-model="(item.Input || {}).name" @keyup="doOnKeyUp(event, 'randomSub', false, item)" />
+                                <button v-show="(item.totalCount || 0) <= 0 && StringUtil.isNotEmpty(item.subs || item['[]'])" style="position: absolute; right: 33px;display: inline-block;" @click="handleTest(true, index, item, null, true)">{{ '查看 ' + ((item.subs || item['[]']) || []).length + ' 个子项' }}</button>
+                                <div v-show="isStatisticsEnabled && (item.totalCount || 0) > 0" style="background: lightgray; position: absolute; padding: 1px; top: 0px; right: 33px;display: inline-block" @click="handleTest(true, index, item, null, true)">
+                                    <!-- 只能写成一行来消除间隙，不能换行、空格 -->
+                                    <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item.totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.redCount || 0 }}</a>
+                                </div>
 
-                                <div :style="{ background: item.compareColor }" v-show="! isRandomEditable && item.compareType != null" style="position: absolute;top: 8px;right: 36px;display: inline-block;">
+                                <div :style="{ background: item.compareColor }" v-show="! isRandomEditable && item.compareType != null" style="position: absolute;bottom: 2px;right: 2px;display: inline-block;">
                                     <button class="hint--left" ref="testRandomSubResultButtons" @mouseover="setTestHint(index, item, true)" v-show="item.compareType != null" @click="handleTest(false, index, item, null, true)" style="position: relative;">{{ StringUtil.limitLength(item.compareMessage, 30, 'middle') + (item.showType == 'before' ? '-前' : '-后') }}</button>
                                     <svg class="icon" style="position: relative;margin-left: 10px" @click="downloadTest(index, item, true)">
                                         <use xlink:href="svg/icon.svg#export-txt"></use>
                                     </svg>   <!-- 中间 button 仅用来占位，解决上面按钮隐藏后，下载图标纵向没对齐 -->
                                     <button class="hint--left" ref="testRandomSubHandleButtons" @mouseover="setTestHint(index, item, true, null, true)" v-show="(item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null)" @click="handleTest(true, index, item, null, true)">{{ item.showType == 'before' ? '错的，撤回' : '对的，纠正' }}</button><button v-show="! ((item.showType != 'before' && item.compareType != 0) || (item.showType == 'before' && (item.TestRecord || {}).id != null))" style="color: white;background: white;border-color: white;" disabled>对的，纠正</button><button style="padding-left: 1px; padding-right: 1px; width: 50px" :style="{ color: item.durationColor }" class="hint--left" ref="testRandomSubResultDurationButtons" @mouseover="setTestHint(index, item, true, true)" @click="handleTest(true, index, item, null, true, true)">{{ (item.showType == 'before' ? item.durationBeforeShowStr : item.durationShowStr) || '?' }}</button>
                                 </div>
-
-<!--                                <img id="vRandomSubUpload" :src="item.status == 'uploading' ? 'img/loading.gif' : 'img/add_light.png'" class="icon" style="margin-right: 27px; top: 13px" @click="uploadImage(currentRandomIndex, index)">-->
-                                <svg v-show="item.Input != null && item.Input.userId == User.id" class="icon" style="margin-right: 5px; top: 13px" @click="remove(item, index, true, true)">
+                                <svg v-show="item.Random != null && item.Random.userId == User.id" class="hint--left" :data-hint="(item.Random || {}).path" class="icon" style="margin-right: 2px;" @click="remove(item, index, true, true)">
                                     <use xlink:href="svg/icon.svg#trash"></use>
                                 </svg>
                             </li>
@@ -502,8 +505,8 @@
                                 <a style="top: 0px; left: 70px; width: 120px; position: absolute" class="hint--left hint--no-animate" ref="randomTexts" @click="item.Input.disable = 1 - (item.Input.disable || 0)" :data-hint="(item.Input || {}).file" href="javascript:void(0)" :style="{ color: item.Input.disable ? 'gray' : 'black' }">{{ (item.Input.disable ? '-' : '') + ((item.Input.step || index) + 1) + '. ' + InputUtil.getShowName(item.Input) }}</a>
                                 <textarea v-show="true" style="top: 25px; left: 70px; width: 370px; height: 95px; padding: 1px; position: absolute; display: inline-flex" :style="{ color: index == currentRandomIndex ? 'black' : 'gray' }" v-model="InputUtil.getShowContent(item.Input)" @keyup="doOnKeyUp(event, 'random', false, item)" disabled></textarea>
 
-                                <button v-show="((item.Input || {}).count || 0) > 1 && (item.totalCount || 0) <= 0" style="position: absolute; bottom: 6px;right: 36px;display: inline-block;" @click="handleTest(true, index, item, null, true)">{{ '查看 ' + ((item.subs || item['[]']) || []).length + ' 个子项' }}</button>
-                                <div v-show="isStatisticsEnabled && ((item.Input || {}).count || 0) > 1 && (item.totalCount || 0) > 0" style="background: lightgray; position: absolute; padding: 1px; bottom: 6px;right: 5px;display: inline-block" @click="handleTest(true, index, item, null, true)">
+                                <button v-show="(item.totalCount || 0) <= 0 && StringUtil.isNotEmpty((item.subs || item['[]']))" style="position: absolute; bottom: 6px;right: 36px;display: inline-block;" @click="handleTest(true, index, item, null, true)">{{ '查看 ' + ((item.subs || item['[]']) || []).length + ' 个子项' }}</button>
+                                <div v-show="isStatisticsEnabled && (item.totalCount || 0) > 0" style="background: lightgray; position: absolute; padding: 1px; bottom: 6px;right: 5px;display: inline-block" @click="handleTest(true, index, item, null, true)">
                                     <!-- 只能写成一行来消除间隙，不能换行、空格 -->
                                     <a style="background: transparent; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ (item.totalCount || 0) + ':' }}</a><a style="background: white; color: black; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.whiteCount || 0 }}</a><a style="background: green; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.greenCount || 0 }}</a><a style="background: blue; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.blueCount || 0 }}</a><a style="background: orange; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.orangeCount || 0 }}</a><a style="background: red; color: white; position: relative; min-width: 6px; width: auto; height: 100%; margin: 0; padding: 2px">{{ item.redCount || 0 }}</a>
                                 </div>
@@ -1106,12 +1109,14 @@ fun(true, 1, 'a'..);
   var vDiffBefore = document.getElementById("vDiffBefore");
   var vDiffAfter = document.getElementById("vDiffAfter");
   var vBeforeCanvas = document.getElementById("vBeforeCanvas");
-  var vDiffCanvas = document.getElementById("vDiffCanvas");
+  var vDiffBeforeCanvas = document.getElementById("vDiffBeforeCanvas");
+  var vDiffAfterCanvas = document.getElementById("vDiffAfterCanvas");
   var vAfterCanvas = document.getElementById("vAfterCanvas");
   var vAfterTotal = document.getElementById("vAfterTotal");
   var vAfterTitle = document.getElementById("vAfterTitle");
   var vAfterThreshold = document.getElementById("vAfterThreshold");
-  var vDiffTitle = document.getElementById("vDiffTitle");
+  var vDiffBeforeTitle = document.getElementById("vDiffBeforeTitle");
+  var vDiffAfterTitle = document.getElementById("vDiffAfterTitle");
   var vDiffThreshold = document.getElementById("vDiffThreshold");
   var vBeforeTitle = document.getElementById("vBeforeTitle");
   var vBeforeThreshold = document.getElementById("vBeforeThreshold");

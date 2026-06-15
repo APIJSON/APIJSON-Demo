@@ -162,7 +162,7 @@ a:active svg, a:hover svg{
   left: 0;
   top: 50px;
   bottom: 0;
-  width: 40%;
+  width: 56%;
   box-shadow: 1px 1px 1px rgba(245, 244, 244, 0.52);
   padding-top: 40px;
   padding-bottom: 10px;
@@ -213,10 +213,10 @@ textarea {
 
 .side-right {
   position: absolute;
-  left: 40%;
+  left: 56%;
   top: 50px;
   bottom: 0;
-  width: 60%;
+  width: 56%;
   padding-left: 5px;
   padding-bottom: 10px;
   display: flex;
@@ -491,8 +491,8 @@ textarea {
   position: absolute;
   top: 50px;
   bottom: 0;
-  left: 40%;
-  z-index: 1000;
+  left: 56%;
+  z-index: 100;
   cursor: w-resize;
   border-right: rgba(221, 221, 221, 0.34) 1px solid;
   border-left: rgba(221, 221, 221, 0.34) 1px solid;
@@ -588,7 +588,6 @@ table.diff thead th.texttitle {
   right: auto;
   top: 100%
 }
-
 .method-pop li {
   display: block;
   padding: 0;
@@ -596,7 +595,6 @@ table.diff thead th.texttitle {
   border-bottom: 0;
   overflow: visible;
 }
-
 .method-pop li a {
   display: block;
   width: 100%;
@@ -608,13 +606,11 @@ table.diff thead th.texttitle {
   color: black;
   text-align: center;
 }
-
 .type-pop {
   left: 0;
   right: auto;
   top: 100%
 }
-
 .type-pop li {
   display: block;
   padding: 0;
@@ -622,7 +618,6 @@ table.diff thead th.texttitle {
   border-bottom: 0;
   overflow: visible;
 }
-
 .type-pop li a {
   display: block;
   width: 100%;
