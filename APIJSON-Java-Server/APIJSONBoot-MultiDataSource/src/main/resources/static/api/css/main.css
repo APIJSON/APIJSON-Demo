@@ -276,7 +276,7 @@ textarea {
   padding-right: 10px;
   display: flex;
   align-items: center;
-  z-index: 101;
+  z-index: 102;
   background-color: #FFF;
   box-shadow: 1px 1px 1px rgba(244, 243, 243, 0.64)
 }

@@ -748,6 +748,7 @@ https://github.com/Tencent/APIJSON/issues
   var HTTP_JSON_TYPES = [HTTP_METHOD_POST, REQUEST_TYPE_JSON, REQUEST_TYPE_GRPC]
   var HTTP_FORM_TYPES = [REQUEST_TYPE_FORM, HTTP_METHOD_PUT, HTTP_METHOD_DELETE]
   var HTTP_DATA_TYPES = [REQUEST_TYPE_DATA, HTTP_METHOD_PUT, HTTP_METHOD_DELETE]
+  var HTTP_FORM_DATA_TYPES = [REQUEST_TYPE_DATA, HTTP_METHOD_PUT, HTTP_METHOD_DELETE]
   var HTTP_CONTENT_TYPES = [REQUEST_TYPE_PARAM, REQUEST_TYPE_FORM, REQUEST_TYPE_DATA, REQUEST_TYPE_JSON, REQUEST_TYPE_GRPC]
 
   var CONTENT_TYPE_MAP = {
@@ -6451,7 +6452,10 @@ https://github.com/Tencent/APIJSON/issues
 
       /**请求类型切换
        */
-      changeMethod: function () {
+      changeMethod: function (method) {
+        if (StringUtil.isNotEmpty(method)) {
+          CodeUtil.method = this.method = method
+        } else {
         var methods = this.methods
         var count = methods == null ? 0 : methods.length
         if (count <= 0) {
@@ -6462,6 +6466,7 @@ https://github.com/Tencent/APIJSON/issues
         if (count > 1) {
           var index = methods.indexOf(this.method) + 1
           CodeUtil.method = this.method = methods[index % count]
+        }
         }
         this.onChange(false);
       },
@@ -6508,7 +6513,10 @@ https://github.com/Tencent/APIJSON/issues
       },
       /**请求类型切换
        */
-      changeType: function () {
+      changeType: function (type) {
+        if (StringUtil.isNotEmpty(type)) {
+          CodeUtil.type = this.type = type
+        } else {
         var types = this.types
         var count = types == null ? 0 : types.length
         if (count <= 0) {
@@ -6520,6 +6528,7 @@ https://github.com/Tencent/APIJSON/issues
           var index = types.indexOf(this.type) + 1
           this.type = types[index % count]
           CodeUtil.type = this.type;
+          }
         }
 
         var url = StringUtil.trim(vUrl.value).replaceAll('\n', '')
@@ -6561,13 +6570,17 @@ https://github.com/Tencent/APIJSON/issues
       },
       /**操作类型切换
        */
-      changeOperate: function () {
-        var operates = this.operates || [OPERATE_TYPE_RECORD, OPERATE_TYPE_REVIEW, OPERATE_TYPE_REPLAY]
-        var count = operates.length
-        if (count > 1) {
-          var index = operates.indexOf(this.operate)
-          index++;
-          this.operate = operates[index % count]
+      changeOperate: function (operate) {
+        if (StringUtil.isNotEmpty(operate)) {
+          this.operate = operate
+        } else {
+          var operates = this.operates || [OPERATE_TYPE_RECORD, OPERATE_TYPE_REVIEW, OPERATE_TYPE_REPLAY]
+          var count = operates.length
+          if (count > 1) {
+            var index = operates.indexOf(this.operate)
+            index++;
+            this.operate = operates[index % count]
+          }
         }
 
         this.onChange(false);
