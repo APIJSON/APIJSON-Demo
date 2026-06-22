@@ -276,7 +276,7 @@ textarea {
   padding-right: 10px;
   display: flex;
   align-items: center;
-  z-index: 102;
+  z-index: 101;
   background-color: #FFF;
   box-shadow: 1px 1px 1px rgba(244, 243, 243, 0.64)
 }
@@ -721,4 +721,12 @@ table.diff thead th.texttitle {
   background-color: #d9edf7;
   border-color: #bce8f1;
   color: #31708f;
+}
+
+.setting-item {
+  border-bottom: #DDD 1px solid;
+  width: 100%;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: small;
 }
