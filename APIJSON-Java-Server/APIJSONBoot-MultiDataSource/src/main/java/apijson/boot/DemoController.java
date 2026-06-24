@@ -2244,13 +2244,13 @@ public class DemoController extends APIJSONController<Long> {
 
                     for (int j = 0; j < args.length; j++) {
                         String arg = StringUtil.trim(args[j]);
-                        int ind = arg.startsWith("//") || arg.startsWith("#") || arg.startsWith("--") ? -1 : arg.indexOf(": ");
+                        int ind = arg.startsWith("//") || arg.startsWith("#") || arg.startsWith("--") ? -1 : arg.indexOf(":");
                         String key = ind <= 0 ? null : arg.substring(0, ind);
                         if (StringUtil.isEmpty(key)) {
                             continue;
                         }
 
-                        valuesMap.put(key, "?");
+                        valuesMap.put(key.trim(), "?");
                         // 语法报错  sql = sql.replaceAll("\${" + key + "}", "?");
                     }
 

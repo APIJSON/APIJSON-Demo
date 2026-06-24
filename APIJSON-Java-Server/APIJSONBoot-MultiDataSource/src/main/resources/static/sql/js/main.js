@@ -1209,13 +1209,14 @@ https://github.com/Tencent/APIJSON/issues
             }
 
             index = item2.indexOf(':')
-            if (index <= 0) {
-              throw new Error('请求头 Request Header 输入错误！请按照每行 key: value 的格式输入，不要有多余的换行或空格！'
+            var key = index <= 0 ? 'sqlautoVal' + i : StringUtil.trim(item2.substring(0, index))
+            if (index == 0) { //  <= 0) {
+              throw new Error('请求头 Request Header 输入错误！请按照每行 key: value // 对应 ${key} 或 value // 对应 ? 的格式输入，不要有多余的换行或空格！'
                 + '\n错误位置: 第 ' + (i + 1) + ' 行'
                 + '\n错误文本: ' + item)
             }
 
-            var val = item2.substring(index + 1, item2.length).trim();
+            var val = index < 0 ? item2.trim() : item2.substring(index + 1, item2.length).trim();
 
             // var ind = val.indexOf('(')  //一定要有函数是为了避免里面是一个简短单词和 SQLAuto 代码中变量冲突
             // if (ind > 0 && val.indexOf(')') > ind) {  //不从 0 开始是为了保证是函数，且不是 (1) 这种单纯限制作用域的括号
@@ -1227,7 +1228,7 @@ https://github.com/Tencent/APIJSON/issues
               }
             // }
 
-            header[StringUtil.trim(item2.substring(0, index))] = val
+            header[key] = val
           }
         }
 
@@ -7573,6 +7574,8 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         var lastVarIndex = -1;
 
         const q = '`'; // 只能用反引号，因为很可能有换行，需要 eval return  this.getQuote()
+        var sqlRest = sql
+
         for (let i = 0; i < reqCount; i ++) {
           const which = i;
           const lineItem = lines[i] || '';
@@ -7600,14 +7603,17 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
           const index = line.indexOf(': '); //APIJSON Table:alias 前面不会有空格 //致后面就接 { 'a': 1} 报错 Unexpected token ':'   lastIndexOf(': '); // indexOf(': '); 可能会有 Comment:to
           const p_k = line.substring(0, index);
 
-          var varIndex = sql.indexOf('${' + p_k + '}')
-          if (varIndex <= 0) {
-            throw new Error('参数配置第 ' + (i + 1) + ' 行错误！ \n' + p_k + ': value 必须对应以上 SQL 中有 ${' + p_k + '} ！\n不允许任何多余的空格！\n必须按 SQL 中变量的顺序配置参数，且 SQL 中不允许同名变量！')
+          var hasKey = StringUtil.isNotEmpty(p_k)
+          var varExp = hasKey ? '${' + p_k + '}' : '?'
+          var varIndex = sqlRest.indexOf(varExp)
+          if (varIndex < 0) {
+            throw new Error('参数配置第 ' + (i + 1) + ' 行错误！ \n' + p_k + ': value 必须对应以上 SQL 中有 ' + varExp + ' ！\n不允许任何多余的空格！\n必须按 SQL 中变量的顺序配置参数，且 SQL 中不允许同名变量！')
           }
-          if (varIndex <= lastVarIndex) {
-            throw new Error('参数配置第 ' + (i + 1) + ' 行位置错误！\n' + p_k + ': value 必须按在 SQL 中变量 ${' + p_k + '} 的位置配置参数，且 SQL 中不允许同名变量！')
-          }
+//          if (varIndex <= lastVarIndex) {
+//            throw new Error('参数配置第 ' + (i + 1) + ' 行位置错误！\n' + p_k + ': value 必须按在 SQL 中变量 ' + varExp + ' 的位置配置参数，且 SQL 中不允许同名变量！')
+//          }
 
+          sqlRest = sqlRest.substring(varIndex + varExp.length)
           lastVarIndex = varIndex
 
           const bi = -1;  //没必要支持，用 before: undefined, after: .. 同样支持替换，反而这样导致不兼容包含空格的 key   p_k.indexOf(' ');
@@ -7624,17 +7630,18 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
           const lastKeyInPath = pathKeys[pathKeys.length - 1]
           const customizeKey = bi > 0;
-          const key = customizeKey ? p_k.substring(bi + 1) : lastKeyInPath;
+          var key = customizeKey ? p_k.substring(bi + 1) : lastKeyInPath;
           if (key == null || key.trim().length <= 0) {
-            throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + key + ' 不是合法的 JSON key!' +
-              '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
-              '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
-              '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
-              '\nkey: 多行代码 必须用 function f() { var a = 1; return a; } f() 这种一行代码格式！');
+//            throw new Error('参数注入 第 ' + (i + 1) + ' 行格式错误！\n字符 ' + key + ' 不是合法的 JSON key!' +
+//              '\n每个随机变量配置都必须按照\n  key0/key1/../targetKey replaceKey: value  // 注释\n的格式！' +
+//              '\n注意冒号 ": " 左边 0 空格，右边 1 空格！其中 replaceKey 可省略。' +
+//              '\nkey: {} 中最外层常量对象 {} 必须用括号包裹为 ({})，也就是 key: ({}) 这种格式！' +
+//              '\nkey: 多行代码 必须用 function f() { var a = 1; return a; } f() 这种一行代码格式！');
+              key = "sqlautoVar" + i
           }
 
           // value RANDOM_DB
-          const value = line.substring(index + ': '.length);
+          const value = index < 0 ? line : line.substring(index + ': '.length);
 
           var invoke = function (val, which, p_k, pathKeys, key, lastKeyInPath) {
             try {
