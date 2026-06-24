@@ -27,6 +27,7 @@ import com.fasterxml.jackson.databind.util.LRUMap;
 
 import jakarta.servlet.AsyncContext;
 import jakarta.servlet.ServletResponse;
+import org.apache.commons.text.StringSubstitutor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -2234,11 +2235,34 @@ public class DemoController extends APIJSONController<Long> {
                 //    onServerError("服务器内部错误，Document 表中的 id=" + JSON.getString(item, "id") + ", name=" + JSON.getString(item, "name") + ", url=" + url + " 对应 url 值错误！只允许合法的 URL 格式！", shutdownWhenServerError);
                 //}
             } else {
-                sqlauto = StringUtil.trim(sqlauto);
-                List<Map<String, Object>> mapList = newMap.get(sqlauto);
+                String sql = StringUtil.trim(sqlauto);
+
+                String header = JSON.getString(item, "header");
+                String[] args = StringUtil.split(header, "\n");
+                if (args != null) {
+                    Map<String, String> valuesMap = new LinkedHashMap<>();
+
+                    for (int j = 0; j < args.length; j++) {
+                        String arg = StringUtil.trim(args[j]);
+                        int ind = arg.startsWith("//") || arg.startsWith("#") || arg.startsWith("--") ? -1 : arg.indexOf(": ");
+                        String key = ind <= 0 ? null : arg.substring(0, ind);
+                        if (StringUtil.isEmpty(key)) {
+                            continue;
+                        }
+
+                        valuesMap.put(key, "?");
+                    }
+
+                    if (! valuesMap.isEmpty()) {
+                        StringSubstitutor sub = new StringSubstitutor(valuesMap);
+                        sql = sub.replace(sqlauto);
+                    }
+                }
+
+                List<Map<String, Object>> mapList = newMap.get(sql);
                 if (mapList == null) {
                     mapList = new ArrayList<>();
-                    newMap.put(sqlauto, mapList);
+                    newMap.put(sql, mapList);
                 }
                 mapList.add(item);
             }
@@ -2329,9 +2353,9 @@ public class DemoController extends APIJSONController<Long> {
                     }
                 }
 
-                String trimmedSQL = sql == null ? null : sql.trim();
+                String trimmedSQL = sql.trim();
 
-                String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
+                String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
                 boolean isInsert = sqlPrefix.startsWith("INSERT ");
                 boolean isWrite = isInsert || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
                 if (WRITE_STRICTLY && isWrite && ! isInsert) {
@@ -2349,7 +2373,7 @@ public class DemoController extends APIJSONController<Long> {
                             List<Map<String, Object>> list = sqlauto.equalsIgnoreCase(trimmedSQL) ? entry.getValue() : null;
                             if (list != null && ! list.isEmpty()) {
                                 find = list;
-                                Log.d(TAG, "execute find DELETE/UPDATE rows = " + JSON.toJSONString(find, true));
+                                Log.d(TAG, "execute " + sql + " : find match rows = " + JSON.toJSONString(find, true));
                                 break;
                             }
                         }
