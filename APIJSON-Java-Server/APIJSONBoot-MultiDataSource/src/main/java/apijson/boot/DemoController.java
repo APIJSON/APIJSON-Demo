@@ -17,6 +17,9 @@ package apijson.boot;
 import apijson.fastjson2.APIJSONController;
 import apijson.fastjson2.APIJSONParser;
 import apijson.fastjson2.JSONRequest;
+import apijson.framework.APIJSONApplication;
+import apijson.framework.APIJSONConstant;
+import apijson.framework.APIJSONCreator;
 import apijson.orm.exception.*;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -104,6 +107,7 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
 @RequestMapping("")
 public class DemoController extends APIJSONController<Long> {
     private static final String TAG = "DemoController";
+
 
     public String getRequestBaseURL() {
         HttpServletRequest httpReq = httpServletRequest;
@@ -2155,7 +2159,102 @@ public class DemoController extends APIJSONController<Long> {
         return config;
     }
 
+    public static void onServerError(String msg, boolean shutdown) throws ServerException {
+        Log.e("DemoController", "\nSQLAuto 测试未通过！\n请修改 Document 表里的 sqlauto 为合法的 SQL 语句！\n\n原因：\n" + msg);
+        if (shutdown) {
+            System.exit(1);
+        } else {
+            throw new ServerException(msg);
+        }
+    }
+
     public static boolean EXECUTE_STRICTLY = true;
+    public static boolean WRITE_STRICTLY = EXECUTE_STRICTLY;
+
+    public static Map<String, List<Map<String, Object>>> SQLAUTO_MAP;
+    static {
+        SQLAUTO_MAP = new LinkedHashMap<>();
+    }
+    public static void init() throws ServerException {
+        init(true, null, null);
+    }
+    public static void init(boolean shutdownWhenServerError, APIJSONCreator<?, ? extends Map<String, Object>, ? extends List<Object>> creator, JSONObject table) throws ServerException {
+        if (creator == null) {
+            creator = APIJSONApplication.DEFAULT_APIJSON_CREATOR;
+        }
+
+        boolean isAll = table == null || table.isEmpty();
+        //JSONObject document = isAll ? JSON.createJSONObject((new JSONRequest("sqlauto{}", "length(sqlauto)>0")).setOrder("version-,id+")) : table;
+        JSONObject document = isAll ? JSON.createJSONObject((new JSONRequest("sqlauto$", Arrays.asList("UPDATE %", "DELETE %"))).setOrder("version-,id+")) : table;
+        if (!Log.DEBUG) {
+            document.put(APIJSONConstant.KEY_DEBUG, 0);
+        }
+
+        JSONObject requestItem = JSON.createJSONObject();
+        requestItem.put(APIJSONConstant.DOCUMENT_, document);
+        requestItem.put("count", 0);
+        JSONObject request = new JSONObject();
+        request.put(APIJSONConstant.DOCUMENT_ + "[]", requestItem);
+        Map<String, Object> response = creator.createParser().setMethod(GET).setNeedVerify(false).parseResponse(request.toJSONString());
+        if (! JSONResponse.isSuccess(response)) {
+            Log.e(TAG, "\n\n\n\n\n !!!! 查询请求映射配置异常 !!!\n" + JSON.getString(response, "msg") + "\n\n\n\n\n");
+            onServerError("查询请求映射配置异常 !", shutdownWhenServerError);
+        }
+
+        JSONArray list = JSON.getJSONArray(response, APIJSONConstant.DOCUMENT_ + "[]");
+        int size = list == null ? 0 : list.size();
+        if (isAll && size <= 0) {
+            Log.w(TAG, "init isAll && size <= 0，没有可用的请求映射配置");
+            return;
+        }
+        Log.d(TAG, "init < for SQLAUTO_MAP.size() = " + SQLAUTO_MAP.size() + " <<<<<<<<<<<<<<<<<<<<<<<<");
+        Map<String, List<Map<String, Object>>> newMap = new LinkedHashMap<>();
+
+        for (int i = 0; i < size; i++) {
+            JSONObject item = JSON.getJSONObject(list, i);
+            if (item == null || item.isEmpty()) {
+                continue;
+            }
+
+            String version = JSON.getString(item, "version");
+            if (StringUtil.isEmpty(version, true)) {
+                onServerError("服务器内部错误，Document 表中的 id=" + JSON.getString(item, "id") + ", name=" + JSON.getString(item, "name") + " 对应 version 不能为空！", shutdownWhenServerError);
+            }
+
+            String url = JSON.getString(item, "url");
+            int index = url == null ? -1 : url.indexOf("/");
+            if (index != 0) {
+                onServerError("服务器内部错误，Document 表中的 id=" + JSON.getString(item, "id") + ", name=" + JSON.getString(item, "name") + ", url=" + url + " 对应 url 值错误，必须以 / 开头！", shutdownWhenServerError);
+            }
+
+            //String requestStr = JSON.getString(item, "request");
+            String sqlauto = JSON.getString(item, "sqlauto");
+            if (StringUtil.isEmpty(sqlauto)) {
+                //if (! StringUtil.isBranchUrl(url)) {
+                //    onServerError("服务器内部错误，Document 表中的 id=" + JSON.getString(item, "id") + ", name=" + JSON.getString(item, "name") + ", url=" + url + " 对应 url 值错误！只允许合法的 URL 格式！", shutdownWhenServerError);
+                //}
+            } else {
+                sqlauto = StringUtil.trim(sqlauto);
+                List<Map<String, Object>> mapList = newMap.get(sqlauto);
+                if (mapList == null) {
+                    mapList = new ArrayList<>();
+                    newMap.put(sqlauto, mapList);
+                }
+                mapList.add(item);
+            }
+
+        }
+
+        if (isAll) {
+            SQLAUTO_MAP = newMap;
+        } else {
+            SQLAUTO_MAP.putAll(newMap);
+        }
+
+        Log.d(TAG, "init  for /> SQLAUTO_MAP.size() = " + SQLAUTO_MAP.size() + " >>>>>>>>>>>>>>>>>>>>>>>");
+    }
+
+
     /**执行 SQL 语句，支持 SQLAuto，注意仅仅不要开放给后端组外的任何人，更不要暴露到公司外的公网！
      * @param request 只用String，避免encode后未decode
      * @return
@@ -2230,8 +2329,36 @@ public class DemoController extends APIJSONController<Long> {
                     }
                 }
 
-
                 String trimmedSQL = sql == null ? null : sql.trim();
+
+                String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
+                boolean isInsert = sqlPrefix.startsWith("INSERT ");
+                boolean isWrite = isInsert || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+                if (WRITE_STRICTLY && isWrite && ! isInsert) {
+                    // 只包含筛选出 apijson 字段的 Map<String, SortedMap<Integer, Map<String, Object>>> documemtMap = DemoVerifier.DOCUMENT_MAP;
+                    Map<String, List<Map<String, Object>>> sqlautoMap = SQLAUTO_MAP;
+                    //if (sqlautoMap == null || sqlautoMap.isEmpty()) {
+                    //
+                    //}
+
+                    List<Map<String, Object>> find = null;
+                    Set<Entry<String, List<Map<String, Object>>>> set = sqlautoMap == null ? null : sqlautoMap.entrySet();
+                    if (set != null) {
+                        for (Entry<String, List<Map<String, Object>>> entry : set) {
+                            String sqlauto = StringUtil.trim(entry == null ? null : entry.getKey());
+                            List<Map<String, Object>> list = sqlauto.equalsIgnoreCase(trimmedSQL) ? entry.getValue() : null;
+                            if (list != null && ! list.isEmpty()) {
+                                find = list;
+                                Log.d(TAG, "execute find DELETE/UPDATE rows = " + JSON.toJSONString(find, true));
+                                break;
+                            }
+                        }
+                    }
+
+                    if (find == null) {
+                        throw new IllegalAccessException("严格模式下 DELETE/UPDATE SQL 只允许 Document 表 sqlauto 字段值，请提前写入并刷新后端服务配置！");
+                    }
+                }
 
                 List<Object> valueList = arg;
 
@@ -2246,9 +2373,6 @@ public class DemoController extends APIJSONController<Long> {
                 config.setPrepared(true);
                 config.setPreparedValueList(valueList);
                 config.setSql(sql);
-
-                String sqlPrefix = trimmedSQL == null || trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
-                boolean isWrite = sqlPrefix.startsWith("INSERT ") || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
 
                 JSONArray arr = null;
 
