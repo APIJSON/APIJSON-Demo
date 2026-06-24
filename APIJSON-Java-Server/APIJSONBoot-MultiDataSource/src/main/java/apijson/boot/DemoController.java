@@ -2251,6 +2251,7 @@ public class DemoController extends APIJSONController<Long> {
                         }
 
                         valuesMap.put(key, "?");
+                        // 语法报错  sql = sql.replaceAll("\${" + key + "}", "?");
                     }
 
                     if (! valuesMap.isEmpty()) {
