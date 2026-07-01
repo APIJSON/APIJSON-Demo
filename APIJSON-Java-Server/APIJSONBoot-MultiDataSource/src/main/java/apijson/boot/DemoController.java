@@ -44,10 +44,7 @@ import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.rmi.ServerException;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeoutException;
@@ -2315,6 +2312,8 @@ public class DemoController extends APIJSONController<Long> {
             if (StringUtil.isEmpty(database, true) && StringUtil.isEmpty(uri, true)) {
                 throw new NullPointerException("database 和 uri 不能同时为空！至少其中一个要传有效值!");
             }
+
+            String datasource = req.getString("datasource");
             String schema = req.getString("schema");
 
             String account = req.getString("account");
@@ -2355,12 +2354,130 @@ public class DemoController extends APIJSONController<Long> {
                 }
 
                 String trimmedSQL = sql.trim();
-
                 String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
                 boolean isInsert = sqlPrefix.startsWith("INSERT ");
-                boolean isWrite = isInsert || sqlPrefix.startsWith("UPDATE ") || sqlPrefix.startsWith("DELETE ");
+                boolean isEdit = (! isInsert) && sqlPrefix.startsWith("UPDATE ");
+                boolean isWrite = isInsert || isEdit || sqlPrefix.startsWith("DELETE ");
+
+                DemoSQLConfig config = new DemoSQLConfig();
+                config.setDatabase(database);
+                config.setDatasource(datasource);
+                config.setDBUri(uri);
+                config.setSchema(schema);
+
                 if (WRITE_STRICTLY && isWrite && ! isInsert) {
-                    // 只包含筛选出 apijson 字段的 Map<String, SortedMap<Integer, Map<String, Object>>> documemtMap = DemoVerifier.DOCUMENT_MAP;
+                    int fromInd = isEdit ? 0 : findKeyIndex(trimmedSQL, "FROM");
+                    if (fromInd < 0) {
+                        throw new IllegalArgumentException("SQL 缺 FORM 关键词!");
+                    }
+
+                    String sqlRest = trimmedSQL.substring(fromInd + (isEdit ? "UPDATE " : " FROM ").length()).trim();
+                    int blankRest = sqlRest.indexOf(" ");
+                    if (blankRest < 0) {
+                        throw new IllegalArgumentException("SQL 缺少 表名!");
+                    }
+
+                    String tblPath = sqlRest.substring(0, blankRest).trim();
+                    sqlRest = sqlRest.substring(blankRest + 1).trim();
+                    String[] tblArr = tblPath.indexOf(".") >= 0 ? tblPath.split("\\.") : new String[]{tblPath}; // StringUtil.split(tblPath.Pattern.quota("."), true);
+                    int len = tblArr == null ? 0 : tblArr.length;
+                    String sch = len < 2 ? null : tblArr[len - 2];
+                    if (StringUtil.isNotEmpty(sch)){
+                        if ((sch.startsWith("`") && sch.endsWith("`")) || (sch.startsWith("[") && sch.endsWith("]")) || (sch.startsWith("\"") && sch.endsWith("\""))) {
+                            sch = sch.substring(1, sch.length() - 1);
+                        }
+
+                        if (StringUtil.isNotEmpty(sch)) {
+                            if (StringUtil.isNotEmpty(schema) && ! schema.equals(sch)) {
+                                throw new ConflictException("传参 schema: " + schema + " 和 SQL 中" + tblPath + " 里的" + sch + "不一致!");
+                            }
+
+                            config.setSchema(sch);
+                        }
+                    }
+                    
+                    String tbl = len < 1 ? null : tblArr[len - 1];
+                    if ((tbl.startsWith("`") && tbl.endsWith("`")) || (tbl.startsWith("[") & tbl.endsWith("]")) || (tbl.startsWith("\"") && tbl.endsWith("\""))) {
+                        tbl = tbl.substring(1, tbl.length() -1);
+                    }
+                    
+                    config.setTable(tbl);
+                    String idKey = config.getIdKey();
+                    String userIdKey = config.getUserIdKey();
+                    int whereInd = findKeyIndex(sqlRest, "WHERE");
+                    if (whereInd < 0) {
+                        throw new IllegalArgumentException("SQL 缺少 WHERE 关键词!");
+                    }
+
+                    sqlRest = sqlRest.substring(whereInd + " WHERE ".length()).trim();
+                    String key;
+                    if (sqlRest.startsWith(idKey)) {
+                        key = idKey;
+                    } else if (sqlRest.startsWith("`" + idKey + "`") || sqlRest.startsWith("[" + idKey + "]") || sqlRest.startsWith("\"" + idKey + "\"")) {
+                        key = "`" + idKey + "`";
+                    } else if (sqlRest.startsWith(userIdKey)) {
+                        key = userIdKey;
+                    } else if (sqlRest.startsWith("`" + userIdKey + "`") || sqlRest.startsWith("[" + userIdKey + "]") || sqlRest.startsWith("\"" + userIdKey + "\"")) {
+                        key = "`" + userIdKey + "`";
+                    } else {
+                        throw new IllegalArgumentException("SQL WHERE 后必须接着 "+ idKey + " 或 " + idKey + " = ? 或 IN(?,?..) !");
+                    }
+
+                    sqlRest = sqlRest.substring(key. length()).trim();
+                    boolean isEq = sqlRest.startsWith("=");
+                    if (! (isEq || sqlRest.startsWith("IN(") || sqlRest.startsWith("in("))) {
+                        throw new IllegalArgumentException("SQL WHERE "+ key + " 后必须接着 = ? 或 IN(?, ? ...) ! ");
+                    }
+
+                    sqlRest = sqlRest.substring(isEq ? 1 : "IN(".length()).trim();
+                    int endInd = isEq && ! sqlRest.startsWith("'") ? -1 : sqlRest.indexOf(isEq ? "'" : ")", 1);
+                    if (isEq && ! sqlRest.startsWith("'")) {
+                        for (int i = 0; i < sqlRest.length(); i++) {
+                            char c = sqlRest.charAt(i);
+                            if (c == '+' || c == '-' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+                                continue;
+                            }
+
+                            endInd = i;
+                        }
+                    } else {
+                        endInd = sqlRest.indexOf(isEq ? "'" : ")", isEq ? 1 : 0);
+                    }
+
+                    sqlRest = endInd < 0 ? sqlRest : sqlRest.substring(endInd + 1).trim();
+                    if (sqlRest.startsWith("OR ") || sqlRest.startsWith("or ") || sqlRest.startsWith("NOT ") || sqlRest.startsWith("not ")) {
+                        throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件不允许 OR/NOT 连接，必须 AND 连接 ! ");
+                    }
+
+                    int orInd = findKeyIndex(sqlRest, "OR");
+
+                    if (orInd >= 0) { // TODO 兼容 AND ( OR ) ？
+                        throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件不允许 OR 连接，必须 AND 连接 ! ");
+                    }
+
+                    //int andInd = sqlRest.startsWith("AND ") || sqlRest.startsWith("and ") ? 1 : sqlRest.indexOf(" AND ");
+                    //if (andInd < 0 && StringUtil.isNotEmpty(sqlRest, true)) {
+                    //    andInd = sqlRest.indexOf(" and ");
+                    //
+                    //    if (andInd < 0) {
+                    //        //int groupInd = findLastKeyIndex(sqlRest, "GROUP BY");
+                    //        int havingInd = -1;
+                    //        //int orderInd = -1;
+                    //        int limitInd = -1;
+                    //
+                    //        //if (groupInd < 0) {
+                    //                havingInd = findLastKeyIndex(sqlRest, "HAVING");
+                    //                //orderInd = findLastKeyIndex(sqlRest, "ORDER BY");
+                    //                limitInd = findLastKeyIndex(sqlRest, "LIMIT");
+                    //        //}
+                    //
+                    //        if (havingInd >= 0 || limitInd >= 0) {
+                    //            throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件必须 AND 连接 ! ");
+                    //        }
+                    //    }
+                    //}
+
+                    // 只包含筛选出 apijson 字段的 Map<String, SortedMap<Integer, Map<String, Object>>> documentMap = DemoVerifier.DOCUMENT_MAP;
                     Map<String, List<Map<String, Object>>> sqlautoMap = SQLAUTO_MAP;
                     //if (sqlautoMap == null || sqlautoMap.isEmpty()) {
                     //
@@ -2385,19 +2502,46 @@ public class DemoController extends APIJSONController<Long> {
                     }
                 }
 
+                APIJSONParser<Long> parser = newParser(session, RequestMethod.PUT); // : DELETE);
+                int maxCount = isWrite ? parser.getMaxUpdateCount() : parser.getMaxQueryCount();
+                if (isInsert == false && (config.isMySQL() || config.isMariaDB())) {
+                    int limitIndex = findLastKeyIndex(trimmedSQL, "LIMIT");
+
+                    if (limitIndex < 0) {
+                        trimmedSQL += " LIMIT " + parser.getDefaultQueryCount();
+                    } else {
+                        String sqlRest = trimmedSQL.substring(limitIndex + " LIMIT ".length()).trim();
+                        int ind = sqlRest.indexOf(" ");
+                        String s = ind < 0 ? sqlRest : sqlRest.substring(0, ind).trim();
+                        String[] arr = StringUtil.split(s);
+
+                        for (int i = 0; i < arr.length; i++) {
+                            String as = arr[i];
+                            if ("?".endsWith(as)) {
+                                continue; // FIXME 不知道在第几个 as = arg.getString();
+                            }
+
+                            try {
+                                int limit = Integer.parseInt(as);
+                                if (limit <= 0 || limit > maxCount) {
+                                    throw new IllegalArgumentException("SQL LIMIT " + s + " 超出范围 1~" + maxCount + " !");
+                                }
+                            } catch (Throwable e) {
+                                throw new IllegalArgumentException("SQL LIMIT " + s + " 不合法!" + e.getMessage(), e);
+                            }
+                        }
+                    }
+                }
+
                 List<Object> valueList = arg;
 
                 DemoSQLExecutor executor = new DemoSQLExecutor();
-                DemoSQLConfig config = new DemoSQLConfig();
 
-                config.setDatabase(database);
-                config.setSchema(schema);
-                config.setDBUri(uri);
                 config.setDBAccount(account);
                 config.setDBPassword(password);
                 config.setPrepared(true);
                 config.setPreparedValueList(valueList);
-                config.setSql(sql);
+                config.setSql(trimmedSQL);
 
                 JSONArray arr = null;
 
@@ -2423,11 +2567,22 @@ public class DemoController extends APIJSONController<Long> {
                         }
                     }
                 } else {
+                    Connection connection = executor.getConnection(config);
                     Statement statement = executor.getStatement(config, trimmedSQL);
                     if (statement instanceof PreparedStatement) {
                         if (EXECUTE_STRICTLY) {
                             if (isWrite) {
-                                ((PreparedStatement) statement).executeUpdate();
+                                try {
+                                    connection.setAutoCommit(false);
+                                    // connection.beginRequest();
+                                    int rows = ((PreparedStatement) statement).executeUpdate();
+                                    if (rows >= maxCount) {
+                                        throw new UnsupportedOperationException("实际影响数量超过上限 " + maxCount + " ! 已回滚变更");
+                                    }
+                                } catch (Throwable e) {
+                                    connection.rollback();
+                                    throw e;
+                                }
                             } else {
                                 ((PreparedStatement) statement).executeQuery();
                             }
@@ -2441,7 +2596,17 @@ public class DemoController extends APIJSONController<Long> {
 
                         if (EXECUTE_STRICTLY) {
                             if (isWrite) {
-                                statement.executeUpdate(sql);
+                                try {
+                                    connection.setAutoCommit(false);
+                                    // connection.beginRequest();
+                                    int rows = statement.executeUpdate(sql);
+                                    if (rows >= maxCount) {
+                                        throw new UnsupportedOperationException("实际影响数量超过上限 " + maxCount + " ! 已回滚变更");
+                                    }
+                                } catch (Throwable e) {
+                                    connection.rollback();
+                                    throw e;
+                                }
                             } else {
                                 statement.executeQuery(sql);
                             }
@@ -2517,6 +2682,45 @@ public class DemoController extends APIJSONController<Long> {
             return result.toJSONString();
         }
 
+    }
+
+    // TODO 抽取到 SQL 或 StringUitl
+    private static int findKeyIndex(String sql, String key) {
+        return findKeyIndex(sql, key, false, false);
+    }
+    private static int findLastKeyIndex(String sql, String key) {
+        return findKeyIndex(sql, key, true, false);
+    }
+
+    private static final String[] LEFT_CHARS = new String[]{" ", "\n", ")"};
+    private static final String[] RIGHT_CHARS = new String[]{" ", "\n", "("};
+    private static int findKeyIndex(String sql, String key, boolean last, boolean cased) {
+        for (int i = 0; i < LEFT_CHARS.length; i++) {
+            String l = LEFT_CHARS[i];
+            for (int j = 0; j < RIGHT_CHARS.length; j++) {
+                String r = RIGHT_CHARS[j];
+                int ind = last ? sql.lastIndexOf(l + key + r) : sql.indexOf(l + key + r);
+                if (ind >= 0) {
+                    return ind;
+                }
+            }
+        }
+
+        if (cased) {
+            return -1;
+        }
+
+        String lower = key.toLowerCase();
+        if (! lower.equals(key)) {
+            return findKeyIndex(sql, lower, last, true);
+        }
+
+        String upper = key.toUpperCase();
+        if (! upper.equals(key)) {
+            return findKeyIndex(sql, upper, last, true);
+        }
+
+        return -1;
     }
 
 
