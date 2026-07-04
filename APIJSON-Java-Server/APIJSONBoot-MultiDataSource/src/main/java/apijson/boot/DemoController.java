@@ -2366,19 +2366,24 @@ public class DemoController extends APIJSONController<Long> {
                 config.setSchema(schema);
 
                 if (WRITE_STRICTLY && isWrite && ! isInsert) {
-                    int fromInd = isEdit ? 0 : findKeyIndex(trimmedSQL, "FROM");
+                    String sqlRest = trimmedSQL.replaceAll("\\s+", " ");
+                    sqlRest = sqlRest.replaceAll("\f", " ");
+                    sqlRest = sqlRest.replaceAll("\n", " ");
+                    sqlRest = sqlRest.replaceAll("\t", " ");
+                    sqlRest = sqlRest.replaceAll("\r", " ");
+                    int fromInd = isEdit ? 0 : findKeyIndex(sqlRest, "FROM");
                     if (fromInd < 0) {
                         throw new IllegalArgumentException("SQL 缺 FORM 关键词!");
                     }
 
-                    String sqlRest = trimmedSQL.substring(fromInd + (isEdit ? "UPDATE " : " FROM ").length()).trim();
+                    sqlRest = sqlRest.substring(fromInd + (isEdit ? "UPDATE " : " FROM ").length()).trim();
                     int blankRest = sqlRest.indexOf(" ");
                     if (blankRest < 0) {
                         throw new IllegalArgumentException("SQL 缺少 表名!");
                     }
 
                     String tblPath = sqlRest.substring(0, blankRest).trim();
-                    sqlRest = sqlRest.substring(blankRest + 1).trim();
+                    sqlRest = sqlRest.substring(blankRest); // + 1).trim();
                     String[] tblArr = tblPath.indexOf(".") >= 0 ? tblPath.split("\\.") : new String[]{tblPath}; // StringUtil.split(tblPath.Pattern.quota("."), true);
                     int len = tblArr == null ? 0 : tblArr.length;
                     String sch = len < 2 ? null : tblArr[len - 2];
@@ -2423,7 +2428,7 @@ public class DemoController extends APIJSONController<Long> {
                         throw new IllegalArgumentException("SQL WHERE 后必须接着 "+ idKey + " 或 " + idKey + " = ? 或 IN(?,?..) !");
                     }
 
-                    sqlRest = sqlRest.substring(key. length()).trim();
+                    sqlRest = sqlRest.substring(key.length()).trim();
                     boolean isEq = sqlRest.startsWith("=");
                     if (! (isEq || sqlRest.startsWith("IN(") || sqlRest.startsWith("in("))) {
                         throw new IllegalArgumentException("SQL WHERE "+ key + " 后必须接着 = ? 或 IN(?, ? ...) ! ");
@@ -2692,8 +2697,8 @@ public class DemoController extends APIJSONController<Long> {
         return findKeyIndex(sql, key, true, false);
     }
 
-    private static final String[] LEFT_CHARS = new String[]{" ", "\n", ")"};
-    private static final String[] RIGHT_CHARS = new String[]{" ", "\n", "("};
+    private static final String[] LEFT_CHARS = new String[]{" ", "\n", "\t", "\r", "\f", ")"};
+    private static final String[] RIGHT_CHARS = new String[]{" ", "\n", "\t", "\r", "\f", "("};
     private static int findKeyIndex(String sql, String key, boolean last, boolean cased) {
         for (int i = 0; i < LEFT_CHARS.length; i++) {
             String l = LEFT_CHARS[i];
