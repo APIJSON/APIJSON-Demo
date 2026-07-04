@@ -2439,11 +2439,9 @@ public class DemoController extends APIJSONController<Long> {
                     if (isEq && ! sqlRest.startsWith("'")) {
                         for (int i = 0; i < sqlRest.length(); i++) {
                             char c = sqlRest.charAt(i);
-                            if (c == '+' || c == '-' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
-                                continue;
+                            if (c == '?' || c == '+' || c == '-' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+                                endInd ++;
                             }
-
-                            endInd = i;
                         }
                     } else {
                         endInd = sqlRest.indexOf(isEq ? "'" : ")", isEq ? 1 : 0);
