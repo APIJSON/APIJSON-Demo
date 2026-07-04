@@ -2523,7 +2523,8 @@ public class DemoController extends APIJSONController<Long> {
                         for (int i = 0; i < arr.length; i++) {
                             String as = arr[i];
                             if ("?".endsWith(as)) {
-                                continue; // FIXME 不知道在第几个 as = arg.getString();
+                                int j = arg == null ? -1 : arg.size() - (arr.length - i);
+                                as = j < 0 || j > arg.size() ? null : arg.getString(j);
                             }
 
                             try {
@@ -2532,7 +2533,7 @@ public class DemoController extends APIJSONController<Long> {
                                     throw new IllegalArgumentException("SQL LIMIT " + s + " 超出范围 1~" + maxCount + " !");
                                 }
                             } catch (Throwable e) {
-                                throw new IllegalArgumentException("SQL LIMIT " + s + " 不合法!" + e.getMessage(), e);
+                                throw new IllegalArgumentException("SQL LIMIT " + s + " 不合法! " + e.getMessage(), e);
                             }
                         }
                     }
