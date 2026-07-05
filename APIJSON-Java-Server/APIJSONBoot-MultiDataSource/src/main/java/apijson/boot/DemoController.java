@@ -1653,6 +1653,13 @@ public class DemoController extends APIJSONController<Long> {
                         String k = ind < 0 ? kv : kv.substring(0, ind);
                         Object v = ind < 0 ? null : kv.substring(ind + 1);
 
+                        // query 已经转义
+//                        try {
+//                            v = URLDecoder.decode((String) v, StringUtil.UTF_8);
+//                        } catch (Throwable e) {
+//                            e.printStackTrace();
+//                        }
+
                         try {
                             v = JSON.parse(v);
                         } catch (Throwable e) {
@@ -1821,11 +1828,11 @@ public class DemoController extends APIJSONController<Long> {
                         JSONObject document = JSON.newJSONObject();
                         document.put("from", 2); // 0-测试工具，1-CI/CD，2-流量录制
                         document.put("name", "[Record] " + new java.util.Date().toLocaleString());
-                        document.put("type", reqType);
                         document.put("method", method == null ? "GET" : method.name());
+                        document.put("type", reqType);
                         document.put("url", branch);
                         document.put("header", StringUtil.isEmpty(hs, true) ? null : hs.trim());
-                        document.put("request", isSQL ? "{}" : (reqBody != null && ! reqBody.isEmpty() ? JSON.toJSONString(reqBody) : (StringUtil.isEmail(body) ? "{}" : body)));
+                        document.put("request", isSQL ? "{}" : (reqBody != null && ! reqBody.isEmpty() ? JSON.toJSONString(reqBody) : (StringUtil.isEmpty(body) ? "{}" : body)));
                         if (isSQL) {
                             // 没有名称，除非 args 传对象而不是数组
                             // JSONList args = req.getJSONArray("args");
@@ -1849,7 +1856,7 @@ public class DemoController extends APIJSONController<Long> {
                 }
                 else {
                     // Random <<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-                    Map<String, ?> m = isSQL ? null : reqBody;
+                    Map<String, ?> m = isSQL ? null : (reqBody != null && ! reqBody.isEmpty() ? reqBody : (isBodyEmpty ? map : JSON.parseObject(body)));
                     String config = isSQL ? hs : parseRandomConfig("", m);
 
                     JSONObject random = JSON.newJSONObject();
@@ -2021,8 +2028,9 @@ public class DemoController extends APIJSONController<Long> {
     protected String sendRequest(HttpSession session, HttpMethod method, String url, String body, HttpHeaders headers) {
         String rspBody = null;
         try {
-            // 为JSON请求设置默认的Content-Type
-            if (body != null && method != HttpMethod.GET && !headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+            // 为JSON请求设置默认的 Content-Type
+            boolean hasContentType = headers.containsKey(HttpHeaders.CONTENT_TYPE) || headers.containsKey(HttpHeaders.CONTENT_TYPE.toLowerCase());
+            if (body != null && method != HttpMethod.GET && ! hasContentType) {
                 // 尝试解析JSON来判断内容类型
                 try {
                     JSON.parse(body);
@@ -2034,13 +2042,13 @@ public class DemoController extends APIJSONController<Long> {
             }
             
             // 设置默认的Accept header
-            if (!headers.containsKey(HttpHeaders.ACCEPT)) {
+            if (! (headers.containsKey(HttpHeaders.ACCEPT) || headers.containsKey(HttpHeaders.ACCEPT.toLowerCase()))) {
                 headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN));
             }
             
             // 为大文本body，设置适当的Content-Type和分块传输
             if (body != null && body.length() > 1024 * 1024) { // 超过1MB
-                if (!headers.containsKey(HttpHeaders.CONTENT_TYPE)) {
+                if (! hasContentType) {
                     headers.setContentType(MediaType.TEXT_PLAIN);
                 }
                 // 设置分块传输
@@ -2094,8 +2102,11 @@ public class DemoController extends APIJSONController<Long> {
             }
         }
 
-        SESSION_MAP.put(session.getId(), session);
-        httpServletResponse.setHeader(APIJSON_DELEGATE_ID, session.getId());
+        String id = session == null ? null : session.getId();
+        if (id != null) {
+            SESSION_MAP.put(id, session);
+            httpServletResponse.setHeader(APIJSON_DELEGATE_ID, id);
+        }
 
         return rspBody;
     }
@@ -2425,13 +2436,13 @@ public class DemoController extends APIJSONController<Long> {
                     } else if (sqlRest.startsWith("`" + userIdKey + "`") || sqlRest.startsWith("[" + userIdKey + "]") || sqlRest.startsWith("\"" + userIdKey + "\"")) {
                         key = "`" + userIdKey + "`";
                     } else {
-                        throw new IllegalArgumentException("SQL WHERE 后必须接着 "+ idKey + " 或 " + idKey + " = ? 或 IN(?,?..) !");
+                        throw new IllegalArgumentException("SQL WHERE 后必须接着 "+ idKey + " 或 " + userIdKey + " = ? 或 IN(?, ? ...) !");
                     }
 
                     sqlRest = sqlRest.substring(key.length()).trim();
                     boolean isEq = sqlRest.startsWith("=");
                     if (! (isEq || sqlRest.startsWith("IN(") || sqlRest.startsWith("in("))) {
-                        throw new IllegalArgumentException("SQL WHERE "+ key + " 后必须接着 = ? 或 IN(?, ? ...) ! ");
+                        throw new IllegalArgumentException("SQL WHERE " + key + " 后必须接着 = ? 或 IN(?, ? ...) ! ");
                     }
 
                     sqlRest = sqlRest.substring(isEq ? 1 : "IN(".length()).trim();
@@ -2486,21 +2497,20 @@ public class DemoController extends APIJSONController<Long> {
                     //
                     //}
 
-                    List<Map<String, Object>> find = null;
+                    List<Map<String, Object>> list = null;
                     Set<Entry<String, List<Map<String, Object>>>> set = sqlautoMap == null ? null : sqlautoMap.entrySet();
                     if (set != null) {
                         for (Entry<String, List<Map<String, Object>>> entry : set) {
                             String sqlauto = StringUtil.trim(entry == null ? null : entry.getKey());
-                            List<Map<String, Object>> list = sqlauto.equalsIgnoreCase(trimmedSQL) ? entry.getValue() : null;
+                            list = sqlauto.equalsIgnoreCase(trimmedSQL) ? entry.getValue() : null;
                             if (list != null && ! list.isEmpty()) {
-                                find = list;
-                                Log.d(TAG, "execute " + sql + " : find match rows = " + JSON.toJSONString(find, true));
+                                Log.d(TAG, "execute " + sql + " : find match rows = " + JSON.toJSONString(list, true));
                                 break;
                             }
                         }
                     }
 
-                    if (find == null) {
+                    if (list == null || list.isEmpty()) {
                         throw new IllegalAccessException("严格模式下 DELETE/UPDATE SQL 只允许 Document 表 sqlauto 字段值，请提前写入并刷新后端服务配置！");
                     }
                 }
@@ -2523,6 +2533,9 @@ public class DemoController extends APIJSONController<Long> {
                             if ("?".endsWith(as)) {
                                 int j = arg == null ? -1 : arg.size() - (arr.length - i);
                                 as = j < 0 || j > arg.size() ? null : arg.getString(j);
+                                if (StringUtil.isEmail(as)) {
+                                    throw new IllegalArgumentException("SQL LIMIT ? 对应的 args[" + j + "] = " + as + " 不合法！");
+                                }
                             }
 
                             try {
@@ -2580,8 +2593,8 @@ public class DemoController extends APIJSONController<Long> {
                                     connection.setAutoCommit(false);
                                     // connection.beginRequest();
                                     int rows = ((PreparedStatement) statement).executeUpdate();
-                                    if (rows >= maxCount) {
-                                        throw new UnsupportedOperationException("实际影响数量超过上限 " + maxCount + " ! 已回滚变更");
+                                    if (rows > maxCount) {
+                                        throw new UnsupportedOperationException("实际影响数量 " + rows + " 超过上限 " + maxCount + " ! 已回滚变更");
                                     }
                                 } catch (Throwable e) {
                                     connection.rollback();
@@ -2595,7 +2608,7 @@ public class DemoController extends APIJSONController<Long> {
                         }
                     } else {
                         if (arg != null && ! arg.isEmpty()) {
-                            throw new UnsupportedOperationException("非预编译模式不允许传参 arg ！");
+                            throw new UnsupportedOperationException("非预编译模式不允许传参 args ！");
                         }
 
                         if (EXECUTE_STRICTLY) {
@@ -2604,8 +2617,8 @@ public class DemoController extends APIJSONController<Long> {
                                     connection.setAutoCommit(false);
                                     // connection.beginRequest();
                                     int rows = statement.executeUpdate(sql);
-                                    if (rows >= maxCount) {
-                                        throw new UnsupportedOperationException("实际影响数量超过上限 " + maxCount + " ! 已回滚变更");
+                                    if (rows > maxCount) {
+                                        throw new UnsupportedOperationException("实际影响数量 " + rows + " 超过上限 " + maxCount + " ! 已回滚变更");
                                     }
                                 } catch (Throwable e) {
                                     connection.rollback();
@@ -2646,6 +2659,9 @@ public class DemoController extends APIJSONController<Long> {
 
                     //        try {
                     updateCount = statement.getUpdateCount();
+                    if (WRITE_STRICTLY && isWrite && updateCount > maxCount) {
+                        throw new IllegalArgumentException("实际影响数量 " + updateCount + " 超过上限 " + maxCount + " ! 已回滚变更");
+                    }
                     //        } catch (Throwable e) {
                     //          e.printStackTrace();
                     //        }
