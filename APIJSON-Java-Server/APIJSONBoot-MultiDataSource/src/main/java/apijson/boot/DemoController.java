@@ -2570,6 +2570,7 @@ public class DemoController extends APIJSONController<Long> {
                 long rsDuration = 0;
                 long executeStartTime = System.currentTimeMillis();
 
+                boolean isAutoCommit = true;
                 try {
                     if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database) || DemoSQLConfig.DATABASE_CASSANDRA.equals(database)) {
                         JSONObject result = executor.execute(config, false);
@@ -2593,6 +2594,7 @@ public class DemoController extends APIJSONController<Long> {
                             if (EXECUTE_STRICTLY) {
                                 if (isWrite) {
                                     try {
+                                        isAutoCommit = false;
                                         connection.setAutoCommit(false);
                                         // connection.beginRequest();
                                         int rows = ((PreparedStatement) statement).executeUpdate();
@@ -2617,6 +2619,7 @@ public class DemoController extends APIJSONController<Long> {
                             if (EXECUTE_STRICTLY) {
                                 if (isWrite) {
                                     try {
+                                        isAutoCommit = false;
                                         connection.setAutoCommit(false);
                                         // connection.beginRequest();
                                         int rows = statement.executeUpdate(sql);
@@ -2673,7 +2676,9 @@ public class DemoController extends APIJSONController<Long> {
                         }
 
                         try {
-                            connection.commit();
+                            if (! (isAutoCommit || connection.getAutoCommit())) {
+                                connection.commit();
+                            }
                         } finally {
                             try {
                                 statement.close();
