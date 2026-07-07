@@ -2452,6 +2452,8 @@ public class DemoController extends APIJSONController<Long> {
                             char c = sqlRest.charAt(i);
                             if (c == '?' || c == '+' || c == '-' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
                                 endInd ++;
+                            } else {
+                                break;
                             }
                         }
                     } else {
@@ -2568,103 +2570,134 @@ public class DemoController extends APIJSONController<Long> {
                 long rsDuration = 0;
                 long executeStartTime = System.currentTimeMillis();
 
-                if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database) || DemoSQLConfig.DATABASE_CASSANDRA.equals(database)) {
-                    JSONObject result = executor.execute(config, false);
-                    executeDuration = System.currentTimeMillis() - executeStartTime;
+                try {
+                    if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database) || DemoSQLConfig.DATABASE_CASSANDRA.equals(database)) {
+                        JSONObject result = executor.execute(config, false);
+                        executeDuration = System.currentTimeMillis() - executeStartTime;
 
-                    if (isWrite) {
-                        updateCount = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
-                    } else {
-                        arr = result == null ? null : result.getJSONArray(DemoSQLExecutor.KEY_RAW_LIST);
-                        if (arr == null) {
-                            arr = new JSONArray();
-                            if (result != null) {
-                                arr.add(result);
-                            }
-                        }
-                    }
-                } else {
-                    Connection connection = executor.getConnection(config);
-                    Statement statement = executor.getStatement(config, trimmedSQL);
-                    if (statement instanceof PreparedStatement) {
-                        if (EXECUTE_STRICTLY) {
-                            if (isWrite) {
-                                try {
-                                    connection.setAutoCommit(false);
-                                    // connection.beginRequest();
-                                    int rows = ((PreparedStatement) statement).executeUpdate();
-                                    if (rows > maxCount) {
-                                        throw new UnsupportedOperationException("实际影响数量 " + rows + " 超过上限 " + maxCount + " ! 已回滚变更");
-                                    }
-                                } catch (Throwable e) {
-                                    connection.rollback();
-                                    throw e;
-                                }
-                            } else {
-                                ((PreparedStatement) statement).executeQuery();
-                            }
+                        if (isWrite) {
+                            updateCount = result == null ? 0 : result.getIntValue(JSONResponse.KEY_COUNT);
                         } else {
-                            ((PreparedStatement) statement).execute();
+                            arr = result == null ? null : result.getJSONArray(DemoSQLExecutor.KEY_RAW_LIST);
+                            if (arr == null) {
+                                arr = new JSONArray();
+                                if (result != null) {
+                                    arr.add(result);
+                                }
+                            }
                         }
                     } else {
-                        if (arg != null && ! arg.isEmpty()) {
-                            throw new UnsupportedOperationException("非预编译模式不允许传参 args ！");
-                        }
-
-                        if (EXECUTE_STRICTLY) {
-                            if (isWrite) {
-                                try {
-                                    connection.setAutoCommit(false);
-                                    // connection.beginRequest();
-                                    int rows = statement.executeUpdate(sql);
-                                    if (rows > maxCount) {
-                                        throw new UnsupportedOperationException("实际影响数量 " + rows + " 超过上限 " + maxCount + " ! 已回滚变更");
+                        Connection connection = executor.getConnection(config);
+                        Statement statement = executor.getStatement(config, trimmedSQL);
+                        if (statement instanceof PreparedStatement) {
+                            if (EXECUTE_STRICTLY) {
+                                if (isWrite) {
+                                    try {
+                                        connection.setAutoCommit(false);
+                                        // connection.beginRequest();
+                                        int rows = ((PreparedStatement) statement).executeUpdate();
+                                        if (rows > maxCount) {
+                                            throw new UnsupportedOperationException("实际影响数量 " + rows + " 超过上限 " + maxCount + " ! 已回滚变更");
+                                        }
+                                    } catch (Throwable e) {
+                                        connection.rollback();
+                                        throw e;
                                     }
-                                } catch (Throwable e) {
-                                    connection.rollback();
-                                    throw e;
+                                } else {
+                                    ((PreparedStatement) statement).executeQuery();
                                 }
                             } else {
-                                statement.executeQuery(sql);
+                                ((PreparedStatement) statement).execute();
                             }
                         } else {
-                            statement.execute(sql);
+                            if (arg != null && ! arg.isEmpty()) {
+                                throw new UnsupportedOperationException("非预编译模式不允许传参 args ！");
+                            }
+
+                            if (EXECUTE_STRICTLY) {
+                                if (isWrite) {
+                                    try {
+                                        connection.setAutoCommit(false);
+                                        // connection.beginRequest();
+                                        int rows = statement.executeUpdate(sql);
+                                        if (rows > maxCount) {
+                                            throw new UnsupportedOperationException("实际影响数量 " + rows + " 超过上限 " + maxCount + " ! 已回滚变更");
+                                        }
+                                    } catch (Throwable e) {
+                                        connection.rollback();
+                                        throw e;
+                                    }
+                                } else {
+                                    statement.executeQuery(sql);
+                                }
+                            } else {
+                                statement.execute(sql);
+                            }
                         }
-                    }
 
-                    executeDuration = System.currentTimeMillis() - executeStartTime;
+                        executeDuration = System.currentTimeMillis() - executeStartTime;
 
-                    arr = new JSONArray();
-                    ResultSet rs = statement.getResultSet();
-                    ResultSetMetaData rsmd = rs == null ? null : rs.getMetaData();
-                    int length = rsmd == null ? 0 : rsmd.getColumnCount();
+                        arr = new JSONArray();
+                        ResultSet rs = statement.getResultSet();
+                        ResultSetMetaData rsmd = rs == null ? null : rs.getMetaData();
+                        int length = rsmd == null ? 0 : rsmd.getColumnCount();
 
 
-                    long cursorStartTime = System.currentTimeMillis();
-                    while (rs != null && rs.next()) {
-                        cursorDuration += System.currentTimeMillis() - cursorStartTime;
+                        long cursorStartTime = System.currentTimeMillis();
+                        while (rs != null && rs.next()) {
+                            cursorDuration += System.currentTimeMillis() - cursorStartTime;
 
-                        JSONObject obj = JSON.newJSONObject();
-                        for (int i = 1; i <= length; i++) {
-                            long sqlStartTime = System.currentTimeMillis();
-                            String name = rsmd.getColumnName(i);  // rsmd.getColumnLable(i);
-                            Object value = rs.getObject(i);
-                            rsDuration += System.currentTimeMillis() - sqlStartTime;
+                            JSONObject obj = JSON.newJSONObject();
+                            for (int i = 1; i <= length; i++) {
+                                long sqlStartTime = System.currentTimeMillis();
+                                String name = rsmd.getColumnName(i);  // rsmd.getColumnLable(i);
+                                Object value = rs.getObject(i);
+                                rsDuration += System.currentTimeMillis() - sqlStartTime;
 
-                            obj.put(name, value);
+                                obj.put(name, value);
+                            }
+
+                            arr.add(obj);
                         }
 
-                        arr.add(obj);
-                    }
+                        //        try {
+                        updateCount = statement.getUpdateCount();
+                        if (WRITE_STRICTLY && isWrite && updateCount > maxCount) {
+                            try {
+                                connection.rollback();
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                            }
 
-                    //        try {
-                    updateCount = statement.getUpdateCount();
-                    if (WRITE_STRICTLY && isWrite && updateCount > maxCount) {
-                        throw new IllegalArgumentException("实际影响数量 " + updateCount + " 超过上限 " + maxCount + " ! 已回滚变更");
+                            throw new IllegalArgumentException("实际影响数量 " + updateCount + " 超过上限 " + maxCount + " ! 已回滚变更");
+                        }
+
+                        try {
+                            connection.commit();
+                        } finally {
+                            try {
+                                statement.close();
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                            }
+
+                            try {
+                                connection.close();
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        //        } catch (Throwable e) {
+                        //          e.printStackTrace();
+                        //        }
                     }
-                    //        } catch (Throwable e) {
-                    //          e.printStackTrace();
-                    //        }
+                } finally {
+                    try {
+                        executor.close();
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
                 }
 
                 JSONObject result = newSuccessResult();
