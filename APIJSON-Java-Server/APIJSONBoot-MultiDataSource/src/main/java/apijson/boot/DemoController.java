@@ -2542,7 +2542,7 @@ public class DemoController extends APIJSONController<Long> {
 
                             try {
                                 int limit = Integer.parseInt(as);
-                                if (limit <= 0 || limit > maxCount) {
+                                if (limit < 0 || limit > maxCount) { // OFFSET 0
                                     throw new IllegalArgumentException("SQL LIMIT " + s + " 超出范围 1~" + maxCount + " !");
                                 }
                             } catch (Throwable e) {
