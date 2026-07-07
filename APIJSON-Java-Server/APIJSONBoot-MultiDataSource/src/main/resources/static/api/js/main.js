@@ -10662,17 +10662,59 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
 
       getDoc4TestCase: function () {
         var list = this.remotes || []
-        var doc = ''
-        var item
+        var s = ''
         for (var i = 0; i < list.length; i ++) {
-          item = list[i] == null ? null : list[i].Document
-          if (item == null || item.name == null) {
+          var item = list[i]
+          var doc = item == null ? null : item.Document
+          if (doc == null || doc.name == null) {
             continue
           }
-          doc += '\n\n#### ' + (item.version > 0 ? 'V' + item.version : 'V*') + ' ' + item.name  + '    ' + item.url
-          doc += '\n```json\n' + item.request + '\n```\n'
+          var tr = item.TestRecord
+
+          var req = doc.request
+          var res = ''
+          try {
+            var m = this.getMethod(doc.url);
+            var standardObj = null;
+            try {
+              standardObj = parseJSON(doc.standard);
+            } catch (e3) {
+              log(e3)
+            }
+
+            var isAPIJSONRouter = false;
+            try {
+              var apijson = parseJSON(doc.apijson);
+              isAPIJSONRouter = JSONResponse.isObject(apijson)
+            } catch (e3) {
+              log(e3)
+            }
+
+            req = StringUtil.trim(CodeUtil.parseComment(req, docObj == null ? null : docObj['[]'], m, this.database, this.language, true, standardObj, null, true, isAPIJSONRouter));
+
+            if (this.view != 'markdown') {
+              res = tr == null ? null : tr.response
+              var standardObj2 = null;
+              try {
+                standardObj2 = StringUtil.isEmpty(res) ? null : parseJSON(tr.standard);
+              } catch (e3) {
+                log(e3)
+              }
+
+              if (StringUtil.isNotEmpty(standardObj2)) {
+                res = StringUtil.trim(CodeUtil.parseComment(format(res), docObj == null ? null : docObj['[]'], m, this.database, this.language, false, standardObj2, null, true, isAPIJSONRouter));
+              }
+            }
+          } catch (e) {
+            log(e)
+          }
+
+          s += '\n\n#### ' + (i + 1) + '. ' + (doc.version > 0 ? 'V' + doc.version : 'V*') + ' ' + doc.name + '   ' + (doc.method || '') + ' ' + (doc.type || '') + ' ' + doc.url;
+          s += '\n```json\n' + req + '\n```\n';
+          s += StringUtil.isEmpty(res) ? '' : '\n=> Response:\n```json\n' + res + '\n```\n';
         }
-        return doc
+
+        return s
       },
 
       enableCross: function (enable) {
@@ -11633,7 +11675,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   args[6] = 'err2';
                 }
 
-                toEval = 'put4Path((ctx || {}).ctx || {}, ' + JSON.stringify(path) + ', ' + args.slice(5).join(', ') + ')';
+                toEval = 'put4Path((ctx || {}).ctx || {}, ' + JSON.stringify(path) + ', ' + args.slice(5).join() + ')';
                 try {
                   var ret = eval(StringUtil.trim(preScript) + '\n;\n(' + toEval + ')')
                   invoke(ret, which, p_k, pathKeys, key, lastKeyInPath);
@@ -11667,7 +11709,7 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
                   args[6] = 'err2';
                 }
 
-                toEval = 'put4Path((ctx || {}).ctx || {}, ' + JSON.stringify(path) + ', ' + args.slice(5).join() + ')';
+                toEval = 'put4Path((ctx || {}).ctx || {}, ' + JSON.stringify(path) + ', ' + args.slice(5).join(', ') + ')';
                 try {
                   var ret = eval(StringUtil.trim(preScript) + '\n;\n(' + toEval + ')')
                   invoke(ret, which, p_k, pathKeys, key, lastKeyInPath);
