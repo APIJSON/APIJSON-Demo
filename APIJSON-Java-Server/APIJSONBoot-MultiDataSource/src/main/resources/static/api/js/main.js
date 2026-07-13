@@ -83,7 +83,7 @@
 
         var axios = require('axios');
         var editormd = null;
-        
+
         import { PageAgent } from 'page-agent'
         import { PageAgentCoreConfig } from "@page-agent/core";
       `)
@@ -7391,7 +7391,7 @@ https://github.com/Tencent/APIJSON/issues
           vSend.disabled = false;
 
           if (this.isEditResponse != true) {
-            vOutput.value = output = '登录后点 ↑ 上方左侧最后图标按钮可查看用例列表，点上方右侧中间图标按钮可上传用例并且添加到列表中 ↑ \nOK，请点左上方 [发送请求] 按钮来测试。[点击这里查看视频教程](https://i.youku.com/i/UNTg1NzI1MjQ4MA==/videos?spm=a2hzp.8244740.0.0)' + code;
+            vOutput.value = output = '登录后点 ↑ 上方左侧最后图标按钮可查看用例列表，点上方右侧中间图标按钮可上传用例并且添加到列表中 ↑ \nOK，请点左上方 [发送请求] 按钮来测试。[点击这里查看视频教程](https://i.youku.com/i/UNTg1NzI1MjQ4MA==/videos)' + code;
 
             this.showDoc()
           }
@@ -9470,7 +9470,9 @@ Content-Type: ` + contentType) + (StringUtil.isEmpty(headerStr, true) ? '' : hea
         }
         vOutput.value = (StringUtil.isEmpty(url, true) ? (StringUtil.isEmpty(html, true) ? '' : StringUtil.trim(html) + '<br>') : '<iframe src="' + url + '"></iframe><br>')
           + (this.isTestCaseShow ? '' : output) + (
-          '\n\n\n## 文档 \n\n 通用文档见 [APIJSON通用文档](https://github.com/Tencent/APIJSON/blob/master/Document.md#3.2) \n### 数据字典\n自动查数据库表和字段属性来生成 \n\n' + d
+          '\n\n\n登录后点 ↑ 上方左侧最后图标按钮显示用例详情，- 移除、↑ 点 Tab 登录(红色)/退出(黑色)测试账号、+ 添加'
+          + '\n点左上角 测试用例 可切换 远程在线 \| 场景串联 \| 本地历史，点它们右侧 (10\|50) 切换显示 分组 \| 用例'
+          + '\n## 文档 \n\n 通用文档见 [APIJSON通用文档](https://github.com/Tencent/APIJSON/blob/master/Document.md#3.2) \n### 数据字典\n自动查数据库表和字段属性来生成 \n\n' + d
           + '<h3 align="center">关于</h3>'
           + '<p align="center">APIAuto-机器学习 HTTP 接口工具'
           + '<br>机器学习零代码测试、生成代码与静态检查、生成文档与光标悬浮注释'
