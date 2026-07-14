@@ -59,7 +59,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		DEFAULT_DATABASE = DATABASE_MYSQL;  //TODO 默认数据库类型，改成你自己的。TiDB, MariaDB, OceanBase 这类兼容 MySQL 的可当做 MySQL 使用
 		//	DEFAULT_NAMESPACE = "root"; //TODO 默认数据库名/模式，改成你自己的，仅对 SurrealDB: root 等数据库有效
 		//	DEFAULT_CATALOG = "postgres"; //TODO 默认数据库名/模式，改成你自己的，仅对 PostgreSQL: posgres 等数据库有效
-		DEFAULT_SCHEMA = "sys"; // "apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Manticore: Manticore, Oracle:
+		DEFAULT_SCHEMA = "sys"; // "apijson";  //TODO 默认数据库名/模式，改成你自己的，默认情况是 MySQL: sys, PostgreSQL: sys, SQL Server: dbo, Manticore: Manticore, Oracle: , StarRocks: quickstart
 
 		// 表名和数据库不一致的，需要配置映射关系。只使用 APIJSONORM 时才需要；
 		// 这个 Demo 用了 apijson-framework 且调用了 APIJSONApplication.init 则不需要
