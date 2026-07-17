@@ -5,7 +5,7 @@
 
 	<groupId>apijson.demo</groupId>
 	<artifactId>apijson-demo</artifactId>
-	<version>7.1.5</version>
+	<version>8.2.0</version>
 
 	<name>APIJSONDemo</name>
 	<description>Demo project for Testing APIJSON Server based on SpringBoot</description>
@@ -30,17 +30,17 @@
 		<dependency>
 			<groupId>com.github.Tencent</groupId>
 			<artifactId>APIJSON</artifactId>
-			<version>8.0.2</version>
+			<version>8.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-framework</artifactId>
-			<version>7.2.2</version>
+			<version>8.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.APIJSON</groupId>
 			<artifactId>apijson-fastjson2</artifactId>
-			<version>1.0.2</version>
+			<version>1.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
