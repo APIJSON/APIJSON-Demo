@@ -179,7 +179,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	@Override
 	public String gainDBVersion() {
 		if (isMySQL()) {
-//			return "5.7.22"; //
+//			return "5.7.22"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
             return "8.0.11"; //TODO 改成你自己的 MySQL 或 PostgreSQL 数据库版本号 //MYSQL 8 和 7 使用的 JDBC 配置不一样
 		}
 		if (isPostgreSQL()) {
@@ -308,7 +308,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//	return "jdbc:opengauss://127.0.0.1:5432/postgres?currentSchema=" + DEFAULT_SCHEMA; //TODO 改成你自己的
 		//}
 		//if (isDoris()) {
-		//  return "jdbc:mysql://localhost:9030"; //TODO 改成你自己的，TiDB 可以当成 MySQL 使用，默认端口为 4000
+		//  return "jdbc:mysql://localhost:9030"; //TODO 改成你自己的，Doris 可以当成 MySQL 使用，默认端口为 9030
+		//}
+		//if (isStarRocks()) {
+		//  return "jdbc:mysql://localhost:9030"; //TODO 改成你自己的，StarRocks 可以当成 Doris/MySQL 使用，默认端口为 9030
 		//}
 		//if (isDatabend()) {
 		//	return "jdbc:databend://localhost:8000?disable_session_token=true"; //TODO 改成你自己的
@@ -329,7 +332,8 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		}
 
 		if (isMySQL()) {
-			return "root"; // ""apijson";  //TODO 改成你自己的
+			return "root"; //TODO 改成你自己的
+//			return "apijson";  //TODO 改成你自己的
 		}
 		if (isPostgreSQL()) {
 			return "postgres";  //TODO 改成你自己的
@@ -391,6 +395,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//	// 不允许用初始账号，需要 CREATE USER 创建新账号并 GRANT 授权 return "opengauss"; //TODO 改成你自己的
 		//}
 		//if (isDoris()) {
+		//	return "root";
+		//}
+		//if (isStarRocks()) {
 		//	return "root";
 		//}
 		//if (isDatabend()) {
@@ -473,7 +480,10 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//	return "openGauss@123"; //TODO 改成你自己的
 		//}
 		//if (isDoris()) {
-		//	return "apijson";
+		//	return "";
+		//}
+		//if (isStarRocks()) {
+		//	return "";
 		//}
 		//if (isDatabend()) {
 		//	return null; //TODO 改成你自己的

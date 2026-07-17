@@ -66,7 +66,7 @@ public class DemoParser extends APIJSONParser<Long> {
 //        return true;
 //    }
 
-    private int maxQueryCount = 2000;
+    private int maxQueryCount = 100;
     //	可重写来设置最大查询数量
     @Override
     public int getMaxQueryCount() {
@@ -75,7 +75,7 @@ public class DemoParser extends APIJSONParser<Long> {
 
     @Override
     public int getMaxUpdateCount() {
-        return 2000;
+        return 10;
     }
 
     @Override
