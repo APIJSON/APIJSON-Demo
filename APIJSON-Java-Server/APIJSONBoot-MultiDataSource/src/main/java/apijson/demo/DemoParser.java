@@ -83,10 +83,10 @@ public class DemoParser extends APIJSONParser<Long> {
         return getMaxUpdateCount();
     }
 
-    @Override
-    public int getMaxSQLCount() {
-        return getMaxUpdateCount();
-    }
+    //@Override
+    //public int getMaxSQLCount() {
+    //    return getMaxUpdateCount();
+    //}
 
     @Override
     public JSONObject parseResponse(JSONObject request) {
