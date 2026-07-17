@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 8.0.42, for macos15 (arm64)
+-- MySQL dump 10.13  Distrib 8.0.31, for macos12 (x86_64)
 --
 -- Host: apijson.cn    Database: sys
 -- ------------------------------------------------------
@@ -50,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-22  3:16:25
+-- Dump completed on 2026-07-18  4:02:35
