@@ -1010,7 +1010,7 @@ public class DemoController extends APIJSONController<Long> {
         }
         requestObject.put(JSONRequest.KEY_FORMAT, true);
         response = new JSONResponse(
-                new DemoParser(POST).setNeedVerifyLogin(false).parseResponse(requestObject)
+                new DemoParser(POST).setNeedVerifyLogin(false).setNeedVerifyRole(false).parseResponse(requestObject)
         );
 
         //验证User和Privacy
