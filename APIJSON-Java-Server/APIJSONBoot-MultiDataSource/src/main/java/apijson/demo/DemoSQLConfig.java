@@ -14,11 +14,6 @@ limitations under the License.*/
 
 package apijson.demo;
 
-import static apijson.framework.APIJSONConstant.ID;
-import static apijson.framework.APIJSONConstant.PRIVACY_;
-import static apijson.framework.APIJSONConstant.USER_;
-import static apijson.framework.APIJSONConstant.USER_ID;
-
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -26,17 +21,16 @@ import java.util.*;
 //import apijson.iotdb.IoTDBUtil;
 import apijson.RequestMethod;
 import apijson.StringUtil;
-import apijson.orm.AbstractParser;
-import apijson.orm.AbstractSQLConfig;
-import apijson.orm.Parser;
+import apijson.orm.*;
 //import apijson.surrealdb.SurrealDBUtil;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 
 import apijson.framework.ColumnUtil;
 import apijson.fastjson2.APIJSONSQLConfig;
-import apijson.orm.Join;
 import apijson.orm.Join.On;
+
+import static apijson.framework.APIJSONConstant.*;
 //import org.influxdb.InfluxDB;
 
 
@@ -51,6 +45,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	public DemoSQLConfig() {
 		super();
 	}
+
 	public DemoSQLConfig(RequestMethod method, String table) {
 		super(method, table);
 	}
@@ -106,6 +101,42 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			////				super.onMissingKey4Combine(name, request, combine, item, key);
 			//			}
 		};
+
+		// 需依赖 APIJSON 8.3.0+
+		//// INSERT INTO `sys`.`Method`(`package`,`method`,`detail`,`userId`) VALUES('unitauto.test','test','测试 UPSERT',82001) ON DUPLICATE KEY UPDATE version = version + 1
+		//UPSERT_TABLE_MAP.put("Method", "version = version + 1"); // 最简单的配置，一般适用于 MySQL, PostgreSQL 及兼容它们语法的数据库
+		//// Oracle/PostgreSQL/SQL Server 配置
+		////{
+		////	Map<String, Object> pgMap = new LinkedHashMap<>();
+		////	pgMap.put("package,method", "version = excluded.version + 1");
+		////	Map<String, Object> dbMap = new LinkedHashMap<>();
+		////	dbMap.put(SQLConfig.DATABASE_POSTGRESQL, pgMap);
+		////
+		////	Map<String, Object> db2Map = new LinkedHashMap<>();
+		////	pgMap.put("package,method", "Method.version = excluded.version + 1");
+		////	dbMap.put(SQLConfig.DATABASE_DB2, db2Map); // 针对 DB2 的配置
+		////
+		////	dbMap.put("package,method", "version = version + 1"); // 除了明确的按数据库配置外的默认配置
+		////	UPSERT_TABLE_MAP.put("Method", dbMap);
+		////}
+		//
+		//// POST /post {"Request":{"method":"GETS","tag":"Test","structure":"{}","tag":"Request"}}
+		//// UPSERT_TABLE_MAP.put(REQUEST_, "version = version + 1"); // 最简单的配置，一般适用于 MySQL, PostgreSQL 及兼容它们语法的数据库
+		//// Oracle/PostgreSQL/SQL Server 配置
+		//{
+		//	Map<String, Object> map = new LinkedHashMap<>();
+		//	map.put("", "version = excluded.version + 1");
+		//	Map<String, Object> dbMap = new LinkedHashMap<>();
+		//	dbMap.put(SQLConfig.DATABASE_POSTGRESQL, map); // 针对 PostgreSQL 的配置
+		//
+		//	Map<String, Object> oracleMap = new LinkedHashMap<>();
+		//	oracleMap.put("package,method", "Method.version = excluded.version + 1");
+		//	dbMap.put(SQLConfig.DATABASE_ORACLE, oracleMap); // 针对 Oracle 的配置
+		//
+		//	dbMap.put("", "version = version + 1"); // 除了明确的按数据库配置外的默认配置
+		//	UPSERT_TABLE_MAP.put(REQUEST_, dbMap);
+		//}
+
 
 		// 自定义原始 SQL 片段，其它功能满足不了时才用它，只有 RAW_MAP 配置了的 key 才允许前端传
 		RAW_MAP.put("`to`.`id`", "");  // 空字符串 "" 表示用 key 的值 `to`.`id`
@@ -229,10 +260,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 	private String dbUri;
+
 	public DemoSQLConfig setDBUri(String dbUri) {
 		this.dbUri = dbUri;
 		return this;
 	}
+
 	@Override
 	public String gainDBUri() {
 		if (StringUtil.isNotEmpty(dbUri)) {
@@ -273,7 +306,7 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 			return "jdbc:TAOS-RS://localhost:6041"; //TODO 改成你自己的
 		}
 		if (isTimescaleDB()) { // PG JDBC 必须在 URI 传 catalog
-		  	return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
+			return "jdbc:postgresql://localhost:5432/postgres?stringtype=unspecified"; //TODO 改成你自己的
 		}
 		if (isQuestDB()) { // PG JDBC 必须在 URI 传 catalog
 			return "jdbc:postgresql://localhost:8812/qdb"; //TODO 改成你自己的
@@ -321,10 +354,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 	private String dbAccount;
+
 	public DemoSQLConfig setDBAccount(String dbAccount) {
 		this.dbAccount = dbAccount;
 		return this;
 	}
+
 	@Override
 	public String gainDBAccount() {
 		if (StringUtil.isNotEmpty(dbAccount)) {
@@ -408,10 +443,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 	private String dbPassword;
+
 	public DemoSQLConfig setDBPassword(String dbPassword) {
 		this.dbPassword = dbPassword;
 		return this;
 	}
+
 	@Override
 	public String gainDBPassword() {
 		if (StringUtil.isNotEmpty(dbPassword)) {
@@ -493,9 +530,11 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	}
 
 	private String sql;
+
 	public String gainSQL() throws Exception {
 		return gainSQL(isPrepared());
 	}
+
 	@Override
 	public String gainSQL(boolean prepared) throws Exception {
 		if (StringUtil.isNotEmpty(sql)) {
@@ -576,10 +615,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	protected void onGainCrossJoinString(Join<Long, JSONObject, JSONArray> join) throws UnsupportedOperationException {
 		// 开启 CROSS JOIN 笛卡尔积联表  	super.onGetCrossJoinString(join);
 	}
+
 	@Override
 	protected void onJoinNotRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> join, String table, List<On> onList, On on) {
 		// 开启 JOIN	ON t1.c1 != t2.c2 等不等式关联 	super.onJoinNotRelation(sql, quote, join, table, onList, on);
 	}
+
 	@Override
 	protected void onJoinComplexRelation(String sql, String quote, Join<Long, JSONObject, JSONArray> join, String table, List<On> onList, On on) {
 		// 开启 JOIN	ON t1.c1 LIKE concat('%', t2.c2, '%') 等复杂关联		super.onJoinComplexRelation(sql, quote, join, table, onList, on);
