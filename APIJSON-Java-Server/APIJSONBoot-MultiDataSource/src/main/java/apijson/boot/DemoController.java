@@ -34,6 +34,8 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestTemplate;
@@ -1356,7 +1358,7 @@ public class DemoController extends APIJSONController<Long> {
      */
     @SuppressWarnings("unchecked")
     @RequestMapping(value = "delegate")
-    public String delegate(
+    public String apiDelegate(
             @RequestParam("$_delegate_url") String rawUrl,
             @RequestParam(value = "$_type", required = false) String type,
             @RequestParam(value = "$_headers", required = false) String headerStr,
@@ -1365,6 +1367,25 @@ public class DemoController extends APIJSONController<Long> {
             @RequestParam(value = "$_record", required = false) Integer record,
             @RequestBody(required = false) String body,
             HttpMethod method, HttpSession session
+    ) {
+        return delegate(rawUrl, type, headerStr, exceptHeaders, sessionId, record, body, method, session);
+    }
+
+    public String delegate(String rawUrl, HttpSession session) {
+        return delegate(rawUrl, null, null, session);
+    }
+    public String delegate(String rawUrl, String sessionId, Integer record, HttpSession session) {
+        return delegate(rawUrl, null, sessionId, record, null, session);
+    }
+    public String delegate(String rawUrl, String type, String sessionId, Integer record, HttpMethod method, HttpSession session) {
+        return delegate(rawUrl, type, sessionId, record, null, method, session);
+    }
+    public String delegate(String rawUrl, String type, String sessionId, Integer record, String body, HttpMethod method, HttpSession session) {
+        return delegate(rawUrl, type, null, null, sessionId, record, body, method, session);
+    }
+
+    public String delegate(String rawUrl, String type, String headerStr, String exceptHeaders, String sessionId,
+            Integer record, String body, HttpMethod method, HttpSession session
     ) {
         if (Log.DEBUG == false) {
             return JSON.toJSONString(newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用服务器代理！")));
@@ -1614,7 +1635,7 @@ public class DemoController extends APIJSONController<Long> {
 
         String rspBody = null;
         if (recordType >= 0) {
-            rspBody = sendRequest(session, method, url, body, headers);
+            rspBody = sendRequest(session, method, url, body, map, headers);
         }
 
         if (recordType != 0) {
@@ -1983,7 +2004,7 @@ public class DemoController extends APIJSONController<Long> {
         }
 
         if (recordType < 0) {
-            rspBody = sendRequest(session, method, url, body, headers);
+            rspBody = sendRequest(session, method, url, body, map, headers);
         }
 
         return rspBody;
@@ -2025,7 +2046,8 @@ public class DemoController extends APIJSONController<Long> {
         }
     }
 
-    protected String sendRequest(HttpSession session, HttpMethod method, String url, String body, HttpHeaders headers) {
+    protected String sendRequest(HttpSession session, HttpMethod method, String url, String body, Map<String, String[]> params, HttpHeaders headers) {
+        method = method == null ? HttpMethod.GET : method;
         String rspBody = null;
         try {
             // 为JSON请求设置默认的 Content-Type
@@ -2037,7 +2059,7 @@ public class DemoController extends APIJSONController<Long> {
                     headers.setContentType(MediaType.APPLICATION_JSON);
                 } catch (Exception e) {
                     // 如果不是JSON，设置为普通文本
-                    headers.setContentType(MediaType.TEXT_PLAIN);
+                    headers.setContentType(params == null || params.isEmpty() ? MediaType.MULTIPART_FORM_DATA : MediaType.TEXT_PLAIN);
                 }
             }
             
@@ -2053,6 +2075,25 @@ public class DemoController extends APIJSONController<Long> {
                 }
                 // 设置分块传输
                 headers.set(HttpHeaders.TRANSFER_ENCODING, "chunked");
+            }
+
+            Set<Entry<String, String[]>> set = params == null || params.isEmpty() ? null : params.entrySet();
+            MultiValueMap result = set == null || set.isEmpty() ? null : new LinkedMultiValueMap<>(set.size());
+            if (result != null) {
+                for (Entry<String, String[]> ety : set) {
+                    String[] vs = ety == null ? null : ety.getValue();
+                    if (vs == null || vs.length <= 0) {
+                        continue;
+                    }
+
+                    String k = ety.getKey();
+                    for (var i = 0; i < vs.length; i ++) {
+                        HttpHeaders hds = new HttpHeaders();
+                        hds.setContentType(headers.getContentType());
+                        HttpEntity<?> entity = new HttpEntity<>(vs[i], hds);
+                        result.add(k, entity);
+                    }
+                }
             }
             
             HttpEntity<String> requestEntity = new HttpEntity<>(method == HttpMethod.GET ? null : body, headers);
@@ -3346,37 +3387,37 @@ public class DemoController extends APIJSONController<Long> {
         //response.sendRedirect("http://localhost:3000/test/start");
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
-        return delegate("http://localhost:3000/test/start?key=" + id, null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3000/test/start?key=" + id, session);
     }
     @GetMapping("api/test/status")
     public String getApiTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
         //response.sendRedirect("http://localhost:3000/test/status");
         DemoParser.KEY_MAP.remove(key);
-        return delegate("http://localhost:3000/test/status", null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3000/test/status", session);
     }
 
     @GetMapping("unit/test/start")
     public String startUnitTest(HttpSession session) {
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
-        return delegate("http://localhost:3001/test/start?key=" + id, null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3001/test/start?key=" + id, session);
     }
     @GetMapping("unit/test/status")
     public String getUnitTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
         DemoParser.KEY_MAP.remove(key);
-        return delegate("http://localhost:3001/test/status", null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3001/test/status", session);
     }
 
     @GetMapping("sql/test/start")
     public String startSQLTest(HttpSession session) {
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
-        return delegate("http://localhost:3002/test/start?key=" + id, null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3002/test/start?key=" + id, session);
     }
     @GetMapping("sql/test/status")
     public String getSQLTestStatus(@RequestParam("key") String key, HttpSession session) {
         DemoParser.KEY_MAP.remove(key);
-        return delegate("http://localhost:3002/test/status", null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3002/test/status", session);
     }
 
     @GetMapping("cv/test/start")
@@ -3384,13 +3425,13 @@ public class DemoController extends APIJSONController<Long> {
         //response.sendRedirect("http://localhost:3003/test/start");
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
-        return delegate("http://localhost:3003/test/start?key=" + id, null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3003/test/start?key=" + id, session);
     }
     @GetMapping("cv/test/status")
     public String getCvTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
         //response.sendRedirect("http://localhost:3003/test/status");
         DemoParser.KEY_MAP.remove(key);
-        return delegate("http://localhost:3003/test/status", null, null, null, null, null, null, HttpMethod.GET, session);
+        return delegate("http://localhost:3003/test/status", session);
     }
 
     // 为 APIAuto, UnitAuto, SQLAuto 提供的后台 Headless 无 UI 测试转发接口  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
