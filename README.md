@@ -1,6 +1,6 @@
 # APIJSON-Demo
-[APIJSON](https://github.com/Tencent/APIJSON) 各种语言(Java, Swift, JavaScript, Python 等)、各种框架(SpringBoot, JFinal 等)、各种客户端(Web, Android, iOS 等) 的 使用示例项目、上手文档、测试数据 SQL 文件 等。<br />
-Demo projects with document and SQL files for [APIJSON](https://github.com/Tencent/APIJSON) with different programming languages, different frameworks and different clients.
+[APIJSON](https://github.com/APIJSON/APIJSON) 各种语言(Java, Swift, JavaScript, Python 等)、各种框架(SpringBoot, JFinal 等)、各种客户端(Web, Android, iOS 等) 的 使用示例项目、上手文档、测试数据 SQL 文件 等。<br />
+Demo projects with document and SQL files for [APIJSON](https://github.com/APIJSON/APIJSON) with different programming languages, different frameworks and different clients.
 
 <br />
 
@@ -15,8 +15,8 @@ Demo projects with document and SQL files for [APIJSON](https://github.com/Tence
 可以跳过这个步骤，直接用 APIJSON 官网服务器地址 apijson.cn:8080 来测试接口。<br />
 You can skip this step and use 'apijson.cn:8080'. <br />
 
-见&nbsp; [APIJSON 后端上手 - Java](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Java-Server)<br />
-See https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/README-English.md <br />
+见&nbsp; [APIJSON 后端上手 - Java](/APIJSON-Java-Server)<br />
+See [Java Server](/APIJSON-Java-Server/README-English.md) <br />
 
 
 #### 2.前端上手
@@ -25,8 +25,8 @@ See https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Java-Server/READ
 可以跳过这个步骤，直接使用 [APIAuto-机器学习 HTTP 接口工具](https://github.com/TommyLemon/APIAuto) 或 下载客户端 App。<br />
 You can skip this step and use [APIAuto](https://github.com/TommyLemon/APIAuto) or download App. <br />
 
-见&nbsp; [Android](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-Android) &nbsp;或&nbsp; [iOS](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](https://github.com/APIJSON/APIJSON-Demo/tree/master/APIJSON-JavaScript)<br />
-See [Android](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-Android/README-English.md), [iOS](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-iOS/README-English.md) or [JavaScript](https://github.com/APIJSON/APIJSON-Demo/blob/master/APIJSON-JavaScript/README-English.md)<br />
+见&nbsp; [Android](/APIJSON-Android) &nbsp;或&nbsp; [iOS](/APIJSON-iOS) &nbsp;或&nbsp; [JavaScript](/APIJSON-JavaScript)<br />
+See [Android](/APIJSON-Android/README-English.md), [iOS](/APIJSON-iOS/README-English.md) or [JavaScript](/APIJSON-JavaScript/README-English.md)<br />
 
 #### 下载客户端 App
 #### Download App
@@ -41,9 +41,9 @@ Complex production App like Twitter tweets<br />
 
 <br /><br />
 
-有问题可以去 Tencent/APIJSON 提 issue <br />
-If you have any question, please create a issue on Tencent/APIJSON<br />
-https://github.com/Tencent/APIJSON/issues
+有问题可以去 APIJSON 主项目提 issue <br />
+If you have any question, please create a issue on the APIJSON core project<br />
+https://github.com/APIJSON/APIJSON/issues
 
 ### 贡献者
 ### Contributors
