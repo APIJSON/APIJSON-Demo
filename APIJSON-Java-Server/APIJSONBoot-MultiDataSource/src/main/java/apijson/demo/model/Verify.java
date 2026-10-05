@@ -24,6 +24,8 @@ import static apijson.orm.AbstractVerifier.UNKNOWN;
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;
 
+import java.util.Date;
+
 /**验证码
  * @author Lemon
  */
@@ -35,8 +37,8 @@ import apijson.framework.BaseModel;
 		POST = {UNKNOWN, LOGIN, CONTACT, CIRCLE, OWNER, ADMIN},
 		PUT = {ADMIN},
 		DELETE = {ADMIN}
-		)
-public class Verify extends BaseModel {
+)
+public class Verify extends BaseModel<Long, Date> {
 	private static final long serialVersionUID = 1L;
 	
 	public static final int TYPE_LOGIN = 0; //登录

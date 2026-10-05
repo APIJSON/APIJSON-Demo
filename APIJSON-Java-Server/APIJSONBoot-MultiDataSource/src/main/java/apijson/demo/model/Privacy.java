@@ -23,6 +23,8 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import apijson.MethodAccess;
 import apijson.framework.BaseModel;
 
+import java.util.Date;
+
 /**
  * TODO 漏洞：如果GETS允许CONTACT，则CONTACT能看到自己的余额，tag可以不是Privacy-circle。
  * 所以需要在Request表中增加role字段。或者干脆这里GETS只允许OWNER, ADMIN，需要用其它角色查时走独立接口。
@@ -35,8 +37,8 @@ import apijson.framework.BaseModel;
 		GETS = {OWNER, ADMIN},
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
-		)
-public class Privacy extends BaseModel {
+)
+public class Privacy extends BaseModel<Long, Date> {
 	private static final long serialVersionUID = 1L;
 
 	public static final int PASSWORD_TYPE_LOGIN = 0;

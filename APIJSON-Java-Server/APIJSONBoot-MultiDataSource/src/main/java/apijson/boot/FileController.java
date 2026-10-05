@@ -424,7 +424,7 @@ public class FileController {
 								headers.setContentLength(body.length());
 							}
 							
-							String renderStr = demoController.sendRequest(session, HttpMethod.POST, "http://localhost:3003/cv/render", body, headers);
+							String renderStr = demoController.sendRequest(session, HttpMethod.POST, "http://localhost:3003/cv/render", body, null, headers);
 							renderStr = StringUtil.trim(renderStr);
 							if (renderStr.length() > 100) {
 								File renderFile = new File(fileUploadRootDir + nfn);

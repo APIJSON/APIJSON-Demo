@@ -44,7 +44,9 @@ public class DemoFunctionParser extends APIJSONFunctionParser<Long> {
 	public static final String TAG = "DemoFunctionParser";
 
 	static {
-		SCRIPT_EXECUTOR_MAP.put("js", new JavaScriptExecutor<Long, JSONObject, JSONArray>());
+		//SCRIPT_EXECUTOR_MAP.put("js", new JavaScriptExecutor<Long, JSONObject, JSONArray>());
+		//SCRIPT_EXECUTOR_MAP.put("graaljs", new JavaScriptExecutor<Long, JSONObject, JSONArray>());
+		//SCRIPT_EXECUTOR_MAP.put("nashorn", new JavaScriptExecutor<Long, JSONObject, JSONArray>());
 	}
 
 	public DemoFunctionParser() {

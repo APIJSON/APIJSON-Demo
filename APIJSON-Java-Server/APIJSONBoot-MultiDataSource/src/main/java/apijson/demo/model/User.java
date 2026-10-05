@@ -17,6 +17,7 @@ package apijson.demo.model;
 import static apijson.orm.AbstractVerifier.ADMIN;
 import static apijson.orm.AbstractVerifier.UNKNOWN;
 
+import java.util.Date;
 import java.util.List;
 
 import apijson.MethodAccess;
@@ -29,8 +30,8 @@ import apijson.orm.Visitor;
 @MethodAccess(
 		POST = {UNKNOWN, ADMIN},
 		DELETE = {ADMIN}
-		)
-public class User extends BaseModel implements Visitor<Long> {
+)
+public class User extends BaseModel<Long, Date> implements Visitor<Long> {
 	private static final long serialVersionUID = 1L;
 	
 	public static final int SEX_MAIL = 0;

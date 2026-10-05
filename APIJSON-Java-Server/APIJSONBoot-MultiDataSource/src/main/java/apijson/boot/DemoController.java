@@ -717,7 +717,7 @@ public class DemoController extends APIJSONController<Long> {
         }
 
         //验证码过期
-        long time = BaseModel.getTimeMillis(verify.getDate());
+        long time = BaseModel.toTimeMillis(verify.getDate());
         long now = System.currentTimeMillis();
         if (now > 60*1000 + time) {
             new DemoParser(DELETE, false).parseResponse(
@@ -2487,7 +2487,7 @@ public class DemoController extends APIJSONController<Long> {
                     }
 
                     sqlRest = sqlRest.substring(isEq ? 1 : "IN(".length()).trim();
-                    int endInd = isEq && ! sqlRest.startsWith("'") ? -1 : sqlRest.indexOf(isEq ? "'" : ")", 1);
+                    int endInd = -1; // isEq && ! sqlRest.startsWith("'") ? -1 : sqlRest.indexOf(isEq ? "'" : ")", 1);
                     if (isEq && ! sqlRest.startsWith("'")) {
                         for (int i = 0; i < sqlRest.length(); i++) {
                             char c = sqlRest.charAt(i);
