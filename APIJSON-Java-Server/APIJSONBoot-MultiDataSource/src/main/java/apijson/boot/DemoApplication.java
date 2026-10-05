@@ -19,6 +19,7 @@ import apijson.fastjson2.APIJSONApplication;
 import apijson.fastjson2.APIJSONCreator;
 import apijson.fastjson2.APIJSONVerifier;
 import apijson.fastjson2.APIJSONSQLConfig;
+import apijson.orm.AbstractFunctionParser;
 import apijson.orm.AbstractParser;
 import apijson.orm.AbstractVerifier;
 import com.alibaba.fastjson.JSONObject;
@@ -85,12 +86,15 @@ public class DemoApplication implements WebServerFactoryCustomizer<ConfigurableS
             e.printStackTrace();
         }
 
+        com.alibaba.fastjson2.JSON.configReaderDateFormat("yyyy-MM-dd HH:mm:ss");
+
         // FIXME 不要开放给项目组后端之外的任何人使用 UnitAuto（强制登录鉴权）！！！如果不需要单元测试则移除相关代码或 unitauto.Log.DEBUG = false;
         // 上线生产环境前改为 false，可不输出 APIJSONORM 的日志 以及 SQLException 的原始(敏感)信息
         //unitauto.Log.DEBUG = true;
         Log.DEBUG = true; // 是否开启调试模式（打印详细日志、返回详细调试信息等）
         AbstractParser.IS_PRINT_BIG_LOG = true; // 是否打印大日志
         APIJSONVerifier.ENABLE_APIJSON_ROUTER = true; // apijson-framework 已集成字段插件 apijson-router，是否开启 接口路由 模式，支持简单接口转为 APIJSON JSON
+        //AbstractFunctionParser.ENABLE_SCRIPT_FUNCTION = true; // 是否启用脚本形式的远程函数
         //APIJSONParser.IS_START_FROM_1 = true; // 分页页码是否从 1 开始，true - 从 1 开始；false - 从 0 开始
         APIJSONSQLConfig.ENABLE_COLUMN_CONFIG = false; // apijson-framework 已集成字段插件 apijson-column，支持 !key 反选字段 和 字段名映射
         APIJSONApplication.init();
