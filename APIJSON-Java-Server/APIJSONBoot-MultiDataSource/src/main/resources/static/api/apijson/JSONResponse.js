@@ -187,7 +187,7 @@ var JSONResponse = {
   CODE_SUCCESS: 200,
   IGNORE_KEYS: ['traceId', 'trace:stack', 'debug:info|help'],
   UPGRADE_KEYS: ['price', 'amount', 'money', 'cash', 'spend', 'cost', 'income', 'outgoing', 'borrow', 'lend', 'gold', 'coin', 'diamond', 'credit', 'budget', 'quantity', 'balance'],
-  DOWNGRADE_KEYS: ['id', 'ID', 'traceId', 'trace_id', 'date', 'time', 'datetime', 'date_time', 'dateTime', 'timestamp', 'create_time', 'update_time', 'created_at', 'updated_at', 'createTime', 'updateTime', 'createdAt', 'updatedAt'],
+  DOWNGRADE_KEYS: ['traceId', 'trace_id', 'date', 'time', 'datetime', 'date_time', 'dateTime', 'timestamp', 'create_time', 'update_time', 'created_at', 'updated_at', 'createTime', 'updateTime', 'createdAt', 'updatedAt'],
 
   /**是否成功
    * @param code
