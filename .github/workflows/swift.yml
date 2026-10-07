@@ -6,8 +6,12 @@ name: Swift
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'APIJSON-iOS/APIJSON-Swift/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'APIJSON-iOS/APIJSON-Swift/**'
 
 jobs:
   build:
