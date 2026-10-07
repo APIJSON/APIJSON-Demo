@@ -1064,35 +1064,48 @@ var JSONResponse = {
               max = result;
             }
           } catch (e) {
-            log(e)
+            log(e);
           }
         }
       }
 
-      var valueCompare = max.code >= JSONResponse.COMPARE_VALUE_CHANGE
-          ? 0 : JSONResponse.compareValue(valueLevel, values, real, target.trend, target.repeat);
-
-      var isNum = CodeUtil.isTypeMatch('number', type)
-
-      if (isNum) {
-        if (JSONResponse.UPGRADE_KEYS.includes(folder)) {
-          valueCompare++;
-        } else if (JSONResponse.DOWNGRADE_KEYS.includes(folder)) {
-          valueCompare--;
+      var isNum = CodeUtil.isTypeMatch('number', type);
+      var ignore = false;
+      var isFolderMeaningful = StringUtil.isNotEmpty(folder) && ! StringUtil.isNumber(folder);
+      if (isFolderMeaningful && (isNum || type == 'string')) {
+        if (JSONResponse.IGNORE_KEYS.includes(folder)) {
+          ignore = true;
         } else if (folder.includes('/')) {
           var keys = StringUtil.splitPath(folder);
           var key = keys == null || keys.length <= 0 ? null : keys[keys.length - 1];
-          if (StringUtil.isNotEmpty(key) && !StringUtil.isNumber(key)) {
-            if (JSONResponse.UPGRADE_KEYS.includes(key)) {
-              valueCompare++;
-            } else if (JSONResponse.DOWNGRADE_KEYS.includes(key)) {
-              valueCompare--;
-            }
+          if (StringUtil.isNotEmpty(key) && ! StringUtil.isNumber(key)) {
+            ignore = JSONResponse.IGNORE_KEYS.includes(key);
           }
         }
       }
 
+      var valueCompare = ignore || max.code >= JSONResponse.COMPARE_VALUE_CHANGE
+          ? 0 : JSONResponse.compareValue(valueLevel, values, real, target.trend, target.repeat);
+
       if (valueCompare > 0) {
+        if (isNum && isFolderMeaningful) {
+          if (JSONResponse.UPGRADE_KEYS.includes(folder)) {
+            valueCompare ++;
+          } else if (JSONResponse.DOWNGRADE_KEYS.includes(folder)) {
+            valueCompare --;
+          } else if (folder.includes('/')) {
+            var keys = StringUtil.splitPath(folder);
+            var key = keys == null || keys.length <= 0 ? null : keys[keys.length - 1];
+            if (StringUtil.isNotEmpty(key) && ! StringUtil.isNumber(key)) {
+              if (JSONResponse.UPGRADE_KEYS.includes(key)) {
+                valueCompare ++;
+              } else if (JSONResponse.DOWNGRADE_KEYS.includes(key)) {
+                valueCompare --;
+              }
+            }
+          }
+        }
+
         max.code = valueCompare;
         max.path = folder;
         max.value = real;
