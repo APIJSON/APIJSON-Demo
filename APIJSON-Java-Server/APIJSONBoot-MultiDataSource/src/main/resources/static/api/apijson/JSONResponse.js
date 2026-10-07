@@ -185,6 +185,10 @@ var JSONResponse = {
   KEY_MSG: 'msg',
   KEY_THROW: 'throw',
   CODE_SUCCESS: 200,
+  IGNORE_KEYS: ['traceId', 'trace:stack', 'debug:info|help'],
+  UPGRADE_KEYS: ['price', 'amount', 'money', 'cash', 'spend', 'cost', 'income', 'outgoing', 'borrow', 'lend', 'gold', 'coin', 'diamond', 'credit', 'budget', 'quantity', 'balance'],
+  DOWNGRADE_KEYS: ['id', 'ID', 'traceId', 'trace_id', 'date', 'time', 'datetime', 'date_time', 'dateTime', 'timestamp', 'create_time', 'update_time', 'created_at', 'updated_at', 'createTime', 'updateTime', 'createdAt', 'updatedAt'],
+
   /**是否成功
    * @param code
    * @return
@@ -917,7 +921,9 @@ var JSONResponse = {
       };
     }
 
-    if (notEmpty == true && typeof real != 'boolean' && typeof real != 'number' && StringUtil.isEmpty(real, true)) { // 空
+    var realType = JSONResponse.getType(real);
+
+    if (notEmpty == true && (real === 0 || (typeof real != 'boolean' && CodeUtil.isTypeMatch('number', realType) && StringUtil.isEmpty(real, true)))) { // 空
       log('compareWithStandard  notEmpty == true && StringUtil.isEmpty(real, true) >> return COMPARE_VALUE_EMPTY');
       return {
         code: JSONResponse.COMPARE_VALUE_EMPTY,
@@ -934,7 +940,6 @@ var JSONResponse = {
       value: null //导致正确时也显示  real
     };
 
-    var realType = JSONResponse.getType(real);
     if (StringUtil.isEmpty(realType) || ['null', 'undefined'].indexOf(realType) >= 0) {
       realType = null;
     }
@@ -1067,12 +1072,30 @@ var JSONResponse = {
       var valueCompare = max.code >= JSONResponse.COMPARE_VALUE_CHANGE
           ? 0 : JSONResponse.compareValue(valueLevel, values, real, target.trend, target.repeat);
 
+      var isNum = CodeUtil.isTypeMatch('number', type)
+
+      if (isNum) {
+        if (JSONResponse.UPGRADE_KEYS.includes(folder)) {
+          valueCompare++;
+        } else if (JSONResponse.DOWNGRADE_KEYS.includes(folder)) {
+          valueCompare--;
+        } else if (folder.includes('/')) {
+          var keys = StringUtil.splitPath(folder);
+          var key = keys == null || keys.length <= 0 ? null : keys[keys.length - 1];
+          if (StringUtil.isNotEmpty(key) && !StringUtil.isNumber(key)) {
+            if (JSONResponse.UPGRADE_KEYS.includes(key)) {
+              valueCompare++;
+            } else if (JSONResponse.DOWNGRADE_KEYS.includes(key)) {
+              valueCompare--;
+            }
+          }
+        }
+      }
+
       if (valueCompare > 0) {
         max.code = valueCompare;
         max.path = folder;
         max.value = real;
-
-        var isNum = CodeUtil.isTypeMatch('number', type)
 
         if (isNum && valueCompare == JSONResponse.COMPARE_VALUE_REPEAT && (target.repeat == null || target.repeat <= 0)
             && values != null && values.indexOf(real) >= 0) {
@@ -1377,8 +1400,14 @@ var JSONResponse = {
 
     var notEmpty = target.notEmpty;
     log('updateStandard  notEmpty = target.notEmpty = ' + notEmpty + ' >>');
-    if (notEmpty !== false && real != null && typeof real != 'boolean' && typeof real != 'number') {
-      notEmpty = target.notEmpty = StringUtil.isNotEmpty(real, true);
+    var rtype = JSONResponse.getType(real);
+
+    if (notEmpty !== false) {
+      if (CodeUtil.isTypeMatch('number', rtype)) { // real === 0) {
+        notEmpty = target.notEmpty = real === 0 ? false : (real < -1 || real > 1 ? true : notEmpty);
+      } else if (real != null && typeof real != 'boolean') {
+        notEmpty = target.notEmpty = StringUtil.isNotEmpty(real, true);
+      }
     }
 
     var type = target.type;
@@ -1386,7 +1415,6 @@ var JSONResponse = {
       target.type = type = null;
     }
 
-    var rtype = JSONResponse.getType(real);
     if ((rtype == null || real == null) && StringUtil.isEmpty(type, true) && StringUtil.isNotEmpty(key, true)) {
       target.guess = true;
       if (StringUtil.isBoolKey(key)) {
@@ -1489,7 +1517,6 @@ var JSONResponse = {
       type = target.type = rtype;
     }
     log('updateStandard  type = target.type = getType(real) = ' + type + ' >>');
-
 
     var lengthLevel = target.lengthLevel;
     var lengths = target.lengths;
@@ -1629,16 +1656,18 @@ var JSONResponse = {
         }
       }
 
-      if (values == null) {
-        values = [];
-      }
-      if (valueLevel < 1 && type == 'number' && ! Number.isSafeInteger(real)) { //double 1.23
-        valueLevel = 1;
-      }
-      target.values = values;
+      if (! [null, 0, ''].includes(real)) {
+        if (values == null) {
+          values = [];
+        }
+        if (valueLevel < 1 && CodeUtil.isTypeMatch('number', type) && ! Number.isSafeInteger(real)) { //double 1.23
+          valueLevel = 1;
+        }
+        target.values = values;
 
-      target = JSONResponse.setValue(target, JSONResponse.getLength(real), lengthLevel == null ? 1 : lengthLevel, lengths, true, true);
-      target = JSONResponse.setValue(target, real, valueLevel, values, false, ignoreTrend);
+        target = JSONResponse.setValue(target, JSONResponse.getLength(real), lengthLevel == null ? 1 : lengthLevel, lengths, true, true);
+        target = JSONResponse.setValue(target, real, valueLevel, values, false, ignoreTrend);
+      }
     }
 
     log('\nupdateStandard >> return target = ' + JSON.stringify(target, null, '    ') + '\n >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> \n\n\n\n\n');

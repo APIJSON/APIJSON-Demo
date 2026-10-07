@@ -95,7 +95,7 @@ import static org.springframework.http.HttpHeaders.SET_COOKIE;
  * 具体见 SpringBoot 文档
  * https://www.springcloud.cc/spring-boot.html#boot-features-spring-mvc
  * 以及 APIJSON 通用文档 3.设计规范 3.1 操作方法
- * https://github.com/Tencent/APIJSON/blob/master/Document.md#3.1
+ * https://github.com/APIJSON/APIJSON/blob/main/Document.md#3.1
  * <br > 建议全通过HTTP POST来请求:
  * <br > 1.减少代码 - 客户端无需写HTTP GET,PUT等各种方式的请求代码
  * <br > 2.提高性能 - 无需URL encode和decode

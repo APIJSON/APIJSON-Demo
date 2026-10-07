@@ -52,7 +52,7 @@ import static apijson.framework.APIJSONConstant.USER_;
 
 /**
  * SQL 执行器，支持连接池及多数据源
- * 具体见 https://github.com/Tencent/APIJSON/issues/151
+ * 具体见 https://github.com/APIJSON/APIJSON/issues/151
  *
  * @author Lemon
  */
