@@ -3,8 +3,12 @@ name: Android CI
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'APIJSON-Android/APIJSONApp/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'APIJSON-Android/APIJSONApp/**'
 
 jobs:
   build:
