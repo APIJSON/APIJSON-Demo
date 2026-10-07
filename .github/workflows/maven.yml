@@ -11,8 +11,12 @@ name: Java CI with Maven
 on:
   push:
     branches: [ "main" ]
+    paths: 
+      - 'APIJSON-Java-Server/APIJSONBoot-MultiDataSource/**'
   pull_request:
     branches: [ "main" ]
+    paths: 
+      - 'APIJSON-Java-Server/APIJSONBoot-MultiDataSource/**'
 
 jobs:
   build:
