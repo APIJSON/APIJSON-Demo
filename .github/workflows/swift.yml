@@ -17,8 +17,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Build
-      working-directory: APIJSON-iOS
+      working-directory: APIJSON-iOS/APIJSON-Swift
       run: swift build -v
     - name: Run tests
-      working-directory: APIJSON-iOS
+      working-directory: APIJSON-iOS/APIJSON-Swift
       run: swift test -v
