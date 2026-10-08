@@ -186,8 +186,8 @@ var JSONResponse = {
   KEY_THROW: 'throw',
   CODE_SUCCESS: 200,
   IGNORE_KEYS: ['traceId', 'trace:stack', 'debug:info|help'],
-  UPGRADE_KEYS: ['price', 'amount', 'money', 'cash', 'spend', 'cost', 'income', 'outgoing', 'borrow', 'lend', 'gold', 'coin', 'diamond', 'credit', 'budget', 'quantity', 'balance'],
-  DOWNGRADE_KEYS: ['traceId', 'trace_id', 'date', 'time', 'datetime', 'date_time', 'dateTime', 'timestamp', 'create_time', 'update_time', 'created_at', 'updated_at', 'createTime', 'updateTime', 'createdAt', 'updatedAt'],
+  UPGRADE_KEYS: ['price', 'amount', 'money', 'cash', 'spend', 'cost', 'income', 'outgoing', 'borrow', 'lend', 'gold', 'coin', 'diamond', 'credit', 'budget', 'quantity', 'balance', 'type', 'status', 'state', 'stage', 'mode', 'currency', 'percent', 'percentage', 'rate', 'ratio', 'cent', 'vip', 'tax', 'change', 'exchange', 'role', 'permission', 'access', 'wealth', 'fee', 'pay', 'sku', 'spu', 'level', 'reward', 'award', 'bonus', 'consume', 'produce', 'gift', 'order', 'buy', 'purchase', 'salary', 'earn', 'coupon', 'discount'],
+  DOWNGRADE_KEYS: ['traceId', 'trace_id', 'date', 'time', 'datetime', 'date_time', 'dateTime', 'timestamp', 'create_time', 'update_time', 'created_at', 'updated_at', 'createTime', 'updateTime', 'createdAt', 'updatedAt', 'delete_time', 'deleteTime', 'deleted_at', 'cur_time', 'curTime', 'cur_timestamp', 'curTimestamp', 'cur_time_stamp', 'current_time', 'current_time_stamp', 'currentTime', 'currentTimestamp', 'server_time', 'serverTime', 'start_time', 'started_at', 'startTime', 'startedAt', 'begin_time', 'begun_at', 'beginTime', 'begunAt', 'end_time', 'ended_at', 'endTime', 'endedAt', 'title', 'subtitle', 'content', 'comment', 'emoji', 'name', 'nickname', 'detail', 'desc', 'describe', 'description'],
 
   /**是否成功
    * @param code
@@ -523,6 +523,56 @@ var JSONResponse = {
               break;
           }
     return it;
+  },
+
+  isUpgradeCompare: function (key, folder) {
+    if (StringUtil.isEmpty(key)) {
+      return false;
+    }
+
+    var keys = JSONResponse.UPGRADE_KEYS || [];
+    if (keys.includes(key) || keys.includes(JSONResponse.getAbstractPath(folder, key))) {
+      return true;
+    }
+
+    for (var i = 0; i < keys.length; i ++) {
+      var k = keys[i];
+      if (StringUtil.isNotEmpty(k) && StringUtil.isKeyOfCategory(key, StringUtil.firstCase(k, true))) {
+        return true;
+      }
+    }
+
+    return StringUtil.isMoneyKey(key) || StringUtil.isBalanceKey(key) || StringUtil.isAmountKey(key) || StringUtil.isLoanKey(key)
+        || StringUtil.isPriceKey(key) || StringUtil.isPercentKey(key) || StringUtil.isRevenueKey(key) || StringUtil.isProfitKey(key)
+        || StringUtil.isCashKey(key) || StringUtil.isDiscountKey(key) || StringUtil.isGradeKey(key) || StringUtil.isLevelKey(key)
+        || StringUtil.isRankKey(key) || StringUtil.isScoreKey(key) || StringUtil.isSexKey(key) || StringUtil.isGenderKey(key);
+        // || StringUtil.isIncomeKey(key) || StringUtil.isOutgoingKey(key) || StringUtil.isGoldKey(key) || StringUtil.isCoinKey(key)
+        // || StringUtil.isBuyKey(key) || StringUtil.isPurchaseKey(key) || StringUtil.isPayKey(key) || StringUtil.isEarnKey(key)
+        // || StringUtil.isSalaryKey(key) || StringUtil.isCostKey(key) || StringUtil.isConsumeKey(key) || StringUtil.isProduceKey(key)
+        // || StringUtil.isFeeKey(key) || StringUtil.isWealthKey(key) || StringUtil.isRewardKey(key) || StringUtil.isAwardKey(key)
+        // || StringUtil.isVipKey(key) || StringUtil.isDiamondKey(key) || StringUtil.isTaxKey(key) || StringUtil.isCurrencyKey(key)
+        // || StringUtil.isChangeKey(key) || StringUtil.isExchangeKey(key) || StringUtil.isBorrowKey(key) || StringUtil.isLendKey(key);
+  },
+  isDowngradeCompare: function (key, folder) {
+    if (StringUtil.isEmpty(key)) {
+      return false;
+    }
+
+    var keys = JSONResponse.DOWNGRADE_KEYS || [];
+    if (keys.includes(key) || keys.includes(JSONResponse.getAbstractPath(folder, key))) {
+      return true;
+    }
+
+    for (var i = 0; i < keys.length; i ++) {
+      var k = keys[i];
+      if (StringUtil.isNotEmpty(k) && StringUtil.isKeyOfCategory(key, StringUtil.firstCase(k, true))) {
+        return true;
+      }
+    }
+
+    return StringUtil.isDateKey(key) || StringUtil.isTimeKey(key) || StringUtil.isNameKey(key) || StringUtil.isDetailKey(key)
+        || StringUtil.isTitleKey(key) || StringUtil.isTextKey(key) || StringUtil.isCommentKey(key) || StringUtil.isContentKey(key)
+        || StringUtil.isDescribeKey(key) || StringUtil.isMessageKey(key);
   },
 
   /**测试compare: 对比 新的请求与上次请求的结果
@@ -1088,25 +1138,27 @@ var JSONResponse = {
           ? 0 : JSONResponse.compareValue(valueLevel, values, real, target.trend, target.repeat);
 
       if (valueCompare > 0) {
-        if (isNum && isFolderMeaningful) {
+        var cmp = valueCompare;
+        if (isNum && isFolderMeaningful && cmp > JSONResponse.COMPARE_VALUE_MORE && cmp < JSONResponse.COMPARE_VALUE_EMPTY) {
           if (JSONResponse.UPGRADE_KEYS.includes(folder)) {
-            valueCompare ++;
+            cmp = JSONResponse.COMPARE_VALUE_EMPTY;
           } else if (JSONResponse.DOWNGRADE_KEYS.includes(folder)) {
-            valueCompare --;
+            cmp = JSONResponse.COMPARE_VALUE_MORE;
           } else if (folder.includes('/')) {
             var keys = StringUtil.splitPath(folder);
             var key = keys == null || keys.length <= 0 ? null : keys[keys.length - 1];
             if (StringUtil.isNotEmpty(key) && ! StringUtil.isNumber(key)) {
-              if (JSONResponse.UPGRADE_KEYS.includes(key)) {
-                valueCompare ++;
-              } else if (JSONResponse.DOWNGRADE_KEYS.includes(key)) {
-                valueCompare --;
+              var fd = keys.slice(0, keys.length - 1).join('/');
+              if (JSONResponse.isUpgradeCompare(key, fd)) {
+                cmp = JSONResponse.COMPARE_VALUE_EMPTY;
+              } else if (JSONResponse.isDowngradeCompare(key, fd)) {
+                cmp = JSONResponse.COMPARE_VALUE_MORE;
               }
             }
           }
         }
 
-        max.code = valueCompare;
+        max.code = cmp;
         max.path = folder;
         max.value = real;
 
@@ -1536,7 +1588,6 @@ var JSONResponse = {
     log('updateStandard  lengthLevel = target.lengthLevel = ' + lengthLevel + ' >>');
     log('updateStandard  lengths = target.lengths = ' + lengths + ' >>');
 
-
     var valueLevel = target.valueLevel;
     var values = target.values;
     log('updateStandard  valueLevel = target.valueLevel = ' + valueLevel + ' >>');
@@ -1546,7 +1597,6 @@ var JSONResponse = {
       log('updateStandard  valueLevel == null >> valueLevel = target.valueLevel = 0;');
       valueLevel = target.valueLevel = 0;
     }
-
 
     if (type == 'array') {
       log('updateStandard  type == array >> ');
