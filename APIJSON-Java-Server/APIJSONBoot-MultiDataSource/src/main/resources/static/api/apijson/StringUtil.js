@@ -881,12 +881,15 @@ var StringUtil = {
   },
 
   longestSubstr: function(str1, str2, trim) {
-    if (! str1 || ! str2) {
-      return "";
+    let m = StringUtil.isString(str1) ? StringUtil.length(str1, trim) : 0;
+    let n = m <= 0 || ! StringUtil.isString(str2) ? 0 : StringUtil.length(str2, trim);
+    if (n <= 0) {
+      return '';
     }
 
-    let m = StringUtil.length(str1, trim);
-    let n = StringUtil.length(str2, trim);
+    if (str1 === str2) {
+      return StringUtil.get(str1);
+    }
 
     // 创建一个二维数组，dp[i][j] 记录以 str1[i-1] 和 str2[j-1] 结尾的公共子串长度
     let dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));

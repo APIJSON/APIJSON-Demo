@@ -1717,9 +1717,9 @@ var JSONResponse = {
               target.sort = sort = sort == null || srt === sort ? srt : (sort.includes(srt) ? sort : (srt === '=' ? sort + '=' : ''));
             }
 
-            if (isStr && same !== '' && StringUtil.isNotEmpty(first) && StringUtil.isNotEmpty(last)) {
-              var sm = StringUtil.longestSubstr(first, last);
-              target.same = same = StringUtil.longestSubstr(same, sm);
+            if (isStr && same !== '' && (StringUtil.isNotEmpty(first) || StringUtil.isNotEmpty(last))) {
+              var sm = StringUtil.isEmpty(first) ? last : (StringUtil.isEmpty(last) ? first : StringUtil.longestSubstr(first, last));
+              target.same = same = same == null ? sm : (StringUtil.isEmpty(sm) ? same : StringUtil.longestSubstr(same, sm));
             }
           }
         }
@@ -1793,7 +1793,7 @@ var JSONResponse = {
           }
 
           if (isStr && same !== '' && StringUtil.isNotEmpty(real)) {
-            var sm = StringUtil.isEmpty(same) ? real : StringUtil.longestSubstr(real, same); // preReal);
+            var sm = same == null ? real : StringUtil.longestSubstr(real, same); // preReal);
             target.same = same = sm; // StringUtil.longestSubstr(same, sm);
           }
         }
