@@ -2563,7 +2563,7 @@ public class DemoController extends APIJSONController<Long> {
 
                 APIJSONParser<Long> parser = newParser(session, RequestMethod.PUT); // : DELETE);
                 int maxCount = isWrite ? parser.getMaxUpdateCount() : parser.getMaxQueryCount();
-                if (isInsert == false && (config.isMySQL() || config.isMariaDB())) {
+                if (isRedis == false && isInsert == false && (config.isMySQL() || config.isMariaDB())) {
                     int limitIndex = findLastKeyIndex(trimmedSQL, "LIMIT");
 
                     if (limitIndex < 0) {
