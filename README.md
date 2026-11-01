@@ -1,6 +1,6 @@
 # APIJSON-Demo
-[APIJSON](https://github.com/APIJSON/APIJSON) 各种语言(Java, Swift, JavaScript, Python 等)、各种框架(SpringBoot, JFinal 等)、各种客户端(Web, Android, iOS 等) 的 使用示例项目、上手文档、测试数据 SQL 文件 等。<br />
-Demo projects with document and SQL files for [APIJSON](https://github.com/APIJSON/APIJSON) with different programming languages, different frameworks and different clients.
+[APIJSON](https://github.com/APIJSON/APIJSON) 各种语言(Java, Swift, JavaScript, Python 等)、各种框架(SpringBoot, JFinal 等)、各种客户端(Web, Android, iOS 等) 的 使用示例项目、上手文档、测试数据 SQL 文件 等，附带 APIAuto, UnitAuto, SQLAuto, AutoUI, CVAuto 等自动化测试。<br />
+Demo projects with document and SQL files for [APIJSON](https://github.com/APIJSON/APIJSON) with different programming languages, different frameworks and different clients along with automated testing: APIAuto, UnitAuto, SQLAuto, AutoUI, CVAuto, etc.
 
 <br />
 
