@@ -28,14 +28,18 @@ import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.JSONArray;
 //import org.duckdb.JsonNode;
+import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericToStringSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import javax.sql.DataSource;
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -64,7 +68,10 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
     static {
         REDIS_TEMPLATE = new RedisTemplate<>();
         try {
-            REDIS_TEMPLATE.setConnectionFactory(new JedisConnectionFactory(new RedisStandaloneConfiguration("127.0.0.1", 6379)));
+            RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration("127.0.0.1", 6379);
+            JedisConnectionFactory connectionFactory = new JedisConnectionFactory(redisConfig);
+            connectionFactory.afterPropertiesSet();
+            REDIS_TEMPLATE.setConnectionFactory(connectionFactory);
             REDIS_TEMPLATE.setKeySerializer(new StringRedisSerializer());
             REDIS_TEMPLATE.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
             REDIS_TEMPLATE.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
@@ -180,29 +187,29 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
         boolean isInfluxDB = config.isInfluxDB(); // DemoSQLConfig.DATABASE_INFLUXDB.equals(config.getDatabase());
         // boolean isIoTDB = config.isIoTDB(); // DemoSQLConfig.DATABASE_IOTDB.equals(config.getDatabase());
         // boolean isSurrealDB = config.isSurrealDB(); // DemoSQLConfig.DATABASE_SURREALDB.equals(config.getDatabase());
+        boolean isRedis = config.isRedis(); // DemoSQLConfig.DATABASE_REDIS.equals(config.getDatabase());
 
-        if (isMilvus || isCassandra || isInfluxDB) { // || isIoTDB || isSurrealDB) {
+        if (isMilvus || isCassandra || isInfluxDB || isRedis) { // || isIoTDB || isSurrealDB) {
             // TODO 把 execute 内与缓存无关只与数据库读写逻辑相关的代码抽取到 executeSQL 函数
             String sql = config.gainSQL(false); // config.isPrepared());
             if (sql != null && config.getMethod() == null) {
                 String trimmedSQL = sql.trim();
-                String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
-                if (sqlPrefix.startsWith("INSERT ")) {
+                if (SQLUtil.isInsert(trimmedSQL, isRedis)) {
                     config.setMethod(RequestMethod.POST);
                 }
-                else if (sqlPrefix.startsWith("UPDATE ")) {
+                else if (SQLUtil.isUpdate(trimmedSQL, isRedis)) {
                     config.setMethod(RequestMethod.PUT);
                 }
-                else if (sqlPrefix.startsWith("DELETE ")) {
+                else if (SQLUtil.isDelete(trimmedSQL, isRedis)) {
                     config.setMethod(RequestMethod.DELETE);
                 }
             }
 
             boolean isWrite = ! RequestMethod.isQueryMethod(config.getMethod());
 
-            List<JSONObject> cache = isWrite ? null : getCache(sql, config);
+            List<JSONObject> cache = isWrite || isRedis ? null : getCache(sql, config);
             int position = config.getPosition();
-            JSONObject result = getCacheItem(cache, position, config);
+            JSONObject result = isRedis ? null : getCacheItem(cache, position, config);
             if (result != null) {
                 if (position == 0 && cache != null && cache.size() > 1) {
                     result.put(KEY_RAW_LIST, cache);
@@ -212,6 +219,69 @@ public class DemoSQLExecutor extends APIJSONSQLExecutor<Long> {
 
 
             List<JSONObject> resultList = new ArrayList<>();
+
+            if (isRedis) {
+                String trimmedSQL = StringUtil.trim(sql);
+                int index = trimmedSQL.indexOf(" ");
+
+                String cmd;
+                byte[][] args;
+                if (index < 0) {
+                    cmd = trimmedSQL;
+                    args = new byte[0][0];
+                } else {
+                    cmd = trimmedSQL.substring(0, index);
+                    String val = trimmedSQL.substring(index + 1).trim();
+                    String[] splitArgs = val.split(" ");
+                    args = new byte[splitArgs.length][];
+                    for (int i = 0; i < splitArgs.length; i++) {
+                        args[i] = StringUtil.trim(splitArgs[i]).getBytes(StandardCharsets.UTF_8);
+                    }
+                }
+
+                RedisTemplate<String, String> redisTemp = new RedisTemplate<>();
+                try {
+                    String uri = config.gainDBUri();
+                    int ind = uri.indexOf("://");
+                    uri = ind < 0 ? uri : uri.substring(ind + 3);
+                    int ind2 = uri.indexOf(":");
+                    String host = ind2 < 0 ? uri : uri.substring(0, ind2);
+                    uri = ind2 < 0 ? "" : uri.substring(ind2 + 1);
+                    int ind3 = uri.indexOf("?");
+                    String port = ind3 < 0 ? uri : uri.substring(0, ind3);
+
+                    RedisStandaloneConfiguration redisConfig = new RedisStandaloneConfiguration(host, StringUtil.isEmpty(port) ? 6379 : Integer.valueOf(port));
+                    redisConfig.setPassword(config.gainDBPassword());
+                    JedisConnectionFactory connectionFactory = new JedisConnectionFactory(redisConfig);
+                    connectionFactory.afterPropertiesSet();
+                    redisTemp.setConnectionFactory(connectionFactory);
+                    redisTemp.setKeySerializer(new StringRedisSerializer());
+                    redisTemp.setHashValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+                    redisTemp.setValueSerializer(new GenericToStringSerializer<>(Serializable.class));
+                    redisTemp.afterPropertiesSet();
+                } catch (Throwable e) {
+                    e.printStackTrace();
+                }
+
+                Object ret = redisTemp.execute(new RedisCallback<Object>() {
+                    @Override
+                    public Object doInRedis(RedisConnection connection) throws DataAccessException {
+                        return connection.execute(cmd, args);
+                    }
+                });
+
+                if (ret != null && ret.getClass().isAssignableFrom(byte[].class)) {
+                    try {
+                        ret = new String((byte[]) ret, StandardCharsets.UTF_8);
+                    } catch (Throwable e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                result = new JSONObject();
+                result.put(isWrite ? JSONResponse.KEY_COUNT : "value", ret);
+                return result;
+            }
 
 //            if (isMilvus) {
 //                if (isWrite) {

@@ -14,6 +14,7 @@ limitations under the License.*/
 
 package apijson.boot;
 
+import apijson.SQLUtil;
 import apijson.fastjson2.APIJSONController;
 import apijson.fastjson2.APIJSONParser;
 import apijson.fastjson2.JSONRequest;
@@ -2370,7 +2371,6 @@ public class DemoController extends APIJSONController<Long> {
             JSONArray arg = req.getJSONArray("args");
             try {
                 if (StringUtil.isEmpty(database, true)) {
-
                     int start = uri.indexOf("://");
                     String prefix = uri.substring(0, start);
                     int mid = prefix.lastIndexOf(":");
@@ -2378,7 +2378,9 @@ public class DemoController extends APIJSONController<Long> {
                         prefix = prefix.substring(mid + 1);
                     }
 
-                    if (DemoSQLConfig.DATABASE_INFLUXDB.equalsIgnoreCase(prefix) || DemoSQLConfig.DATABASE_CASSANDRA.equalsIgnoreCase(prefix)) {
+                    boolean isCassandra = DemoSQLConfig.DATABASE_CASSANDRA.equalsIgnoreCase(prefix);
+                    boolean isRedis = (! isCassandra) && DemoSQLConfig.DATABASE_REDIS.equalsIgnoreCase(prefix);
+                    if (isCassandra || isRedis || DemoSQLConfig.DATABASE_INFLUXDB.equalsIgnoreCase(prefix)) {
                         database = prefix.toUpperCase();
 
                         int end = uri.lastIndexOf("/");
@@ -2395,18 +2397,12 @@ public class DemoController extends APIJSONController<Long> {
                             // password = "apijson@123";
 //                        }
 
-                        if (DemoSQLConfig.DATABASE_CASSANDRA.equalsIgnoreCase(prefix)) { // unknown protocol: jdbc
+                        if (isCassandra) { // unknown protocol: jdbc
                             account = "test"; // "peter";
                             password = "test"; // null;
                         }
                     }
                 }
-
-                String trimmedSQL = sql.trim();
-                String sqlPrefix = trimmedSQL.length() < 7 ? "" : trimmedSQL.substring(0, 7).toUpperCase();
-                boolean isInsert = sqlPrefix.startsWith("INSERT ");
-                boolean isEdit = (! isInsert) && sqlPrefix.startsWith("UPDATE ");
-                boolean isWrite = isInsert || isEdit || sqlPrefix.startsWith("DELETE ");
 
                 DemoSQLConfig config = new DemoSQLConfig();
                 config.setDatabase(database);
@@ -2414,122 +2410,132 @@ public class DemoController extends APIJSONController<Long> {
                 config.setDBUri(uri);
                 config.setSchema(schema);
 
+                boolean isRedis = config.isRedis();
+
+                String trimmedSQL = sql.trim();
+                boolean isInsert = SQLUtil.isInsert(trimmedSQL, isRedis);
+                boolean isEdit = (! isInsert) && SQLUtil.isUpdate(trimmedSQL, isRedis);
+                boolean isDelete = (! (isInsert || isEdit)) && SQLUtil.isDelete(trimmedSQL, isRedis);
+                boolean isWrite = isInsert || isEdit || isDelete;
+
                 if (WRITE_STRICTLY && isWrite && ! isInsert) {
-                    String sqlRest = trimmedSQL.replaceAll("\\s+", " ");
-                    sqlRest = sqlRest.replaceAll("\f", " ");
-                    sqlRest = sqlRest.replaceAll("\n", " ");
-                    sqlRest = sqlRest.replaceAll("\t", " ");
-                    sqlRest = sqlRest.replaceAll("\r", " ");
-                    int fromInd = isEdit ? 0 : findKeyIndex(sqlRest, "FROM");
-                    if (fromInd < 0) {
-                        throw new IllegalArgumentException("SQL 缺 FORM 关键词!");
-                    }
-
-                    sqlRest = sqlRest.substring(fromInd + (isEdit ? "UPDATE " : " FROM ").length()).trim();
-                    int blankRest = sqlRest.indexOf(" ");
-                    if (blankRest < 0) {
-                        throw new IllegalArgumentException("SQL 缺少 表名!");
-                    }
-
-                    String tblPath = sqlRest.substring(0, blankRest).trim();
-                    sqlRest = sqlRest.substring(blankRest); // + 1).trim();
-                    String[] tblArr = tblPath.indexOf(".") >= 0 ? tblPath.split("\\.") : new String[]{tblPath}; // StringUtil.split(tblPath.Pattern.quota("."), true);
-                    int len = tblArr == null ? 0 : tblArr.length;
-                    String sch = len < 2 ? null : tblArr[len - 2];
-                    if (StringUtil.isNotEmpty(sch)){
-                        if ((sch.startsWith("`") && sch.endsWith("`")) || (sch.startsWith("[") && sch.endsWith("]")) || (sch.startsWith("\"") && sch.endsWith("\""))) {
-                            sch = sch.substring(1, sch.length() - 1);
+                    if (! isRedis) {
+                        String sqlRest = trimmedSQL.replaceAll("\\s+", " ");
+                        sqlRest = sqlRest.replaceAll("\f", " ");
+                        sqlRest = sqlRest.replaceAll("\n", " ");
+                        sqlRest = sqlRest.replaceAll("\t", " ");
+                        sqlRest = sqlRest.replaceAll("\r", " ");
+                        int fromInd = isEdit ? 0 : findKeyIndex(sqlRest, "FROM");
+                        if (fromInd < 0) {
+                            throw new IllegalArgumentException("SQL 缺 FORM 关键词!");
                         }
 
+                        sqlRest = sqlRest.substring(fromInd + (isEdit ? "UPDATE " : " FROM ").length()).trim();
+                        int blankRest = sqlRest.indexOf(" ");
+                        if (blankRest < 0) {
+                            throw new IllegalArgumentException("SQL 缺少 表名!");
+                        }
+
+                        String tblPath = sqlRest.substring(0, blankRest).trim();
+                        sqlRest = sqlRest.substring(blankRest); // + 1).trim();
+                        String[] tblArr = tblPath.indexOf(".") >= 0 ? tblPath.split("\\.") : new String[]{tblPath}; // StringUtil.split(tblPath.Pattern.quota("."), true);
+                        int len = tblArr == null ? 0 : tblArr.length;
+                        String sch = len < 2 ? null : tblArr[len - 2];
                         if (StringUtil.isNotEmpty(sch)) {
-                            if (StringUtil.isNotEmpty(schema) && ! schema.equals(sch)) {
-                                throw new ConflictException("传参 schema: " + schema + " 和 SQL 中" + tblPath + " 里的" + sch + "不一致!");
+                            if ((sch.startsWith("`") && sch.endsWith("`")) || (sch.startsWith("[") && sch.endsWith("]")) || (sch.startsWith("\"") && sch.endsWith("\""))) {
+                                sch = sch.substring(1, sch.length() - 1);
                             }
 
-                            config.setSchema(sch);
-                        }
-                    }
-                    
-                    String tbl = len < 1 ? null : tblArr[len - 1];
-                    if ((tbl.startsWith("`") && tbl.endsWith("`")) || (tbl.startsWith("[") & tbl.endsWith("]")) || (tbl.startsWith("\"") && tbl.endsWith("\""))) {
-                        tbl = tbl.substring(1, tbl.length() -1);
-                    }
-                    
-                    config.setTable(tbl);
-                    String idKey = config.getIdKey();
-                    String userIdKey = config.getUserIdKey();
-                    int whereInd = findKeyIndex(sqlRest, "WHERE");
-                    if (whereInd < 0) {
-                        throw new IllegalArgumentException("SQL 缺少 WHERE 关键词!");
-                    }
+                            if (StringUtil.isNotEmpty(sch)) {
+                                if (StringUtil.isNotEmpty(schema) && !schema.equals(sch)) {
+                                    throw new ConflictException("传参 schema: " + schema + " 和 SQL 中" + tblPath + " 里的" + sch + "不一致!");
+                                }
 
-                    sqlRest = sqlRest.substring(whereInd + " WHERE ".length()).trim();
-                    String key;
-                    if (sqlRest.startsWith(idKey)) {
-                        key = idKey;
-                    } else if (sqlRest.startsWith("`" + idKey + "`") || sqlRest.startsWith("[" + idKey + "]") || sqlRest.startsWith("\"" + idKey + "\"")) {
-                        key = "`" + idKey + "`";
-                    } else if (sqlRest.startsWith(userIdKey)) {
-                        key = userIdKey;
-                    } else if (sqlRest.startsWith("`" + userIdKey + "`") || sqlRest.startsWith("[" + userIdKey + "]") || sqlRest.startsWith("\"" + userIdKey + "\"")) {
-                        key = "`" + userIdKey + "`";
-                    } else {
-                        throw new IllegalArgumentException("SQL WHERE 后必须接着 "+ idKey + " 或 " + userIdKey + " = ? 或 IN(?, ? ...) !");
-                    }
-
-                    sqlRest = sqlRest.substring(key.length()).trim();
-                    boolean isEq = sqlRest.startsWith("=");
-                    if (! (isEq || sqlRest.startsWith("IN(") || sqlRest.startsWith("in("))) {
-                        throw new IllegalArgumentException("SQL WHERE " + key + " 后必须接着 = ? 或 IN(?, ? ...) ! ");
-                    }
-
-                    sqlRest = sqlRest.substring(isEq ? 1 : "IN(".length()).trim();
-                    int endInd = -1; // isEq && ! sqlRest.startsWith("'") ? -1 : sqlRest.indexOf(isEq ? "'" : ")", 1);
-                    if (isEq && ! sqlRest.startsWith("'")) {
-                        for (int i = 0; i < sqlRest.length(); i++) {
-                            char c = sqlRest.charAt(i);
-                            if (c == '?' || c == '+' || c == '-' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
-                                endInd ++;
-                            } else {
-                                break;
+                                config.setSchema(sch);
                             }
                         }
-                    } else {
-                        endInd = sqlRest.indexOf(isEq ? "'" : ")", isEq ? 1 : 0);
+
+                        String tbl = len < 1 ? null : tblArr[len - 1];
+                        if ((tbl.startsWith("`") && tbl.endsWith("`")) || (tbl.startsWith("[") & tbl.endsWith("]")) || (tbl.startsWith("\"") && tbl.endsWith("\""))) {
+                            tbl = tbl.substring(1, tbl.length() - 1);
+                        }
+
+                        config.setTable(tbl);
+                        String idKey = config.getIdKey();
+                        String userIdKey = config.getUserIdKey();
+                        int whereInd = findKeyIndex(sqlRest, "WHERE");
+                        if (whereInd < 0) {
+                            throw new IllegalArgumentException("SQL 缺少 WHERE 关键词!");
+                        }
+
+                        sqlRest = sqlRest.substring(whereInd + " WHERE ".length()).trim();
+                        String key;
+                        if (sqlRest.startsWith(idKey)) {
+                            key = idKey;
+                        } else if (sqlRest.startsWith("`" + idKey + "`") || sqlRest.startsWith("[" + idKey + "]") || sqlRest.startsWith("\"" + idKey + "\"")) {
+                            key = "`" + idKey + "`";
+                        } else if (sqlRest.startsWith(userIdKey)) {
+                            key = userIdKey;
+                        } else if (sqlRest.startsWith("`" + userIdKey + "`") || sqlRest.startsWith("[" + userIdKey + "]") || sqlRest.startsWith("\"" + userIdKey + "\"")) {
+                            key = "`" + userIdKey + "`";
+                        } else {
+                            throw new IllegalArgumentException("SQL WHERE 后必须接着 " + idKey + " 或 " + userIdKey + " = ? 或 IN(?, ? ...) !");
+                        }
+
+                        sqlRest = sqlRest.substring(key.length()).trim();
+                        boolean isEq = sqlRest.startsWith("=");
+                        if (!(isEq || sqlRest.startsWith("IN(") || sqlRest.startsWith("in("))) {
+                            throw new IllegalArgumentException("SQL WHERE " + key + " 后必须接着 = ? 或 IN(?, ? ...) ! ");
+                        }
+
+                        sqlRest = sqlRest.substring(isEq ? 1 : "IN(".length()).trim();
+                        int endInd = -1; // isEq && ! sqlRest.startsWith("'") ? -1 : sqlRest.indexOf(isEq ? "'" : ")", 1);
+                        if (isEq && !sqlRest.startsWith("'")) {
+                            for (int i = 0; i < sqlRest.length(); i++) {
+                                char c = sqlRest.charAt(i);
+                                if (c == '?' || c == '+' || c == '-' || (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+                                    endInd++;
+                                } else {
+                                    break;
+                                }
+                            }
+                        } else {
+                            endInd = sqlRest.indexOf(isEq ? "'" : ")", isEq ? 1 : 0);
+                        }
+
+                        sqlRest = endInd < 0 ? sqlRest : sqlRest.substring(endInd + 1).trim();
+                        if (sqlRest.startsWith("OR ") || sqlRest.startsWith("or ") || sqlRest.startsWith("NOT ") || sqlRest.startsWith("not ")) {
+                            throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件不允许 OR/NOT 连接，必须 AND 连接 ! ");
+                        }
+
+                        int orInd = findKeyIndex(sqlRest, "OR");
+
+                        if (orInd >= 0) { // TODO 兼容 AND ( OR ) ？
+                            throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件不允许 OR 连接，必须 AND 连接 ! ");
+                        }
+
+                        //int andInd = sqlRest.startsWith("AND ") || sqlRest.startsWith("and ") ? 1 : sqlRest.indexOf(" AND ");
+                        //if (andInd < 0 && StringUtil.isNotEmpty(sqlRest, true)) {
+                        //    andInd = sqlRest.indexOf(" and ");
+                        //
+                        //    if (andInd < 0) {
+                        //        //int groupInd = findLastKeyIndex(sqlRest, "GROUP BY");
+                        //        int havingInd = -1;
+                        //        //int orderInd = -1;
+                        //        int limitInd = -1;
+                        //
+                        //        //if (groupInd < 0) {
+                        //                havingInd = findLastKeyIndex(sqlRest, "HAVING");
+                        //                //orderInd = findLastKeyIndex(sqlRest, "ORDER BY");
+                        //                limitInd = findLastKeyIndex(sqlRest, "LIMIT");
+                        //        //}
+                        //
+                        //        if (havingInd >= 0 || limitInd >= 0) {
+                        //            throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件必须 AND 连接 ! ");
+                        //        }
+                        //    }
+                        //}
                     }
-
-                    sqlRest = endInd < 0 ? sqlRest : sqlRest.substring(endInd + 1).trim();
-                    if (sqlRest.startsWith("OR ") || sqlRest.startsWith("or ") || sqlRest.startsWith("NOT ") || sqlRest.startsWith("not ")) {
-                        throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件不允许 OR/NOT 连接，必须 AND 连接 ! ");
-                    }
-
-                    int orInd = findKeyIndex(sqlRest, "OR");
-
-                    if (orInd >= 0) { // TODO 兼容 AND ( OR ) ？
-                        throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件不允许 OR 连接，必须 AND 连接 ! ");
-                    }
-
-                    //int andInd = sqlRest.startsWith("AND ") || sqlRest.startsWith("and ") ? 1 : sqlRest.indexOf(" AND ");
-                    //if (andInd < 0 && StringUtil.isNotEmpty(sqlRest, true)) {
-                    //    andInd = sqlRest.indexOf(" and ");
-                    //
-                    //    if (andInd < 0) {
-                    //        //int groupInd = findLastKeyIndex(sqlRest, "GROUP BY");
-                    //        int havingInd = -1;
-                    //        //int orderInd = -1;
-                    //        int limitInd = -1;
-                    //
-                    //        //if (groupInd < 0) {
-                    //                havingInd = findLastKeyIndex(sqlRest, "HAVING");
-                    //                //orderInd = findLastKeyIndex(sqlRest, "ORDER BY");
-                    //                limitInd = findLastKeyIndex(sqlRest, "LIMIT");
-                    //        //}
-                    //
-                    //        if (havingInd >= 0 || limitInd >= 0) {
-                    //            throw new IllegalArgumentException("SQL WHERE " + key + (isEq ? " = val" : " IN(val0, val1 ...)") + " 后条件必须 AND 连接 ! ");
-                    //        }
-                    //    }
-                    //}
 
                     // 只包含筛选出 apijson 字段的 Map<String, SortedMap<Integer, Map<String, Object>>> documentMap = DemoVerifier.DOCUMENT_MAP;
                     Map<String, List<Map<String, Object>>> sqlautoMap = SQLAUTO_MAP;
@@ -2610,7 +2616,21 @@ public class DemoController extends APIJSONController<Long> {
 
                 boolean isAutoCommit = true;
                 try {
-                    if (DemoSQLConfig.DATABASE_INFLUXDB.equals(database) || DemoSQLConfig.DATABASE_CASSANDRA.equals(database)) {
+                    if (isRedis || config.isInfluxDB() || config.isCassandra()) {
+                        int size = arg == null ? 0 : arg.size();
+                        if (size > 0 && trimmedSQL.contains("?")) {
+                            Object[] params = new Object[size];
+                            for (int i = 0; i < size; i++) {
+                                Object a = arg.get(i);
+                                params[i] = (isRedis ? (a == null ? "null" : ("".equals(a) ? "\"\"" : (JSON.isBoolOrNumOrStr(a)
+                                        ? a : JSON.toJSONString(a))
+                                )) : JSON.toJSONString(a));
+                            }
+
+                            trimmedSQL = String.format (trimmedSQL.replace("?", "%s"), params);
+                            config.setSql(trimmedSQL);
+                        }
+
                         JSONObject result = executor.execute(config, false);
                         executeDuration = System.currentTimeMillis() - executeStartTime;
 
