@@ -17,9 +17,7 @@ package apijson.boot;
 import apijson.fastjson2.APIJSONController;
 import apijson.fastjson2.APIJSONParser;
 import apijson.fastjson2.JSONRequest;
-import apijson.framework.APIJSONApplication;
-import apijson.framework.APIJSONConstant;
-import apijson.framework.APIJSONCreator;
+import apijson.framework.*;
 import apijson.orm.exception.*;
 import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
@@ -68,7 +66,6 @@ import apijson.demo.DemoVerifier;
 import apijson.demo.model.Privacy;
 import apijson.demo.model.User;
 import apijson.demo.model.Verify;
-import apijson.framework.BaseModel;
 import unitauto.MethodUtil;
 
 import static apijson.JSON.getString;
@@ -3320,10 +3317,16 @@ public class DemoController extends APIJSONController<Long> {
     //}
 
     @PostMapping("method/list")
-    public Map<String, Object> listMethod(@RequestBody String request) {
+    public Map<String, Object> listMethod(@RequestBody String request, HttpSession session) {
         if (Log.DEBUG == false) {
             return MethodUtil.JSON_CALLBACK.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用 UnitAuto 单元测试！"));
         }
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return MethodUtil.JSON_CALLBACK.newErrorResult(e);
+        }
+
         return MethodUtil.listMethod(request);
     }
 
@@ -3351,9 +3354,19 @@ public class DemoController extends APIJSONController<Long> {
             }
         };
 
-        if (Log.DEBUG == false) {
+        Exception err = Log.DEBUG ? null : new IllegalAccessException("非 DEBUG 模式下不允许使用 UnitAuto 单元测试！");
+        if (err == null) {
             try {
-                listener.complete(MethodUtil.JSON_CALLBACK.newErrorResult(new IllegalAccessException("非 DEBUG 模式下不允许使用 UnitAuto 单元测试！")));
+                HttpSession session = servletRequest.getSession();
+                COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+            } catch (Exception e) {
+                err = e;
+            }
+        }
+
+        if (err != null) {
+            try {
+                listener.complete(MethodUtil.JSON_CALLBACK.newErrorResult(err));
             }
             catch (Exception e1) {
                 e1.printStackTrace();
@@ -3384,6 +3397,12 @@ public class DemoController extends APIJSONController<Long> {
 
     @GetMapping("api/test/start")
     public String startApiTest(HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         //response.sendRedirect("http://localhost:3000/test/start");
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
@@ -3391,6 +3410,12 @@ public class DemoController extends APIJSONController<Long> {
     }
     @GetMapping("api/test/status")
     public String getApiTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         //response.sendRedirect("http://localhost:3000/test/status");
         DemoParser.KEY_MAP.remove(key);
         return delegate("http://localhost:3000/test/status", session);
@@ -3398,30 +3423,60 @@ public class DemoController extends APIJSONController<Long> {
 
     @GetMapping("unit/test/start")
     public String startUnitTest(HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
         return delegate("http://localhost:3001/test/start?key=" + id, session);
     }
     @GetMapping("unit/test/status")
     public String getUnitTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         DemoParser.KEY_MAP.remove(key);
         return delegate("http://localhost:3001/test/status", session);
     }
 
     @GetMapping("sql/test/start")
     public String startSQLTest(HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
         return delegate("http://localhost:3002/test/start?key=" + id, session);
     }
     @GetMapping("sql/test/status")
     public String getSQLTestStatus(@RequestParam("key") String key, HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         DemoParser.KEY_MAP.remove(key);
         return delegate("http://localhost:3002/test/status", session);
     }
 
     @GetMapping("cv/test/start")
     public String startCvTest(HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         //response.sendRedirect("http://localhost:3003/test/start");
         long id = 100000 + Math.round(899999*Math.random());
         DemoParser.KEY_MAP.put(String.valueOf(id), session);  // 调这个接口一般是前端/CI/CD，调查询接口的是 Node，Session 不同 session.setAttribute("key", id);
@@ -3429,6 +3484,12 @@ public class DemoController extends APIJSONController<Long> {
     }
     @GetMapping("cv/test/status")
     public String getCvTestStatus(@RequestParam(value = "key", required = false) String key, HttpSession session) {
+        try {
+            COMMON_PARSER.getVerifier().setVisitor(APIJSONVerifier.getVisitor(session)).verifyLogin();
+        } catch (Exception e) {
+            return JSON.toJSONString(COMMON_PARSER.newErrorResult(e));
+        }
+
         //response.sendRedirect("http://localhost:3003/test/status");
         DemoParser.KEY_MAP.remove(key);
         return delegate("http://localhost:3003/test/status", session);
