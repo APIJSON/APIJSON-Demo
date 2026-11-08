@@ -76,7 +76,7 @@ var StringUtil = {
       return s <= 0;
     }
 
-    if (trim) {
+    if (trim !== false && typeof s == 'string') {
       s = s.trim();
     }
     return s.length <= 0;
@@ -91,7 +91,8 @@ var StringUtil = {
    * @return
    */
   isName: function(s) {
-    return s != null && s.length > 0 && /[a-zA-Z_]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
+    var l = StringUtil.length(s);
+    return l >= 2 && l <= StringUtil.MAX_NAME_LENGTH && /[a-zA-Z_]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
   },
 
   /**判断是否为代码名称，只能包含字母，数字或下划线
@@ -99,7 +100,8 @@ var StringUtil = {
    * @return
    */
   isBigName: function(s) {
-    return s != null && s.length > 0 && /[A-Z]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
+    var l = StringUtil.length(s);
+    return l >= 2 && l <= StringUtil.MAX_NAME_LENGTH && /[A-Z]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
   },
 
   /**判断是否为代码名称，只能包含字母，数字或下划线
@@ -107,13 +109,63 @@ var StringUtil = {
    * @return
    */
   isSmallName: function(s) {
-    return s != null && s.length > 0 && /[a-z]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
+    var l = StringUtil.length(s);
+    return l >= 1 && l <= StringUtil.MAX_NAME_LENGTH && /[a-z]/.test(s.substring(0, 1)) && /^[0-9a-zA-Z_]+$/.test(s);
   },
 
   isConstName: function(s) {
-    return s != null && s.length > 0 && /[A-Z_]/.test(s.substring(0, 1)) && /^[0-9A-Z_]+$/.test(s);
+    var l = StringUtil.length(s);
+    return l >= 2 && l <= StringUtil.MAX_CONST_NAME_LENGTH && /[A-Z_]/.test(s.substring(0, 1)) && /^[0-9A-Z_]+$/.test(s);
   },
 
+  SYNTAX_NAMES: ['bool', 'boolean', 'int', 'integer', 'num', 'number', 'str', 'string', 'arr', 'array', 'obj', 'object'
+    , 'type', 'class', 'fun', 'func', 'function', 'var', 'variable', 'val', 'value', 'const', 'is', 'as', 'id', 'index', 'unique'
+    , 'select', 'insert', 'update', 'delete', 'query', 'mutate', 'sleep', 'no', 'yes', 'and', 'or', 'not', 'cast', 'first', 'last'
+    , 'from', 'join', 'on', 'at', 'in', 'out', 'where', 'by', 'having', 'limit', 'offset', 'find', 'list', 'get', 'set', 'put', 'remove'
+    , 'slice', 'splice', 'reduce', 'add', 'minus', 'push', 'pop', 'list', 'dict', 'map', 'trim', 'of'
+  ],
+  COLUMN_NAMES: ['page', 'count', 'size', 'pagesize', 'pagenum', 'pageno', 'col', 'column', 'name', 'age', 'sex', 'gender', 'amount'
+    , 'email', 'phone', 'tel', 'telephone', 'detail', 'describe', 'description', 'total', 'index', 'position', 'key', 'row', 'len', 'length', 'data'
+  ],
+  isBizName: function(s) {
+    if (typeof s != 'string' || StringUtil.length(s) < 3) {
+      return false;
+    }
+    if (StringUtil.isBigName(s) && ! StringUtil.isConstName(s)) {
+      return true;
+    }
+    if (! StringUtil.isName(s)) {
+      return false;
+    }
+    s = s.toLowerCase();
+    var names = StringUtil.SYNTAX_NAMES || [];
+    for (var i = 0; i < names.length; i ++) {
+      if (s.endsWith(names[i])) {
+        return false;
+      }
+    }
+    return true;
+  },
+  isSchemaName: function(s) {
+    return typeof s == 'string' && StringUtil.isBizName(s.replaceAll('-', ''));
+  },
+  isTableName: function(s) {
+    if (StringUtil.isBigName(s) && ! StringUtil.isConstName(s)) {
+      return true;
+    }
+    if (! StringUtil.isBizName(s)) {
+      return false;
+    }
+    s = s.toLowerCase();
+    var names = StringUtil.COLUMN_NAMES || [];
+    for (var i = 0; i < names.length; i ++) {
+      var n = names[i];
+      if (s.endsWith(n)) {
+        return false;
+      }
+    }
+    return true;
+  },
 
   /**添加后缀
    * @param key
@@ -152,7 +204,7 @@ var StringUtil = {
    * @return
    */
   toUpperCase: function(s, trim) {
-    s = trim ? StringUtil.trim(s) : StringUtil.get(s);
+    s = trim !== false ? StringUtil.trim(s) : StringUtil.get(s);
     return s.toUpperCase();
   },
   /**全部小写
@@ -160,7 +212,7 @@ var StringUtil = {
    * @return
    */
   toLowerCase: function(s, trim) {
-    s = trim ? StringUtil.trim(s) : StringUtil.get(s);
+    s = trim !== false ? StringUtil.trim(s) : StringUtil.get(s);
     return s.toLowerCase();
   },
 
@@ -218,7 +270,10 @@ var StringUtil = {
       return null;
     }
 
-    if (trim) {
+    if (typeof s != 'string') {
+      s = StringUtil.get(s);
+    }
+    else if (trim !== false) {
       s = s.trim();
     }
 
@@ -226,7 +281,7 @@ var StringUtil = {
       separator = ',';
     }
 
-    if (trim) {
+    if (trim !== false) {
       while (s.startsWith(separator)) {
         s = s.substring(1);
       }
@@ -243,7 +298,7 @@ var StringUtil = {
   },
 
   splitPath: function (s, trim) {
-    return StringUtil.split(s, '/', trim)
+    return StringUtil.split(s, '/', trim);
   },
 
   isNumber: function (s) {
@@ -282,18 +337,18 @@ var StringUtil = {
     }
     return s.substring(0, maxLen) + '..';
   },
-  PATTERN_PHONE: /"^1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4(?:(?:10|4[01])\\d{3}|[68]\\d{4}|[579]\\d{2}))\\d{6}$"/g,
+  PATTERN_PHONE: /^1(?:3\\d{3}|5[^4\\D]\\d{2}|8\\d{3}|7(?:[0-35-9]\\d{2}|4(?:0\\d|1[0-2]|9\\d))|9[0-35-9]\\d{2}|6[2567]\\d{2}|4(?:(?:10|4[01])\\d{3}|[68]\\d{4}|[579]\\d{2}))\\d{6}$/g,
   isPhone: function (s) {
     if (Number.isSafeInteger(s)) {
       s = StringUtil.get(s)
     }
     return StringUtil.isString(s) && StringUtil.PATTERN_PHONE.test(s)
   },
-  PATTERN_EMAIL: /"^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$"/g,
+  PATTERN_EMAIL: /^([a-zA-Z0-9_\\-\\.]+)@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.)|(([a-zA-Z0-9\\-]+\\.)+))([a-zA-Z]{2,4}|[0-9]{1,3})(\\]?)$/g,
   isEmail: function (s) {
     return StringUtil.isString(s) && StringUtil.PATTERN_EMAIL.test(s)
   },
-  PATTERN_ID_CARD: /"(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)"/g,
+  PATTERN_ID_CARD: /(^[1-9]\\d{5}(18|19|([23]\\d))\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{3}[0-9Xx]$)|(^[1-9]\\d{5}\\d{2}((0[1-9])|(10|11|12))(([0-2][1-9])|10|20|30|31)\\d{2}$)/g,
   isIDCard: function (s) {
     return StringUtil.isString(s) && StringUtil.PATTERN_EMAIL.test(s)
   },
@@ -549,8 +604,59 @@ var StringUtil = {
        return false;
      }
 
-     return ((key.startsWith('is') || key.startsWith('Is')) && /[a-z]/g.test(k) != true)
-      || (key.startsWith('IS') && /[A-Za-z]/g.test(k) != true);
+     if (((key.startsWith('is') || key.startsWith('Is')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('IS') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     k = key.substring(3, 4);
+     if (StringUtil.isEmpty(k, true)) {
+       return false;
+     }
+     if (((key.startsWith('has') || key.startsWith('Has')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('HAS') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     if (((key.startsWith('can') || key.startsWith('Can')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('CAN') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     k = key.substring(4, 5);
+     if (StringUtil.isEmpty(k, true)) {
+       return false;
+     }
+     if (((key.startsWith('have') || key.startsWith('Have')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('HAVE') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     k = key.substring(5, 6);
+     if (StringUtil.isEmpty(k, true)) {
+       return false;
+     }
+     if (((key.startsWith('shall') || key.startsWith('Shall')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('SHALL') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     k = key.substring(6, 7);
+     if (StringUtil.isEmpty(k, true)) {
+       return false;
+     }
+     if (((key.startsWith('should') || key.startsWith('Should')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('SHOULD') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     if (((key.startsWith('enable') || key.startsWith('Enable')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('ENABLE') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     k = key.substring(7, 8);
+     if (StringUtil.isEmpty(k, true)) {
+       return false;
+     }
+     if (((key.startsWith('disable') || key.startsWith('Disable')) && /[a-z]/g.test(k) != true)
+       || (key.startsWith('DISABLE') && /[A-Za-z]/g.test(k) != true)) {
+       return true;
+     }
+     return false;
   },
   isIntKey: function (key) {
      return StringUtil.isKeyOfCategory(key, 'Int') || StringUtil.isKeyOfCategory(key, 'Integer');
@@ -639,6 +745,9 @@ var StringUtil = {
   isScoreKey: function (key) {
      return StringUtil.isKeyOfCategory(key, 'Score');
   },
+  isRankKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Rank');
+  },
   isSexKey: function (key) {
      return StringUtil.isKeyOfCategory(key, 'Sex');
   },
@@ -682,7 +791,30 @@ var StringUtil = {
      return StringUtil.isKeyOfCategory(key, 'Latitude');
   },
   isNameKey: function (key) {
-     return StringUtil.isKeyOfCategory(key, 'Name');
+     var l = StringUtil.length(key);
+     return l >= 2 && l <= 30 && StringUtil.isKeyOfCategory(key, 'Name');
+  },
+  isTitleKey: function (key) {
+    var l = StringUtil.length(key);
+    return l >= 2 && l <= 30 && StringUtil.isKeyOfCategory(key, 'Title');
+  },
+  isTextKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Text') || StringUtil.isKeyOfCategory(key, 'Txt');
+  },
+  isContentKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Content');
+  },
+  isMessageKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Message') || StringUtil.isKeyOfCategory(key, 'Msg');
+  },
+  isCommentKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Comment');
+  },
+  isDetailKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Detail');
+  },
+  isDescribeKey: function (key) {
+    return StringUtil.isKeyOfCategory(key, 'Desc') || StringUtil.isKeyOfCategory(key, 'Describe') || StringUtil.isKeyOfCategory(key, 'Description');
   },
   isPathKey: function (key) {
      return StringUtil.isKeyOfCategory(key, 'Path');
@@ -694,10 +826,14 @@ var StringUtil = {
      return StringUtil.isKeyOfCategory(key, 'Uri');
   },
   isDateKey: function (key) {
-     return StringUtil.isKeyOfCategory(key, 'Date');
+     return ['createat', 'createdat', 'updateat', 'updatedat', 'deletdat', 'deletedat', 'addat', 'addedat', 'editat'
+       , 'editedat', 'removeat', 'removedat', 'sendat', 'sentat', 'sendedat', 'receiveat', 'receivedat'].indexOf(StringUtil.get(key).toLowerCase()) >= 0
+         || StringUtil.isKeyOfCategory(key, 'Date');
   },
   isTimeKey: function (key) {
-     return StringUtil.isKeyOfCategory(key, 'Time');
+     return ['createat', 'createdat', 'updateat', 'updatedat', 'deletdat', 'deletedat', 'addat', 'addedat', 'editat'
+           , 'editedat', 'removeat', 'removedat', 'sendat', 'sentat', 'sendedat', 'receiveat', 'receivedat'].indexOf(StringUtil.get(key).toLowerCase()) >= 0
+         || StringUtil.isKeyOfCategory(key, 'Time') || StringUtil.isKeyOfCategory(key, 'Timestamp');
   },
   isKeyOfCategory: function (key, category) {
      if (StringUtil.isEmpty(key, true) || StringUtil.isEmpty(category, true) || key.length < category.length) {
@@ -745,6 +881,54 @@ var StringUtil = {
 
     var ind = s.indexOf(':')
     return ind < 0 ? [s] : [s.substring(0, ind), s.substring(ind + 1)]
+  },
+  toRandom: function (s) {
+    return StringUtil.toForm(s, true)
+  },
+  toHeader: function (s) {
+    return StringUtil.toForm(s)
+  },
+  toForm: function (s, quote) {
+    if (s == null) {
+      return '';
+    }
+    var json = parseJSON(s) || {};
+    var newStr = '';
+    for (var k in json) {
+      var v = json[k];
+      if (v instanceof Object || v instanceof Array) {
+        v = JSON.stringify(v);
+      }
+      newStr += '\n' + k + ': ' + (quote && typeof v == 'string' ? "'" + v.replaceAll("'", "\\'") + "'" : StringUtil.trim(v));
+    }
+    return StringUtil.trim(newStr);
+  },
+  longestSubstr: function(str1, str2, trim) {
+    let m = StringUtil.isString(str1) ? StringUtil.length(str1, trim) : 0;
+    let n = m <= 0 || ! StringUtil.isString(str2) ? 0 : StringUtil.length(str2, trim);
+    if (n <= 0) {
+      return '';
+    }
+    if (str1 === str2) {
+      return StringUtil.get(str1);
+    }
+    let dp = Array.from(Array(m + 1), () => Array(n + 1).fill(0));
+    let maxLength = 0; // 记录最长公共子串的长度
+    let endIndex = 0;  // 记录最长公共子串在 str1 中结束的位置
+    for (let i = 1; i <= m; i++) {
+      for (let j = 1; j <= n; j++) {
+        if (str1[i - 1] === str2[j - 1]) {
+          dp[i][j] = dp[i - 1][j - 1] + 1;
+          if (dp[i][j] > maxLength) {
+            maxLength = dp[i][j];
+            endIndex = i; // 这里的 i 是基于 1 的索引，对应 str1 的 endIndex
+          }
+        } else {
+          dp[i][j] = 0; // 不连续则清零
+        }
+      }
+    }
+    return str1.substring(endIndex - maxLength, endIndex);
   }
 };
 

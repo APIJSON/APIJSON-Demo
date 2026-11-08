@@ -717,6 +717,14 @@ table.diff thead th.texttitle {
   color: #31708f;
 }
 
+.setting-item {
+  border-bottom: #DDD 1px solid;
+  width: 100%;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  font-size: small;
+}
+
 /* 标签弹窗样式 */
 .label-modal-overlay {
   position: fixed;

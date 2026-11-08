@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>AutoUI-零代码快准稳录制回放 App UI</title>
+  <title>AutoUI-AI 零代码快准稳 UI 自动化测试平台</title>
     <meta charset="utf-8" />
   <meta name="keywords" content="apijson,api,json,auto,ui,uiauto,uigo,unit,unitauto,自动化UI回归测试,机器学习UI回归测试,回归测试,机器学习,UI测试,自动化,UI自动化,功能测试,功能自动化,App测试,App自动化,录制回放,零代码,低代码"/>
-  <meta name="description" content="📱 零代码快准稳 UI 智能录制回放平台 🚀 自动兼容任意宽高比分辨率屏幕，自动精准等待网络请求，录制回放快、准、稳！"/>
+  <meta name="description" content="📱 AI 零代码快准稳 UI 自动化测试平台 🚀 3 像素内自动精准定位，2 毫秒内自动精准等待，自动断言 UI 和数据，自动分析 bug 属于前端还是后端"/>
 
     <!-- 登录 <<<<<<<<<<<<<<<<<<<< -->
     <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
@@ -146,6 +146,10 @@
                   <a style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(true, 15)">其它环境地址 URL Host: {{ otherEnv || '点击设置' }}</a>
                   <a v-show="User.id == null || User.id <= 0" style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(true, 6)">托管服务器地址 URL: {{ server || '点击设置' }}</a>
 <!--                  <a v-show="User.id != null && User.id > 0" style="border-bottom: #DDD 1px solid;width: 100%" href="javascript:void(0)" @click="showConfig(true, 8)">导入第三方文档(平台名 URL): <br/>{{ thirdParty || '点击设置' }}</a>-->
+                  <a v-show="User.id == null || User.id <= 0" class="setting-item" href="javascript:void(0)" @click="showConfig(true, 19)">AI Model: <br/>{{ aiModel || '点击设置' }}</a>
+                  <a v-show="User.id == null || User.id <= 0" class="setting-item" href="javascript:void(0)" @click="showConfig(true, 20)">AI Base URL: <br/>{{ aiBaseUrl || '点击设置' }}</a>
+                  <a v-show="User.id == null || User.id <= 0" class="setting-item" href="javascript:void(0)" @click="showConfig(true, 21)">AI API Key: <br/>{{ aiApiKey || '点击设置' }}</a>
+                  <a v-show="User.id == null || User.id <= 0" class="setting-item" href="javascript:void(0)" @click="showConfig(true, 22)">AI Language: <br/>{{ aiLanguage || '点击设置' }}</a>
                 </ul>
             </span>
 
@@ -186,12 +190,17 @@
             </span>
             <span v-show="isShowType()" class="pop-btn transfer">
             <button class="transfer" id="vType" :disabled="isEditResponse" @click="changeType()">{{ getTypeName(type, method) }}</button>
-                <ul class="historys pop type-pop" style="width: 250px;">
+                <ul class="historys pop type-pop" style="width: 360px;">
                     <li ><a href="javascript:void(0)" :style="{color: type == 'PARAM' ? 'red' : 'black'}" @click="changeType('PARAM')" >PARAM // ?a=1&b=c&key=value</a></li>
-                    <li ><a href="javascript:void(0)" :style="{color: type == 'FORM' ? 'red' : 'black'}" @click="changeType('FORM')" >FORM // x-www-form-urlencoded</a></li>
-                    <li ><a href="javascript:void(0)" :style="{color: type == 'DATA' ? 'red' : 'black'}" @click="changeType('DATA')" >DATA // form-data</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'FORM' ? 'red' : 'black'}" @click="changeType('FORM')" >FORM // application/x-www-form-urlencoded</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'DATA' ? 'red' : 'black'}" @click="changeType('DATA')" >DATA // multipart/form-data</a></li>
                     <li ><a href="javascript:void(0)" :style="{color: type == 'JSON' ? 'red' : 'black'}" @click="changeType('JSON')" >JSON // application/json</a></li>
                     <li ><a href="javascript:void(0)" :style="{color: type == 'GRPC' ? 'red' : 'black'}" @click="changeType('GRPC')" >GRPC // application/json</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'TEXT' ? 'red' : 'black'}" @click="changeType('TEXT')" >TEXT // text/plain</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'TXML' ? 'red' : 'black'}" @click="changeType('TXML')" >TXML  // text/xml</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'AXML' ? 'red' : 'black'}" @click="changeType('AXML')" >AXML // application/xml</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'HTML' ? 'red' : 'black'}" @click="changeType('HTML')" >HTML // text/html</a></li>
+                    <li ><a href="javascript:void(0)" :style="{color: type == 'XHTML' ? 'red' : 'black'}" @click="changeType('XHTML')" >XHTML // application/xhtml+xml</a></li>
                 </ul>
             </span>
             <div style="height: 100%;display: flex;flex-grow: 1">
@@ -237,7 +246,7 @@
                         <li v-for="(item, index) in caseGroups" :id="'caseGroup' + index" >
                             <div style="display: inline-table; width: 100%">
                                 <input v-show="isCaseGroupEditable" style="min-width: 60px; width: 40%; margin-right: 6px" v-model="item.groupName" @keyup="doOnKeyUp(event, 'caseGroup', false, item)" />
-                                <a href="javascript:void(0)" @click="selectCaseGroup(index, item)" > {{(isCaseGroupEditable ? '' : (StringUtil.isEmpty(item.groupName) ? '-' : item.groupName) + ' ') + item.groupUrl}}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white" class="hint--left" :data-hint="(StringUtil.isEmpty(item.groupName) ? '-' : item.groupName) + ' ' + item.groupUrl">{{' (' + item.count + ')  '}}</a>
+                                <a href="javascript:void(0)" @click="selectCaseGroup(index, item)" > {{(isCaseGroupEditable ? '' : (isCaseItemShow() && StringUtil.isNotEmpty(item.groupName) ? '' : (index + 1) + '. ') + (StringUtil.isEmpty(item.groupName) ? '' : item.groupName) + ' ') + item.groupUrl}}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white" class="hint--left" :data-hint="(StringUtil.isEmpty(item.groupName) ? '-' : item.groupName) + ' ' + item.groupUrl">{{' (' + item.count + ')  '}}</a>
                                 <!--                            <div v-show="isStatisticsEnabled" style="position: absolute; right: 36px; top: 8px; display: inline-flex">-->
     <!--                                <div v-show="(item.totalCount || 0) > 0" style="background: lightgray; padding: 1px; margin-right: 2px; display: inline-block; position: relative" @click="restoreRemote(index, item, null, true)" >-->
     <!--                                    &lt;!&ndash; 只能写成一行来消除间隙，不能换行、空格 &ndash;&gt;-->
@@ -267,11 +276,16 @@
                 <div v-show="isChainShow && isChainGroupShow() && ! isLocalShow" :style="{width: chainShowType == 0 ? '40%' : '100%', 'border-right': chainShowType != 0 ? 'none' : '#DDD 1px solid' }" style="float: left; min-width: 30px; width: 40%; height: 100%;">
                     <input id="vChainGroupAdd" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainGroupAdd', false, {'groupName': vChainGroupAdd.value})" placeholder="输入名称，回车来添加" />
 
-                    <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
+                    <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 100px">
                         <li v-for="(item, index) in chainGroups" :id="'chainGroup' + index" >
                             <div style="display: inline-table; width: 100%">
                                 <input v-show="isCaseGroupEditable" style="min-width: 60px; width: 40%; margin-right: 6px" v-model="item.Chain.groupName" @keyup="doOnKeyUp(event, 'chainGroup', false, item)" />
-                                <a href="javascript:void(0)" @click="selectChainGroup(index, item.Chain)" :style="{ color: index == currentChainGroupIndex ? 'black' : 'gray' }" >{{ isCaseGroupEditable ? '' : item.Chain.groupName }}</a><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white; margin-right: 24px" class="hint--left" :data-hint="item.Chain.groupName">{{' (' + (item.Chain.count - 1) + ')  '}}</a>
+                                <a href="javascript:void(0)" @click="selectChainGroup(index, item.Chain)" :style="{ color: index == currentChainGroupIndex ? 'black' : 'gray' }" >{{ (isCaseItemShow() ? '' : (index + 1) + '. ') + (isCaseGroupEditable ? '' : item.Chain.groupName) }}</a>
+                                <ul style="display: inline-flex; position: absolute; top: 6px; right: 84px; padding: 0px; height: 27px; overflow: scroll hidden;">
+                                    <li style="margin: 0px; padding: 2px; background-color: rgba(255, 255, 255, 0.6); border: #DDD 1px solid; border-radius: 2px " v-for="(tag, ind) in item.Chain.tagList" :id="'tag' + index" >
+                                        <a href="javascript:void(0)" style="position: relative; min-width: 6px; width: auto; height: 30px; " @click="removeTag(ind, tag, index, item)" >{{ tag }}</a>
+                                    </li>
+                                </ul><button class="hint--left" data-hint="新增标签" style="position: absolute; right: 60px; top: 6px;" href="javascript:void(0)" @click="changeTag(index, item)"> + </button><a style="right: 0px; position: absolute; z-index: 100; width: fit-content; background-color: white; margin-right: 24px" class="hint--left" :data-hint="item.Chain.groupName">{{' (' + (item.Chain.count - 1) + ')  '}}</a>
                                 <svg class="icon" @click="remove(item, index, true, false, false, true)" style="background-color: white; width: 27px; height: 18px; right: -2px; top: 10px; padding-left: 3px; padding-right: 4px; padding-top: 2px; padding-bottom: 2px;" >
                                     <use xlink:href="svg/icon.svg#trash"></use>
                                 </svg>
@@ -288,11 +302,20 @@
                     </div>
                 </div>
 
+                <div v-show="((isChainShow && isChainGroupShow())) || (isCaseItemShow() && ! (isChainShow || isLocalShow))" style="left: 0px; display: inline-flex; width: 100%; bottom: 36px; padding: 4px 10px 4px 10px; position: absolute; background-color: white; z-index: 102">
+                    <input id="vTagAdd" style="width: 64px; height: 28px; text-align: center" @keyup="doOnKeyUp(event, 'chainTagAdd', false, {'name': vTagAdd.value})" placeholder="新增标签，回车来添加" />
+                    <a href="javascript:void(0)" style="position: relative; min-width: 12px; width: auto; top: 3px; text-align: center" @click="changeTagCombine()" >{{ tagCombines[tagCombineIndex] }}</a>
+                    <ul style="display: inline-flex; padding: 0px; width: 100%; height: 28px; overflow: hidden;overflow-x: scroll;">
+                        <li style="margin: 0px; padding: 2px; border: #DDD 1px solid; border-radius: 2px " v-for="(item, index) in tags" :id="'tag' + index" >
+                            <a href="javascript:void(0)" style="position: relative; min-width: 6px; width: auto; height: 28px; " @click="selectTag(index, item, ! isChainShow)" :style="{ color: item.selected ? 'red' : 'gray' }" >{{ item.name }}</a>
+                        </li>
+                    </ul>
+                </div>
 
                 <div v-show="isLocalShow || isCaseItemShow()" :style="{width: isCaseGroupShow() && ! isLocalShow ? '60%' : '100%'}" style="float: right; flex-grow: 1; height: 100%;">
                     <input id="vChainAdd" v-show="isChainShow && currentChainGroupIndex >= 0" style="width: 100%; text-align: center"  @keyup="doOnKeyUp(event, 'chainAdd', false, {'groupName': vChainAdd.value})" placeholder="输入名称，回车来搜索及添加" />
 
-                    <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 50px">
+                    <ul class="historys" style="width: 100%; height: 100%;overflow: hidden;overflow-y: scroll;padding-bottom: 100px">
                         <li v-for="(item, index) in testCases" :id="'docItem' + index" >
                             <div style="display: inline-table; padding: 0px; margin: 0px" >
 <!--                                <button class="hint&#45;&#45;right" :data-hint="(item.Flow || {}).url" v-show="isShowMethod()" style="width: 60px; margin-right: 0px;padding: 0px;" id="vDocMethod" @click="restoreRemoteAndTest(index, item)">{{ getMethodName((item.Flow || {}).method, (item.Flow || {}).type) }}</button>-->
@@ -301,7 +324,12 @@
 		                        
 								<img width="90" height="195" :src="item.Flow.screenshot || (item.TestRecord || {}).screenshot || 'img/Screenshot_2020-11-07-16-38-20-932_apijson.demo.jpg'" style="width: 90px; min-height: 160px; height: 100%; margin: 4px; position: relative;" @click="restoreRemote(index, item, null, true)" href="javascript:void(0)"/>
 								<a style="width: 75%; min-width: 90px; align-content: flex-start; position: absolute; left: 118px; top: 14px; font-size: medium; color: black" >{{ (item.Flow || {}).name }}</a>
-
+                                <ul v-show="! (isChainShow || isLocalShow)" style="display: inline-flex; position: absolute; right: 56px; padding: 0px; height: 27px; overflow: scroll hidden;">
+                                    <li style="margin: 0px; padding: 2px; background-color: rgba(255, 255, 255, 0.7); border: #DDD 1px solid; border-radius: 2px " v-for="(tag, ind) in (item.Flow || {}).tagList" :id="'tag' + index" >
+                                        <a href="javascript:void(0)" style="position: relative; min-width: 6px; width: auto; height: 30px; " @click="removeTag(ind, tag, index, item, true)" >{{ tag }}</a>
+                                    </li>
+                                </ul><button v-show="! (isChainShow || isLocalShow)" class="hint--left" data-hint="新增标签" style="position: absolute; right: 32px;" href="javascript:void(0)" @click="changeTag(index, item, true)"> + </button>
+                                <button v-show="isChainShow && isChainItemShow()" class="hint--left" :data-hint="StringUtil.isEmpty((item.Chain || {}).testAccount, true) ? '绑定帐号' : '解绑帐号 ' + (item.Chain || {}).testAccount + '@' + (((item.Chain || {}).testInfo || {}).baseUrl || '')" :style="{color: ((item.Chain || {}).testInfo || {}).isLoggedIn ? 'red' : 'black' }" style="position: absolute; right: 31px;" id="vDocAccount" @click="bindAccount(index, item)">{{ (item.Chain || {}).testName || (item.Chain || {}).testAccount || '+' }}</button>
 								<a style="white-space: pre-wrap; display: inline-flex; height: 100%; position: absolute; left: 118px; top: 40px; font-size: small; color: dimgray" @click="restoreRemote(index, item, null, true)" href="javascript:void(0)">{{
 		                          '时间：' + (item.Flow.time == null ? '?' : item.Flow.time) + ' (' + ((item.Input || {}).count - (item.Input || {}).disableCount || '?') + '/' + ((item.Input || {}).count || '?') + ')'
 		                          + '\nApp：' + (item.Flow.appName || '?') + ', ' + (item.Flow.package || '?') + ', ' + (item.Flow.versionName || '?') + ' (' + (item.Flow.versionCode || '?') + ')'
@@ -610,7 +638,7 @@ My-Header: 'Secret' + Math.random() // 示例，代码执行结果作为实际�
 
                     <!--        v-model  不允许调用方法            -->
                     <template v-if="scripts[scriptType][scriptBelongId]">
-                    <textarea id="vScript" style="width: 100%;height: 100%;" wrap="off"
+                    <textarea id="vScript" style="width: 100%;height: 100%; padding-bottom: 50px" wrap="off"
                               v-model="scripts[scriptType][scriptBelongId][isPreScript ? 'pre' : 'post'].script"
                               placeholder="// JavaScript 脚本
 // 逻辑代码 ..
@@ -695,7 +723,7 @@ fun(true, 1, 'a'..);
                             <button style="background-color: #DDD;margin: 0px;outline: none;border: #DDD 1px solid;" href="javascript:void(0)" @click="removeAccountTab()"> - </button>
                             <!-- 每个账号 -->
                             <div v-for="(item, index) in accounts" style="display: inline-block; border: #DDD 1px solid" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD'}">
-                              <button style="outline: none; border: none" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD', color: currentAccountIndex == index && item.isLoggedIn ? 'red' : 'black'}" @click="onClickAccount(index, item)">{{ JSONResponse.getName(item) + (StringUtil.isEmpty(item.baseUrl) || StringUtil.trim(item.baseUrl) == getBaseUrl() ? '' : '@' + StringUtil.trim(item.baseUrl)) }}</button>
+                              <button class="hint--top" :data-hint="(item.account || item.email || item.phone) + (StringUtil.isEmpty(item.baseUrl) ? '' : '@' + item.baseUrl)" style="outline: none; border: none; padding: 3px;" :style="{backgroundColor: currentAccountIndex == index ? 'transparent' : '#DDD', color: currentAccountIndex == index && item.isLoggedIn ? 'red' : 'black'}" @click="onClickAccount(index, item)">{{ JSONResponse.getName(item) }}</button>
                               <br v-show="isStatisticsEnabled && isCrossEnabled && isAllSummaryShow()" />
                               <div v-show="isStatisticsEnabled && isCrossEnabled && isAllSummaryShow()" style="background: lightgray; padding: 1px; display: inline-block; margin: 1px" >
                                 <!-- 只能写成一行来消除间隙，不能换行、空格 -->
@@ -790,7 +818,7 @@ fun(true, 1, 'a'..);
 
             <!--格式化错误视图-->
             <div class="view-error" v-show="view == 'error'">
-                <pre v-cloak>{{error.msg}}</pre>
+                <pre style="max-height: 760px; overflow-x: scroll; overflow-y: scroll;" v-cloak>{{error.msg}}</pre>
             </div>
 
             <!--diff视图-->
@@ -975,6 +1003,14 @@ fun(true, 1, 'a'..);
 
     <!-- 登录 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> -->
 
+    <div class="save-box" v-show="isAlertShow">
+        <svg class="icon close-icon" @click="showAlert(false)">
+            <use xlink:href="svg/icon.svg#close"></use>
+        </svg>
+
+        <a type="text" style="background-color: white; padding: 6px 10px 6px 10px">{{alertMsg}}</a><br/>
+        <button  @click="showAlert(false)" >确定</button>
+    </div>
 
 </div>
 
@@ -1078,7 +1114,6 @@ fun(true, 1, 'a'..);
 <script src="js/FileSaver.js"></script>
 <script src="js/uuid.js"></script>
 <script src="js/clipboard.min.js"></script>
-<script src="js/helper.js"></script>
 
 <!-- 必须在main.js前 TODO 可能有冲突，代码写入vue文件？ <<<<<<<<<<<<<<<< -->
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
@@ -1086,8 +1121,8 @@ fun(true, 1, 'a'..);
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONObject.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONRequest.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/JSONResponse.js" ></script>
-<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/R.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/CodeUtil.js" ></script>
+<script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/R.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/KeyEvent.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/EditTextEvent.js" ></script>
 <script type="text/javascript" language="JavaScript" charset="UTF-8" src="apijson/MotionEvent.js" ></script>
@@ -1194,5 +1229,6 @@ fun(true, 1, 'a'..);
 
 <script src="md/editormd.js"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/page-agent@1.10.0/dist/iife/page-agent.demo.js" crossorigin="true"></script>
 </body>
 </html>
