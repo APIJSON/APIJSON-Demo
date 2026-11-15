@@ -1,5 +1,3 @@
-# DROP TABLE IF EXISTS `Moment`;
-
 CREATE TABLE `Moment` (
   `id` bigint,
   `userId` bigint,

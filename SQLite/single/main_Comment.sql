@@ -1,5 +1,3 @@
-# DROP TABLE IF EXISTS `Comment`;
-
 CREATE TABLE `Comment` (
   `id` bigint,
   `toId` bigint,
@@ -8,7 +6,6 @@ CREATE TABLE `Comment` (
   `date` timestamp,
   `content` text
 );
-
 
 INSERT INTO `Comment`(`id`, `toId`, `userId`, `momentId`, `date`, `content`) VALUES (4,0,38710,470,'2017-02-01 11:20:50','This is a Content...-4');
 INSERT INTO `Comment`(`id`, `toId`, `userId`, `momentId`, `date`, `content`) VALUES (13,0,82005,58,'2017-02-01 11:20:50','This is a Content...-13');

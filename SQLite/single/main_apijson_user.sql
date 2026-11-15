@@ -1,5 +1,3 @@
-# DROP TABLE IF EXISTS `apijson_user`;
-
 CREATE TABLE `apijson_user` (
   `id` bigint,
   `sex` integer,
