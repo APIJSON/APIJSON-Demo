@@ -298,6 +298,9 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 		//  if (isSQLite()) {
 		//  	return "jdbc:sqlite:sample.db"; //TODO 改成你自己的
 		//  }
+		if (isTurso()) {
+			return "jdbc:turso:db"; //TODO 改成你自己的
+		}
 		if (isDameng()) {
 			return "jdbc:dm://localhost:5236"; //TODO 改成你自己的
 		}
@@ -656,6 +659,12 @@ public class DemoSQLConfig extends APIJSONSQLConfig<Long> {
 	////		return InfluxDBUtil.getSQLSchema(super.getSQLSchema(), isIoTDB());
 	////		return IoTDBUtil.getSQLSchema(super.getSQLSchema().replaceAll("-", "."), isIoTDB());
 	//	}
+
+	@Override
+	public String gainSQLSchema() {
+		// Turso 的 schema 是 ATTACH 的库名，但 Java 驱动没开放 --experimental-attach，只能用 main，否则报 no such database
+		return isTurso() ? "main" : super.gainSQLSchema();
+	}
 
 	@Override
 	public String gainSQLTable() {
