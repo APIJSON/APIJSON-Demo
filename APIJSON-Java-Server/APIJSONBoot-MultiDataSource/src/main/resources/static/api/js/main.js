@@ -3801,7 +3801,7 @@ https://github.com/APIJSON/APIJSON/issues
 
         }
       },
-      importCharlesSession: function (file) {
+      importCharlesSession: function (file, isNew) {
         var self = this
         var load
         if (file && typeof file.arrayBuffer === 'function') {
@@ -3821,7 +3821,8 @@ https://github.com/APIJSON/APIJSON/issues
         load.then(function (buf) {
           var account = self.getCurrentAccount() || {}
           var projectHost = self.projectHost || {}
-          var pack = charlesSessionToDocuments(buf, {
+          var fun = isNew ? charlesNewSessionToDocuments : charlesSessionToDocuments;
+          var pack = fun(buf, {
             userId: (self.User || {}).id || 0,
             project: projectHost.project || 'APIJSON',
             testAccountId: account.id || 0
@@ -3953,11 +3954,12 @@ https://github.com/APIJSON/APIJSON/issues
           this.addApiCase2Chain(group, list, index + 1, chains, preIndex, preChain)
           return
         }
-        const currentResponse = parseJSON(input.response);
+        const currentResponse = parseJSON(input.response, input.response, true);
         if (StringUtil.isEmpty(currentResponse, true)) {
           this.addApiCase2Chain(group, list, index + 1, chains, preIndex, preChain)
           return
         }
+
         chains = chains || []
         const projectHost = this.projectHost || {}
         const project = StringUtil.isEmpty(projectHost.project) ? null : projectHost.project
@@ -8310,8 +8312,10 @@ https://github.com/APIJSON/APIJSON/issues
           const reader = new FileReader();
           reader.onload = (evt) => {
             var fileName = file.name || '';
-            if (fileName.endsWith(".chls")) {
-              App.importCharlesSession(file);
+            if (fileName.endsWith(".chls") || fileName.endsWith(".chlsj")) {
+              App.importCharlesSession(file, false);
+            } else if (fileName.endsWith(".chlz")) {
+              App.importCharlesSession(file, true);
             }
           };
           reader.readAsDataURL(file);

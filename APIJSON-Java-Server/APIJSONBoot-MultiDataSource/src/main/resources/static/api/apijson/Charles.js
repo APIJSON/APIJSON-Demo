@@ -631,8 +631,9 @@ function charlesRequestTag(body, type) {
 function charlesSessionToDocuments(buffer, ctx) {
   ctx = ctx || {}
   var calls = parseCharlesSession(buffer).filter(function (call) {
-    return call.method && call.method !== 'CONNECT' && call.target && call.responseBody
+    return call.method && [null, '', 'CONNECT', 'OPTIONS', 'TRACE'].indexOf(call.method) < 0 && call.target && call.responseBody
   })
+
   calls.sort(function (a, b) {
     if (a.time !== b.time) {
       return a.time < b.time ? -1 : 1
